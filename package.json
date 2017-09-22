@@ -1,0 +1,20 @@
+{
+  "name": "mongo-graphql-starter",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arackaf/mongo-graphql-starter.git"
+  },
+  "author": "Adam Rackis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/arackaf/mongo-graphql-starter/issues"
+  },
+  "homepage": "https://github.com/arackaf/mongo-graphql-starter",
+  "devDependencies": {},
+  "dependencies": {
+    "@std/esm": "^0.10.2"
+  }
+}
