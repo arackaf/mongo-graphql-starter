@@ -1,3 +1,3 @@
 import { createGraphqlSchema } from "../index";
 
-console.log(typeof createGraphqlSchema);
+createGraphqlSchema(import("./project/schema.js"));
