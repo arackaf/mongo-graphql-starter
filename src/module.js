@@ -1,2 +1,2 @@
-import createGraphqlSchema from "./createGraphqlSchema";
+import createGraphqlSchema from "./createGraphqlSchema/createSchema";
 export { createGraphqlSchema };
