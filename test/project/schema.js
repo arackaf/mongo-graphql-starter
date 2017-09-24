@@ -1,3 +1,13 @@
-export const Person = {};
+import { MongoId, String, Int, Float } from "../../src/createGraphQlSchema.js";
 
-export const User = {};
+// let MongoId = "",
+//   String = "",
+//   Int = "",
+//   Float = "";
+
+export const Person = {
+  _id: MongoId,
+  name: String,
+  age: Int,
+  weight: Float
+};

@@ -1,9 +1,15 @@
 import path from "path";
+import fs from "fs";
 
 export default function(source, destPath) {
   Promise.resolve(source).then(module => {
-    Object.keys(module).forEach(k => console.log(k));
+    let dir = path.relative(destPath, "upload");
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
 
-    console.log(path.resolve("project/schema.js", "."));
+    Object.keys(module).forEach(k => {
+      console.log(k);
+    });
   });
 }
