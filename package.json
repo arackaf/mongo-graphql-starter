@@ -13,8 +13,8 @@
     "url": "https://github.com/arackaf/mongo-graphql-starter/issues"
   },
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
-  "devDependencies": {},
-  "dependencies": {
-    "@std/esm": "^0.10.2"
-  }
+  "devDependencies": {
+    "@std/esm": "0.11.0"
+  },
+  "dependencies": {}
 }
