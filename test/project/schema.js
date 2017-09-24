@@ -1,9 +1,4 @@
-import { MongoId, String, Int, Float } from "../../src/createGraphQlSchema.js";
-
-// let MongoId = "",
-//   String = "",
-//   Int = "",
-//   Float = "";
+import { MongoId, String, Int, Float } from "../../src/createGraphQlSchema/schemaTypes";
 
 export const Person = {
   _id: MongoId,
