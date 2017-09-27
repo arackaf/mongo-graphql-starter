@@ -5,8 +5,9 @@ import { createObject } from "./createCode";
 
 export default function(source, destPath) {
   Promise.resolve(source).then(module => {
+    console.log("XXXXXXXXXXcreating in");
     let rootDir = path.join(destPath, "graphQL");
-    console.log("creating in", rootDir);
+    console.log("!!!!!!!!!!creating in", rootDir);
     if (!fs.existsSync(rootDir)) {
       fs.mkdirSync(rootDir);
     }

@@ -1,4 +1,4 @@
-function arraysMatch(arr1, arr2) {
+exports.arraysMatch = (arr1, arr2) => {
   if (!Array.isArray(arr1)) {
     throw "Arg 1 not an array";
   }
@@ -16,8 +16,4 @@ function arraysMatch(arr1, arr2) {
   });
 
   expect(1).toBe(1);
-}
-
-module.exports = {
-  arraysMatch
 };

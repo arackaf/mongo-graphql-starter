@@ -15,6 +15,7 @@
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
     "@std/esm": "0.11.0",
+    "del": "^3.0.0",
     "graphql": "*.*.*",
     "graphql-tools": "*.*.*",
     "jest": "21.1.0"
