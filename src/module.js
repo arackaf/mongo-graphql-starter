@@ -7,6 +7,9 @@ import { makeExecutableSchema } from "graphql-tools";
 import * as graphqlAst from "./queryUtilities/parseAst";
 export { graphqlAst };
 
+import * as dataTypes from "./createGraphqlSchema/dataTypes";
+export { dataTypes };
+
 let astPassedIn, schema;
 
 let typeDefs = `
