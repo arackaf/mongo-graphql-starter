@@ -23,7 +23,15 @@ function createProperties(properties, offset) {
 }
 
 function displayValue(value) {
-  return typeof value === "string" ? `"${value}"` : typeof value === "object" ? `{ __isArray: true, type: ${value.type.__name} }` : "";
+  if (typeof value === "string") {
+    return `"${value}"`;
+  } else if (typeof value === "object") {
+    if (value.__isArray) {
+      return `"[${value.type.__name}]"`;
+    } else if (value.__isObject) {
+      return `"${value.type.__name}"`;
+    }
+  }
 }
 
 //${properties.map(({ name, value }) => `${propertyTab}${name}: ${value}`).join(",\n")}
