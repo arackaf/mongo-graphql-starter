@@ -4,7 +4,7 @@ export const Int = "Int";
 export const Float = "Float";
 export const ArrayOf = type => {
   return {
-    isArray: true,
+    __isArray: true,
     type
   };
 };
