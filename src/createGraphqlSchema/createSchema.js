@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 
-import { createObject } from "./createCode";
+import { createObject, createGraphqlSchema } from "./createCode";
 
 import { MongoId, String, Int, Float, ArrayOf } from "./dataTypes";
 
@@ -17,15 +17,17 @@ export default function(source, destPath) {
     modules.forEach(objectToCreate => {
       let k = objectToCreate.__name,
         modulePath = path.join(rootDir, k),
-        objPath = path.join(modulePath, k + ".js");
+        objPath = path.join(modulePath, k + ".js"),
+        schemaPath = path.join(modulePath, "schema.js");
 
       let fields = objectToCreate.fields;
 
       if (!fs.existsSync(objPath)) {
         fs.mkdirSync(modulePath);
+
         fs.writeFileSync(
           objPath,
-          createObject("export const Test = {", [
+          createObject("export default {", [
             {
               name: "fields",
               value: Object.keys(objectToCreate.fields).map(k => ({
@@ -34,9 +36,9 @@ export default function(source, destPath) {
               }))
             }
           ]) + ";"
-
-          //createObject("export const Test = {", [{ name: "a", value: '"value"' }, { name: "b", value: "two" }, { name: "c", value: "three" }])
         );
+
+        fs.writeFileSync(schemaPath, createGraphqlSchema(objectToCreate));
       }
     });
   });
