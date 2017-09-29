@@ -10,6 +10,9 @@ export { graphqlAst };
 import * as dataTypes from "./createGraphqlSchema/dataTypes";
 export { dataTypes };
 
+import * as mongoQueryHelpers from "./queryUtilities/mongoQueryHelpers";
+export { mongoQueryHelpers };
+
 let astPassedIn, schema;
 
 let typeDefs = `

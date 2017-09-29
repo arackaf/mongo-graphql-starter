@@ -1,14 +1,15 @@
-const { graphql } = require("graphql");
-const { makeExecutableSchema } = require("graphql-tools");
+import { graphql } from "graphql";
+import { makeExecutableSchema } from "graphql-tools";
 
-const { graphqlAst: { parseRequestedFields }, createGraphqlSchema } = require("../../index");
+import { graphqlAst, createGraphqlSchema } from "../../index";
+const { parseRequestedFields } = graphqlAst;
 
-const { arraysMatch } = require("../testUtils");
-const projectSetup = require("./projectSetup");
+import { arraysMatch } from "../testUtils";
+import projectSetup from "../projectSetupA";
 
-const path = require("path");
-const fs = require("fs");
-const del = require("del");
+import path from "path";
+import fs from "fs";
+import del from "del";
 
 let astPassedIn, schema;
 
