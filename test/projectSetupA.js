@@ -1,4 +1,4 @@
-const { dataTypes: { MongoId, String, Int, Float, ArrayOf } } = require("../../index");
+const { dataTypes: { MongoId, String, Int, Float, ArrayOf } } = require("../index");
 
 const Author = {
   table: "authors",
