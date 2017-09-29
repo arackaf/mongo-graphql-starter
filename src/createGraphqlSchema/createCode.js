@@ -18,7 +18,7 @@ function createProperties(properties, offset) {
   return properties
     .map(({ name, value }) => {
       return `${propertyTab}${name}: ${Array.isArray(value)
-        ? `[\n${nestedObjTab}${createObject("{", value, offset + 2)}\n${propertyTab}]`
+        ? `${createObject(" {", value, offset + 1)}${propertyTab}`
         : displayMetadataValue(value)}`;
     })
     .join(",\n");

@@ -4,8 +4,6 @@ import { makeExecutableSchema } from "graphql-tools";
 import { graphqlAst } from "../index";
 const { parseRequestedFields } = graphqlAst;
 
-import { arraysMatch } from "./testUtils";
-
 let astPassedIn, schema;
 
 beforeAll(() => {
