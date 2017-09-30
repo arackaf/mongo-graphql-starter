@@ -10,6 +10,22 @@ export function getMongoFilters(args, objectMetaData) {
     if (objectMetaData.fields[k]) {
       hash[k] = args[k];
     }
+    if (k.indexOf("_") >= 0) {
+      let pieces = k.split("_"),
+        queryOperation = pieces.slice(-1)[0],
+        fieldName = pieces.slice(0, pieces.length - 1).join("_");
+
+      let field = objectMetaData.fields[fieldName];
+      if (field === String) {
+        if (queryOperation === "contains") {
+          hash[fieldName] = { $regex: new RegExp(args[k], "i") };
+        } else if (queryOperation === "startsWith") {
+          hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
+        } else if (queryOperation === "endsWith") {
+          hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+        }
+      }
+    }
     return hash;
   }, {});
 }

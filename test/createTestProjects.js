@@ -1,8 +1,8 @@
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
 
-import { graphqlAst, createGraphqlSchema } from "../index";
-const { parseRequestedFields } = graphqlAst;
+import { parseAst, createGraphqlSchema } from "../index";
+const { parseRequestedFields } = parseAst;
 
 import projectSetup from "./projectSetupA";
 

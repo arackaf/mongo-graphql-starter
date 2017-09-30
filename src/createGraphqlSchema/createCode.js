@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { MongoId, String, Int, Float, ArrayOf } from "./dataTypes";
 
 const TAB = "  "; //two spaces
@@ -90,4 +92,9 @@ ${idField ? `${TAB}get${name}(${idField}: String): ${name}` : ""}
 }
 
 \`;`;
+}
+
+export function createGraphqlResolver(objectToCreate) {
+  let template = fs.readFileSync(path.resolve("src/createGraphqlSchema/resolverTemplate.js", "."), { encoding: "utf8" });
+  return template.replace(/\${table}/g, objectToCreate.table).replace(/\${objName}/g, objectToCreate.__name);
 }
