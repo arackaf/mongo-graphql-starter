@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 
-import { createObject, createGraphqlSchema } from "./createCode";
+import { createObject, createGraphqlSchema, createGraphqlResolver } from "./createCode";
 
 import { MongoId, String, Int, Float, ArrayOf } from "./dataTypes";
 
@@ -15,10 +15,11 @@ export default function(source, destPath) {
     let modules = Object.keys(module).map(k => module[k]);
 
     modules.forEach(objectToCreate => {
-      let k = objectToCreate.__name,
-        modulePath = path.join(rootDir, k),
-        objPath = path.join(modulePath, k + ".js"),
-        schemaPath = path.join(modulePath, "schema.js");
+      let objName = objectToCreate.__name,
+        modulePath = path.join(rootDir, objName),
+        objPath = path.join(modulePath, objName + ".js"),
+        schemaPath = path.join(modulePath, "schema.js"),
+        resolverPath = path.join(modulePath, "resolver.js");
 
       let fields = objectToCreate.fields;
 
@@ -28,6 +29,10 @@ export default function(source, destPath) {
         fs.writeFileSync(
           objPath,
           createObject("export default {", [
+            {
+              name: "table",
+              value: objectToCreate.table
+            },
             {
               name: "fields",
               value: Object.keys(objectToCreate.fields).map(k => ({
@@ -39,6 +44,8 @@ export default function(source, destPath) {
         );
 
         fs.writeFileSync(schemaPath, createGraphqlSchema(objectToCreate));
+
+        fs.writeFileSync(resolverPath, createGraphqlResolver(objectToCreate));
       }
     });
   });

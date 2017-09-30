@@ -1,6 +1,6 @@
 {
-  "name": "mongo-graphql-adapter",
-  "version": "0.0.0",
+  "name": "mongo-graphql-starter",
+  "version": "0.0.1-beta1",
   "description": "",
   "main": "index.js",
   "repository": {

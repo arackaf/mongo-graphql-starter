@@ -4,14 +4,17 @@ export { createGraphqlSchema };
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
 
-import * as graphqlAst from "./queryUtilities/parseAst";
-export { graphqlAst };
+import * as parseAst from "./queryUtilities/parseAst";
+export { parseAst };
 
 import * as dataTypes from "./createGraphqlSchema/dataTypes";
 export { dataTypes };
 
 import * as mongoQueryHelpers from "./queryUtilities/mongoQueryHelpers";
 export { mongoQueryHelpers };
+
+import decontructGraphqlQuery from "./queryUtilities/decontructGraphqlQuery";
+export { decontructGraphqlQuery };
 
 let astPassedIn, schema;
 
