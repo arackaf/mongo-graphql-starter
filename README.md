@@ -218,3 +218,4 @@ export default {
 
 - Add more data types, and filters
 - Add basic mutations 
+- Switch Mongo over to the aggregation pipeline, and add things like sorting and paging 
