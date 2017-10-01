@@ -95,9 +95,9 @@ All code generated is modern JavaScript, meaning ES6, plus async / await and obj
 
 ### All code is extensible.  
 
-All of the schema and resolver files discussed below, including the master schema and resolver files, are only generated the first time; if you run the utility again, they will not be written over (though an option to override that may be added later).  The idea is that generated schema and resolver files are only a start, not a final product.  Additional, one-off tweaks can safely be added to your schema and resolver, as needed.
+All of the schema and resolver files discussed below are only generated the first time; if you run the utility again, they will not be over-written (though an option to override that may be added later).  The idea is that generated schema and resolver files are only a start, not a final product.  Additional, one-off tweaks and specialized use cases can safely be added later, as needed.
 
-### Generated schema files
+### Generated type-specific schemas
 
 The book schema file generatd from the setup above looks like this
 
@@ -138,13 +138,13 @@ export const query = `
 `;
 ```
 
-Each field that you set up in your meta data of course gets added to you main type. Basic queries have also been created, namely `allBooks` with  filters set up depending on their type; and a `getBook` query that looks up a book by _id. 
+Each field from your metadata of course gets added to the main type. Basic queries have also been created, namely `allBooks` with filters set up for each field, depending on type; and a `getBook` query that looks up a book by _id. 
 
 ### Filters created
 
 WIP - see the schema file above for now
 
-### Resolvers created 
+### Generated type-specific resolvers 
 
 The Book resolver looks like this
 
@@ -170,4 +170,51 @@ export default {
 };
 ```
 
-The graphQL AST is parsed to determine which fields were requested, and only they are queried from Mongo.  And of course the args are translated to the proper Mongo queries. 
+The db connection is grabbed from the root object (see the setup above for how to add that).  Then the graphQL AST is parsed to determine which fields were requested, and only they are queried from Mongo.  And of course the args are translated to the proper Mongo queries. 
+
+## Master schema
+
+The master schema just pieces all of the type-specific schemas together.  Feel free to add your own schemas manually, and tie them in here.  Again, this file will not be over-written on subsequent runs.
+
+```javascript
+import { query as AuthorQuery, type as AuthorType } from './Author/schema';
+import { query as BookQuery, type as BookType } from './Book/schema';
+    
+export default `
+  ${AuthorType}
+
+  ${BookType}
+
+  type Query {
+    ${AuthorQuery}
+
+    ${BookQuery}
+  }
+`
+```
+
+## Master resolver
+
+Likewise for the main resolver 
+
+```javascript
+import Author from './Author/resolver';
+import Book from './Book/resolver';
+
+let { AuthorQuery, ...AuthorRest } = Author,
+  { BookQuery, ...BookRest } = Book;
+    
+export default {
+  Query: Object.assign({},
+    AuthorQuery,
+    BookQuery
+  ),
+  ...AuthorRest,
+  ...BookRest
+};
+```
+
+## What's next
+
+- Add more data types, and filters
+- Add basic mutations 
