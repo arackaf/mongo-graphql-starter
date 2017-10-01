@@ -91,4 +91,83 @@ Now `http://localhost:3000/graphql` should, assuming the database above exists, 
 
 ## A closer look at what's generated
 
-WIP
+All code generated is modern JavaScript, meaning ES6, plus async / await and object spread, along with ES6 modules (`import` / `export`).  If you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you to do so) then this code should just work.  If any of those conditions are false, you'll need to pipe the results through Babel using your favorite build tool.
+
+### All code is extensible.  
+
+All of the schema and resolver files discussed below, including the master schema and resolver files, are only generated the first time; if you run the utility again, they will not be written over (though an option to override that may be added later).  The idea is that generated schema and resolver files are only a start, not a final product.  Additional, one-off tweaks can safely be added to your schema and resolver, as needed.
+
+### Generated schema files
+
+The book schema file generatd from the setup above looks like this
+
+```javascript
+export const type = `
+
+type Book {
+  _id: String
+  title: String
+  pages: Int
+  weight: Float
+  authors: [Author]
+}
+
+`;
+
+export const query = `
+
+  allBooks(
+    title: String,
+    title_contains: String,
+    title_startsWith: String,
+    title_endsWith: String,
+    pages: Int,
+    pages_lt: Int,
+    pages_lte: Int,
+    pages_gt: Int,
+    pages_gte: Int,
+    weight: Float,
+    weight_lt: Float,
+    weight_lte: Float,
+    weight_gt: Float,
+    weight_gte: Float
+  ): [Book]
+
+  getBook(_id: String): Book
+
+`;
+```
+
+Each field that you set up in your meta data of course gets added to you main type. Basic queries have also been created, namely `allBooks` with  filters set up depending on their type; and a `getBook` query that looks up a book by _id. 
+
+### Filters created
+
+WIP - see the schema file above for now
+
+### Resolvers created 
+
+The Book resolver looks like this
+
+```javascript
+import { decontructGraphqlQuery } from "mongo-graphql-starter";
+import Book from "./Book";
+
+export default {
+  Query: {
+    async allBooks(root, args, context, ast) {
+      let db = await root.db,
+        { filters, requestedFields, projections } = decontructGraphqlQuery(args, ast, Book);
+
+      return (await db.collection("books").find(filters, projections)).toArray();
+    },
+    async getBook(root, args, context, ast) {
+      let db = await root.db,
+        { filters, requestedFields, projections } = decontructGraphqlQuery(args, ast, Book);
+
+      return await db.collection("books").findOne(filters, projections);
+    }
+  }
+};
+```
+
+The graphQL AST is parsed to determine which fields were requested, and only they are queried from Mongo.  And of course the args are translated to the proper Mongo queries. 
