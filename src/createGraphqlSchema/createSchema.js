@@ -5,6 +5,17 @@ import { createObject, createGraphqlSchema, createGraphqlResolver } from "./crea
 
 import { MongoId, String, Int, Float, ArrayOf } from "./dataTypes";
 
+function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
+  directoriesToCreate.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+  });
+  if (!onlyIfAbsent || !fs.existsSync(path)) {
+    fs.writeFileSync(path, contents);
+  }
+}
+
 export default function(source, destPath) {
   Promise.resolve(source).then(module => {
     let rootDir = path.join(destPath, "graphQL");
@@ -25,39 +36,40 @@ export default function(source, destPath) {
       names.push(objName);
       let fields = objectToCreate.fields;
 
-      if (!fs.existsSync(objPath)) {
-        fs.mkdirSync(modulePath);
+      createFile(
+        objPath,
+        createObject("export default {", [
+          {
+            name: "table",
+            value: objectToCreate.table
+          },
+          {
+            name: "fields",
+            value: Object.keys(objectToCreate.fields).map(k => ({
+              name: k,
+              value: objectToCreate.fields[k]
+            }))
+          }
+        ]) + ";",
+        true,
+        modulePath
+      );
 
-        fs.writeFileSync(
-          objPath,
-          createObject("export default {", [
-            {
-              name: "table",
-              value: objectToCreate.table
-            },
-            {
-              name: "fields",
-              value: Object.keys(objectToCreate.fields).map(k => ({
-                name: k,
-                value: objectToCreate.fields[k]
-              }))
-            }
-          ]) + ";"
-        );
-
-        fs.writeFileSync(schemaPath, createGraphqlSchema(objectToCreate));
-
-        fs.writeFileSync(resolverPath, createGraphqlResolver(objectToCreate));
-      }
+      createFile(schemaPath, createGraphqlSchema(objectToCreate), true);
+      createFile(resolverPath, createGraphqlResolver(objectToCreate), true);
     });
 
-    let schemaImports = names.map(n => `import ${n} from './${n}/schema';`).join("\n");
+    let schemaImports = names.map(n => `import { query as ${n}Query, type as ${n}Type } from './${n}/schema';`).join("\n");
     fs.writeFileSync(
       path.join(rootDir, "schema.js"),
       `${schemaImports}
     
 export default \`
-  ${names.map(n => "${" + n + "}").join("\n\n  ")}
+  ${names.map(n => "${" + n + "Type}").join("\n\n  ")}
+
+  type Query {
+    ${names.map(n => "${" + n + "Query}").join("\n\n    ")}
+  }
 \``
     );
 

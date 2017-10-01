@@ -43,9 +43,9 @@ function displaySchemaValue(value) {
     return `${value == MongoId ? "String" : value}`;
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return `"[${value.type.__name}]"`;
+      return `[${value.type.__name}]`;
     } else if (value.__isObject) {
-      return `"${value.type.__name}"`;
+      return `${value.type.__name}`;
     }
   }
 }
@@ -75,7 +75,7 @@ export function createGraphqlSchema(objectToCreate) {
 
   let idField = Object.keys(fields).find(k => fields[k] === MongoId);
 
-  return `export default \`
+  return `export const type = \`
 
 type ${name} {
 ${TAB}${Object.keys(fields)
@@ -83,15 +83,20 @@ ${TAB}${Object.keys(fields)
     .join(`\n${TAB}`)}
 }
 
-type Query {
+\`;
+
+export const query = \`
+
 ${TAB}all${name}s(
 ${TAB2}${allFields.join(`,\n${TAB2}`)}
   ): [${name}]
 
 ${idField ? `${TAB}get${name}(${idField}: String): ${name}` : ""}
-}
 
-\`;`;
+\`;
+
+
+`;
 }
 
 export function createGraphqlResolver(objectToCreate) {
