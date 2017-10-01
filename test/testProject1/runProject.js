@@ -5,15 +5,12 @@ import schema from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
 
-const app = express();
-
-let dbPromise = MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter");
-
-var root = {
-  db: dbPromise
-};
-
-const executableSchema = makeExecutableSchema({ typeDefs: schema, resolvers });
+const app = express(),
+  dbPromise = MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter"),
+  root = {
+    db: dbPromise
+  },
+  executableSchema = makeExecutableSchema({ typeDefs: schema, resolvers });
 
 app.use(
   "/graphql",
@@ -23,5 +20,4 @@ app.use(
     rootValue: root
   })
 );
-
 app.listen(3000);
