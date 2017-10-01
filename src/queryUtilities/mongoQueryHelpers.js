@@ -9,8 +9,7 @@ export function getMongoFilters(args, objectMetaData) {
   return Object.keys(args).reduce((hash, k) => {
     if (objectMetaData.fields[k]) {
       hash[k] = args[k];
-    }
-    if (k.indexOf("_") >= 0) {
+    } else if (k.indexOf("_") >= 0) {
       let pieces = k.split("_"),
         queryOperation = pieces.slice(-1)[0],
         fieldName = pieces.slice(0, pieces.length - 1).join("_");
