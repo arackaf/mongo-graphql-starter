@@ -4,7 +4,7 @@
 
 This utility will scaffold a basic GraphQL schema and resolvers, with filters working out of the box, based on metadata you enter about your Mongo db.
 
-The philosophy of this project is to auto-generate the repetative boilerplate needed for a graphQL endpoint, while leaving you free to code up all your odd or advanced edge cases as needed.
+The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd or advanced edge cases as needed.
 
 ## How do you use it?
 
@@ -42,7 +42,7 @@ export default {
 };
 ```
 
-Now tell mongo-graphql-starter to created your schema and resolvers, like this
+Now tell mongo-graphql-starter to create your schema and resolvers, like this
 
 ```javascript
 import { createGraphqlSchema } from "mongo-graphql-starter";
@@ -57,7 +57,9 @@ There should now be a graphQL folder containing schema, resolver, and type metad
 
 ![Image of basic scaffolding](docs-img/initialCreated.png)
 
-Now fire up express and connect it to the GraphQL schema that was just created—don't forget to add a root object with a `db` property that resolves to a connection to your database.
+Now tell express about it—and don't forget to add a root object with a `db` property that resolves to a connection to your database.  
+
+Here's what a minimal, complete example might look like.
 
 ```javascript
 import { MongoClient } from "mongodb";
@@ -85,17 +87,17 @@ app.use(
 app.listen(3000);
 ```
 
-Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run basic queries against your data
+Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run basic queries.
 
 ![Image of graphiQL](docs-img/graphiQL-running.png)
 
 ## A closer look at what's generated
 
-All code generated is modern JavaScript, meaning ES6, plus async / await and object spread, along with ES6 modules (`import` / `export`).  If you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you to do so) then this code should just work.  If any of those conditions are false, you'll need to pipe the results through Babel using your favorite build tool.
+All code generated is modern JavaScript, meaning ES6, plus `async` / `await` and object spread, along with ES6 modules (`import` / `export`).  If you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you to do so) then this code should just work.  If any of those conditions are false, you'll need to pipe the results through Babel using your favorite build tool.
 
 ### All code is extensible.  
 
-All of the schema and resolver files discussed below are only generated the first time; if you run the utility again, they will not be over-written (though an option to override that may be added later).  The idea is that generated schema and resolver files are only a start, not a final product.  Additional, one-off tweaks and specialized use cases can safely be added later, as needed.
+All of the schema and resolver files discussed below are only generated the first time; if you run the utility again, they will not be over-written (though an option to override that may be added later).  The idea is that generated schema and resolver files are a useful starting point that will usually need one-off tweaks and specialized use cases added later.
 
 ### Generated type-specific schemas
 
@@ -170,7 +172,7 @@ export default {
 };
 ```
 
-The db connection is grabbed from the root object (see the setup above for how to add that).  Then the graphQL AST is parsed to determine which fields were requested, and only they are queried from Mongo.  And of course the args are translated to the proper Mongo queries. 
+The db connection is grabbed from the root object (see the setup above for how to add that).  Then the graphQL AST is parsed to determine which fields were requested, so only they can be queried from Mongo.  And of course the args are translated into the proper Mongo queries. 
 
 ## Master schema
 
