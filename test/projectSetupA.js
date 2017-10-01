@@ -1,4 +1,5 @@
-const { dataTypes: { MongoId, String, Int, Float, ArrayOf } } = require("../index");
+import { dataTypes } from "mongo-graphql-starter";
+const { MongoId, String, Int, Float, ArrayOf } = dataTypes;
 
 const Author = {
   table: "authors",
@@ -19,7 +20,7 @@ const Book = {
   }
 };
 
-module.exports = {
+export default {
   Author,
   Book
 };
