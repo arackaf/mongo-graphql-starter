@@ -11,9 +11,8 @@ import fs from "fs";
 import del from "del";
 
 try {
-  del.sync("test/testProject1/project");
-  fs.mkdirSync("test/testProject1/project");
-  createGraphqlSchema(projectSetup, path.resolve("./test/testProject1/project"));
+  del.sync("test/testProject1/graphQL");
+  createGraphqlSchema(projectSetup, path.resolve("./test/testProject1"));
 } catch (e) {
   console.log(e);
 }
