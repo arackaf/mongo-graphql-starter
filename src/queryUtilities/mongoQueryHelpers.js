@@ -23,6 +23,16 @@ export function getMongoFilters(args, objectMetaData) {
         } else if (queryOperation === "endsWith") {
           hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
         }
+      } else if (field === Int || field === Float) {
+        if (queryOperation === "lt") {
+          hash[fieldName] = { $lt: args[k] };
+        } else if (queryOperation === "lte") {
+          hash[fieldName] = { $lte: args[k] };
+        } else if (queryOperation === "gt") {
+          hash[fieldName] = { $gt: args[k] };
+        } else if (queryOperation === "gte") {
+          hash[fieldName] = { $gte: args[k] };
+        }
       }
     }
     return hash;
