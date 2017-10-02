@@ -144,7 +144,31 @@ Each field from your metadata of course gets added to the main type. Basic queri
 
 ### Filters created
 
+#### String filters
+
+If your field is named `title` then the following filters will be available on your `all${TypeName}s` filter
+
+Exact match
+
+`title: "My Title"` - will match results with exactly that title value
+
+String contains
+
+`title_contains: "My"` - will match results with the string `My` anywhere inside, case insensitively. 
+
+String starts with
+
+`title_startsWith: "My"` - will match results that start with the string `My`, case insensitively. 
+
+String ends with
+
+`title_endsWith: "title"` - will match results that end with the string `title`, case insensitively. 
+
+#### Int filters
+
 WIP - see the schema file above for now
+
+
 
 ### Generated type-specific resolvers 
 
