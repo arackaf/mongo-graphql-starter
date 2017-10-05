@@ -166,8 +166,78 @@ String ends with
 
 #### Int filters
 
-WIP - see the schema file above for now
+If your field is named `pages` then the following filters will be available on your `all${TypeName}s` filter
 
+Exact match
+
+`pages: 200` - will match results with exactly that `pages` value
+
+Less than
+
+`pages_lt: 200` - will match results where `pages` is less than 200 
+
+Less than or equal
+
+`pages_lte: 200` - will match results where `pages` is less than or equal to 200 
+
+Greater than
+
+`pages_gt: 200` - will match results where `pages` is greater than 200 
+
+Greater than or equal
+
+`pages_gte: 200` - will match results where `pages` is greater than or equal to 200 
+
+#### Float filters
+
+If your field is named `weight` then the following filters will be available on your `all${TypeName}s` filter
+
+Exact match
+
+`weight: 200` - will match results with exactly that `weight` value
+
+Less than
+
+`weight_lt: 200` - will match results where `weight` is less than 200 
+
+Less than or equal
+
+`weight_lte: 200` - will match results where `weight` is less than or equal to 200 
+
+Greater than
+
+`weight_gt: 200` - will match results where `weight` is greater than 200 
+
+Greater than or equal
+
+`weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
+
+#### OR filters
+
+Combining filters with Mongo's `$or` is easy.  Just use the same API, but with `OR` instead of `$or` (`$` doesn't seem to be a valid character for GraphQL identifiers).  For example
+
+```javascript
+{
+  allBooks(pages_gt: 50, OR: [{title: "Book 1", pages: 100}, {title_contains: "ook", OR: [{weight_gt: 2}, {pages_lt: 0}]}]) {
+    _id
+    title
+    pages
+    weight
+  }
+}
+```
+
+will match all results where 
+
+pages is greater than 50 
+  AND (
+    (title is "Book 1" AND pages is 100) 
+    OR 
+    (title contains "ook" 
+      AND 
+        (weight is greater than 2 OR pages is less than 0) 
+    )
+  ) 
 
 
 ### Generated type-specific resolvers 
