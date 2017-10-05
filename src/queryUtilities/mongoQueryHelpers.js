@@ -7,7 +7,12 @@ export function getMongoProjection(fields) {
 
 export function getMongoFilters(args, objectMetaData) {
   return Object.keys(args).reduce((hash, k) => {
-    if (objectMetaData.fields[k]) {
+    if (k === "OR" && args.OR != null) {
+      if (!Array.isArray(args.OR)) {
+        throw "Non array passed to OR - received " + hash.OR;
+      }
+      hash.$or = args.OR.map(packetArgs => getMongoFilters(packetArgs, objectMetaData));
+    } else if (objectMetaData.fields[k]) {
       hash[k] = args[k];
     } else if (k.indexOf("_") >= 0) {
       let pieces = k.split("_"),

@@ -83,12 +83,16 @@ ${TAB}${Object.keys(fields)
     .join(`\n${TAB}`)}
 }
 
+input ${name}Filters {
+${TAB}${allFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
+}
+
 \`;
 
 export const query = \`
 
 ${TAB}all${name}s(
-${TAB2}${allFields.join(`,\n${TAB2}`)}
+${TAB2}${allFields.concat([`OR: [${name}Filters]`]).join(`,\n${TAB2}`)}
   ): [${name}]
 
 ${idField ? `${TAB}get${name}(${idField}: String): ${name}` : ""}
