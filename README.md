@@ -91,6 +91,111 @@ Now `http://localhost:3000/graphql` should, assuming the database above exists, 
 
 ![Image of graphiQL](docs-img/graphiQL-running.png)
 
+## Filters created
+
+### String filters
+
+If your field is named `title` then the following filters will be available on your `all${TypeName}s` filter
+
+Exact match
+
+`title: "My Title"` - will match results with exactly that title value
+
+String contains
+
+`title_contains: "My"` - will match results with the string `My` anywhere inside, case insensitively. 
+
+String starts with
+
+`title_startsWith: "My"` - will match results that start with the string `My`, case insensitively. 
+
+String ends with
+
+`title_endsWith: "title"` - will match results that end with the string `title`, case insensitively. 
+
+### Int filters
+
+If your field is named `pages` then the following filters will be available on your `all${TypeName}s` filter
+
+Exact match
+
+`pages: 200` - will match results with exactly that `pages` value
+
+Less than
+
+`pages_lt: 200` - will match results where `pages` is less than 200 
+
+Less than or equal
+
+`pages_lte: 200` - will match results where `pages` is less than or equal to 200 
+
+Greater than
+
+`pages_gt: 200` - will match results where `pages` is greater than 200 
+
+Greater than or equal
+
+`pages_gte: 200` - will match results where `pages` is greater than or equal to 200 
+
+### Float filters
+
+If your field is named `weight` then the following filters will be available on your `all${TypeName}s` filter
+
+Exact match
+
+`weight: 200` - will match results with exactly that `weight` value
+
+Less than
+
+`weight_lt: 200` - will match results where `weight` is less than 200 
+
+Less than or equal
+
+`weight_lte: 200` - will match results where `weight` is less than or equal to 200 
+
+Greater than
+
+`weight_gt: 200` - will match results where `weight` is greater than 200 
+
+Greater than or equal
+
+`weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
+
+### OR filters
+
+Combining filters with Mongo's `$or` is easy.  Just use the same API, but with `OR` instead of `$or` (`$` doesn't seem to be a valid character for GraphQL identifiers).  For example
+
+```javascript
+{
+  allBooks(
+    pages_gt: 50, 
+    OR: [
+      {title: "Book 1", pages: 100}, 
+      {title_contains: "ook", OR: [{weight_gt: 2}, {pages_lt: 0}]}
+    ]
+  ) {
+    _id
+    title
+    pages
+    weight
+  }
+}
+```
+
+will match all results where 
+
+```
+pages is greater than 50 
+  AND (
+    (title is "Book 1" AND pages is 100) 
+    OR 
+    (title contains "ook" 
+      AND 
+        (weight is greater than 2 OR pages is less than 0) 
+    )
+  )
+```
+
 ## A closer look at what's generated
 
 All code generated is modern JavaScript, meaning ES6, plus `async` / `await` and object spread, along with ES6 modules (`import` / `export`).  If you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you to do so) then this code should just work.  If any of those conditions are false, you'll need to pipe the results through Babel using your favorite build tool.
@@ -141,103 +246,6 @@ export const query = `
 ```
 
 Each field from your metadata of course gets added to the main type. Basic queries have also been created, namely `allBooks` with filters set up for each field, depending on type; and a `getBook` query that looks up a book by _id. 
-
-### Filters created
-
-#### String filters
-
-If your field is named `title` then the following filters will be available on your `all${TypeName}s` filter
-
-Exact match
-
-`title: "My Title"` - will match results with exactly that title value
-
-String contains
-
-`title_contains: "My"` - will match results with the string `My` anywhere inside, case insensitively. 
-
-String starts with
-
-`title_startsWith: "My"` - will match results that start with the string `My`, case insensitively. 
-
-String ends with
-
-`title_endsWith: "title"` - will match results that end with the string `title`, case insensitively. 
-
-#### Int filters
-
-If your field is named `pages` then the following filters will be available on your `all${TypeName}s` filter
-
-Exact match
-
-`pages: 200` - will match results with exactly that `pages` value
-
-Less than
-
-`pages_lt: 200` - will match results where `pages` is less than 200 
-
-Less than or equal
-
-`pages_lte: 200` - will match results where `pages` is less than or equal to 200 
-
-Greater than
-
-`pages_gt: 200` - will match results where `pages` is greater than 200 
-
-Greater than or equal
-
-`pages_gte: 200` - will match results where `pages` is greater than or equal to 200 
-
-#### Float filters
-
-If your field is named `weight` then the following filters will be available on your `all${TypeName}s` filter
-
-Exact match
-
-`weight: 200` - will match results with exactly that `weight` value
-
-Less than
-
-`weight_lt: 200` - will match results where `weight` is less than 200 
-
-Less than or equal
-
-`weight_lte: 200` - will match results where `weight` is less than or equal to 200 
-
-Greater than
-
-`weight_gt: 200` - will match results where `weight` is greater than 200 
-
-Greater than or equal
-
-`weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
-
-#### OR filters
-
-Combining filters with Mongo's `$or` is easy.  Just use the same API, but with `OR` instead of `$or` (`$` doesn't seem to be a valid character for GraphQL identifiers).  For example
-
-```javascript
-{
-  allBooks(pages_gt: 50, OR: [{title: "Book 1", pages: 100}, {title_contains: "ook", OR: [{weight_gt: 2}, {pages_lt: 0}]}]) {
-    _id
-    title
-    pages
-    weight
-  }
-}
-```
-
-will match all results where 
-
-pages is greater than 50 
-  AND (
-    (title is "Book 1" AND pages is 100) 
-    OR 
-    (title contains "ook" 
-      AND 
-        (weight is greater than 2 OR pages is less than 0) 
-    )
-  ) 
 
 
 ### Generated type-specific resolvers 
