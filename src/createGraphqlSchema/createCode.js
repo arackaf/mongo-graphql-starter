@@ -83,8 +83,14 @@ ${TAB}${Object.keys(fields)
     .join(`\n${TAB}`)}
 }
 
+input ${name}Sort {
+${TAB}${Object.keys(fields)
+    .map(k => `${k}: Int`)
+    .join(`\n${TAB}`)}
+}
+
 input ${name}Filters {
-${TAB}${allFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
+${TAB}${allFields.concat([`OR: [${name}Filters]`, `sort: ${name}Sort`]).join(`\n${TAB}`)}
 }
 
 \`;
@@ -92,7 +98,7 @@ ${TAB}${allFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 export const query = \`
 
 ${TAB}all${name}s(
-${TAB2}${allFields.concat([`OR: [${name}Filters]`]).join(`,\n${TAB2}`)}
+${TAB2}${allFields.concat([`OR: [${name}Filters]`, `sort: ${name}Sort`]).join(`,\n${TAB2}`)}
   ): [${name}]
 
 ${idField ? `${TAB}get${name}(${idField}: String): ${name}` : ""}
