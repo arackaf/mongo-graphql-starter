@@ -2,9 +2,10 @@ import { getMongoFilters, getMongoProjection } from "./mongoQueryHelpers";
 import { parseRequestedFields } from "./parseAst";
 
 export default function(args, ast, objectMetaData) {
-  let filters = getMongoFilters(args, objectMetaData),
+  let $match = getMongoFilters(args, objectMetaData),
     { primitives: requestedFields } = parseRequestedFields(ast),
-    projections = getMongoProjection(requestedFields);
+    $project = getMongoProjection(requestedFields),
+    $sort = args.SORT;
 
-  return { filters, requestedFields, projections };
+  return { $match, requestedFields, $project, $sort };
 }
