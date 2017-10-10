@@ -22,21 +22,21 @@ afterAll(async () => {
 });
 
 test("Float match", async () => {
-  queryAndMatchArray({ schema, db, query: "{allBooks(weight: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.5" }] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks(weight: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.5" }] });
 });
 
 test("Float lt", async () => {
-  queryAndMatchArray({ schema, db, query: "{allBooks(weight_lt: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.1" }] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks(weight_lt: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.1" }] });
 });
 
 test("Float lts", async () => {
-  queryAndMatchArray({ schema, db, query: "{allBooks(weight_lte: 5.1){title}}", coll: "allBooks", results: [{ title: "Book 5.1" }] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks(weight_lte: 5.1){title}}", coll: "allBooks", results: [{ title: "Book 5.1" }] });
 });
 
 test("Float gt", async () => {
-  queryAndMatchArray({ schema, db, query: "{allBooks(weight_gt: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.9" }] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks(weight_gt: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.9" }] });
 });
 
 test("Float gte", async () => {
-  queryAndMatchArray({ schema, db, query: "{allBooks(weight_gte: 5.9){title}}", coll: "allBooks", results: [{ title: "Book 5.9" }] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks(weight_gte: 5.9){title}}", coll: "allBooks", results: [{ title: "Book 5.9" }] });
 });

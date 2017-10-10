@@ -27,25 +27,7 @@ afterAll(async () => {
 });
 
 test("Sort test 1", async () => {
-  queryAndMatchArray({
-    schema,
-    db,
-    query: "{allBooks(SORT: {title: 1}){title, pages}}",
-    coll: "allBooks",
-    results: [
-      { title: "Book 1", pages: 100 },
-      { title: "Book 2", pages: 150 },
-      { title: "Book 3", pages: 90 },
-      { title: "Book 4", pages: 200 },
-      { title: "Book 5", pages: 200 },
-      { title: "Book 6", pages: 200 },
-      { title: "Book 7", pages: 210 },
-      { title: "Book 8", pages: 200 }
-    ]
-  });
-});
-test("Sort test 2", async () => {
-  queryAndMatchArray({
+  await queryAndMatchArray({
     schema,
     db,
     query: "{allBooks(SORT: {title: 1}){title, pages}}",
@@ -63,21 +45,21 @@ test("Sort test 2", async () => {
   });
 });
 
-// test("Sort test 2", async () => {
-//   queryAndMatchArray({
-//     schema,
-//     db,
-//     query: "{allBooks(SORT: {pages: 1}){title, pages}}",
-//     coll: "allBooks",
-//     results: [
-//       { title: "Book 3", pages: 90 },
-//       { title: "Book 1", pages: 100 },
-//       { title: "Book 2", pages: 150 },
-//       { title: "Book 4", pages: 200 },
-//       { title: "Book 5", pages: 200 },
-//       { title: "Book 6", pages: 200 },
-//       { title: "Book 8", pages: 200 },
-//       { title: "Book 7", pages: 210 }
-//     ]
-//   });
-// });
+test("Sort test 2", async () => {
+  queryAndMatchArray({
+    schema,
+    db,
+    query: "{allBooks(SORT: {pages: 1, title: 1}){title, pages}}",
+    coll: "allBooks",
+    results: [
+      { title: "Book 3", pages: 90 },
+      { title: "Book 1", pages: 100 },
+      { title: "Book 2", pages: 150 },
+      { title: "Book 4", pages: 200 },
+      { title: "Book 5", pages: 200 },
+      { title: "Book 6", pages: 200 },
+      { title: "Book 8", pages: 200 },
+      { title: "Book 7", pages: 210 }
+    ]
+  });
+});
