@@ -7,7 +7,9 @@ export default function(args, ast, objectMetaData) {
     $project = getMongoProjection(requestedFields),
     sort = args.SORT,
     sorts = args.SORTS,
-    $sort;
+    $sort,
+    $limit,
+    $skip;
 
   if (sort) {
     $sort = sort;
@@ -18,5 +20,13 @@ export default function(args, ast, objectMetaData) {
     });
   }
 
-  return { $match, requestedFields, $project, $sort };
+  if (args.LIMIT != null || args.SKIP != null) {
+    $limit = args.LIMIT;
+    $skip = args.SKIP;
+  } else if (args.PAGE != null && args.PAGE_SIZE != null) {
+    $limit = args.PAGE_SIZE;
+    $skip = (args.PAGE - 1) * args.PAGE_SIZE;
+  }
+
+  return { $match, requestedFields, $project, $sort, $limit, $skip };
 }
