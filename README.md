@@ -212,6 +212,14 @@ allBooks(SORTS: [{pages: 1}, {title: -1}]){title, pages}
 
 which will sort by pages ascending, and then by title descending. 
 
+### Paging
+
+Page your data in one of two ways.
+
+Pass `LIMIT` and `SKIP` arguments to your queries, which will map directly to your Mongo queries.
+
+Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `LIMIT` and `SKIP` for you, and add to the Mongo query.
+
 ## A closer look at what's generated
 
 All code generated is modern JavaScript, meaning ES6, plus `async` / `await` and object spread, along with ES6 modules (`import` / `export`).  If you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you to do so) then this code should just work.  If any of those conditions are false, you'll need to pipe the results through Babel using your favorite build tool.

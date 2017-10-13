@@ -98,7 +98,9 @@ ${TAB}${allFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 export const query = \`
 
 ${TAB}all${name}s(
-${TAB2}${allFields.concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`]).join(`,\n${TAB2}`)}
+${TAB2}${allFields
+    .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+    .join(`,\n${TAB2}`)}
   ): [${name}]
 
 ${idField ? `${TAB}get${name}(${idField}: String): ${name}` : ""}
