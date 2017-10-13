@@ -161,7 +161,7 @@ Greater than or equal
 
 `weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
 
-### OR filters
+### OR Queries
 
 Combining filters with Mongo's `$or` is easy.  Just use the same API, but with `OR` instead of `$or` (`$` doesn't seem to be a valid character for GraphQL identifiers).  For example
 
@@ -195,6 +195,22 @@ pages is greater than 50
     )
   )
 ```
+
+### Sorting
+
+To sort, use the `SORT` argument, and pass it an object literal with the field by which you'd like to sort, with the Mongo value of 1 for ascending, or -1 for descending.  For example
+0
+```
+allBooks(SORT: {title: 1}){title, pages}
+```
+
+To sort by multiple fields, use `SORTS`, and send an array of those same object literals.  For example
+
+```
+allBooks(SORTS: [{pages: 1}, {title: -1}]){title, pages}
+```
+
+which will sort by pages ascending, and then by title descending. 
 
 ## A closer look at what's generated
 

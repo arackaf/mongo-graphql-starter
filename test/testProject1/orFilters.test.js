@@ -22,7 +22,7 @@ afterAll(async () => {
 });
 
 test("OR filters 1", async () => {
-  queryAndMatchArray({
+  await queryAndMatchArray({
     schema,
     db,
     query: '{allBooks(OR: [{title: "Book 1"}]){title, pages}}',
@@ -32,7 +32,7 @@ test("OR filters 1", async () => {
 });
 
 test("OR filters 2", async () => {
-  queryAndMatchArray({
+  await queryAndMatchArray({
     schema,
     db,
     query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1"}]){title, pages}}',
@@ -42,7 +42,7 @@ test("OR filters 2", async () => {
 });
 
 test("OR filters 3", async () => {
-  queryAndMatchArray({
+  await queryAndMatchArray({
     schema,
     db,
     query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{pages: 100}]}]){title, pages}}',
@@ -52,7 +52,7 @@ test("OR filters 3", async () => {
 });
 
 test("OR filters 4", async () => {
-  queryAndMatchArray({
+  await queryAndMatchArray({
     schema,
     db,
     query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{title: "XXX"}, {pages: 100}]}]){title, pages}}',
@@ -62,7 +62,7 @@ test("OR filters 4", async () => {
 });
 
 test("OR filters 5 - AND and OR", async () => {
-  queryAndMatchArray({
+  await queryAndMatchArray({
     schema,
     db,
     query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{pages: 101}]}]){title, pages}}',
