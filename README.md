@@ -216,9 +216,9 @@ which will sort by pages ascending, and then by title descending.
 
 Page your data in one of two ways.
 
-Pass `LIMIT` and `SKIP` arguments to your queries, which will map directly to your Mongo queries.
+Pass `LIMIT` and `SKIP` to your query, which will map directly to the `$limit` and `$skip` Mongo aggregation arguments.
 
-Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `LIMIT` and `SKIP` for you, and add to the Mongo query.
+Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$skip` for you, and add to the Mongo query.
 
 ## A closer look at what's generated
 
