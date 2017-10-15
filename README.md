@@ -220,6 +220,63 @@ Pass `LIMIT` and `SKIP` to your query, which will map directly to the `$limit` a
 
 Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$skip` for you, and add to the Mongo query.
 
+### Middleware
+
+Middleware allows you to add cross cutting concerns to your resolvers. After your query is processed, and all of the Mongo filters, projections, paging, etc are computed, these values are passed through each registered middleware, allowing them to modify these values as needed.  For example
+
+```javascript
+import { middleware } from "mongo-graphql-starter";
+
+middleware.use((deconstructedQuery, root, args, context, ast) => {
+  deconstructedQuery.$match.title = "Book 1";
+});
+```
+
+will, uselessly, force every query run on every type to add a title match of "Book 1".
+
+A more useful example, coming soon, would be middleware that takes the `userId` value from the Express request object, representing the logged-on user, and adds it to all queries so they only return results belonging to the current user.
+
+---
+
+From the middleware shown above, `deconstructedQuery` is the entire packet of Mongo query items that were calculated from the args passed to your resolver.  This object contains:
+
+`$match` - the Mongo filters
+
+`$project` - the Mongo projection object
+
+`$sort` - the Mongo sort object
+
+`$limit` - the limit value
+
+`$skip` - the skip value
+
+This is your opportunity to mutate any of these values.  The remaining arguments passed to your middleware are the same ones passed to all resolver:
+
+`root` -  the root object. This will have your db object, and anything else you chose to add to it
+
+`args` - the graphQL arguments object
+
+`context` - by default your Express request object 
+
+`ast` - the entire graphQL query AST with complete info about your query: query name, fields requested, etc
+
+If you need to do asynchronous work, just have the method return a Promise.  The generated graphQL resolver will `Promise.resolve` each middleware you register, then continue on and run the Mongo query with whatever values you leave in `deconstructedQuery`.
+
+### Preprocessor
+
+Similar to middleware, preprocessors run before any work is done in the resolvers, and are passed the `root`, `args`, `context` and `ast` objects to be mutated as needed.  Use this as an opportunity to amend or validate what the user sends over.  For example, 
+
+```javascript
+import { preprocessor } from "mongo-graphql-starter";
+
+preprocessor.use((root, args, context, ast) => {
+  args.PAGE = 2;
+  args.PAGE_SIZE = 3;
+});
+```
+
+will force every query to have a page size of 3, and request page number 2.  A more useful example might enforce a maximum `PAGE_SIZE` value, so users don't request too much data in one request. 
+
 ## A closer look at what's generated
 
 All code generated is modern JavaScript, meaning ES6, plus `async` / `await` and object spread, along with ES6 modules (`import` / `export`).  If you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you to do so) then this code should just work.  If any of those conditions are false, you'll need to pipe the results through Babel using your favorite build tool.
