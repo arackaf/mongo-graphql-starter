@@ -234,6 +234,8 @@ middleware.use((deconstructedQuery, root, args, context, ast) => {
 
 will, uselessly, force every query run on every type to add a title match of "Book 1".
 
+A more useful example, coming soon, would be middleware that takes the `userId` value from the Express request object, representing the logged-on user, and adds it to all queries so they only return results belonging to the current user.
+
 ---
 
 From the middleware shown above, `deconstructedQuery` is the entire packet of Mongo query items that were calculated from the args passed to your resolver.  This object contains:
@@ -259,6 +261,21 @@ This is your opportunity to mutate any of these values.  The remaining arguments
 `ast` - the entire graphQL query AST with complete info about your query: query name, fields requested, etc
 
 If you need to do asynchronous work, just have the method return a Promise.  The generated graphQL resolver will `Promise.resolve` each middleware you register, then continue on and run the Mongo query with whatever values you leave in `deconstructedQuery`.
+
+### Preprocessor
+
+Similar to middleware, preprocessors run before any work is done in the resolvers, and are passed the `root`, `args`, `context` and `ast` objects to be mutated as needed.  Use this as an opportunity to amend or validate what the user sends over.  For example, 
+
+```javascript
+import { preprocessor } from "mongo-graphql-starter";
+
+preprocessor.use((root, args, context, ast) => {
+  args.PAGE = 2;
+  args.PAGE_SIZE = 3;
+});
+```
+
+will force every query to have a page size of 3, and request page number 2.  A more useful example might enforce a maximum `PAGE_SIZE` value, so users don't request too much data in one request. 
 
 ## A closer look at what's generated
 
