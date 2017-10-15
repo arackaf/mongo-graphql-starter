@@ -34,7 +34,7 @@ afterAll(async () => {
   middleware.clearAll();
 });
 
-test("Test middleware 1", async () => {
+test("Test middleware single item 1", async () => {
   await queryAndMatchArray({
     schema,
     db,

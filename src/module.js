@@ -18,3 +18,6 @@ export { decontructGraphqlQuery };
 
 import middleware from "./middleware";
 export { middleware };
+
+import preprocessor from "./preprocessor";
+export { preprocessor };
