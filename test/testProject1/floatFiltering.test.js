@@ -25,6 +25,16 @@ test("Float match", async () => {
   await queryAndMatchArray({ schema, db, query: "{allBooks(weight: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.5" }] });
 });
 
+test("Float in", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: "{allBooks(weight_in: [5.4, 5.5, 5.6]){title}}",
+    coll: "allBooks",
+    results: [{ title: "Book 5.5" }]
+  });
+});
+
 test("Float lt", async () => {
   await queryAndMatchArray({ schema, db, query: "{allBooks(weight_lt: 5.5){title}}", coll: "allBooks", results: [{ title: "Book 5.1" }] });
 });

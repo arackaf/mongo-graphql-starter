@@ -25,6 +25,10 @@ test("Int match", async () => {
   await queryAndMatchArray({ schema, db, query: "{allBooks(pages: 100){title}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });
 
+test("Int in", async () => {
+  await queryAndMatchArray({ schema, db, query: "{allBooks(pages_in: [99, 100, 101]){title}}", coll: "allBooks", results: [{ title: "Book 100" }] });
+});
+
 test("Int lt", async () => {
   await queryAndMatchArray({ schema, db, query: "{allBooks(pages_lt: 101){title}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });
