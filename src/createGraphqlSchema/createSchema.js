@@ -3,7 +3,9 @@ import fs from "fs";
 
 import { createObject, createGraphqlSchema, createGraphqlResolver } from "./createCode";
 
-import { MongoId, String, Int, Float, ArrayOf } from "./dataTypes";
+import { MongoId, String, Int, Float, ArrayOf, Date } from "./dataTypes";
+
+const defaultDateFormat = "%m/%d/%Y";
 
 function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
   directoriesToCreate.forEach(dir => {
@@ -45,10 +47,34 @@ export default function(source, destPath) {
           },
           {
             name: "fields",
-            value: Object.keys(objectToCreate.fields).map(k => ({
-              name: k,
-              value: objectToCreate.fields[k]
-            }))
+            value: Object.keys(fields).map(k => {
+              if (fields[k] === Date) {
+                return {
+                  name: k,
+                  value: createObject(
+                    "{",
+                    [
+                      {
+                        name: "__isDate",
+                        value: true,
+                        literal: true
+                      },
+                      {
+                        name: "format",
+                        value: defaultDateFormat
+                      }
+                    ],
+                    3
+                  ),
+                  literal: true
+                };
+              } else {
+                return {
+                  name: k,
+                  value: fields[k]
+                };
+              }
+            })
           }
         ]) + ";",
         true,
