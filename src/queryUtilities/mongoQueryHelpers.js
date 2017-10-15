@@ -1,8 +1,14 @@
 import { parseRequestedFields } from "./parseAst";
 import { MongoId, String, Int, Float } from "../createGraphqlSchema/dataTypes";
 
-export function getMongoProjection(fields) {
-  return fields.reduce((hash, field) => ((hash[field] = 1), hash), {});
+export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData) {
+  let result = primitiveSelections.reduce((hash, field) => ((hash[field] = 1), hash), {});
+  objectSelections.forEach(sel => {
+    if (objectMetaData.fields[sel]) {
+      result[sel] = 1;
+    }
+  });
+  return result;
 }
 
 export function getMongoFilters(args, objectMetaData) {
