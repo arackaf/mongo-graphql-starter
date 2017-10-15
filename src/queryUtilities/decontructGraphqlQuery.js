@@ -3,8 +3,8 @@ import { parseRequestedFields } from "./parseAst";
 
 export default function(args, ast, objectMetaData) {
   let $match = getMongoFilters(args, objectMetaData),
-    { primitives: requestedFields } = parseRequestedFields(ast),
-    $project = getMongoProjection(requestedFields),
+    { primitives: requestedFields, objectSelections } = parseRequestedFields(ast),
+    $project = getMongoProjection(requestedFields, objectSelections, objectMetaData),
     sort = args.SORT,
     sorts = args.SORTS,
     $sort,

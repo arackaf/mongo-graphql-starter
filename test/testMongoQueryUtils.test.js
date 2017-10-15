@@ -1,11 +1,7 @@
 import { mongoQueryHelpers } from "../index";
-const { getMongoProjection, getMongoFilters } = mongoQueryHelpers;
+const { getMongoFilters } = mongoQueryHelpers;
 
 import Book from "./testProject1/graphQL/Book/Book";
-
-test("Mongo projection correctly created", () => {
-  expect(getMongoProjection(["_id", "title", "publisher"])).toEqual({ _id: 1, title: 1, publisher: 1 });
-});
 
 //---------------------------------------- STRING ---------------------------------------------------
 
