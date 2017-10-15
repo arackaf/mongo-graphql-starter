@@ -26,23 +26,28 @@ export function getMongoFilters(args, objectMetaData) {
         fieldName = pieces.slice(0, pieces.length - 1).join("_");
 
       let field = objectMetaData.fields[fieldName];
-      if (field === String) {
-        if (queryOperation === "contains") {
-          hash[fieldName] = { $regex: new RegExp(args[k], "i") };
-        } else if (queryOperation === "startsWith") {
-          hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
-        } else if (queryOperation === "endsWith") {
-          hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
-        }
-      } else if (field === Int || field === Float) {
-        if (queryOperation === "lt") {
-          hash[fieldName] = { $lt: args[k] };
-        } else if (queryOperation === "lte") {
-          hash[fieldName] = { $lte: args[k] };
-        } else if (queryOperation === "gt") {
-          hash[fieldName] = { $gt: args[k] };
-        } else if (queryOperation === "gte") {
-          hash[fieldName] = { $gte: args[k] };
+
+      if (queryOperation === "in") {
+        hash[fieldName] = { $in: args[k] };
+      } else {
+        if (field === String) {
+          if (queryOperation === "contains") {
+            hash[fieldName] = { $regex: new RegExp(args[k], "i") };
+          } else if (queryOperation === "startsWith") {
+            hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
+          } else if (queryOperation === "endsWith") {
+            hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+          }
+        } else if (field === Int || field === Float) {
+          if (queryOperation === "lt") {
+            hash[fieldName] = { $lt: args[k] };
+          } else if (queryOperation === "lte") {
+            hash[fieldName] = { $lte: args[k] };
+          } else if (queryOperation === "gt") {
+            hash[fieldName] = { $gt: args[k] };
+          } else if (queryOperation === "gte") {
+            hash[fieldName] = { $gte: args[k] };
+          }
         }
       }
     }

@@ -25,6 +25,16 @@ test("String match", async () => {
   await queryAndMatchArray({ schema, db, query: '{allBooks(title: "Book 1"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });
 
+test("String in", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_in: ["X", "Book 1", "Y"]){title}}',
+    coll: "allBooks",
+    results: [{ title: "Book 1" }]
+  });
+});
+
 test("String startsWith", async () => {
   await queryAndMatchArray({ schema, db, query: '{allBooks(title_startsWith: "B"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });

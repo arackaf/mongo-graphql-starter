@@ -55,16 +55,26 @@ function displaySchemaValue(value) {
 }
 
 function queriesForField(fieldName, fieldType) {
+  let result = [];
   switch (fieldType) {
     case String:
-      return [fieldName, `${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`);
+      result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`));
+      break;
     case Int:
     case Float:
-      return [fieldName, `${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(
-        p => `${p}: ${fieldType == Int ? "Int" : "Float"}`
-      );
+      result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
+      break;
   }
-  return [];
+
+  switch (fieldType) {
+    case String:
+    case Int:
+    case Float:
+      result.push(`${fieldName}: ${fieldType}`);
+      result.push(`${fieldName}_in: [${fieldType}]`);
+  }
+
+  return result;
 }
 
 export function createGraphqlSchema(objectToCreate) {
