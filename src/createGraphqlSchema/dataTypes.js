@@ -8,3 +8,9 @@ export const ArrayOf = type => {
     type
   };
 };
+export const typeLiteral = type => {
+  return {
+    __isLiteral: true,
+    type
+  };
+};

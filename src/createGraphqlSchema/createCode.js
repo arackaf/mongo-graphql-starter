@@ -32,6 +32,8 @@ function displayMetadataValue(value) {
   } else if (typeof value === "object") {
     if (value.__isArray) {
       return `"[${value.type.__name}]"`;
+    } else if (value.__isLiteral) {
+      return `"${value.type}"`;
     } else if (value.__isObject) {
       return `"${value.type.__name}"`;
     }
@@ -44,6 +46,8 @@ function displaySchemaValue(value) {
   } else if (typeof value === "object") {
     if (value.__isArray) {
       return `[${value.type.__name}]`;
+    } else if (value.__isLiteral) {
+      return value.type;
     } else if (value.__isObject) {
       return `${value.type.__name}`;
     }

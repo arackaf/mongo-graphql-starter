@@ -1,5 +1,5 @@
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, ArrayOf } = dataTypes;
+const { MongoId, String, Int, Float, ArrayOf, typeLiteral } = dataTypes;
 
 const Author = {
   table: "authors",
@@ -16,7 +16,8 @@ const Book = {
     title: String,
     pages: Int,
     weight: Float,
-    authors: ArrayOf(Author)
+    authors: ArrayOf(Author),
+    strArrs: typeLiteral("[[String]]")
   }
 };
 
