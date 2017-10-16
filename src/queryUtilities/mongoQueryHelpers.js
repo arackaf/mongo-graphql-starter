@@ -1,8 +1,17 @@
 import { parseRequestedFields } from "./parseAst";
 import { MongoId, String, Int, Float } from "../createGraphqlSchema/dataTypes";
 
-export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData) {
-  let result = primitiveSelections.reduce((hash, field) => ((hash[field] = 1), hash), {});
+export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData, args) {
+  let result = primitiveSelections.reduce((hash, field) => {
+    let entry = objectMetaData.fields[field];
+    if (typeof entry === "object" && entry.__isDate) {
+      let format = args[field + "_format"] || entry.format;
+      hash[field] = { $dateToString: { format, date: "$" + field } };
+    } else {
+      hash[field] = 1;
+    }
+    return hash;
+  }, {});
   objectSelections.forEach(sel => {
     if (objectMetaData.fields[sel]) {
       result[sel] = 1;
@@ -12,20 +21,29 @@ export function getMongoProjection(primitiveSelections, objectSelections, object
 }
 
 export function getMongoFilters(args, objectMetaData) {
+  let fields = objectMetaData.fields;
   return Object.keys(args).reduce((hash, k) => {
     if (k === "OR" && args.OR != null) {
       if (!Array.isArray(args.OR)) {
         throw "Non array passed to OR - received " + hash.OR;
       }
       hash.$or = args.OR.map(packetArgs => getMongoFilters(packetArgs, objectMetaData));
-    } else if (objectMetaData.fields[k]) {
+    } else if (fields[k]) {
+      if (typeof fields[k] === "object" && fields[k].__isDate) {
+        args[k] = new Date(args[k]);
+      }
+
       hash[k] = args[k];
     } else if (k.indexOf("_") >= 0) {
-      let pieces = k.split("_"),
-        queryOperation = pieces.slice(-1)[0],
-        fieldName = pieces.slice(0, pieces.length - 1).join("_");
-
+      let pieces = k.split("_");
+      let queryOperation = pieces.slice(-1)[0];
+      let fieldName = pieces.slice(0, pieces.length - 1).join("_");
       let field = objectMetaData.fields[fieldName];
+      let isDate = typeof field === "object" && field.__isDate;
+
+      if (queryOperation !== "format" && isDate) {
+        args[k] = queryOperation === "in" ? args[k].map(val => new Date(val)) : new Date(args[k]);
+      }
 
       if (queryOperation === "in") {
         hash[fieldName] = { $in: args[k] };
@@ -38,7 +56,7 @@ export function getMongoFilters(args, objectMetaData) {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === Int || field === Float) {
+        } else if (field === Int || field === Float || isDate) {
           if (queryOperation === "lt") {
             hash[fieldName] = { $lt: args[k] };
           } else if (queryOperation === "lte") {
