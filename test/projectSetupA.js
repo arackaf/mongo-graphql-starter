@@ -1,5 +1,5 @@
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, Date, ArrayOf, typeLiteral } = dataTypes;
+const { MongoId, String, Int, Float, Date, ArrayOf, formattedDate, typeLiteral } = dataTypes;
 
 const Author = {
   table: "authors",
@@ -18,7 +18,8 @@ const Book = {
     weight: Float,
     authors: ArrayOf(Author),
     strArrs: typeLiteral("[[String]]"),
-    createdOn: Date
+    createdOn: Date,
+    createdOnYearOnly: formattedDate({ format: "%Y" })
   }
 };
 

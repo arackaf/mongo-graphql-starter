@@ -18,7 +18,7 @@ export const typeLiteral = type => {
 
 export const formattedDate = options => {
   return {
-    __isDate: true,
-    ...options
+    ...options,
+    __isDate: true
   };
 };

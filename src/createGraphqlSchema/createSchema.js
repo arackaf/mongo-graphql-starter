@@ -48,7 +48,8 @@ export default function(source, destPath) {
           {
             name: "fields",
             value: Object.keys(fields).map(k => {
-              if (fields[k] === Date) {
+              let entry = fields[k];
+              if (entry === Date || (typeof entry === "object" && entry.__isDate)) {
                 return {
                   name: k,
                   value: createObject(
@@ -61,7 +62,7 @@ export default function(source, destPath) {
                       },
                       {
                         name: "format",
-                        value: defaultDateFormat
+                        value: entry.format || defaultDateFormat
                       }
                     ],
                     3
