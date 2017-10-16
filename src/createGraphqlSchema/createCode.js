@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { MongoId, String, Int, Float, ArrayOf } from "./dataTypes";
+import { MongoId, String, Int, Float, Date, arrayOf } from "./dataTypes";
 
 const TAB = "  "; //two spaces
 
@@ -15,19 +15,22 @@ ${declarationTab}}`.trim();
 }
 
 function createProperties(properties, offset) {
-  let propertyTab = TAB.repeat(offset),
-    nestedObjTab = TAB.repeat(offset + 1);
+  let propertyTab = TAB.repeat(offset);
+  let nestedObjTab = TAB.repeat(offset + 1);
+
   return properties
-    .map(({ name, value }) => {
+    .map(({ name, value, literal }) => {
       return `${propertyTab}${name}: ${Array.isArray(value)
         ? `${createObject(" {", value, offset + 1)}${propertyTab}`
-        : displayMetadataValue(value)}`;
+        : displayMetadataValue(value, literal)}`;
     })
     .join(",\n");
 }
 
-function displayMetadataValue(value) {
-  if (typeof value === "string") {
+function displayMetadataValue(value, literal) {
+  if (literal) {
+    return value;
+  } else if (typeof value === "string") {
     return `"${value}"`;
   } else if (typeof value === "object") {
     if (value.__isArray) {
@@ -41,8 +44,10 @@ function displayMetadataValue(value) {
 }
 
 function displaySchemaValue(value) {
-  if (typeof value === "string") {
-    return `${value == MongoId ? "String" : value}`;
+  if (typeof value === "object" && value.__isDate) {
+    return "String";
+  } else if (typeof value === "string") {
+    return `${value == MongoId || value == Date ? "String" : value}`;
   } else if (typeof value === "object") {
     if (value.__isArray) {
       return `[${value.type.__name}]`;
@@ -54,22 +59,25 @@ function displaySchemaValue(value) {
   }
 }
 
-function queriesForField(fieldName, fieldType) {
+function queriesForField(fieldName, realFieldType) {
   let result = [];
-  switch (fieldType) {
+  let fieldType = realFieldType === Date ? "String" : realFieldType;
+  switch (realFieldType) {
     case String:
       result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`));
       break;
     case Int:
     case Float:
+    case Date:
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
       break;
   }
 
-  switch (fieldType) {
+  switch (realFieldType) {
     case String:
     case Int:
     case Float:
+    case Date:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
@@ -88,6 +96,7 @@ export function createGraphqlSchema(objectToCreate) {
   });
 
   let idField = Object.keys(fields).find(k => fields[k] === MongoId);
+  let dateFields = Object.keys(fields).filter(k => fields[k] === Date || (typeof fields[k] === "object" && fields[k].__isDate));
 
   return `export const type = \`
 
@@ -114,6 +123,7 @@ export const query = \`
 ${TAB}all${name}s(
 ${TAB2}${allFields
     .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+    .concat(dateFields.map(f => `${f}_format: String`))
     .join(`,\n${TAB2}`)}
   ): [${name}]
 

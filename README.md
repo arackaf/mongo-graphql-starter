@@ -15,7 +15,7 @@ First, create your db metadata like this.  Each mongo collection you'd like adde
 **projectSetupA.js**
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, ArrayOf } = dataTypes;
+const { MongoId, String, Int, Float, arrayOf } = dataTypes;
 
 const Author = {
   table: "authors",
@@ -32,7 +32,7 @@ const Book = {
     title: String,
     pages: Int,
     weight: Float,
-    authors: ArrayOf(Author)
+    authors: arrayOf(Author)
   }
 };
 
@@ -90,6 +90,63 @@ app.listen(3000);
 Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run basic queries.
 
 ![Image of graphiQL](docs-img/graphiQL-running.png)
+
+## Valid types for your fields
+
+Here are the valid types you can import from `mongo-graphql-starter`
+
+```javascript
+import { dataTypes } from "mongo-graphql-starter";
+const { MongoId, String, Int, Float, Date, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+```
+
+`MongoId` will create your field as a string, and will return whatever Mongo uid that was created.
+
+`String`, `Int`, and `Float` are all self explanatory.
+
+`Date` will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo.  Moreoever, querying this date will by default format it as `MM/DD/YYYY`.  To override this, use the `formattedDate` method, and pass in an object with the Mongo date format you'd like used by default.  For example, `createdOnYearOnly: formattedDate({ format: "%Y" })`.
+
+`objectOf` is for specifying a single object of some other type you've created
+
+`arrayOf` is for specifying an array of some other type you've created
+
+`typeLiteral` is for specifying your own type, manually.  The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.
+
+Here's a complete example
+
+```javascript
+import { dataTypes } from "mongo-graphql-starter";
+const { MongoId, String, Int, Float, Date, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+
+const Author = {
+  table: "authors",
+  fields: {
+    _id: MongoId,
+    name: String
+  }
+};
+
+const Book = {
+  table: "books",
+  fields: {
+    _id: MongoId,
+    title: String,
+    pages: Int,
+    weight: Float,
+    authors: arrayOf(Author),
+    primaryAuthor: objectOf(Author),
+    strArrs: typeLiteral("[[String]]"),
+    createdOn: Date,
+    createdOnYearOnly: formattedDate({ format: "%Y" })
+  }
+};
+
+export default {
+  Author,
+  Book
+};
+
+```
 
 ## Filters created
 
@@ -160,6 +217,40 @@ Greater than
 Greater than or equal
 
 `weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
+
+### Date filters
+
+If your field is named `createdOn` then the following filters will be available on your `all${TypeName}s` filter
+
+Exact match
+
+`createdOn: "2004-06-02T03:00:10"` - will match results with exactly that `createdOn` date
+
+Less than
+
+`createdOn_lt: "2004-06-02T03:00:10"` - will match results where `createdOn` is less than that date 
+
+Less than or equal
+
+`createdOn_lte: "2004-06-02T03:00:10"` - will match results where `createdOn` is less than or equal to that date
+
+Greater than
+
+`createdOn_gt: "2004-06-02T03:00:10"` - will match results where `createdOn` is greater than that date
+
+Greater than or equal
+
+`createdOn_gte: "2004-06-02T03:00:10"` - will match results where `createdOn` is greater than or equal to that date
+
+### Formatting dates
+
+Each date field will also have a dateField_format argument created for queries, allowing you to customize the date formatting for that field; the format passed in should correspond with valid Mongo date formats.  For example, if your date is called `createdOn`, then you can do
+
+```
+{allBooks(pages: 100, createdOn_format: "%m"){createdOn}}
+```
+
+will query books with a `pages` value of `100`, and return only the `createdOn` field, formatted as only the month.
 
 ### OR Queries
 
