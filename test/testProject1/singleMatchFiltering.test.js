@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import resolvers from "./graphQL/resolver";
 import typeDefs from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
@@ -10,9 +10,9 @@ beforeAll(async () => {
   db = await MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
-  await db.collection("books").insert({ _id: "1", title: "Book 1", weight: 5.1 });
-  await db.collection("books").insert({ _id: "2", title: "Book 2", weight: 5.5 });
-  await db.collection("books").insert({ _id: "3", title: "Book 3", weight: 5.9 });
+  await db.collection("books").insert({ _id: ObjectId("59e3dbdf94dc6983d41deece"), title: "Book 1", weight: 5.1 });
+  await db.collection("books").insert({ _id: ObjectId("59e41fc694dc6983d41deed1"), title: "Book 2", weight: 5.5 });
+  await db.collection("books").insert({ _id: ObjectId("59e41fda94dc6983d41deed2"), title: "Book 3", weight: 5.9 });
 });
 
 afterAll(async () => {
@@ -22,9 +22,19 @@ afterAll(async () => {
 });
 
 test("Match single", async () => {
-  await queryAndMatchArray({ schema, db, query: `{getBook(_id: "1"){title}}`, coll: "getBook", results: { title: "Book 1" } });
+  await queryAndMatchArray({ schema, db, query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){title}}`, coll: "getBook", results: { title: "Book 1" } });
 });
 
 test("Match single 2", async () => {
-  await queryAndMatchArray({ schema, db, query: `{getBook(_id: "2"){title}}`, coll: "getBook", results: { title: "Book 2" } });
+  await queryAndMatchArray({ schema, db, query: `{getBook(_id: "59e41fc694dc6983d41deed1"){title}}`, coll: "getBook", results: { title: "Book 2" } });
+});
+
+test("Match single", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: `{allBooks(_id: "59e3dbdf94dc6983d41deece"){title}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1" }]
+  });
 });

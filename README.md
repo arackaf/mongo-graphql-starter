@@ -100,7 +100,7 @@ import { dataTypes } from "mongo-graphql-starter";
 const { MongoId, String, Int, Float, Date, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
 ```
 
-`MongoId` will create your field as a string, and will return whatever Mongo uid that was created.
+`MongoId` will create your field as a string, and will return whatever Mongo uid that was created.  Any filters using this id will wrap the string in Mongo's `ObjectId` function.
 
 `String`, `Int`, and `Float` are all self explanatory.
 
@@ -150,13 +150,23 @@ export default {
 
 ## Filters created
 
-### String filters
+### All filter types
 
-If your field is named `title` then the following filters will be available on your `all${TypeName}s` filter
+string, int, float, MongoId and date fields will all have the following filters created
 
 Exact match
 
-`title: "My Title"` - will match results with exactly that title value
+`field: <value>` - will match results with exactly that value
+
+In match
+
+`field_in: [<value1>, <value2>]` - will match results which match any of those exact values
+
+Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.
+
+### String filters
+
+If your field is named `title` then the following filters will be available on your `all${TypeName}s` filter
 
 String contains
 
@@ -173,10 +183,6 @@ String ends with
 ### Int filters
 
 If your field is named `pages` then the following filters will be available on your `all${TypeName}s` filter
-
-Exact match
-
-`pages: 200` - will match results with exactly that `pages` value
 
 Less than
 
@@ -198,10 +204,6 @@ Greater than or equal
 
 If your field is named `weight` then the following filters will be available on your `all${TypeName}s` filter
 
-Exact match
-
-`weight: 200` - will match results with exactly that `weight` value
-
 Less than
 
 `weight_lt: 200` - will match results where `weight` is less than 200 
@@ -221,10 +223,6 @@ Greater than or equal
 ### Date filters
 
 If your field is named `createdOn` then the following filters will be available on your `all${TypeName}s` filter
-
-Exact match
-
-`createdOn: "2004-06-02T03:00:10"` - will match results with exactly that `createdOn` date
 
 Less than
 
