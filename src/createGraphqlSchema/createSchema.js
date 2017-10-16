@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { createObject, createGraphqlSchema, createGraphqlResolver } from "./createCode";
 
-import { MongoId, String, Int, Float, ArrayOf, Date } from "./dataTypes";
+import { MongoId, String, Int, Float, arrayOf, Date } from "./dataTypes";
 
 const defaultDateFormat = "%m/%d/%Y";
 

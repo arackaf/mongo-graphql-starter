@@ -3,9 +3,15 @@ export const String = "String";
 export const Int = "Int";
 export const Float = "Float";
 export const Date = "Date";
-export const ArrayOf = type => {
+export const arrayOf = type => {
   return {
     __isArray: true,
+    type
+  };
+};
+export const objectOf = type => {
+  return {
+    __isObject: true,
     type
   };
 };

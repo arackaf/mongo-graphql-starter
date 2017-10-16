@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { MongoId, String, Int, Float, Date, ArrayOf } from "./dataTypes";
+import { MongoId, String, Int, Float, Date, arrayOf } from "./dataTypes";
 
 const TAB = "  "; //two spaces
 
