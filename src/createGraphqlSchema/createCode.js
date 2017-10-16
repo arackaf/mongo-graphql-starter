@@ -44,7 +44,9 @@ function displayMetadataValue(value, literal) {
 }
 
 function displaySchemaValue(value) {
-  if (typeof value === "string") {
+  if (typeof value === "object" && value.__isDate) {
+    return "String";
+  } else if (typeof value === "string") {
     return `${value == MongoId || value == Date ? "String" : value}`;
   } else if (typeof value === "object") {
     if (value.__isArray) {
