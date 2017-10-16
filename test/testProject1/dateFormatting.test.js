@@ -40,3 +40,23 @@ test("Date display custom", async () => {
     results: [{ createdOnYearOnly: "2004" }]
   });
 });
+
+test("Date display default - override", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: `{allBooks(pages: 100, createdOn_format: "%m"){createdOn}}`,
+    coll: "allBooks",
+    results: [{ createdOn: "06" }]
+  });
+});
+
+test("Date display custom - override", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: `{allBooks(pages: 100, createdOnYearOnly_format: "%m"){createdOnYearOnly}}`,
+    coll: "allBooks",
+    results: [{ createdOnYearOnly: "06" }]
+  });
+});

@@ -96,6 +96,7 @@ export function createGraphqlSchema(objectToCreate) {
   });
 
   let idField = Object.keys(fields).find(k => fields[k] === MongoId);
+  let dateFields = Object.keys(fields).filter(k => fields[k] === Date || (typeof fields[k] === "object" && fields[k].__isDate));
 
   return `export const type = \`
 
@@ -122,6 +123,7 @@ export const query = \`
 ${TAB}all${name}s(
 ${TAB2}${allFields
     .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+    .concat(dateFields.map(f => `${f}_format: String`))
     .join(`,\n${TAB2}`)}
   ): [${name}]
 

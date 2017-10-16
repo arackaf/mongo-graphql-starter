@@ -1,11 +1,12 @@
 import { parseRequestedFields } from "./parseAst";
 import { MongoId, String, Int, Float } from "../createGraphqlSchema/dataTypes";
 
-export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData) {
+export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData, args) {
   let result = primitiveSelections.reduce((hash, field) => {
     let entry = objectMetaData.fields[field];
     if (typeof entry === "object" && entry.__isDate) {
-      hash[field] = { $dateToString: { format: entry.format, date: "$" + field } };
+      let format = args[field + "_format"] || entry.format;
+      hash[field] = { $dateToString: { format, date: "$" + field } };
     } else {
       hash[field] = 1;
     }
