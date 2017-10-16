@@ -19,7 +19,8 @@ export default {
       await preprocessor.process(root, args, context, ast);
       let db = await root.db;
       let { $match, $project } = await middleware.process(decontructGraphqlQuery(args, ast, ${objName}), root, args, context, ast);
-      return await (db.collection("${table}").findOne($match, $project));
+
+      return (await db.collection("${table}").aggregate([{ $match }, { $project }, { $limit: 1 }]).toArray())[0];
     }
   }
 };

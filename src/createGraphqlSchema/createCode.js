@@ -128,7 +128,11 @@ ${TAB2}${allFields
     .join(`,\n${TAB2}`)}
   ): [${name}]
 
-${idField ? `${TAB}get${name}(${idField}: String): ${name}` : ""}
+${idField
+    ? `${TAB}get${name}(
+${TAB2}${[`${idField}: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
+): ${name}`
+    : ""}
 
 \`;
 
