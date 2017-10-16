@@ -61,7 +61,7 @@ function displaySchemaValue(value) {
 
 function queriesForField(fieldName, realFieldType) {
   let result = [];
-  let fieldType = realFieldType === Date ? "String" : realFieldType;
+  let fieldType = realFieldType === Date || realFieldType === MongoId ? "String" : realFieldType;
   switch (realFieldType) {
     case String:
       result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`));
@@ -74,6 +74,7 @@ function queriesForField(fieldName, realFieldType) {
   }
 
   switch (realFieldType) {
+    case MongoId:
     case String:
     case Int:
     case Float:

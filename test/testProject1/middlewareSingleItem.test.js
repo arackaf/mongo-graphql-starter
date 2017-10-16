@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import resolvers from "./graphQL/resolver";
 import typeDefs from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
@@ -17,12 +17,12 @@ beforeAll(async () => {
   await db.collection("books").insert({ _id: "5", title: "Book 5", pages: 200 });
   await db.collection("books").insert({ _id: "8", title: "Book 8", pages: 200 });
   await db.collection("books").insert({ _id: "1", title: "Book 1", pages: 100 });
-  await db.collection("books").insert({ _id: "2", title: "Book 2", pages: 150 });
+  await db.collection("books").insert({ _id: ObjectId("59e41fc694dc6983d41deed1"), title: "Book 2", pages: 150 });
   await db.collection("books").insert({ _id: "7", title: "Book 7", pages: 210 });
   await db.collection("books").insert({ _id: "3", title: "Book 3", pages: 90 });
 
   middleware.use((deconstructedQuery, root, args, context, ast) => {
-    deconstructedQuery.$match._id = "2";
+    deconstructedQuery.$match._id = ObjectId("59e41fc694dc6983d41deed1");
   });
 });
 
