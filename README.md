@@ -1,7 +1,5 @@
 # mongo-graphql-starter
 
-**Warning - this project is extremely young and still rough around the edges. Don't use it for any kind of serious production use.**
-
 This utility will scaffold a basic GraphQL schema and resolvers, with filters working out of the box, based on metadata you enter about your Mongo db.
 
 The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd or advanced edge cases as needed.
@@ -97,7 +95,17 @@ Here are the valid types you can import from `mongo-graphql-starter`
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, Date, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+const { 
+  MongoId, 
+  String, 
+  Int, 
+  Float, 
+  Date, 
+  arrayOf, 
+  objectOf, 
+  formattedDate, 
+  typeLiteral 
+} = dataTypes;
 ```
 
 `MongoId` will create your field as a string, and will return whatever Mongo uid that was created.  Any filters using this id will wrap the string in Mongo's `ObjectId` function.
@@ -116,7 +124,17 @@ Here's a complete example
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, Date, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+const { 
+  MongoId, 
+  String, 
+  Int, 
+  Float, 
+  Date, 
+  arrayOf, 
+  objectOf, 
+  formattedDate, 
+  typeLiteral 
+} = dataTypes;
 
 const Author = {
   table: "authors",
@@ -145,7 +163,6 @@ export default {
   Author,
   Book
 };
-
 ```
 
 ## Filters created
