@@ -14,7 +14,11 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
     }
     throw msg;
   } else if (allResults.data && allResults.data[coll] === null && results !== null) {
-    throw "Null came back unexpectadly on filter";
+    let msg = "Null came back unexpectadly on filter";
+    try {
+      msg += "\n\n" + JSON.parse(allResults);
+    } catch (e) {}
+    throw msg;
   }
   let arr = allResults.data[coll];
 
