@@ -60,6 +60,9 @@ function displaySchemaValue(value) {
 }
 
 function queriesForField(fieldName, realFieldType) {
+  if (typeof realFieldType === "object" && realFieldType.__isDate) {
+    realFieldType = Date;
+  }
   let result = [];
   let fieldType = realFieldType === Date || realFieldType === MongoId ? "String" : realFieldType;
   switch (realFieldType) {
@@ -89,11 +92,13 @@ function queriesForField(fieldName, realFieldType) {
 export function createGraphqlSchema(objectToCreate) {
   let fields = objectToCreate.fields,
     name = objectToCreate.__name,
+    allQueryFields = [],
     allFields = [],
     TAB2 = TAB + TAB;
 
   Object.keys(fields).forEach(k => {
-    allFields.push(...queriesForField(k, fields[k]));
+    allQueryFields.push(...queriesForField(k, fields[k]));
+    allFields.push(`${k}: ${displaySchemaValue(fields[k])}`);
   });
 
   let idField = Object.keys(fields).find(k => fields[k] === MongoId);
@@ -114,15 +119,29 @@ ${TAB}${Object.keys(fields)
 }
 
 input ${name}Filters {
-${TAB}${allFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
+${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 }
+
+\`;
+
+export const mutation = \`
+
+${TAB}create${name}(
+${TAB2}${allFields.join(`,\n${TAB2}`)}
+  ): [${name}]
+
+${idField
+    ? `${TAB}delete${name}(
+${TAB2}${[`${idField}: String`]}
+  ): Boolean`
+    : ""}
 
 \`;
 
 export const query = \`
 
 ${TAB}all${name}s(
-${TAB2}${allFields
+${TAB2}${allQueryFields
     .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
     .concat(dateFields.map(f => `${f}_format: String`))
     .join(`,\n${TAB2}`)}
@@ -131,7 +150,7 @@ ${TAB2}${allFields
 ${idField
     ? `${TAB}get${name}(
 ${TAB2}${[`${idField}: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
-): ${name}`
+  ): ${name}`
     : ""}
 
 \`;
