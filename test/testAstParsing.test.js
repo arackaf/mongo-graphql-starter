@@ -1,8 +1,8 @@
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
 
-import { parseAst } from "../index";
-const { parseRequestedFields } = parseAst;
+import { queryUtilities } from "../index";
+const { parseRequestedFields } = queryUtilities;
 
 let astPassedIn, schema;
 

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { MongoId, String, Int, Float, Date, arrayOf } from "./dataTypes";
+import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "./dataTypes";
 
 const TAB = "  "; //two spaces
 
@@ -43,45 +43,45 @@ function displayMetadataValue(value, literal) {
   }
 }
 
-function displaySchemaValue(value) {
+function displaySchemaValue(value, useInputs) {
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
-    return `${value == MongoId || value == Date ? "String" : value}`;
+    return `${value == MongoIdType || value == DateType ? "String" : value}`;
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return `[${value.type.__name}]`;
+      return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
     } else if (value.__isLiteral) {
       return value.type;
     } else if (value.__isObject) {
-      return `${value.type.__name}`;
+      return `${value.type.__name}${useInputs ? "Input" : ""}`;
     }
   }
 }
 
 function queriesForField(fieldName, realFieldType) {
   if (typeof realFieldType === "object" && realFieldType.__isDate) {
-    realFieldType = Date;
+    realFieldType = DateType;
   }
   let result = [];
-  let fieldType = realFieldType === Date || realFieldType === MongoId ? "String" : realFieldType;
+  let fieldType = realFieldType === DateType || realFieldType === MongoIdType ? "String" : realFieldType;
   switch (realFieldType) {
-    case String:
+    case StringType:
       result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`));
       break;
-    case Int:
-    case Float:
-    case Date:
+    case IntType:
+    case FloatType:
+    case DateType:
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
       break;
   }
 
   switch (realFieldType) {
-    case MongoId:
-    case String:
-    case Int:
-    case Float:
-    case Date:
+    case MongoIdType:
+    case StringType:
+    case IntType:
+    case FloatType:
+    case DateType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
@@ -94,21 +94,29 @@ export function createGraphqlSchema(objectToCreate) {
     name = objectToCreate.__name,
     allQueryFields = [],
     allFields = [],
+    allFieldsMutation = [],
     TAB2 = TAB + TAB;
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
     allFields.push(`${k}: ${displaySchemaValue(fields[k])}`);
+    allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
   });
 
-  let idField = Object.keys(fields).find(k => fields[k] === MongoId);
-  let dateFields = Object.keys(fields).filter(k => fields[k] === Date || (typeof fields[k] === "object" && fields[k].__isDate));
+  let idField = Object.keys(fields).find(k => fields[k] === MongoIdType);
+  let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
 
   return `export const type = \`
 
 type ${name} {
 ${TAB}${Object.keys(fields)
     .map(k => `${k}: ${displaySchemaValue(fields[k])}`)
+    .join(`\n${TAB}`)}
+}
+
+input ${name}Input {
+${TAB}${Object.keys(fields)
+    .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
     .join(`\n${TAB}`)}
 }
 
@@ -127,8 +135,12 @@ ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 export const mutation = \`
 
 ${TAB}create${name}(
-${TAB2}${allFields.join(`,\n${TAB2}`)}
-  ): [${name}]
+${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
+  ): ${name}
+
+${TAB}update${name}(
+${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
+  ): ${name}
 
 ${idField
     ? `${TAB}delete${name}(
