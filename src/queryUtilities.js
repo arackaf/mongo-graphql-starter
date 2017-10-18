@@ -1,6 +1,4 @@
-import { parseRequestedFields } from "./parseAst";
-import { MongoId, String, Int, Float } from "../createGraphqlSchema/dataTypes";
-
+import { MongoIdType, DateType, StringType, IntType, FloatType } from "./createGraphqlSchema/dataTypes";
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData, args) {
@@ -33,7 +31,7 @@ export function getMongoFilters(args, objectMetaData) {
     } else if (fields[k]) {
       if (typeof fields[k] === "object" && fields[k].__isDate) {
         args[k] = new Date(args[k]);
-      } else if (fields[k] === MongoId) {
+      } else if (fields[k] === MongoIdType) {
         args[k] = ObjectId(args[k]);
       }
 
@@ -52,7 +50,7 @@ export function getMongoFilters(args, objectMetaData) {
       if (queryOperation === "in") {
         hash[fieldName] = { $in: args[k] };
       } else {
-        if (field === String) {
+        if (field === StringType) {
           if (queryOperation === "contains") {
             hash[fieldName] = { $regex: new RegExp(args[k], "i") };
           } else if (queryOperation === "startsWith") {
@@ -60,7 +58,7 @@ export function getMongoFilters(args, objectMetaData) {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === Int || field === Float || isDate) {
+        } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
             hash[fieldName] = { $lt: args[k] };
           } else if (queryOperation === "lte") {
@@ -75,4 +73,76 @@ export function getMongoFilters(args, objectMetaData) {
     }
     return hash;
   }, {});
+}
+
+export function parseRequestedFields(ast) {
+  let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
+  if (fieldNode) {
+    let primitives = fieldNode.selectionSet.selections.filter(sel => sel.selectionSet == null).map(sel => sel.name.value);
+    let objectSelections = fieldNode.selectionSet.selections.filter(sel => sel.selectionSet != null).map(sel => sel.name.value);
+
+    return { primitives, objectSelections };
+  }
+}
+
+export function newObjectFromArgs(args, typeMetadata) {
+  return Object.keys(args).reduce((obj, k) => {
+    let field = typeMetadata.fields[k];
+    if (!field) return obj;
+
+    if (field == DateType || (typeof field === "object" && field.__isDate)) {
+      obj[k] = new Date(args[k]);
+    } else {
+      obj[k] = args[k];
+    }
+
+    return obj;
+  }, {});
+}
+
+export function decontructGraphqlQuery(args, ast, objectMetaData) {
+  let $match = getMongoFilters(args, objectMetaData),
+    { primitives: requestedFields, objectSelections } = parseRequestedFields(ast),
+    $project = getMongoProjection(requestedFields, objectSelections, objectMetaData, args),
+    sort = args.SORT,
+    sorts = args.SORTS,
+    $sort,
+    $limit,
+    $skip;
+
+  if (sort) {
+    $sort = sort;
+  } else if (sorts) {
+    $sort = {};
+    sorts.forEach(packet => {
+      Object.assign($sort, packet);
+    });
+  }
+
+  if (args.LIMIT != null || args.SKIP != null) {
+    $limit = args.LIMIT;
+    $skip = args.SKIP;
+  } else if (args.PAGE != null && args.PAGE_SIZE != null) {
+    $limit = args.PAGE_SIZE;
+    $skip = (args.PAGE - 1) * args.PAGE_SIZE;
+  }
+
+  return { $match, requestedFields, $project, $sort, $limit, $skip };
+}
+
+export function getUpdateObject(args, typeMetadata) {
+  return {
+    $set: Object.keys(args).reduce((obj, k) => {
+      let field = typeMetadata.fields[k];
+      if (!field || k === "_id") return obj;
+
+      if (field == DateType || (typeof field === "object" && field.__isDate)) {
+        obj[k] = new Date(args[k]);
+      } else {
+        obj[k] = args[k];
+      }
+
+      return obj;
+    }, {})
+  };
 }

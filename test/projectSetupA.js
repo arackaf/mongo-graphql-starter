@@ -1,25 +1,25 @@
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, Date, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+const { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
 
 const Author = {
   table: "authors",
   fields: {
-    _id: MongoId,
-    name: String
+    _id: MongoIdType,
+    name: StringType
   }
 };
 
 const Book = {
   table: "books",
   fields: {
-    _id: MongoId,
-    title: String,
-    pages: Int,
-    weight: Float,
+    _id: MongoIdType,
+    title: StringType,
+    pages: IntType,
+    weight: FloatType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
-    createdOn: Date,
+    createdOn: DateType,
     createdOnYearOnly: formattedDate({ format: "%Y" })
   }
 };

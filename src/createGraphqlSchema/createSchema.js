@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { createObject, createGraphqlSchema, createGraphqlResolver } from "./createCode";
 
-import { MongoId, String, Int, Float, arrayOf, Date } from "./dataTypes";
+import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "./dataTypes";
 
 const defaultDateFormat = "%m/%d/%Y";
 
@@ -49,7 +49,7 @@ export default function(source, destPath) {
             name: "fields",
             value: Object.keys(fields).map(k => {
               let entry = fields[k];
-              if (entry === Date || (typeof entry === "object" && entry.__isDate)) {
+              if (entry === DateType || (typeof entry === "object" && entry.__isDate)) {
                 return {
                   name: k,
                   value: createObject(
@@ -86,7 +86,7 @@ export default function(source, destPath) {
       createFile(resolverPath, createGraphqlResolver(objectToCreate), true);
     });
 
-    let schemaImports = names.map(n => `import { query as ${n}Query, type as ${n}Type } from './${n}/schema';`).join("\n");
+    let schemaImports = names.map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`).join("\n");
     fs.writeFileSync(
       path.join(rootDir, "schema.js"),
       `${schemaImports}
@@ -97,11 +97,16 @@ export default \`
   type Query {
     ${names.map(n => "${" + n + "Query}").join("\n\n    ")}
   }
+
+  type Mutation {
+    ${names.map(n => "${" + n + "Mutation}").join("\n\n    ")}
+  }
+
 \``
     );
 
     let resolverImports = names.map(n => `import ${n} from './${n}/resolver';`).join("\n"),
-      resolverDestructurings = "let " + names.map(n => `{ ${n}Query, ...${n}Rest } = ${n}`).join(",\n  ") + ";";
+      resolverDestructurings = "const " + names.map(n => `{ Query: ${n}Query, Mutation: ${n}Mutation, ...${n}Rest } = ${n}`).join(";\nconst ") + ";";
     fs.writeFileSync(
       path.join(rootDir, "resolver.js"),
       `${resolverImports}\n\n${resolverDestructurings}
@@ -109,6 +114,9 @@ export default \`
 export default {
   Query: Object.assign({},
     ${names.map(n => `${n}Query`).join(",\n    ")}
+  ),
+  Mutation: Object.assign({},
+    ${names.map(n => `${n}Mutation`).join(",\n    ")}
   ),
   ${names.map(n => `...${n}Rest`).join(",\n  ")}
 };
