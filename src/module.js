@@ -22,6 +22,9 @@ export { getMongoProjection };
 import { parseRequestedFields } from "./queryUtilities/parseAst";
 export { parseRequestedFields };
 
+import getUpdateObject from "./queryUtilities/getUpdateObject";
+export { getUpdateObject };
+
 import newObjectFromArgs from "./queryUtilities/newObjectFromArgs";
 export { newObjectFromArgs };
 
