@@ -24,3 +24,17 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
 
   expect(arr).toEqual(results);
 }
+
+export async function runMutation({ schema, db, mutation, variables, result }) {
+  let mutationResult = await graphql(schema, `mutation{${mutation}}`, { db });
+
+  if (mutationResult.errors) {
+    throw "Failed with \n\n" + mutationResult.errors;
+  }
+
+  if (mutationResult.data && mutationResult.data[result]) {
+    return mutationResult.data[result];
+  } else {
+    throw result + " not found on mutation result";
+  }
+}
