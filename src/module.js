@@ -19,6 +19,9 @@ export { decontructGraphqlQuery };
 import { getMongoProjection } from "./queryUtilities/mongoQueryHelpers";
 export { getMongoProjection };
 
+import { parseRequestedFields } from "./queryUtilities/parseAst";
+export { parseRequestedFields };
+
 import newObjectFromArgs from "./queryUtilities/newObjectFromArgs";
 export { newObjectFromArgs };
 

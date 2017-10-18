@@ -1,4 +1,11 @@
-import { decontructGraphqlQuery, getMongoProjection, newObjectFromArgs, middleware, preprocessor } from "mongo-graphql-starter";
+import { 
+  decontructGraphqlQuery, 
+  parseRequestedFields,
+  getMongoProjection, 
+  newObjectFromArgs, 
+  middleware, 
+  preprocessor 
+} from "mongo-graphql-starter";
 import ${objName} from "./${objName}";
 
 export default {
@@ -27,10 +34,11 @@ export default {
     async create${objName}(root, args, context, ast) {
       let db = await root.db;
       let newObject = newObjectFromArgs(args, ${objName});
-      let $project = null;
+      let { primitives: requestedFields, objectSelections } = parseRequestedFields(ast);
+      let $project = getMongoProjection(requestedFields, objectSelections, ${objName}, args);
       
       await db.collection("${table}").insert(newObject);
-      return (await db.collection("${table}").aggregate([{ $match: { _id: newObject._id } }, { $limit: 1 }]).toArray())[0];
+      return (await db.collection("${table}").aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }]).toArray())[0];
     }
   }
 };
