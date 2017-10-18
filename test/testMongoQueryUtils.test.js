@@ -1,5 +1,5 @@
-import { mongoQueryHelpers } from "../index";
-const { getMongoFilters } = mongoQueryHelpers;
+import { queryUtilities } from "../index";
+const { getMongoFilters } = queryUtilities;
 
 import Book from "./testProject1/graphQL/Book/Book";
 

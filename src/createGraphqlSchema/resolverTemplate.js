@@ -1,12 +1,6 @@
-import { 
-  decontructGraphqlQuery, 
-  parseRequestedFields,
-  getMongoProjection, 
-  newObjectFromArgs,
-  getUpdateObject,
-  middleware, 
-  preprocessor 
-} from "mongo-graphql-starter";
+import { middleware, preprocessor, queryUtilities } from "mongo-graphql-starter";
+const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject } = queryUtilities
+
 import { ObjectId } from "mongodb";
 import ${objName} from "./${objName}";
 
