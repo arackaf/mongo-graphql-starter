@@ -16,6 +16,9 @@ export { mongoQueryHelpers };
 import decontructGraphqlQuery from "./queryUtilities/decontructGraphqlQuery";
 export { decontructGraphqlQuery };
 
+import newObjectFromArgs from "./queryUtilities/newObjectFromArgs";
+export { newObjectFromArgs };
+
 import middleware from "./middleware";
 export { middleware };
 

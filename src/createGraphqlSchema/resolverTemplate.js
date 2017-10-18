@@ -1,4 +1,4 @@
-import { decontructGraphqlQuery, middleware, preprocessor } from "mongo-graphql-starter";
+import { decontructGraphqlQuery, newObjectFromArgs, middleware, preprocessor } from "mongo-graphql-starter";
 import ${objName} from "./${objName}";
 
 export default {
@@ -21,6 +21,15 @@ export default {
       let { $match, $project } = await middleware.process(decontructGraphqlQuery(args, ast, ${objName}), root, args, context, ast);
 
       return (await db.collection("${table}").aggregate([{ $match }, { $project }, { $limit: 1 }]).toArray())[0];
+    }
+  },
+  Mutation: {
+    async create${objName}(root, args, context, ast) {
+      let db = await root.db;
+      let newObject = newObjectFromArgs(args, ${objName});
+      
+      await db.collection("${table}").insert(newObject);
+      return await db.collection("${table}").findOne({ _id: newObject._id });
     }
   }
 };

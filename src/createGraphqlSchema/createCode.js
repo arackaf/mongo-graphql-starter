@@ -43,18 +43,18 @@ function displayMetadataValue(value, literal) {
   }
 }
 
-function displaySchemaValue(value) {
+function displaySchemaValue(value, useInputs) {
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
     return `${value == MongoId || value == Date ? "String" : value}`;
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return `[${value.type.__name}]`;
+      return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
     } else if (value.__isLiteral) {
       return value.type;
     } else if (value.__isObject) {
-      return `${value.type.__name}`;
+      return `${value.type.__name}${useInputs ? "Input" : ""}`;
     }
   }
 }
@@ -94,11 +94,15 @@ export function createGraphqlSchema(objectToCreate) {
     name = objectToCreate.__name,
     allQueryFields = [],
     allFields = [],
+    allFieldsMutation = [],
     TAB2 = TAB + TAB;
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
     allFields.push(`${k}: ${displaySchemaValue(fields[k])}`);
+    if (fields[k] != MongoId) {
+      allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
+    }
   });
 
   let idField = Object.keys(fields).find(k => fields[k] === MongoId);
@@ -109,6 +113,12 @@ export function createGraphqlSchema(objectToCreate) {
 type ${name} {
 ${TAB}${Object.keys(fields)
     .map(k => `${k}: ${displaySchemaValue(fields[k])}`)
+    .join(`\n${TAB}`)}
+}
+
+input ${name}Input {
+${TAB}${Object.keys(fields)
+    .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
     .join(`\n${TAB}`)}
 }
 
@@ -127,8 +137,8 @@ ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 export const mutation = \`
 
 ${TAB}create${name}(
-${TAB2}${allFields.join(`,\n${TAB2}`)}
-  ): [${name}]
+${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
+  ): ${name}
 
 ${idField
     ? `${TAB}delete${name}(
