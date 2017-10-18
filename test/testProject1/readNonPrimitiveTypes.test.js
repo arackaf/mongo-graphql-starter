@@ -10,10 +10,16 @@ beforeAll(async () => {
   db = await MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
-  await db.collection("books").insert({ title: "Book 10", pages: 10, primaryAuthor: { _id: "3", name: "Adam R" }, strArrs: [["a"], ["b", "c"]] });
-  await db.collection("books").insert({ title: "Book 100", pages: 100, authors: [{ _id: "1", name: "Adam" }], strArrs: [["a"], ["b", "c"]] });
-  await db.collection("books").insert({ title: "Book 150", pages: 150, authors: [{ _id: "2", name: "Bob" }] });
-  await db.collection("books").insert({ title: "Book 200", pages: 200, authors: [{ _id: "1", name: "Adam" }, { _id: 2, name: "Bob" }] });
+  await db
+    .collection("books")
+    .insert({ title: "Book 10", pages: 10, primaryAuthor: { birthday: "2004-06-03", name: "Adam R" }, strArrs: [["a"], ["b", "c"]] });
+  await db
+    .collection("books")
+    .insert({ title: "Book 100", pages: 100, authors: [{ birthday: "2004-06-02", name: "Adam" }], strArrs: [["a"], ["b", "c"]] });
+  await db.collection("books").insert({ title: "Book 150", pages: 150, authors: [{ birthday: "2000-01-02", name: "Bob" }] });
+  await db
+    .collection("books")
+    .insert({ title: "Book 200", pages: 200, authors: [{ birthday: "2004-03-22", name: "Adam" }, { _id: 2, name: "Bob" }] });
 });
 
 afterAll(async () => {
@@ -26,9 +32,9 @@ test("Fetches primary author", async () => {
   await queryAndMatchArray({
     schema,
     db,
-    query: "{allBooks(pages: 10){title, primaryAuthor { _id, name }}}",
+    query: "{allBooks(pages: 10){title, primaryAuthor { birthday, name }}}",
     coll: "allBooks",
-    results: [{ title: "Book 10", primaryAuthor: { _id: "3", name: "Adam R" } }]
+    results: [{ title: "Book 10", primaryAuthor: { birthday: "06/03/2004", name: "Adam R" } }]
   });
 });
 
@@ -36,9 +42,9 @@ test("Fetches authors", async () => {
   await queryAndMatchArray({
     schema,
     db,
-    query: "{allBooks(pages: 100){title, authors { _id, name }}}",
+    query: "{allBooks(pages: 100){title, authors { birthday, name }}}",
     coll: "allBooks",
-    results: [{ title: "Book 100", authors: [{ _id: "1", name: "Adam" }] }]
+    results: [{ title: "Book 100", authors: [{ birthday: "06/02/2004", name: "Adam" }] }]
   });
 });
 
@@ -56,8 +62,8 @@ test("Fetches both", async () => {
   await queryAndMatchArray({
     schema,
     db,
-    query: "{allBooks(pages: 100){title, strArrs, authors { _id, name }}}",
+    query: "{allBooks(pages: 100){title, strArrs, authors { birthday, name }}}",
     coll: "allBooks",
-    results: [{ title: "Book 100", authors: [{ _id: "1", name: "Adam" }], strArrs: [["a"], ["b", "c"]] }]
+    results: [{ title: "Book 100", authors: [{ birthday: "06/02/2004", name: "Adam" }], strArrs: [["a"], ["b", "c"]] }]
   });
 });
