@@ -100,9 +100,7 @@ export function createGraphqlSchema(objectToCreate) {
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
     allFields.push(`${k}: ${displaySchemaValue(fields[k])}`);
-    if (fields[k] != MongoId) {
-      allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
-    }
+    allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
   });
 
   let idField = Object.keys(fields).find(k => fields[k] === MongoId);
@@ -137,6 +135,10 @@ ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 export const mutation = \`
 
 ${TAB}create${name}(
+${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
+  ): ${name}
+
+${TAB}update${name}(
 ${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
   ): ${name}
 
