@@ -38,9 +38,19 @@ export default function(source, destPath) {
       names.push(objName);
       let fields = objectToCreate.fields;
 
+      let types = new Set([]);
+      Object.keys(fields).forEach(k => {
+        let packet = fields[k];
+        if (packet.__isArray || packet.__isObject) {
+          types.add(packet.type.__name);
+        }
+      });
+
+      let imports = types.size ? [...types].map(n => `import ${n} from "../${n}/${n}";`).join("\n") + "\n\n" : "";
+
       createFile(
         objPath,
-        createObject("export default {", [
+        createObject(imports + "export default {", [
           {
             name: "table",
             value: objectToCreate.table
@@ -64,6 +74,19 @@ export default function(source, destPath) {
                         name: "format",
                         value: entry.format || defaultDateFormat
                       }
+                    ],
+                    3
+                  ),
+                  literal: true
+                };
+              } else if (typeof entry === "object" && (entry.__isArray || entry.__isObject)) {
+                return {
+                  name: k,
+                  value: createObject(
+                    "{",
+                    [
+                      { name: entry.__isArray ? "__isArray" : "__isObject", value: true, literal: true },
+                      { name: "type", value: entry.type.__name, literal: true }
                     ],
                     3
                   ),
