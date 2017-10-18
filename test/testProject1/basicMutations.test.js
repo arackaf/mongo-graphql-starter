@@ -36,3 +36,22 @@ test("Creation mutation runs and returns object, then searched with graphQL", as
     results: { title: "Book 3", pages: 150 }
   });
 });
+
+test("Creation mutation runs and returns object with formatting", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBook(title: "Book 2", pages: 100, weight: 1.2, authors: [{_id: "1", name: "Adam"}, {_id: "2", name: "Bob"}], primaryAuthor: {_id: "2", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"){title, pages, weight, authors { _id, name }, primaryAuthor{ _id, name }, strArrs, createdOn, createdOnYearOnly}`,
+    result: "createBook"
+  });
+  expect(obj).toEqual({
+    title: "Book 2",
+    pages: 100,
+    weight: 1.2,
+    authors: [{ _id: "1", name: "Adam" }, { _id: "2", name: "Bob" }],
+    primaryAuthor: { _id: "2", name: "Bob" },
+    strArrs: [["a"], ["b", "c"]],
+    createdOn: "06/03/2004",
+    createdOnYearOnly: "2004"
+  });
+});

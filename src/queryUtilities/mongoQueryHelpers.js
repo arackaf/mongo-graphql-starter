@@ -1,5 +1,5 @@
 import { parseRequestedFields } from "./parseAst";
-import { MongoId, String, Int, Float } from "../createGraphqlSchema/dataTypes";
+import { MongoIdType, StringType, IntType, FloatType } from "../createGraphqlSchema/dataTypes";
 
 import { ObjectId } from "mongodb";
 
@@ -33,7 +33,7 @@ export function getMongoFilters(args, objectMetaData) {
     } else if (fields[k]) {
       if (typeof fields[k] === "object" && fields[k].__isDate) {
         args[k] = new Date(args[k]);
-      } else if (fields[k] === MongoId) {
+      } else if (fields[k] === MongoIdType) {
         args[k] = ObjectId(args[k]);
       }
 
@@ -52,7 +52,7 @@ export function getMongoFilters(args, objectMetaData) {
       if (queryOperation === "in") {
         hash[fieldName] = { $in: args[k] };
       } else {
-        if (field === String) {
+        if (field === StringType) {
           if (queryOperation === "contains") {
             hash[fieldName] = { $regex: new RegExp(args[k], "i") };
           } else if (queryOperation === "startsWith") {
@@ -60,7 +60,7 @@ export function getMongoFilters(args, objectMetaData) {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === Int || field === Float || isDate) {
+        } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
             hash[fieldName] = { $lt: args[k] };
           } else if (queryOperation === "lte") {
