@@ -21,7 +21,7 @@ test("Deletion works works", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBook(title: "Book 2"){_id, title, pages, weight, authors { _id, name }, primaryAuthor{ _id, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `createBook(title: "Book 2"){_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
     result: "createBook"
   });
 
