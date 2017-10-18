@@ -16,6 +16,9 @@ export { mongoQueryHelpers };
 import decontructGraphqlQuery from "./queryUtilities/decontructGraphqlQuery";
 export { decontructGraphqlQuery };
 
+import { getMongoProjection } from "./queryUtilities/mongoQueryHelpers";
+export { getMongoProjection };
+
 import newObjectFromArgs from "./queryUtilities/newObjectFromArgs";
 export { newObjectFromArgs };
 

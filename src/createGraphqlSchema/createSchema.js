@@ -3,7 +3,7 @@ import fs from "fs";
 
 import { createObject, createGraphqlSchema, createGraphqlResolver } from "./createCode";
 
-import { MongoId, String, Int, Float, arrayOf, Date } from "./dataTypes";
+import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "./dataTypes";
 
 const defaultDateFormat = "%m/%d/%Y";
 
@@ -49,7 +49,7 @@ export default function(source, destPath) {
             name: "fields",
             value: Object.keys(fields).map(k => {
               let entry = fields[k];
-              if (entry === Date || (typeof entry === "object" && entry.__isDate)) {
+              if (entry === DateType || (typeof entry === "object" && entry.__isDate)) {
                 return {
                   name: k,
                   value: createObject(
