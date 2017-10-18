@@ -30,8 +30,8 @@ export default {
     async create${objName}(root, args, context, ast) {
       let db = await root.db;
       let newObject = newObjectFromArgs(args, ${objName});
-      let { primitives: requestedFields, objectSelections } = parseRequestedFields(ast);
-      let $project = getMongoProjection(requestedFields, objectSelections, ${objName}, args);
+      let requestMap = parseRequestedFields(ast);
+      let $project = getMongoProjection(requestMap, ${objName}, args);
       
       await db.collection("${table}").insert(newObject);
       return (await db.collection("${table}").aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }]).toArray())[0];
@@ -47,8 +47,8 @@ export default {
         await db.collection("${table}").update({ _id: ObjectId(args._id) }, updates);
       }
 
-      let { primitives: requestedFields, objectSelections } = parseRequestedFields(ast);
-      let $project = getMongoProjection(requestedFields, objectSelections, ${objName}, args);
+      let requestMap = parseRequestedFields(ast);
+      let $project = getMongoProjection(requestMap, ${objName}, args);
       
       return (await db.collection("${table}").aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }]).toArray())[0];
     },

@@ -1,17 +1,20 @@
 import { MongoIdType, DateType, StringType, IntType, FloatType } from "./createGraphqlSchema/dataTypes";
 import { ObjectId } from "mongodb";
 
-export function getMongoProjection(primitiveSelections, objectSelections, objectMetaData, args) {
-  let result = primitiveSelections.reduce((hash, field) => {
+export function getMongoProjection(requestMap, objectMetaData, args) {
+  [...requestMap.entries()].reduce((hash, [field, entry]) => {
     let entry = objectMetaData.fields[field];
-    if (typeof entry === "object" && entry.__isDate) {
+
+    if (entry === true) {
+      hash[field] = 1;
+    } else if (typeof entry === "object" && entry.__isDate) {
       let format = args[field + "_format"] || entry.format;
       hash[field] = { $dateToString: { format, date: "$" + field } };
-    } else {
-      hash[field] = 1;
     }
     return hash;
   }, {});
+
+  let result = primitiveSelections.reduce((hash, field) => {}, {});
   objectSelections.forEach(sel => {
     if (objectMetaData.fields[sel]) {
       result[sel] = 1;
@@ -19,6 +22,7 @@ export function getMongoProjection(primitiveSelections, objectSelections, object
   });
   return result;
 }
+//return getMap(requestMap, objectMetaData);
 
 export function getMongoFilters(args, objectMetaData) {
   let fields = objectMetaData.fields;
@@ -78,11 +82,12 @@ export function getMongoFilters(args, objectMetaData) {
 export function parseRequestedFields(ast) {
   let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
   if (fieldNode) {
-    let primitives = fieldNode.selectionSet.selections.filter(sel => sel.selectionSet == null).map(sel => sel.name.value);
-    let objectSelections = fieldNode.selectionSet.selections.filter(sel => sel.selectionSet != null).map(sel => sel.name.value);
-
-    return { primitives, objectSelections };
+    return getSelections(fieldNode);
   }
+}
+
+function getSelections(fieldNode) {
+  return new Map(fieldNode.selectionSet.selections.map(sel => [sel.name.value, sel.selectionSet == null ? true : getSelections(sel)]));
 }
 
 export function newObjectFromArgs(args, typeMetadata) {
