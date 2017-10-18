@@ -2,27 +2,30 @@ import { MongoIdType, DateType, StringType, IntType, FloatType } from "./createG
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(requestMap, objectMetaData, args) {
-  [...requestMap.entries()].reduce((hash, [field, entry]) => {
+  return getProjectionObject(requestMap, objectMetaData, args);
+}
+function getProjectionObject(requestMap, objectMetaData, args = {}, switchOn = () => 1, fieldReference = field => "$" + field) {
+  return [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
     let entry = objectMetaData.fields[field];
 
-    if (entry === true) {
-      hash[field] = 1;
-    } else if (typeof entry === "object" && entry.__isDate) {
+    debugger;
+    if (selectionEntry === true) {
+      hash[field] = switchOn(field);
+    } else if (entry.__isDate) {
       let format = args[field + "_format"] || entry.format;
-      hash[field] = { $dateToString: { format, date: "$" + field } };
+      hash[field] = { $dateToString: { format, date: fieldReference(field) } };
+    } else if (entry.__isArray) {
+      hash[field] = {
+        $map: {
+          input: "$" + field,
+          as: "item",
+          in: getProjectionObject(selectionEntry, entry.type, {}, f => "$$item." + f, f => "$$item." + f)
+        }
+      };
     }
     return hash;
   }, {});
-
-  let result = primitiveSelections.reduce((hash, field) => {}, {});
-  objectSelections.forEach(sel => {
-    if (objectMetaData.fields[sel]) {
-      result[sel] = 1;
-    }
-  });
-  return result;
 }
-//return getMap(requestMap, objectMetaData);
 
 export function getMongoFilters(args, objectMetaData) {
   let fields = objectMetaData.fields;
@@ -106,14 +109,16 @@ export function newObjectFromArgs(args, typeMetadata) {
 }
 
 export function decontructGraphqlQuery(args, ast, objectMetaData) {
-  let $match = getMongoFilters(args, objectMetaData),
-    { primitives: requestedFields, objectSelections } = parseRequestedFields(ast),
-    $project = getMongoProjection(requestedFields, objectSelections, objectMetaData, args),
-    sort = args.SORT,
-    sorts = args.SORTS,
-    $sort,
-    $limit,
-    $skip;
+  let $match = getMongoFilters(args, objectMetaData);
+  let requestMap = parseRequestedFields(ast);
+  debugger;
+  let $project = getMongoProjection(requestMap, objectMetaData, args);
+  debugger;
+  let sort = args.SORT;
+  let sorts = args.SORTS;
+  let $sort;
+  let $limit;
+  let $skip;
 
   if (sort) {
     $sort = sort;
@@ -132,7 +137,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData) {
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
   }
 
-  return { $match, requestedFields, $project, $sort, $limit, $skip };
+  return { $match, $project, $sort, $limit, $skip };
 }
 
 export function getUpdateObject(args, typeMetadata) {
