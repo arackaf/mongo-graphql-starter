@@ -51,6 +51,15 @@ export default {
       let $project = getMongoProjection(requestedFields, objectSelections, ${objName}, args);
       
       return (await db.collection("${table}").aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }]).toArray())[0];
+    },
+    async delete${objName}(root, args, context, ast) {
+      if (!args._id){
+        throw "No _id sent";
+      }
+      let db = await root.db;
+
+      await db.collection("${table}").remove({ _id: ObjectId(args._id) });
+      return true;
     }
   }
 };

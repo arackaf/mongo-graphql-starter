@@ -37,6 +37,17 @@ test("Creation mutation runs and returns object, then searched with graphQL", as
   });
 });
 
+test("Creation mutation runs and returns object, then searched with graphQL. Check non-created fields", async () => {
+  let obj = await runMutation({ schema, db, mutation: `createBook(title: "Book 3", pages: 150){_id}`, result: "createBook" });
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: `{getBook(_id: "${obj._id}"){title, pages, weight}}`,
+    coll: "getBook",
+    results: { title: "Book 3", pages: 150, weight: null }
+  });
+});
+
 test("Creation mutation runs and returns object with formatting", async () => {
   let obj = await runMutation({
     schema,
