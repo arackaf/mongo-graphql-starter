@@ -4,27 +4,28 @@ import { ObjectId } from "mongodb";
 export function getMongoProjection(requestMap, objectMetaData, args) {
   return getProjectionObject(requestMap, objectMetaData, args);
 }
-function getProjectionObject(requestMap, objectMetaData, args = {}, switchOn = () => 1, fieldReference = field => "$" + field) {
+function getProjectionObject(requestMap, objectMetaData, args = {}, currentObject = "", increment = 0) {
   return [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
     let entry = objectMetaData.fields[field];
 
     if (selectionEntry === true) {
       if (entry.__isDate) {
         let format = args[field + "_format"] || entry.format;
-        hash[field] = { $dateToString: { format, date: fieldReference(field) } };
+        hash[field] = { $dateToString: { format, date: currentObject ? currentObject + "." + field : "$" + field } };
       } else {
-        hash[field] = switchOn(field);
+        hash[field] = currentObject ? currentObject + "." + field : "$" + field;
       }
     } else if (entry.__isArray) {
+      let currentObjName = "item" + (increment || "");
       hash[field] = {
         $map: {
-          input: "$" + field,
-          as: "item",
-          in: getProjectionObject(selectionEntry, entry.type, {}, f => "$$item." + f, f => "$$item." + f)
+          input: currentObject ? currentObject + "." + field : "$" + field,
+          as: currentObjName,
+          in: getProjectionObject(selectionEntry, entry.type, {}, "$$" + currentObjName, increment + 1)
         }
       };
     } else {
-      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, f => 1, nestedFieldName => `$${field}.` + nestedFieldName);
+      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, currentObject ? currentObject + "." + field : "$" + field, increment);
     }
     return hash;
   }, {});
