@@ -50,7 +50,8 @@ const Comment = {
     text: StringType,
     upVotes: IntType,
     downVotes: IntType,
-    author: objectOf(User)
+    author: objectOf(User),
+    reviewers: arrayOf(User)
   }
 };
 
