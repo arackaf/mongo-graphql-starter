@@ -2,10 +2,9 @@ import { dataTypes } from "mongo-graphql-starter";
 const { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
 
 const Author = {
-  table: "authors",
   fields: {
-    _id: MongoIdType,
-    name: StringType
+    name: StringType,
+    birthday: DateType
   }
 };
 
@@ -24,7 +23,25 @@ const Book = {
   }
 };
 
+const Subject = {
+  table: "subjects",
+  fields: {
+    _id: MongoIdType,
+    name: StringType
+  }
+};
+
+const Tag = {
+  table: "tags",
+  fields: {
+    _id: MongoIdType,
+    name: StringType
+  }
+};
+
 export default {
-  Author,
-  Book
+  Book,
+  Subject,
+  Tag,
+  Author
 };
