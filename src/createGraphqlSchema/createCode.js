@@ -103,7 +103,6 @@ export function createGraphqlSchema(objectToCreate) {
     allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
   });
 
-  let idField = Object.keys(fields).find(k => fields[k] === MongoIdType);
   let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
 
   return `export const type = \`
@@ -142,11 +141,9 @@ ${TAB}update${name}(
 ${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
   ): ${name}
 
-${idField
-    ? `${TAB}delete${name}(
-${TAB2}${[`${idField}: String`]}
-  ): Boolean`
-    : ""}
+${TAB}delete${name}(
+${TAB2}${[`_id: String`]}
+  ): Boolean
 
 \`;
 
@@ -159,11 +156,9 @@ ${TAB2}${allQueryFields
     .join(`,\n${TAB2}`)}
   ): [${name}]
 
-${idField
-    ? `${TAB}get${name}(
-${TAB2}${[`${idField}: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
-  ): ${name}`
-    : ""}
+${TAB}get${name}(
+${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
+  ): ${name}
 
 \`;
 
