@@ -13,24 +13,37 @@ First, create your db metadata like this.  Each mongo collection you'd like adde
 **projectSetupA.js**
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoId, String, Int, Float, arrayOf } = dataTypes;
+const { 
+  MongoIdType, 
+  StringType, 
+  IntType, 
+  FloatType, 
+  DateType, 
+  arrayOf, 
+  objectOf, 
+  formattedDate, 
+  typeLiteral 
+} = dataTypes;
 
 const Author = {
-  table: "authors",
   fields: {
-    _id: MongoId,
-    name: String
+    name: StringType,
+    birthday: DateType
   }
 };
 
 const Book = {
   table: "books",
   fields: {
-    _id: MongoId,
-    title: String,
-    pages: Int,
-    weight: Float,
-    authors: arrayOf(Author)
+    _id: MongoIdType,
+    title: StringType,
+    pages: IntType,
+    weight: FloatType,
+    authors: arrayOf(Author),
+    primaryAuthor: objectOf(Author),
+    strArrs: typeLiteral("[[String]]"),
+    createdOn: DateType,
+    createdOnYearOnly: formattedDate({ format: "%Y" })
   }
 };
 
@@ -96,11 +109,11 @@ Here are the valid types you can import from `mongo-graphql-starter`
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
 const { 
-  MongoId, 
-  String, 
-  Int, 
-  Float, 
-  Date, 
+  MongoIdType, 
+  StringType, 
+  IntType, 
+  FloatType, 
+  DateType, 
   arrayOf, 
   objectOf, 
   formattedDate, 
@@ -125,11 +138,11 @@ Here's a complete example
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
 const { 
-  MongoId, 
-  String, 
-  Int, 
-  Float, 
-  Date, 
+  MongoIdType, 
+  StringType, 
+  IntType, 
+  FloatType, 
+  DateType, 
   arrayOf, 
   objectOf, 
   formattedDate, 
@@ -137,24 +150,23 @@ const {
 } = dataTypes;
 
 const Author = {
-  table: "authors",
   fields: {
-    _id: MongoId,
-    name: String
+    name: StringType,
+    birthday: DateType
   }
 };
 
 const Book = {
   table: "books",
   fields: {
-    _id: MongoId,
-    title: String,
-    pages: Int,
-    weight: Float,
+    _id: MongoIdType,
+    title: StringType,
+    pages: IntType,
+    weight: FloatType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
-    createdOn: Date,
+    createdOn: DateType,
     createdOnYearOnly: formattedDate({ format: "%Y" })
   }
 };
