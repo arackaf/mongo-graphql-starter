@@ -41,7 +41,8 @@ const User = {
   fields: {
     name: StringType,
     birthday: DateType,
-    tagsSubscribed: arrayOf(Tag)
+    tagsSubscribed: arrayOf(Tag),
+    favoriteTag: objectOf(Tag)
   }
 };
 
@@ -58,6 +59,7 @@ const Comment = {
 const Blog = {
   table: "blogs",
   fields: {
+    author: objectOf(User),
     title: StringType,
     content: StringType,
     comments: arrayOf(Comment)
