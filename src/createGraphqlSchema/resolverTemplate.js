@@ -9,8 +9,7 @@ export default {
     async all${objName}s(root, args, context, ast) {
       await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      debugger;
-      let { $match, requestedFields, $project, $sort, $limit, $skip } = await middleware.process(decontructGraphqlQuery(args, ast, ${objName}), root, args, context, ast);
+      let { $match, $project, $sort, $limit, $skip } = await middleware.process(decontructGraphqlQuery(args, ast, ${objName}), root, args, context, ast);
       let aggregateItems = [{ $match }, { $project }].concat([
         $sort ? { $sort } : null, 
         $skip != null ? { $skip } : null, 

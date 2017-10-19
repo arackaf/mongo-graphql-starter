@@ -18,6 +18,8 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
     try {
       msg += "\n\n" + JSON.parse(allResults);
     } catch (e) {}
+
+    console.log("\n\n", allResults, "\n\n");
     throw msg;
   }
   let arr = allResults.data[coll];
