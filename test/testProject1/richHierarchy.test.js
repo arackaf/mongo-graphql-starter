@@ -17,50 +17,89 @@ afterAll(async () => {
   db = null;
 });
 
-test("", () => {
-  expect(1).toBe(1);
+test("Create minimal object", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(title: "Blog 1", content: "Hello"){title, content, comments{text}}`,
+    result: "createBlog"
+  });
+  expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: null });
 });
 
-// test("Create minimal object", async () => {
-//   let obj = await runMutation({
-//     schema,
-//     db,
-//     mutation: `createBlog(title: "Blog 1", content: "Hello"){title, content, comments{text}}`,
-//     result: "createBlog"
-//   });
-//   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: null });
-// });
+test("Add comment", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1"}]){title, content, comments{text}}`,
+    result: "createBlog"
+  });
+  expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1" }] });
+});
 
-// test("Add comment", async () => {
-//   let obj = await runMutation({
-//     schema,
-//     db,
-//     mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1"}]){title, content, comments{text}}`,
-//     result: "createBlog"
-//   });
-//   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1" }] });
-// });
+test("Add author to comment", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22"}}]){title, content, comments{text, author{name, birthday}}}`,
+    result: "createBlog"
+  });
+  expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1", author: { name: "Adam", birthday: "03/22/1982" } }] });
+});
 
-// test("Add author to comment", async () => {
-//   let obj = await runMutation({
-//     schema,
-//     db,
-//     mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "2004-03-22"}}]){title, content, comments{text, author{name, birthday}}}`,
-//     result: "createBlog"
-//   });
-//   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1", author: { name: "Adam", birthday: "03/22/1982" } }] });
-// });
+test("Add tags to author", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"}, {name: "t2"}]}}]){title, content, comments{text, author{name, birthday, tagsSubscribed{name}}}}`,
+    result: "createBlog"
+  });
+  expect(obj).toEqual({
+    title: "Blog 1",
+    content: "Hello",
+    comments: [{ text: "C1", author: { name: "Adam", birthday: "03/22/1982", tagsSubscribed: [{ name: "t1" }, { name: "t2" }] } }]
+  });
+});
 
-// test("Creation mutation runs and returns object, then searched with graphQL", async () => {
-//   let obj = await runMutation({ schema, db, mutation: `createBook(title: "Book 3", pages: 150){_id}`, result: "createBook" });
-//   await queryAndMatchArray({
-//     schema,
-//     db,
-//     query: `{getBook(_id: "${obj._id}"){title, pages}}`,
-//     coll: "getBook",
-//     results: { title: "Book 3", pages: 150 }
-//   });
-// });
+test("Add reviewers with tags to author", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `
+      createBlog(
+        title: "Blog 1", 
+        content: "Hello", 
+        comments: [{
+          text: "C1", 
+          reviewers: [{
+            name: "Adam", 
+            birthday: "1982-03-22", 
+            tagsSubscribed: [{name: "t1"}, {name: "t2"}]
+          }, {
+            name: "Adam2", 
+            birthday: "1982-03-23", 
+            tagsSubscribed: [{name: "t3"}, {name: "t4"}]
+          }],
+          author: { name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"},  {name: "t2"}]} 
+        }]
+      ){title, content, comments{text, reviewers{name, birthday, tagsSubscribed{name}}, author{name, birthday, tagsSubscribed{name}}}}`,
+    result: "createBlog"
+  });
+  expect(obj).toEqual({
+    title: "Blog 1",
+    content: "Hello",
+    comments: [
+      {
+        text: "C1",
+        reviewers: [
+          { name: "Adam", birthday: "03/22/1982", tagsSubscribed: [{ name: "t1" }, { name: "t2" }] },
+          { name: "Adam2", birthday: "03/23/1982", tagsSubscribed: [{ name: "t3" }, { name: "t4" }] }
+        ],
+        author: { name: "Adam", birthday: "03/22/1982", tagsSubscribed: [{ name: "t1" }, { name: "t2" }] }
+      }
+    ]
+  });
+});
 
 // test("Creation mutation runs and returns object, then searched with graphQL. Check non-created fields", async () => {
 //   let obj = await runMutation({ schema, db, mutation: `createBook(title: "Book 3", pages: 150){_id}`, result: "createBook" });
