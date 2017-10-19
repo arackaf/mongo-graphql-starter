@@ -8,12 +8,13 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, switchOn = (
   return [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
     let entry = objectMetaData.fields[field];
 
-    debugger;
     if (selectionEntry === true) {
-      hash[field] = switchOn(field);
-    } else if (entry.__isDate) {
-      let format = args[field + "_format"] || entry.format;
-      hash[field] = { $dateToString: { format, date: fieldReference(field) } };
+      if (entry.__isDate) {
+        let format = args[field + "_format"] || entry.format;
+        hash[field] = { $dateToString: { format, date: fieldReference(field) } };
+      } else {
+        hash[field] = switchOn(field);
+      }
     } else if (entry.__isArray) {
       hash[field] = {
         $map: {
@@ -22,6 +23,8 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, switchOn = (
           in: getProjectionObject(selectionEntry, entry.type, {}, f => "$$item." + f, f => "$$item." + f)
         }
       };
+    } else {
+      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, f => 1, nestedFieldName => `$${field}.` + nestedFieldName);
     }
     return hash;
   }, {});
@@ -98,8 +101,12 @@ export function newObjectFromArgs(args, typeMetadata) {
     let field = typeMetadata.fields[k];
     if (!field) return obj;
 
-    if (field == DateType || (typeof field === "object" && field.__isDate)) {
+    if (field == DateType || field.__isDate) {
       obj[k] = new Date(args[k]);
+    } else if (field.__isArray) {
+      obj[k] = args[k].map(argItem => newObjectFromArgs(argItem, field.type));
+    } else if (field.__isObject) {
+      obj[k] = newObjectFromArgs(args[k], field.type);
     } else {
       obj[k] = args[k];
     }
@@ -111,9 +118,7 @@ export function newObjectFromArgs(args, typeMetadata) {
 export function decontructGraphqlQuery(args, ast, objectMetaData) {
   let $match = getMongoFilters(args, objectMetaData);
   let requestMap = parseRequestedFields(ast);
-  debugger;
   let $project = getMongoProjection(requestMap, objectMetaData, args);
-  debugger;
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
@@ -142,17 +147,25 @@ export function decontructGraphqlQuery(args, ast, objectMetaData) {
 
 export function getUpdateObject(args, typeMetadata) {
   return {
-    $set: Object.keys(args).reduce((obj, k) => {
-      let field = typeMetadata.fields[k];
-      if (!field || k === "_id") return obj;
-
-      if (field == DateType || (typeof field === "object" && field.__isDate)) {
-        obj[k] = new Date(args[k]);
-      } else {
-        obj[k] = args[k];
-      }
-
-      return obj;
-    }, {})
+    $set: getUpdateObjectContents(args, typeMetadata)
   };
+}
+
+function getUpdateObjectContents(args, typeMetadata) {
+  return Object.keys(args).reduce((obj, k) => {
+    let field = typeMetadata.fields[k];
+    if (!field || k === "_id") return obj;
+
+    if (field == DateType || (typeof field === "object" && field.__isDate)) {
+      obj[k] = new Date(args[k]);
+    } else if (field.__isArray) {
+      obj[k] = args[k].map(argsItem => getUpdateObjectContents(argsItem, field.type));
+    } else if (field.__isObject) {
+      obj[k] = getUpdateObjectContents(args[k], field.type);
+    } else {
+      obj[k] = args[k];
+    }
+
+    return obj;
+  }, {});
 }

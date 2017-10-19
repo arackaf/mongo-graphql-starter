@@ -86,10 +86,36 @@ test("Modification mutation works", async () => {
     pages: 101,
     weight: 1.3,
     authors: [{ birthday: "03/23/1982", name: "Adam R" }, { birthday: "06/03/2004", name: "Bob B" }],
-    primaryAuthor: { birthday: "06/03/2004", name: "Mike" },
+    primaryAuthor: { birthday: "01/02/2000", name: "Mike" },
     strArrs: [["d"], ["e", "f"]],
-    createdOn: "01/02/2000",
+    createdOn: "06/04/2004",
     createdOnYearOnly: "2004"
+  });
+});
+
+test("Modification mutation works", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBook(authors: [{birthday: "1982-03-22", name: "Adam"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}){_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    result: "createBook"
+  });
+
+  let updated = await runMutation({
+    schema,
+    db,
+    mutation: `updateBook(_id: "${obj._id}", authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}){title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    result: "updateBook"
+  });
+  expect(updated).toEqual({
+    title: null,
+    pages: null,
+    weight: null,
+    authors: [{ birthday: "03/23/1982", name: "Adam R" }, { birthday: "06/03/2004", name: "Bob B" }],
+    primaryAuthor: { birthday: "01/02/2000", name: "Mike" },
+    strArrs: null,
+    createdOn: null,
+    createdOnYearOnly: null
   });
 });
 
@@ -111,8 +137,8 @@ test("Partial modification mutation works", async () => {
     title: "Book 2a",
     pages: 101,
     weight: 1.2,
-    authors: [{ birthday: "03/23/1982", name: "Adam R" }, { birthday: "06/03/2004", name: "Bob B" }],
-    primaryAuthor: { birthday: "06/02/2004", name: "Mike" },
+    authors: [{ birthday: "03/22/1982", name: "Adam" }, { birthday: "06/02/2004", name: "Bob" }],
+    primaryAuthor: { birthday: "06/02/2004", name: "Bob" },
     strArrs: [["a"], ["b", "c"]],
     createdOn: "06/03/2004",
     createdOnYearOnly: "2004"
