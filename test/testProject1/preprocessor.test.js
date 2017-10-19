@@ -5,10 +5,11 @@ import { makeExecutableSchema } from "graphql-tools";
 
 import { queryAndMatchArray } from "../testUtil";
 import { preprocessor } from "mongo-graphql-starter";
+import conn from "./connection";
 
 let db, schema;
 beforeAll(async () => {
-  db = await MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter");
+  db = await MongoClient.connect(conn);
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
   await db.collection("books").insert({ title: "Book 4", pages: 200 });
