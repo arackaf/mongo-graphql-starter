@@ -32,16 +32,43 @@ const Subject = {
 };
 
 const Tag = {
-  table: "tags",
   fields: {
-    _id: MongoIdType,
     name: StringType
+  }
+};
+
+const User = {
+  fields: {
+    name: StringType,
+    birthday: DateType,
+    tagsSubscribed: arrayOf(Tag)
+  }
+};
+
+const Comment = {
+  fields: {
+    text: StringType,
+    upVotes: IntType,
+    downVotes: IntType,
+    author: objectOf(User)
+  }
+};
+
+const Blog = {
+  table: "blogs",
+  fields: {
+    title: StringType,
+    content: StringType,
+    comments: arrayOf(Comment)
   }
 };
 
 export default {
   Book,
   Subject,
+  User,
+  Blog,
+  Comment,
   Tag,
   Author
 };
