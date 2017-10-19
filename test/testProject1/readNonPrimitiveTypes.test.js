@@ -4,10 +4,11 @@ import typeDefs from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
 
 import { queryAndMatchArray } from "../testUtil";
+import conn from "./connection";
 
 let db, schema;
 beforeAll(async () => {
-  db = await MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter");
+  db = await MongoClient.connect(conn);
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
   await db
@@ -17,13 +18,11 @@ beforeAll(async () => {
     .collection("books")
     .insert({ title: "Book 100", pages: 100, authors: [{ birthday: new Date("2004-06-02"), name: "Adam" }], strArrs: [["a"], ["b", "c"]] });
   await db.collection("books").insert({ title: "Book 150", pages: 150, authors: [{ birthday: new Date("2000-01-02"), name: "Bob" }] });
-  await db
-    .collection("books")
-    .insert({
-      title: "Book 200",
-      pages: 200,
-      authors: [{ birthday: new Date("2004-03-22"), name: "Adam" }, { birthday: new Date("2002-02-03"), name: "Bob" }]
-    });
+  await db.collection("books").insert({
+    title: "Book 200",
+    pages: 200,
+    authors: [{ birthday: new Date("2004-03-22"), name: "Adam" }, { birthday: new Date("2002-02-03"), name: "Bob" }]
+  });
 });
 
 afterAll(async () => {

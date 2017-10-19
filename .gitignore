@@ -3,3 +3,4 @@
 test/testProject1/project/
 test/testProject1/graphQL/
 node_modules/
+test/mongo3-4-conn-string.txt

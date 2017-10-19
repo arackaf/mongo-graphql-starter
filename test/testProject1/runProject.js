@@ -4,9 +4,10 @@ import resolvers from "./graphQL/resolver";
 import schema from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
+import conn from "./connection";
 
 const app = express(),
-  dbPromise = MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter"),
+  dbPromise = MongoClient.connect(conn),
   root = {
     db: dbPromise
   },
