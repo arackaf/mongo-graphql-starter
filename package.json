@@ -23,7 +23,7 @@
     "express-graphql": "^0.6.11",
     "graphql": "*.*.*",
     "graphql-tools": "*.*.*",
-    "jest": "21.1.0",
+    "jest": "^21.2.1",
     "mongodb": "^2.2.31"
   },
   "scripts": {
