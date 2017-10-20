@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -15,7 +15,6 @@
   "jest": {},
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
-    "@std/esm": "0.11.0",
     "babel-jest": "^21.2.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
     "del": "^3.0.0",
@@ -23,11 +22,13 @@
     "express-graphql": "^0.6.11",
     "graphql": "*.*.*",
     "graphql-tools": "*.*.*",
-    "jest": "^21.2.1",
-    "mongodb": "^2.2.31"
+    "jest": "^21.2.1"
   },
   "scripts": {
     "test": "node test/masterSetup && jest --config=jest.config1.json && jest --config=jest.config2.json && jest --config=jest.configRoot.json"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@std/esm": "0.11.0",
+    "mongodb": "^2.2.31"
+  }
 }
