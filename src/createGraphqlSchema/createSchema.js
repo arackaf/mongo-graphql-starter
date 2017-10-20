@@ -35,6 +35,7 @@ export default function(source, destPath) {
 
     let names = [];
     let namesWithTables = [];
+    let namesWithoutTables = [];
     modules.forEach(objectToCreate => {
       let objName = objectToCreate.__name;
       let modulePath = path.join(rootDir, objName);
@@ -45,6 +46,8 @@ export default function(source, destPath) {
       names.push(objName);
       if (objectToCreate.table) {
         namesWithTables.push(objName);
+      } else {
+        namesWithoutTables.push(objName);
       }
       let fields = objectToCreate.fields;
 
@@ -123,7 +126,11 @@ export default function(source, destPath) {
       }
     });
 
-    let schemaImports = names.map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`).join("\n");
+    let schemaImports = namesWithTables
+      .map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`)
+      .concat(namesWithoutTables.map(n => `import { type as ${n}Type } from './${n}/schema';`))
+      .join("\n");
+
     fs.writeFileSync(
       path.join(rootDir, "schema.js"),
       `${schemaImports}
@@ -132,11 +139,11 @@ export default \`
   ${names.map(n => "${" + n + "Type}").join("\n\n  ")}
 
   type Query {
-    ${names.map(n => "${" + n + "Query}").join("\n\n    ")}
+    ${namesWithTables.map(n => "${" + n + "Query}").join("\n\n    ")}
   }
 
   type Mutation {
-    ${names.map(n => "${" + n + "Mutation}").join("\n\n    ")}
+    ${namesWithTables.map(n => "${" + n + "Mutation}").join("\n\n    ")}
   }
 
 \``

@@ -126,11 +126,16 @@ ${TAB}${Object.keys(fields)
     .join(`\n${TAB}`)}
 }
 
-input ${name}Filters {
+${objectToCreate.table
+    ? `input ${name}Filters {
 ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
-}
+}`
+    : ""}
 
 \`;
+
+${objectToCreate.table
+    ? `
 
 export const mutation = \`
 
@@ -152,9 +157,9 @@ export const query = \`
 
 ${TAB}all${name}s(
 ${TAB2}${allQueryFields
-    .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
-    .concat(dateFields.map(f => `${f}_format: String`))
-    .join(`,\n${TAB2}`)}
+        .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+        .concat(dateFields.map(f => `${f}_format: String`))
+        .join(`,\n${TAB2}`)}
   ): [${name}]
 
 ${TAB}get${name}(
@@ -163,7 +168,8 @@ ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join
 
 \`;
 
-
+`
+    : ""}
 `;
 }
 
