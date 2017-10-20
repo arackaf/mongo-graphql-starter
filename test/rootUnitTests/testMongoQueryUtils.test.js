@@ -1,7 +1,7 @@
-import { queryUtilities } from "../index";
+import { queryUtilities } from "mongo-graphql-starter";
 const { getMongoFilters } = queryUtilities;
 
-import Book from "./testProject1/graphQL/Book/Book";
+import Book from "../testProject1/graphQL/Book/Book";
 
 //---------------------------------------- STRING ---------------------------------------------------
 

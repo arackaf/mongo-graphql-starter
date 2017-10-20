@@ -28,6 +28,17 @@ test("Create minimal object", async () => {
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: null });
 });
 
+test("_id added automatically", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(title: "Blog 1", content: "Hello"){_id}`,
+    result: "createBlog"
+  });
+
+  await queryAndMatchArray({ schema, db, query: `{getBlog(_id: "${obj._id}"){title}}`, coll: "getBlog", results: { title: "Blog 1" } });
+});
+
 test("Add comment", async () => {
   let obj = await runMutation({
     schema,
@@ -124,7 +135,40 @@ test("Add favorite tag to author and reviewers reviewers with tags to author", a
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      ){title, content, author{name, birthday, favoriteTag{name}, tagsSubscribed{name}}, comments{text, reviewers{name, birthday, tagsSubscribed{name}}, author{name, birthday, favoriteTag{name}, tagsSubscribed{name}}}}`,
+      ){
+        title, 
+        content, 
+        author{
+          name, 
+          birthday, 
+          favoriteTag{
+            name
+          }, 
+          tagsSubscribed{
+            name
+          }
+        }, 
+        comments{
+          text, 
+          reviewers{
+            name, 
+            birthday, 
+            tagsSubscribed{
+              name
+            }
+          }, 
+          author{
+            name, 
+            birthday, 
+            favoriteTag{
+              name
+            }, 
+            tagsSubscribed{
+              name
+            }
+          }
+        }
+      }`,
     result: "createBlog"
   });
   expect(obj).toEqual({
