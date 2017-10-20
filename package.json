@@ -25,7 +25,9 @@
     "jest": "^21.2.1"
   },
   "scripts": {
-    "test": "node test/masterSetup && jest --config=jest.config1.json && jest --config=jest.config2.json && jest --config=jest.configRoot.json"
+    "test": "node test/masterSetup && jest --runInBand",
+    "test1": "node test/masterSetup && jest --runInBand --config=jest.config1.json",
+    "test2": "node test/masterSetup && jest --runInBand --config=jest.config2.json"
   },
   "dependencies": {
     "@std/esm": "0.11.0",
