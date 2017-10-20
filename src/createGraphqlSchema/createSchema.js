@@ -24,16 +24,22 @@ export default function(source, destPath) {
     if (!fs.existsSync(rootDir)) {
       fs.mkdirSync(rootDir);
     }
-    Object.keys(module).forEach(k => (module[k].__name = k));
+    Object.keys(module).forEach(k => {
+      module[k].__name = k;
+      if (!module[k].fields._id && module[k].table) {
+        //add _id, and as a bonus, make it show up first in the list since the spec iterates object keys in order of insertion
+        module[k].fields = { _id: MongoIdType, ...module[k].fields };
+      }
+    });
     let modules = Object.keys(module).map(k => module[k]);
 
     let names = [];
     modules.forEach(objectToCreate => {
-      let objName = objectToCreate.__name,
-        modulePath = path.join(rootDir, objName),
-        objPath = path.join(modulePath, objName + ".js"),
-        schemaPath = path.join(modulePath, "schema.js"),
-        resolverPath = path.join(modulePath, "resolver.js");
+      let objName = objectToCreate.__name;
+      let modulePath = path.join(rootDir, objName);
+      let objPath = path.join(modulePath, objName + ".js");
+      let schemaPath = path.join(modulePath, "schema.js");
+      let resolverPath = path.join(modulePath, "resolver.js");
 
       names.push(objName);
       let fields = objectToCreate.fields;

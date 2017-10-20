@@ -27,7 +27,7 @@
     "mongodb": "^2.2.31"
   },
   "scripts": {
-    "test": "node test/masterSetup && jest"
+    "test": "node test/masterSetup && jest --config=jest.config1.json && jest --config=jest.config2.json && jest --config=jest.configRoot.json"
   },
   "dependencies": {}
 }
