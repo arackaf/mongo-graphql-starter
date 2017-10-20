@@ -174,6 +174,6 @@ ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join
 }
 
 export function createGraphqlResolver(objectToCreate) {
-  let template = fs.readFileSync(path.resolve("src/createGraphqlSchema/resolverTemplate.js", "."), { encoding: "utf8" });
+  let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
   return template.replace(/\${table}/g, objectToCreate.table).replace(/\${objName}/g, objectToCreate.__name);
 }
