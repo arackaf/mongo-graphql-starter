@@ -19,11 +19,11 @@ afterAll(async () => {
   db = null;
 });
 
-test("Deletion works works", async () => {
+test("Deletion works", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBook(title: "Book 2"){_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `createBook(title: "Book 2"){_id}`,
     result: "createBook"
   });
 
