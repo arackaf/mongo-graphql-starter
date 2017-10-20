@@ -34,6 +34,7 @@ export default function(source, destPath) {
     let modules = Object.keys(module).map(k => module[k]);
 
     let names = [];
+    let namesWithTables = [];
     modules.forEach(objectToCreate => {
       let objName = objectToCreate.__name;
       let modulePath = path.join(rootDir, objName);
@@ -42,6 +43,9 @@ export default function(source, destPath) {
       let resolverPath = path.join(modulePath, "resolver.js");
 
       names.push(objName);
+      if (objectToCreate.table) {
+        namesWithTables.push(objName);
+      }
       let fields = objectToCreate.fields;
 
       let types = new Set([]);
@@ -57,10 +61,12 @@ export default function(source, destPath) {
       createFile(
         objPath,
         createObject(imports + "export default {", [
-          {
-            name: "table",
-            value: objectToCreate.table
-          },
+          objectToCreate.table
+            ? {
+                name: "table",
+                value: objectToCreate.table
+              }
+            : null,
           {
             name: "fields",
             value: Object.keys(fields).map(k => {
@@ -112,7 +118,9 @@ export default function(source, destPath) {
       );
 
       createFile(schemaPath, createGraphqlSchema(objectToCreate), true);
-      createFile(resolverPath, createGraphqlResolver(objectToCreate), true);
+      if (objectToCreate.table) {
+        createFile(resolverPath, createGraphqlResolver(objectToCreate), true);
+      }
     });
 
     let schemaImports = names.map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`).join("\n");
@@ -134,20 +142,21 @@ export default \`
 \``
     );
 
-    let resolverImports = names.map(n => `import ${n} from './${n}/resolver';`).join("\n"),
-      resolverDestructurings = "const " + names.map(n => `{ Query: ${n}Query, Mutation: ${n}Mutation, ...${n}Rest } = ${n}`).join(";\nconst ") + ";";
+    let resolverImports = namesWithTables.map(n => `import ${n} from './${n}/resolver';`).join("\n");
+    let resolverDestructurings =
+      "const " + namesWithTables.map(n => `{ Query: ${n}Query, Mutation: ${n}Mutation, ...${n}Rest } = ${n}`).join(";\nconst ") + ";";
     fs.writeFileSync(
       path.join(rootDir, "resolver.js"),
       `${resolverImports}\n\n${resolverDestructurings}
     
 export default {
   Query: Object.assign({},
-    ${names.map(n => `${n}Query`).join(",\n    ")}
+    ${namesWithTables.map(n => `${n}Query`).join(",\n    ")}
   ),
   Mutation: Object.assign({},
-    ${names.map(n => `${n}Mutation`).join(",\n    ")}
+    ${namesWithTables.map(n => `${n}Mutation`).join(",\n    ")}
   ),
-  ${names.map(n => `...${n}Rest`).join(",\n  ")}
+  ${namesWithTables.map(n => `...${n}Rest`).join(",\n  ")}
 };
   
 `

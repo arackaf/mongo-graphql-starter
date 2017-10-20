@@ -5,8 +5,8 @@ import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "
 const TAB = "  "; //two spaces
 
 export function createObject(declaration, properties, offset = 1) {
-  let propertyTab = TAB.repeat(offset),
-    declarationTab = TAB.repeat(offset - 1);
+  let propertyTab = TAB.repeat(offset);
+  let declarationTab = TAB.repeat(offset - 1);
 
   return `
 ${declarationTab}${declaration}
@@ -19,6 +19,7 @@ function createProperties(properties, offset) {
   let nestedObjTab = TAB.repeat(offset + 1);
 
   return properties
+    .filter(prop => prop)
     .map(({ name, value, literal }) => {
       return `${propertyTab}${name}: ${Array.isArray(value)
         ? `${createObject(" {", value, offset + 1)}${propertyTab}`
