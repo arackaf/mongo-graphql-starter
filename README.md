@@ -432,9 +432,13 @@ For more examples, check out [the full test suite](test/testProject2/richQueryin
 
 Each queryable type will also generate a `create<Type>`, `update<Type>` and `delete<Type>` mutation.  
 
-`create<Type>` will create a new object.  Pass it arguments for each field on the type, and it will return back the new, created object, or at least the pieces thereof which you specify in your mutation.
+`create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object, or at least the pieces thereof which you specify in your mutation.
 
-`update<Type>` requires an `_id`, as well as any other arguments representing fields you want to update.  For now, any arguments you send will replace what was already there, though in the future a way to just `$push` a new element onto an array, and similar, will be added.  Similarly, the pieces of the updated object will be returned, conforming to what you specify in your graphQL mutation.
+For example
+
+`createBook(Book: {title: "Book 1", pages: 100}){title, pages}`
+
+`update<Type>` requires an `_id` argument, as well as an update argument, named for your `Type`. For now, this argument contains only the fields of your type - whatever you pass on this object will update the corresponding values in the Mongo collection, though in the future a way to just `$push` a new element onto an array, `$INC` a value, etc, will be added.  Similarly, the pieces of the updated object will be returned, based on what you specify in your graphQL mutation.
 
 `delete<Type>` takes a single `_id` argument, and deletes it.
 
@@ -445,7 +449,7 @@ test("Deletion works", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBook(title: "Book 2"){_id}`,
+    mutation: `createBook(Book: {title: "Book 2"}){_id}`,
     result: "createBook"
   });
 
@@ -466,7 +470,7 @@ test("Partial modification mutation works", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBook(
+    mutation: `createBook(Book: {
       title: "Book 2", 
       pages: 100, 
       weight: 1.2, 
@@ -478,7 +482,7 @@ test("Partial modification mutation works", async () => {
       strArrs: [["a"], ["b", "c"]], 
       createdOn: "2004-06-03", 
       createdOnYearOnly: "2004-06-03"
-    ){
+    }){
       _id, 
       title, 
       pages, 
@@ -501,11 +505,10 @@ test("Partial modification mutation works", async () => {
   let updated = await runMutation({
     schema,
     db,
-    mutation: `updateBook(
-      _id: "${obj._id}", 
+    mutation: `updateBook(_id: "${obj._id}", Book: {
       title: "Book 2a", 
       pages: 101
-    ){
+    }){
       title, 
       pages, 
       weight, 
@@ -527,10 +530,7 @@ test("Partial modification mutation works", async () => {
     title: "Book 2a",
     pages: 101,
     weight: 1.2,
-    authors: [
-      { birthday: "03/22/1982", name: "Adam" }, 
-      { birthday: "06/02/2004", name: "Bob" }
-    ],
+    authors: [{ birthday: "03/22/1982", name: "Adam" }, { birthday: "06/02/2004", name: "Bob" }],
     primaryAuthor: { birthday: "06/02/2004", name: "Bob" },
     strArrs: [["a"], ["b", "c"]],
     createdOn: "06/03/2004",
