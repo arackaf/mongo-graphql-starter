@@ -120,14 +120,21 @@ ${TAB}${Object.keys(fields)
     .join(`\n${TAB}`)}
 }
 
+input ${name}MutationInput {
+${TAB}${Object.keys(fields)
+    .filter(k => k != "_id")
+    .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
+    .join(`\n${TAB}`)}
+}
+
 input ${name}Sort {
 ${TAB}${Object.keys(fields)
     .map(k => `${k}: Int`)
     .join(`\n${TAB}`)}
-}
-
-${objectToCreate.table
-    ? `input ${name}Filters {
+}${objectToCreate.table
+    ? `
+    
+input ${name}Filters {
 ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 }`
     : ""}
@@ -136,15 +143,14 @@ ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
 
 ${objectToCreate.table
     ? `
-
 export const mutation = \`
 
 ${TAB}create${name}(
-${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
+${TAB2}${[`${name}: ${name}Input`].join(`,\n${TAB2}`)}
   ): ${name}
 
 ${TAB}update${name}(
-${TAB2}${allFieldsMutation.join(`,\n${TAB2}`)}
+${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `${name}: ${name}MutationInput`].join(`,\n${TAB2}`)}
   ): ${name}
 
 ${TAB}delete${name}(
@@ -152,6 +158,7 @@ ${TAB2}${[`_id: String`]}
   ): Boolean
 
 \`;
+
 
 export const query = \`
 
