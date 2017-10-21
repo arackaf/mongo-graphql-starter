@@ -29,7 +29,7 @@ export default {
   Mutation: {
     async createBook(root, args, context, ast) {
       let db = await root.db;
-      let newObject = newObjectFromArgs(args, Book);
+      let newObject = newObjectFromArgs(args.Book, Book);
       let requestMap = parseRequestedFields(ast);
       let $project = getMongoProjection(requestMap, Book, args);
       
@@ -41,7 +41,7 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      let updates = getUpdateObject(args, Book);
+      let updates = getUpdateObject(args.Book || {}, Book);
 
       if (Object.keys(updates.$set).length){
         await db.collection("books").update({ _id: ObjectId(args._id) }, updates);

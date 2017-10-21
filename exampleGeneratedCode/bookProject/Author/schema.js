@@ -10,12 +10,15 @@ input AuthorInput {
   birthday: String
 }
 
+input AuthorMutationInput {
+  name: String
+  birthday: String
+}
+
 input AuthorSort {
   name: Int
   birthday: Int
 }
-
-
 
 `;
 
