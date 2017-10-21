@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import mkdirp from "mkdirp";
 
 import { createObject, createGraphqlSchema, createGraphqlResolver } from "./createCode";
 
@@ -22,7 +23,7 @@ export default function(source, destPath) {
   Promise.resolve(source).then(module => {
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
-      fs.mkdirSync(rootDir);
+      mkdirp.sync(rootDir);
     }
     Object.keys(module).forEach(k => {
       module[k].__name = k;
