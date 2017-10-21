@@ -5,3 +5,4 @@ test/testProject1/graphQL/
 node_modules/
 test/mongo3-4-conn-string.txt
 test/testProject2/graphQL/
+test/testProject3/graphQL/
