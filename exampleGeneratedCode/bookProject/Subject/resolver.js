@@ -29,7 +29,7 @@ export default {
   Mutation: {
     async createSubject(root, args, context, ast) {
       let db = await root.db;
-      let newObject = newObjectFromArgs(args, Subject);
+      let newObject = newObjectFromArgs(args.Subject, Subject);
       let requestMap = parseRequestedFields(ast);
       let $project = getMongoProjection(requestMap, Subject, args);
       
@@ -41,7 +41,7 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      let updates = getUpdateObject(args, Subject);
+      let updates = getUpdateObject(args.Subject || {}, Subject);
 
       if (Object.keys(updates.$set).length){
         await db.collection("subjects").update({ _id: ObjectId(args._id) }, updates);

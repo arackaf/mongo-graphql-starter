@@ -10,11 +10,15 @@ input SubjectInput {
   name: String
 }
 
+input SubjectMutationInput {
+  name: String
+}
+
 input SubjectSort {
   _id: Int
   name: Int
 }
-
+    
 input SubjectFilters {
   _id: String
   _id_in: [String]
@@ -29,17 +33,15 @@ input SubjectFilters {
 `;
 
 
-
 export const mutation = `
 
   createSubject(
-    _id: String,
-    name: String
+    Subject: SubjectInput
   ): Subject
 
   updateSubject(
     _id: String,
-    name: String
+    Subject: SubjectMutationInput
   ): Subject
 
   deleteSubject(
@@ -47,6 +49,7 @@ export const mutation = `
   ): Boolean
 
 `;
+
 
 export const query = `
 

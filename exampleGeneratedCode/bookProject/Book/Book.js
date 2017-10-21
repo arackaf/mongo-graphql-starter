@@ -9,11 +9,11 @@ export default {
     weight: "Float",
     authors: {
       __isArray: true,
-      type: Author
+      get type(){ return Author; }
     },
     primaryAuthor: {
       __isObject: true,
-      type: Author
+      get type(){ return Author; }
     },
     strArrs: "[[String]]",
     createdOn: {

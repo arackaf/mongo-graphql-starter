@@ -155,7 +155,7 @@ export function getUpdateObject(args, typeMetadata) {
 function getUpdateObjectContents(args, typeMetadata) {
   return Object.keys(args).reduce((obj, k) => {
     let field = typeMetadata.fields[k];
-    if (!field || k === "_id") return obj;
+    if (!field) return obj;
 
     if (field == DateType || (typeof field === "object" && field.__isDate)) {
       obj[k] = new Date(args[k]);

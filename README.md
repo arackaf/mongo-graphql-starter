@@ -144,6 +144,82 @@ Type|Description
 `arrayOf`|Function: Pass it a type you've created to specify an array of that type
 `typeLiteral`|Function: pass it an arbitrary string to specify a field of that GraphQL type.  The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.
 
+## Circular dependencies are fine
+
+Feel free to have your types reference each other - it should work fine.  For example
+
+```javascript
+import { dataTypes } from "mongo-graphql-starter";
+const {
+  MongoIdType, 
+  StringType, 
+  IntType, 
+  FloatType, 
+  DateType, 
+  arrayOf, 
+  objectOf, 
+  formattedDate, 
+  typeLiteral 
+} = dataTypes;
+
+const Tag = {
+  table: "tags",
+  fields: {
+    _id: MongoIdType,
+    tagName: StringType
+  }
+};
+
+const Author = {
+  table: "authors",
+  fields: {
+    name: StringType,
+    tags: arrayOf(Tag)
+  }
+};
+
+Tag.fields.authors = arrayOf(Author);
+
+export default {
+  Author,
+  Tag
+};
+```
+
+generates a graphQL schema where this code runs fine
+
+```javascript
+test("Circular dependencies work", async () => {
+  let tag = await runMutation({ 
+    schema, 
+    db, 
+    mutation: `createTag(Tag: {tagName: "JavaScript"}){_id}`, 
+    result: "createTag" 
+  });
+  let author = await runMutation({ schema, db, result: "createAuthor"
+    mutation: `createAuthor(Author: { 
+      name: "Adam", 
+      tags: [{_id: "${tag._id}", tagName: "${tag.tagName}"}]
+    }){_id, name}`,
+  });
+
+  await runMutation({ schema, db, result: "updateTag"
+    mutation: `updateTag(_id: "${tag._id}", 
+      Tag: { 
+        authors: [{_id: "${author._id}", name: "${author.name}"}]
+      }){_id}`,
+  });
+
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: `{getTag(_id: "${tag._id}"){tagName, authors{ _id, name }}}`,
+    coll: "getTag",
+    results: { tagName: "JavaScript", authors: [{ _id: author._id, name: "Adam" }] }
+  });
+});
+```
+
 ## Queries created
 
 For each queryable type, there will be a `get<Type>` query which receives an `_id` argument, and returns the single, matching object; as well as an `all<Type>s` query which receives filters for each field, described below, and returns an array of matching results.
@@ -433,10 +509,6 @@ For more examples, check out [the full test suite](test/testProject2/richQueryin
 Each queryable type will also generate a `create<Type>`, `update<Type>` and `delete<Type>` mutation.  
 
 `create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object, or at least the pieces thereof which you specify in your mutation.
-
-For example
-
-`createBook(Book: {title: "Book 1", pages: 100}){title, pages}`
 
 `update<Type>` requires an `_id` argument, as well as an update argument, named for your `Type`. For now, this argument contains only the fields of your type - whatever you pass on this object will update the corresponding values in the Mongo collection, though in the future a way to just `$push` a new element onto an array, `$INC` a value, etc, will be added.  Similarly, the pieces of the updated object will be returned, based on what you specify in your graphQL mutation.
 
