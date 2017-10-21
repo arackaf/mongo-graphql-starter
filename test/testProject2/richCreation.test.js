@@ -22,7 +22,7 @@ test("Create minimal object", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBlog(title: "Blog 1", content: "Hello"){title, content, comments{text}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){title, content, comments{text}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: null });
@@ -32,7 +32,7 @@ test("_id added automatically", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBlog(title: "Blog 1", content: "Hello"){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){_id}`,
     result: "createBlog"
   });
 
@@ -43,7 +43,7 @@ test("Add comment", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1"}]){title, content, comments{text}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1"}]}){title, content, comments{text}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1" }] });
@@ -53,7 +53,7 @@ test("Add author to comment", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22"}}]){title, content, comments{text, author{name, birthday}}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22"}}]}){title, content, comments{text, author{name, birthday}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1", author: { name: "Adam", birthday: "03/22/1982" } }] });
@@ -63,7 +63,7 @@ test("Add tags to author", async () => {
   let obj = await runMutation({
     schema,
     db,
-    mutation: `createBlog(title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"}, {name: "t2"}]}}]){title, content, comments{text, author{name, birthday, tagsSubscribed{name}}}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"}, {name: "t2"}]}}]}){title, content, comments{text, author{name, birthday, tagsSubscribed{name}}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({
@@ -78,7 +78,7 @@ test("Add reviewers with tags to author", async () => {
     schema,
     db,
     mutation: `
-      createBlog(
+      createBlog(Blog: {
         title: "Blog 1", 
         content: "Hello", 
         comments: [{
@@ -94,7 +94,7 @@ test("Add reviewers with tags to author", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"},  {name: "t2"}]} 
         }]
-      ){title, content, comments{text, reviewers{name, birthday, tagsSubscribed{name}}, author{name, birthday, tagsSubscribed{name}}}}`,
+      }){title, content, comments{text, reviewers{name, birthday, tagsSubscribed{name}}, author{name, birthday, tagsSubscribed{name}}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({
@@ -118,7 +118,7 @@ test("Add favorite tag to author and reviewers reviewers with tags to author", a
     schema,
     db,
     mutation: `
-      createBlog(
+      createBlog(Blog: {
         title: "Blog 1", 
         content: "Hello", 
         author: { name: "Adam Auth", birthday: "2004-06-02", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]},
@@ -135,7 +135,7 @@ test("Add favorite tag to author and reviewers reviewers with tags to author", a
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      ){
+      }){
         title, 
         content, 
         author{

@@ -23,7 +23,7 @@ test("Deep querying 1", async () => {
     schema,
     db,
     mutation: `
-      createBlog(
+      createBlog(Blog: {
         title: "Blog 1", 
         content: "Hello", 
         author: { name: "Adam Auth", birthday: "2004-06-02", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]},
@@ -40,7 +40,7 @@ test("Deep querying 1", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      ){_id}`,
+      }){_id}`,
     result: "createBlog"
   });
 
@@ -105,7 +105,7 @@ test("Deep querying 2", async () => {
     schema,
     db,
     mutation: `
-      createBlog(
+      createBlog(Blog: {
         title: "Blog 1", 
         content: "Hello", 
         author: { name: "Adam Auth", birthday: "2004-06-02", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]},
@@ -122,7 +122,7 @@ test("Deep querying 2", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      ){_id}`,
+      }){_id}`,
     result: "createBlog"
   });
 
@@ -186,7 +186,7 @@ test("Deep querying 3", async () => {
     schema,
     db,
     mutation: `
-      createBlog(
+      createBlog(Blog: {
         title: "Blog 1", 
         content: "Hello", 
         author: { name: "Adam Auth", birthday: "2004-06-02", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]},
@@ -203,7 +203,7 @@ test("Deep querying 3", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      ){_id}`,
+      }){_id}`,
     result: "createBlog"
   });
 
@@ -255,7 +255,7 @@ test("Deep querying 4", async () => {
     schema,
     db,
     mutation: `
-      createBlog(
+      createBlog(Blog: {
         title: "Blog 1", 
         content: "Hello", 
         author: { name: "Adam Auth", birthday: "2004-06-02", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]},
@@ -272,7 +272,7 @@ test("Deep querying 4", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      ){_id}`,
+      }){_id}`,
     result: "createBlog"
   });
 
