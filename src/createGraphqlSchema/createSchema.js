@@ -102,7 +102,7 @@ export default function(source, destPath) {
                     "{",
                     [
                       { name: entry.__isArray ? "__isArray" : "__isObject", value: true, literal: true },
-                      { name: "type", value: entry.type.__name, literal: true }
+                      { definition: "get type(){ return " + entry.type.__name + "; }" }
                     ],
                     3
                   ),

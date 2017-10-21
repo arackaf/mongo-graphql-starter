@@ -20,10 +20,12 @@ function createProperties(properties, offset) {
 
   return properties
     .filter(prop => prop)
-    .map(({ name, value, literal }) => {
-      return `${propertyTab}${name}: ${Array.isArray(value)
-        ? `${createObject(" {", value, offset + 1)}${propertyTab}`
-        : displayMetadataValue(value, literal)}`;
+    .map(({ name, value, literal, definition }) => {
+      return (
+        propertyTab +
+        (definition ||
+          `${name}: ${Array.isArray(value) ? `${createObject(" {", value, offset + 1)}${propertyTab}` : displayMetadataValue(value, literal)}`)
+      );
     })
     .join(",\n");
 }
