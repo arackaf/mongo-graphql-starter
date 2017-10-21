@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -30,7 +30,8 @@
     "test2": "node test/masterSetup && jest --runInBand --config=jest.config2.json"
   },
   "dependencies": {
-    "@std/esm": "0.11.0",
-    "mongodb": "^2.2.31"
+    "@std/esm": "0.12.1",
+    "mkdirp": "^0.5.1",
+    "mongodb": "2.2.31"
   }
 }
