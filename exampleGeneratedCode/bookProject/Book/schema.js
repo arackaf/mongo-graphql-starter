@@ -24,6 +24,17 @@ input BookInput {
   createdOnYearOnly: String
 }
 
+input BookMutationInput {
+  title: String
+  pages: Int
+  weight: Float
+  authors: [AuthorInput]
+  primaryAuthor: AuthorInput
+  strArrs: [[String]]
+  createdOn: String
+  createdOnYearOnly: String
+}
+
 input BookSort {
   _id: Int
   title: Int
@@ -35,7 +46,7 @@ input BookSort {
   createdOn: Int
   createdOnYearOnly: Int
 }
-
+    
 input BookFilters {
   _id: String
   _id_in: [String]
@@ -74,31 +85,15 @@ input BookFilters {
 `;
 
 
-
 export const mutation = `
 
   createBook(
-    _id: String,
-    title: String,
-    pages: Int,
-    weight: Float,
-    authors: [AuthorInput],
-    primaryAuthor: AuthorInput,
-    strArrs: [[String]],
-    createdOn: String,
-    createdOnYearOnly: String
+    Book: BookInput
   ): Book
 
   updateBook(
     _id: String,
-    title: String,
-    pages: Int,
-    weight: Float,
-    authors: [AuthorInput],
-    primaryAuthor: AuthorInput,
-    strArrs: [[String]],
-    createdOn: String,
-    createdOnYearOnly: String
+    Book: BookMutationInput
   ): Book
 
   deleteBook(
@@ -106,6 +101,7 @@ export const mutation = `
   ): Boolean
 
 `;
+
 
 export const query = `
 
