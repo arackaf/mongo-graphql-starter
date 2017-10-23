@@ -89,3 +89,20 @@ test("Basic decrement 2", async () => {
 
   expect(obj).toEqual({ title: "Blog 1", words: 96 });
 });
+
+test("Push new comment", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){_id}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    schema,
+    db,
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {title: "Blog 1", comments_PUSH: {text: "C2"}}){title, comments{text}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }] });
+});

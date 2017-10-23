@@ -76,7 +76,7 @@ function getMutations(k, fields) {
     return [`${k}: String`];
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return [`${k}: [${value.type.__name}Input]`];
+      return [`${k}: [${value.type.__name}Input]`, `${k}_PUSH: ${value.type.__name}Input`];
     } else if (value.__isLiteral) {
       return [`${k}: ${value.type}`];
     } else if (value.__isObject) {

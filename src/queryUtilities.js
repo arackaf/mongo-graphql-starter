@@ -149,8 +149,9 @@ export function decontructGraphqlQuery(args, ast, objectMetaData) {
 export function getUpdateObject(args, typeMetadata) {
   let $set = {};
   let $inc = {};
-  getUpdateObjectContents(args, typeMetadata, $set, $inc);
-  let result = { $set, $inc };
+  let $push = {};
+  getUpdateObjectContents(args, typeMetadata, $set, $inc, $push);
+  let result = { $set, $inc, $push };
   Object.keys(result).forEach(k => {
     if (!Object.keys(result[k]).length) {
       delete result[k];
@@ -159,7 +160,7 @@ export function getUpdateObject(args, typeMetadata) {
   return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata, $set, $inc) {
+function getUpdateObjectContents(args, typeMetadata, $set, $inc, $push) {
   Object.keys(args).forEach(k => {
     let field = typeMetadata.fields[k];
 
@@ -167,23 +168,25 @@ function getUpdateObjectContents(args, typeMetadata, $set, $inc) {
       let pieces = k.split("_");
       let queryOperation = pieces.slice(-1)[0];
       let fieldName = pieces.slice(0, pieces.length - 1).join("_");
+      field = typeMetadata.fields[fieldName];
 
       if (queryOperation === "INC") {
         $inc[fieldName] = args[k];
       } else if (queryOperation === "DEC") {
         $inc[fieldName] = args[k] * -1;
+      } else if (queryOperation === "PUSH") {
+        $push[fieldName] = newObjectFromArgs(args[k], field.type);
       }
     } else {
       if (field == DateType || (typeof field === "object" && field.__isDate)) {
         $set[k] = new Date(args[k]);
       } else if (field.__isArray) {
-        $set[k] = args[k].map(argsItem => getUpdateObjectContents(argsItem, field.type, {}, $inc));
+        $set[k] = args[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
       } else if (field.__isObject) {
-        $set[k] = getUpdateObjectContents(args[k], field.type, {}, $inc);
+        $set[k] = newObjectFromArgs(args[k], field.type);
       } else {
         $set[k] = args[k];
       }
     }
   });
-  return $set; //ugh this is ugly
 }
