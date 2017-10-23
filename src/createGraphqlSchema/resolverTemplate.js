@@ -43,7 +43,7 @@ export default {
       let db = await root.db;
       let updates = getUpdateObject(args.${objName} || {}, ${objName});
 
-      if (Object.keys(updates.$set).length){
+      if (updates.$set || updates.$inc) {
         await db.collection("${table}").update({ _id: ObjectId(args._id) }, updates);
       }
 

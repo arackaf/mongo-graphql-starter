@@ -147,26 +147,43 @@ export function decontructGraphqlQuery(args, ast, objectMetaData) {
 }
 
 export function getUpdateObject(args, typeMetadata) {
-  return {
-    $set: getUpdateObjectContents(args, typeMetadata)
-  };
+  let $set = {};
+  let $inc = {};
+  getUpdateObjectContents(args, typeMetadata, $set, $inc);
+  let result = { $set, $inc };
+  Object.keys(result).forEach(k => {
+    if (!Object.keys(result[k]).length) {
+      delete result[k];
+    }
+  });
+  return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata) {
-  return Object.keys(args).reduce((obj, k) => {
+function getUpdateObjectContents(args, typeMetadata, $set, $inc) {
+  Object.keys(args).forEach(k => {
     let field = typeMetadata.fields[k];
-    if (!field) return obj;
 
-    if (field == DateType || (typeof field === "object" && field.__isDate)) {
-      obj[k] = new Date(args[k]);
-    } else if (field.__isArray) {
-      obj[k] = args[k].map(argsItem => getUpdateObjectContents(argsItem, field.type));
-    } else if (field.__isObject) {
-      obj[k] = getUpdateObjectContents(args[k], field.type);
+    if (!field) {
+      let pieces = k.split("_");
+      let queryOperation = pieces.slice(-1)[0];
+      let fieldName = pieces.slice(0, pieces.length - 1).join("_");
+
+      if (queryOperation === "INC") {
+        $inc[fieldName] = args[k];
+      } else if (queryOperation === "DEC") {
+        $inc[fieldName] = args[k] * -1;
+      }
     } else {
-      obj[k] = args[k];
+      if (field == DateType || (typeof field === "object" && field.__isDate)) {
+        $set[k] = new Date(args[k]);
+      } else if (field.__isArray) {
+        $set[k] = args[k].map(argsItem => getUpdateObjectContents(argsItem, field.type, {}, $inc));
+      } else if (field.__isObject) {
+        $set[k] = getUpdateObjectContents(args[k], field.type, {}, $inc);
+      } else {
+        $set[k] = args[k];
+      }
     }
-
-    return obj;
-  }, {});
+  });
+  return $set; //ugh this is ugly
 }
