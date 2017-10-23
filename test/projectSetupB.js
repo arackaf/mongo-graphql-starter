@@ -38,6 +38,7 @@ const Blog = {
   table: "blogs",
   fields: {
     author: objectOf(User),
+    words: IntType,
     title: StringType,
     content: StringType,
     comments: arrayOf(Comment)
