@@ -176,6 +176,8 @@ function getUpdateObjectContents(args, typeMetadata, $set, $inc, $push) {
         $inc[fieldName] = args[k] * -1;
       } else if (queryOperation === "PUSH") {
         $push[fieldName] = newObjectFromArgs(args[k], field.type);
+      } else if (queryOperation === "CONCAT") {
+        $push[fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
       }
     } else {
       if (field == DateType || (typeof field === "object" && field.__isDate)) {

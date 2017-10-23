@@ -106,3 +106,20 @@ test("Push new comment", async () => {
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }] });
 });
+
+test("Concat new comments", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){_id}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    schema,
+    db,
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {title: "Blog 1", comments_CONCAT: [{text: "C2"}, {text: "C3"}]}){title, comments{text}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }, { text: "C3" }] });
+});
