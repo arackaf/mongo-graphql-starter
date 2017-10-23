@@ -80,7 +80,7 @@ function getMutations(k, fields) {
     } else if (value.__isLiteral) {
       return [`${k}: ${value.type}`];
     } else if (value.__isObject) {
-      return [`${k}: ${value.type.__name}Input`];
+      return [`${k}: ${value.type.__name}Input`, `${k}_UPDATE: ${value.type.__name}MutationInput`];
     }
   }
 }

@@ -123,3 +123,57 @@ test("Concat new comments", async () => {
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }, { text: "C3" }] });
 });
+
+test("Add mutate author - add favorite tag and birthday", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth"} }){ _id }`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    schema,
+    db,
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { birthday: "2004-06-03", favoriteTag: {name: "tf"}}}){title, author{name, birthday, favoriteTag{name}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { name: "Adam Auth", birthday: "06/03/2004", favoriteTag: { name: "tf" } } });
+});
+
+test("Add mutate author - add favorite tag and birthday", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth", birthday: "2004-06-02"} }){ _id }`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    schema,
+    db,
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { favoriteTag: {name: "ft"}}}){title, author{name, birthday, favoriteTag{name}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { name: "Adam Auth", birthday: "06/02/2004", favoriteTag: { name: "ft" } } });
+});
+
+test("Nested mutation", async () => {
+  let obj = await runMutation({
+    schema,
+    db,
+    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth", favoriteTag: { name: "ft" }} }){ _id }`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    schema,
+    db,
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { favoriteTag_UPDATE: {description: "desc"}}}){title, author{name, favoriteTag{name, description}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { name: "Adam Auth", favoriteTag: { name: "ft", description: "desc" } } });
+});
