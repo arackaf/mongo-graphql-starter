@@ -150,7 +150,7 @@ export function getUpdateObject(args, typeMetadata) {
   let $set = {};
   let $inc = {};
   let $push = {};
-  getUpdateObjectContents(args, typeMetadata, $set, $inc, $push);
+  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push);
   let result = { $set, $inc, $push };
   Object.keys(result).forEach(k => {
     if (!Object.keys(result[k]).length) {
@@ -160,7 +160,7 @@ export function getUpdateObject(args, typeMetadata) {
   return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata, $set, $inc, $push) {
+function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) {
   Object.keys(args).forEach(k => {
     let field = typeMetadata.fields[k];
 
@@ -178,16 +178,18 @@ function getUpdateObjectContents(args, typeMetadata, $set, $inc, $push) {
         $push[fieldName] = newObjectFromArgs(args[k], field.type);
       } else if (queryOperation === "CONCAT") {
         $push[fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+      } else if (queryOperation === "UPDATE") {
+        getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push);
       }
     } else {
       if (field == DateType || (typeof field === "object" && field.__isDate)) {
-        $set[k] = new Date(args[k]);
+        $set[prefix + k] = new Date(args[k]);
       } else if (field.__isArray) {
-        $set[k] = args[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
+        $set[prefix + k] = args[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
       } else if (field.__isObject) {
-        $set[k] = newObjectFromArgs(args[k], field.type);
+        $set[prefix + k] = newObjectFromArgs(args[k], field.type);
       } else {
-        $set[k] = args[k];
+        $set[prefix + k] = args[k];
       }
     }
   });

@@ -11,7 +11,8 @@ const Subject = {
 
 const Tag = {
   fields: {
-    name: StringType
+    name: StringType,
+    description: StringType
   }
 };
 
