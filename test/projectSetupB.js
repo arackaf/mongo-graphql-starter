@@ -11,7 +11,9 @@ const Subject = {
 
 const Tag = {
   fields: {
-    name: StringType
+    name: StringType,
+    description: StringType,
+    timesUsed: IntType
   }
 };
 
@@ -38,6 +40,7 @@ const Blog = {
   table: "blogs",
   fields: {
     author: objectOf(User),
+    words: IntType,
     title: StringType,
     content: StringType,
     comments: arrayOf(Comment)

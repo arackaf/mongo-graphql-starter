@@ -4,6 +4,7 @@ export const IntType = "Int";
 export const FloatType = "Float";
 export const DateType = "Date";
 export const arrayOf = type => {
+  type.__usedInArray = true;
   return {
     __isArray: true,
     type
