@@ -62,6 +62,35 @@ function displaySchemaValue(value, useInputs) {
   }
 }
 
+function getMutations(k, fields) {
+  let value = fields[k];
+
+  if (typeof value === "object" && value.__isDate) {
+    return [`${k}: String`];
+  } else if (typeof value === "string") {
+    if (value === "Int") {
+      return [`${k}: Int`, `${k}_INC: Int`, `${k}_DEC: Int`];
+    } else if (value === "Float") {
+      return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
+    }
+    return [`${k}: String`];
+  } else if (typeof value === "object") {
+    if (value.__isArray) {
+      return [
+        `${k}: [${value.type.__name}Input]`,
+        `${k}_PUSH: ${value.type.__name}Input`,
+        `${k}_CONCAT: [${value.type.__name}Input]`,
+        `${k}_UPDATE: ${value.type.__name}ArrayMutationInput`,
+        `${k}_UPDATES: [${value.type.__name}ArrayMutationInput]`
+      ];
+    } else if (value.__isLiteral) {
+      return [`${k}: ${value.type}`];
+    } else if (value.__isObject) {
+      return [`${k}: ${value.type.__name}Input`, `${k}_UPDATE: ${value.type.__name}MutationInput`];
+    }
+  }
+}
+
 function queriesForField(fieldName, realFieldType) {
   if (typeof realFieldType === "object" && realFieldType.__isDate) {
     realFieldType = DateType;
@@ -125,10 +154,17 @@ ${TAB}${Object.keys(fields)
 input ${name}MutationInput {
 ${TAB}${Object.keys(fields)
     .filter(k => k != "_id")
-    .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
+    .reduce((inputs, k) => (inputs.push(...getMutations(k, fields)), inputs), [])
     .join(`\n${TAB}`)}
 }
-
+${objectToCreate.__usedInArray
+    ? `
+input ${name}ArrayMutationInput {
+${TAB}index: Int,
+${TAB}${name}: ${name}MutationInput
+}
+`
+    : ""}
 input ${name}Sort {
 ${TAB}${Object.keys(fields)
     .map(k => `${k}: Int`)

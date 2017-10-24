@@ -72,6 +72,10 @@ export default function(source, destPath) {
               }
             : null,
           {
+            name: "typeName",
+            value: objName
+          },
+          {
             name: "fields",
             value: Object.keys(fields).map(k => {
               let entry = fields[k];

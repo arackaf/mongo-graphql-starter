@@ -147,26 +147,58 @@ export function decontructGraphqlQuery(args, ast, objectMetaData) {
 }
 
 export function getUpdateObject(args, typeMetadata) {
-  return {
-    $set: getUpdateObjectContents(args, typeMetadata)
-  };
+  let $set = {};
+  let $inc = {};
+  let $push = {};
+  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push);
+  let result = { $set, $inc, $push };
+  Object.keys(result).forEach(k => {
+    if (!Object.keys(result[k]).length) {
+      delete result[k];
+    }
+  });
+  return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata) {
-  return Object.keys(args).reduce((obj, k) => {
+function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) {
+  Object.keys(args).forEach(k => {
     let field = typeMetadata.fields[k];
-    if (!field) return obj;
 
-    if (field == DateType || (typeof field === "object" && field.__isDate)) {
-      obj[k] = new Date(args[k]);
-    } else if (field.__isArray) {
-      obj[k] = args[k].map(argsItem => getUpdateObjectContents(argsItem, field.type));
-    } else if (field.__isObject) {
-      obj[k] = getUpdateObjectContents(args[k], field.type);
+    if (!field) {
+      let pieces = k.split("_");
+      let queryOperation = pieces.slice(-1)[0];
+      let fieldName = pieces.slice(0, pieces.length - 1).join("_");
+      field = typeMetadata.fields[fieldName];
+
+      if (queryOperation === "INC") {
+        $inc[prefix + fieldName] = args[k];
+      } else if (queryOperation === "DEC") {
+        $inc[prefix + fieldName] = args[k] * -1;
+      } else if (queryOperation === "PUSH") {
+        $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
+      } else if (queryOperation === "CONCAT") {
+        $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+      } else if (queryOperation === "UPDATE") {
+        if (field.__isArray) {
+          getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push);
+        } else {
+          getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push);
+        }
+      } else if (queryOperation === "UPDATES") {
+        args[k].forEach(update => {
+          getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push);
+        });
+      }
     } else {
-      obj[k] = args[k];
+      if (field == DateType || (typeof field === "object" && field.__isDate)) {
+        $set[prefix + k] = new Date(args[k]);
+      } else if (field.__isArray) {
+        $set[prefix + k] = args[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
+      } else if (field.__isObject) {
+        $set[prefix + k] = newObjectFromArgs(args[k], field.type);
+      } else {
+        $set[prefix + k] = args[k];
+      }
     }
-
-    return obj;
-  }, {});
+  });
 }
