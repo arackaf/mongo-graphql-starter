@@ -76,7 +76,13 @@ function getMutations(k, fields) {
     return [`${k}: String`];
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return [`${k}: [${value.type.__name}Input]`, `${k}_PUSH: ${value.type.__name}Input`, `${k}_CONCAT: [${value.type.__name}Input]`];
+      return [
+        `${k}: [${value.type.__name}Input]`,
+        `${k}_PUSH: ${value.type.__name}Input`,
+        `${k}_CONCAT: [${value.type.__name}Input]`,
+        `${k}_UPDATE: ${value.type.__name}ArrayMutationInput`,
+        `${k}_UPDATES: [${value.type.__name}ArrayMutationInput]`
+      ];
     } else if (value.__isLiteral) {
       return [`${k}: ${value.type}`];
     } else if (value.__isObject) {
@@ -151,7 +157,14 @@ ${TAB}${Object.keys(fields)
     .reduce((inputs, k) => (inputs.push(...getMutations(k, fields)), inputs), [])
     .join(`\n${TAB}`)}
 }
-
+${objectToCreate.__usedInArray
+    ? `
+input ${name}ArrayMutationInput {
+${TAB}index: Int,
+${TAB}${name}: ${name}MutationInput
+}
+`
+    : ""}
 input ${name}Sort {
 ${TAB}${Object.keys(fields)
     .map(k => `${k}: Int`)
