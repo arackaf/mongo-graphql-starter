@@ -4,6 +4,12 @@ This utility will scaffold GraphQL schema and resolvers, with queries, filters a
 
 The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd or advanced edge cases as needed.
 
+## Prior art
+
+This project is heavily inspired by [Graph.Cool](https://www.graph.cool/).  It's an amazing graphQL-as-a-service that got me hooked immediately on the idea of auto-generating graphQL queries, filters, etc on your data store.  The only thing I disliked about it was that you lose control of your data.  You lack the ability to connect directly to your database and index tune, bulk insert data, bulk update data, etc.  This project aims to provide the best of both worlds: your graphQL endpoint—including queries and mutations—are auto generated, but on top of the database you provide, and by extension retain control of.  Moreover, the graphQL schema and resolvers are generated in such a way that adding your own one-off edge cases is easy, and encouraged.
+
+This project is otherwise unrelated to Graph.Cool.  It is not in any way intended to be—and never will be—a full clone, and any similarities to the APIs generated are incidental.
+
 ## How do you use it?
 
 Let's work through a simple example.
@@ -614,6 +620,6 @@ Each type has its own folder, and always generates a type metadata file, and a g
 
 ## What's next
 
+- Allow filtering through nested objects and arrays
 - Add more data types, and filters
-- More robust updates
 - Allow queryable types to define relationships between one another, so related data can be queries intelligently, without the SELECT N+1 problem
