@@ -510,106 +510,39 @@ Each queryable type will also generate a `create<Type>`, `update<Type>` and `del
 
 `create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object, or at least the pieces thereof which you specify in your mutation.
 
-`update<Type>` requires an `_id` argument, as well as an update argument, named for your `Type`. For now, this argument contains only the fields of your type - whatever you pass on this object will update the corresponding values in the Mongo collection, though in the future a way to just `$push` a new element onto an array, `$INC` a value, etc, will be added.  Similarly, the pieces of the updated object will be returned, based on what you specify in your graphQL mutation.
+---
+
+`update<Type>` requires an `_id` argument, as well as an update argument, named for your `Type`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+
+In addition, the following arguments are supported
+
+Argument|For types|Description
+------|-------|------
+`<fieldName>_INC`|Numeric|Increments the current value by the amount specified.  For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.  
+`<fieldName>_DEC`|Numeric|Decrements the current value by the amount specified.  For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.
+`<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.
+`<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array.
+`<fieldName>_UPDATE`|Arrays|Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specific `field_INC`, `field_PUSH`, etc, recursively. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.
+`<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.
+`<fieldName>_UPDATE`|Objects|Implements the specified changes on the nested object.  The provided update object is of the same form specified here.  For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2
+
+Full examples are below.
+
+---
 
 `delete<Type>` takes a single `_id` argument, and deletes it.
 
-An example of create and delete, together
+---
 
-```javascript
-test("Deletion works", async () => {
-  let obj = await runMutation({
-    schema,
-    db,
-    mutation: `createBook(Book: {title: "Book 2"}){_id}`,
-    result: "createBook"
-  });
+### Mutation examples
 
-  await runMutation({
-    schema,
-    db,
-    mutation: `deleteBook(_id: "${obj._id}")`,
-    result: "deleteBook"
-  });
-  await queryAndMatchArray({ schema, db, query: "{allBooks{title}}", coll: "allBooks", results: [] });
-});
-```
+[Example of create and delete, together](test/testProject1/deletion.test.js#L22)
 
-While update looks like this
+[Example of a basic update](test/testProject1/mutations.test.js#L188)
 
-```javascript
-test("Partial modification mutation works", async () => {
-  let obj = await runMutation({
-    schema,
-    db,
-    mutation: `createBook(Book: {
-      title: "Book 2", 
-      pages: 100, 
-      weight: 1.2, 
-      authors: [
-        {birthday: "1982-03-22", name: "Adam"}, 
-        {birthday: "2004-06-02", name: "Bob"}
-      ], 
-      primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, 
-      strArrs: [["a"], ["b", "c"]], 
-      createdOn: "2004-06-03", 
-      createdOnYearOnly: "2004-06-03"
-    }){
-      _id, 
-      title, 
-      pages, 
-      weight, 
-      authors { 
-        birthday, 
-        name 
-      }, 
-      primaryAuthor{ 
-        birthday, 
-        name 
-      }, 
-      strArrs, 
-      createdOn, 
-      createdOnYearOnly
-    }`,
-    result: "createBook"
-  });
+[Full example of nested updates](test/testProject2/richUpdating.test.js#L335)
 
-  let updated = await runMutation({
-    schema,
-    db,
-    mutation: `updateBook(_id: "${obj._id}", Book: {
-      title: "Book 2a", 
-      pages: 101
-    }){
-      title, 
-      pages, 
-      weight, 
-      authors { 
-        birthday, 
-        name 
-      }, 
-      primaryAuthor{ 
-        birthday, 
-        name 
-      }, 
-      strArrs, 
-      createdOn, 
-      createdOnYearOnly
-    }`,
-    result: "updateBook"
-  });
-  expect(updated).toEqual({
-    title: "Book 2a",
-    pages: 101,
-    weight: 1.2,
-    authors: [{ birthday: "03/22/1982", name: "Adam" }, { birthday: "06/02/2004", name: "Bob" }],
-    primaryAuthor: { birthday: "06/02/2004", name: "Bob" },
-    strArrs: [["a"], ["b", "c"]],
-    createdOn: "06/03/2004",
-    createdOnYearOnly: "2004"
-  });
-});
-```
+[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L397)
 
 ## Middleware
 
