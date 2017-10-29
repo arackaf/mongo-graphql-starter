@@ -32,26 +32,36 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, currentObjec
 }
 
 export function getMongoFilters(args, objectMetaData) {
+  return fillMongoFiltersObject(args, objectMetaData);
+}
+function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
   let fields = objectMetaData.fields;
-  return Object.keys(args).reduce((hash, k) => {
+  Object.keys(args).forEach(k => {
     if (k === "OR" && args.OR != null) {
       if (!Array.isArray(args.OR)) {
         throw "Non array passed to OR - received " + hash.OR;
       }
-      hash.$or = args.OR.map(packetArgs => getMongoFilters(packetArgs, objectMetaData));
+      hash.$or = args.OR.map(packetArgs => fillMongoFiltersObject(packetArgs, objectMetaData, void 0, prefix));
     } else if (fields[k]) {
       if (typeof fields[k] === "object" && fields[k].__isDate) {
         args[k] = new Date(args[k]);
+      } else if (fields[k].__isObject) {
+        fillMongoFiltersObject(args[k], fields[k].type, hash, prefix + k + ".");
+        return;
+      } else if (fields[k].__isArray) {
+        hash[prefix + k] = { $elemMatch: fillMongoFiltersObject(args[k], fields[k].type) };
+        return;
       } else if (fields[k] === MongoIdType) {
         args[k] = ObjectId(args[k]);
       }
 
-      hash[k] = args[k];
+      hash[prefix + k] = args[k];
     } else if (k.indexOf("_") >= 0) {
       let pieces = k.split("_");
       let queryOperation = pieces.slice(-1)[0];
       let fieldName = pieces.slice(0, pieces.length - 1).join("_");
       let field = objectMetaData.fields[fieldName];
+      fieldName = prefix + fieldName;
       let isDate = typeof field === "object" && field.__isDate;
 
       if (queryOperation !== "format" && isDate) {
@@ -82,8 +92,8 @@ export function getMongoFilters(args, objectMetaData) {
         }
       }
     }
-    return hash;
-  }, {});
+  });
+  return hash;
 }
 
 export function parseRequestedFields(ast) {
