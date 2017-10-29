@@ -1,15 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray } from "../testUtil";
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray } = await spinUp());
 
   await db.collection("books").insert({ title: "Book 4", pages: 200 });
   await db.collection("books").insert({ title: "Book 6", pages: 200 });
