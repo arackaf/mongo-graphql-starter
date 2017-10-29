@@ -1,17 +1,10 @@
-import { MongoClient, ObjectId } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
-
-import { queryAndMatchArray } from "../testUtil";
-
+import spinUp from "./spinUp";
 import { middleware } from "mongo-graphql-starter";
-import conn from "./connection";
+import { ObjectId } from "mongodb";
 
-let db, schema;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 
   await db.collection("books").insert({ _id: "4", title: "Book 4", pages: 200 });
   await db.collection("books").insert({ _id: "6", title: "Book 6", pages: 200 });
@@ -37,8 +30,6 @@ afterAll(async () => {
 
 test("Test middleware single item 1", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{getBook{title, pages}}",
     coll: "getBook",
     results: { title: "Book 2", pages: 150 }

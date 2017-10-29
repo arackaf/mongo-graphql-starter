@@ -1,15 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray } from "../testUtil";
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 
   await db.collection("books").insert({ title: "Book 1" });
   await db.collection("books").insert({ title: "Second Book" });
@@ -23,7 +16,7 @@ afterAll(async () => {
 });
 
 test("String match", async () => {
-  await queryAndMatchArray({ schema, db, query: '{allBooks(title: "Book 1"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
+  await queryAndMatchArray({ query: '{allBooks(title: "Book 1"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });
 
 test("String in", async () => {
@@ -37,13 +30,13 @@ test("String in", async () => {
 });
 
 test("String startsWith", async () => {
-  await queryAndMatchArray({ schema, db, query: '{allBooks(title_startsWith: "B"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
+  await queryAndMatchArray({ query: '{allBooks(title_startsWith: "B"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });
 
 test("String endsWith", async () => {
-  await queryAndMatchArray({ schema, db, query: '{allBooks(title_endsWith: "k"){title}}', coll: "allBooks", results: [{ title: "Second Book" }] });
+  await queryAndMatchArray({ query: '{allBooks(title_endsWith: "k"){title}}', coll: "allBooks", results: [{ title: "Second Book" }] });
 });
 
 test("String contains", async () => {
-  await queryAndMatchArray({ schema, db, query: '{allBooks(title_contains: "x"){title}}', coll: "allBooks", results: [{ title: "Title x 1" }] });
+  await queryAndMatchArray({ query: '{allBooks(title_contains: "x"){title}}', coll: "allBooks", results: [{ title: "Title x 1" }] });
 });

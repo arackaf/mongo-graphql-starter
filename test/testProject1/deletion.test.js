@@ -1,16 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray, runMutation } from "../testUtil";
-
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 });
 
 afterAll(async () => {
@@ -21,15 +13,11 @@ afterAll(async () => {
 
 test("Deletion works", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `createBook(Book: {title: "Book 2"}){_id}`,
     result: "createBook"
   });
 
   await runMutation({
-    schema,
-    db,
     mutation: `deleteBook(_id: "${obj._id}")`,
     result: "deleteBook"
   });

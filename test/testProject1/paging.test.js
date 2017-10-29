@@ -1,8 +1,8 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 
   await db.collection("books").insert({ title: "Book 4", pages: 200 });
   await db.collection("books").insert({ title: "Book 6", pages: 200 });
