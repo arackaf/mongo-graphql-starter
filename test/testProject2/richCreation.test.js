@@ -1,15 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray, runMutation } from "../testUtil";
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 });
 
 afterAll(async () => {
@@ -20,8 +13,6 @@ afterAll(async () => {
 
 test("Create minimal object", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){title, content, comments{text}}`,
     result: "createBlog"
   });
@@ -30,8 +21,6 @@ test("Create minimal object", async () => {
 
 test("_id added automatically", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){_id}`,
     result: "createBlog"
   });
@@ -41,8 +30,6 @@ test("_id added automatically", async () => {
 
 test("Add comment", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1"}]}){title, content, comments{text}}`,
     result: "createBlog"
   });
@@ -51,8 +38,6 @@ test("Add comment", async () => {
 
 test("Add author to comment", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22"}}]}){title, content, comments{text, author{name, birthday}}}`,
     result: "createBlog"
   });
@@ -61,8 +46,6 @@ test("Add author to comment", async () => {
 
 test("Add tags to author", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"}, {name: "t2"}]}}]}){title, content, comments{text, author{name, birthday, tagsSubscribed{name}}}}`,
     result: "createBlog"
   });
@@ -75,8 +58,6 @@ test("Add tags to author", async () => {
 
 test("Add reviewers with tags to author", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `
       createBlog(Blog: {
         title: "Blog 1", 
@@ -115,8 +96,6 @@ test("Add reviewers with tags to author", async () => {
 
 test("Add favorite tag to author and reviewers reviewers with tags to author", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `
       createBlog(Blog: {
         title: "Blog 1", 
