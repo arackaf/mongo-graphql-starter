@@ -118,6 +118,10 @@ function queriesForField(fieldName, realFieldType) {
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
 
+  if (realFieldType.__isObject || realFieldType.__isArray) {
+    result.push(`${fieldName}: ${realFieldType.type.__name}Filters`);
+  }
+
   return result;
 }
 
@@ -169,13 +173,11 @@ input ${name}Sort {
 ${TAB}${Object.keys(fields)
     .map(k => `${k}: Int`)
     .join(`\n${TAB}`)}
-}${objectToCreate.table
-    ? `
+}
     
 input ${name}Filters {
 ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
-}`
-    : ""}
+}
 
 \`;
 

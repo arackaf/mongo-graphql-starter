@@ -334,6 +334,46 @@ pages is greater than 50
   )
 ```
 
+### Nested object and array filters
+
+For nested arrays or objects, you can pass a filter with the name of the field, that's of the same form as the corresponding type's normal filters.  For arrays, whatever you pass in will be translated into [`$elemMatch`](https://docs.mongodb.com/manual/reference/operator/query/elemMatch/), which means the record will have to have at least one array member which matches all of your criteria to be returned.  Similarly, for nested objects the record will have to have an object value which matches all criteria to be returned.
+
+For example
+
+```javascript
+{allBlogs(
+  comments: {
+    upVotes: 4, 
+    author: { 
+      OR: [
+        { name: "CA 3" }, 
+        { favoriteTag: {name: "T1"} }
+      ]
+    } 
+  }, 
+  SORT: {title: 1}
+){ title }}
+```
+
+Will query blogs that have at least one comment which has 4 upvotes, and also has an author with either a name of "CA 3", or a favoriteTag with a name of "T1"
+
+Or you could do
+
+```javascript
+{allBlogs(
+  comments: {
+    upVotes: 4, 
+    OR: [
+      {author: { name: "CA 3" } }, 
+      {author: { favoriteTag: {name: "T1"}}}
+    ]
+  }, 
+  SORT: {title: 1}
+){ title }}
+```
+
+which is identical.
+
 ### Sorting
 
 To sort, use the `SORT` argument, and pass it an object literal with the field by which you'd like to sort, with the Mongo value of 1 for ascending, or -1 for descending.  For example
