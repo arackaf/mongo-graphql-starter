@@ -1,10 +1,4 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
-
-import { queryAndMatchArray, runMutation } from "../testUtil";
-import conn from "./connection";
+import spinUp from "./spinUp";
 
 const authorA = { name: "A 1", birthday: new Date("1982-03-22"), favoriteTag: { name: "T1", description: "Desc1" } };
 const authorB = { name: "A 2", birthday: new Date("1982-06-15"), favoriteTag: { name: "T1", description: "Desc1" } };
@@ -22,11 +16,9 @@ const comment5 = { text: "Comment 5", upVotes: 4, author: cauthorA };
 const comment6 = { text: "Comment 6", upVotes: 4, author: cauthorA };
 const comment7 = { text: "Comment 7", upVotes: 4, author: cauthorC };
 
-let db, schema;
+let db, schema, queryAndMatchArray;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
-
+  ({ db, schema, queryAndMatchArray } = await spinUp());
   await Promise.all([
     db.collection("blogs").insert({ title: "Blog 1", author: authorA, comments: [comment1, comment2, comment3] }),
     db.collection("blogs").insert({ title: "Blog 2", author: authorA, comments: [] }),
@@ -103,8 +95,6 @@ test("Deep querying 14", async () =>
 
 async function runIt(query, results) {
   await queryAndMatchArray({
-    schema,
-    db,
     query,
     coll: "allBlogs",
     results

@@ -1,4 +1,4 @@
-import { MongoIdType, DateType, StringType, IntType, FloatType } from "./createGraphqlSchema/dataTypes";
+import { MongoIdType, DateType, StringType, IntType, FloatType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(requestMap, objectMetaData, args) {

@@ -1,10 +1,10 @@
-import createGraphqlSchema from "./createGraphqlSchema/createSchema";
+import createGraphqlSchema from "./createGraphqlSchema";
 export { createGraphqlSchema };
 
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
 
-import * as dataTypes from "./createGraphqlSchema/dataTypes";
+import * as dataTypes from "./dataTypes";
 export { dataTypes };
 
 import * as queryUtilities from "./queryUtilities";
