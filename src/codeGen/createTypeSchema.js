@@ -20,21 +20,21 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   return `export const type = \`
   
   type ${name} {
-  ${TAB}${Object.keys(fields)
-    .map(k => `${k}: ${displaySchemaValue(fields[k])}`)
+  ${Object.keys(fields)
+    .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
     .join(`\n${TAB}`)}
   }
   
   input ${name}Input {
-  ${TAB}${Object.keys(fields)
-    .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
+  ${Object.keys(fields)
+    .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k], true)}`)
     .join(`\n${TAB}`)}
   }
   
   input ${name}MutationInput {
-  ${TAB}${Object.keys(fields)
+  ${Object.keys(fields)
     .filter(k => k != "_id")
-    .reduce((inputs, k) => (inputs.push(...getMutations(k, fields)), inputs), [])
+    .reduce((inputs, k) => (inputs.push(...getMutations(k, fields).map(val => TAB + val)), inputs), [])
     .join(`\n${TAB}`)}
   }
   ${objectToCreate.__usedInArray
@@ -46,13 +46,13 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   `
     : ""}
   input ${name}Sort {
-  ${TAB}${Object.keys(fields)
-    .map(k => `${k}: Int`)
+  ${Object.keys(fields)
+    .map(k => `${TAB}${k}: Int`)
     .join(`\n${TAB}`)}
   }
       
   input ${name}Filters {
-  ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}`)}
+  ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}${TAB}`)}
   }
   
   \`;
@@ -66,7 +66,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     ): ${name}
   
   ${TAB}update${name}(
-  ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `${name}: ${name}MutationInput`].join(`,\n${TAB2}`)}
+  ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `${name}: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
     ): ${name}
   
   ${TAB}delete${name}(
@@ -82,11 +82,11 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   ${TAB2}${allQueryFields
         .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
         .concat(dateFields.map(f => `${f}_format: String`))
-        .join(`,\n${TAB2}`)}
+        .join(`,\n${TAB2}${TAB}`)}
     ): [${name}]
   
   ${TAB}get${name}(
-  ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
+  ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}${TAB}`)}
     ): ${name}
   
   \`;
