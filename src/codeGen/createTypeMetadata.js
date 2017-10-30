@@ -83,7 +83,7 @@ function createObject(declaration, properties, offset = 1) {
 
   return `
   ${declarationTab}${declaration}
-  ${createProperties(properties, offset)}
+${createProperties(properties, offset)}
   ${declarationTab}}`.trim();
 }
 
