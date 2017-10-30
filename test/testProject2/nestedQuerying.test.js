@@ -1,12 +1,48 @@
 import spinUp from "./spinUp";
 
-const authorA = { name: "A 1", birthday: new Date("1982-03-22"), favoriteTag: { name: "T1", description: "Desc1" } };
-const authorB = { name: "A 2", birthday: new Date("1982-06-15"), favoriteTag: { name: "T1", description: "Desc1" } };
-const authorC = { name: "A 3", birthday: new Date("1982-07-04"), favoriteTag: { name: "T2", description: "Desc2" } };
+const authorA = {
+  name: "A 1",
+  knicknames: ["a1", "one"],
+  luckyNumbers: [1, 11],
+  birthday: new Date("1982-03-22"),
+  favoriteTag: { name: "T1", description: "Desc1" }
+};
+const authorB = {
+  name: "A 2",
+  knicknames: ["a2", "two"],
+  luckyNumbers: [2, 22],
+  birthday: new Date("1982-06-15"),
+  favoriteTag: { name: "T1", description: "Desc1" }
+};
+const authorC = {
+  name: "A 3",
+  knicknames: ["a3", "three"],
+  luckyNumbers: [3, 33],
+  birthday: new Date("1982-07-04"),
+  favoriteTag: { name: "T2", description: "Desc2" }
+};
 
-const cauthorA = { name: "CA 1", birthday: new Date("1982-03-22"), favoriteTag: { name: "T1", description: "Desc1" } };
-const cauthorB = { name: "CA 2", birthday: new Date("1982-06-15"), favoriteTag: { name: "T1", description: "Desc1" } };
-const cauthorC = { name: "CA 3", birthday: new Date("1982-07-04"), favoriteTag: { name: "T2", description: "Desc2" } };
+const cauthorA = {
+  name: "CA 1",
+  knicknames: ["c1", "cone"],
+  luckyNumbers: [1, 11],
+  birthday: new Date("1982-03-22"),
+  favoriteTag: { name: "T1", description: "Desc1" }
+};
+const cauthorB = {
+  name: "CA 2",
+  knicknames: ["c2", "ctwo"],
+  luckyNumbers: [2, 22],
+  birthday: new Date("1982-06-15"),
+  favoriteTag: { name: "T1", description: "Desc1" }
+};
+const cauthorC = {
+  name: "CA 3",
+  knicknames: ["c3", "cthree"],
+  luckyNumbers: [3, 33],
+  birthday: new Date("1982-07-04"),
+  favoriteTag: { name: "T2", description: "Desc2" }
+};
 
 const comment1 = { text: "Comment 1", upVotes: 2, author: cauthorA };
 const comment2 = { text: "Comment 2", upVotes: 4, author: cauthorB };
@@ -37,6 +73,24 @@ afterAll(async () => {
 test("Deep querying 1", async () =>
   await runIt(`{allBlogs(author: {name: "A 1"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
+test("Deep querying 1a", async () =>
+  await runIt(`{allBlogs(author: {knicknames: ["a1", "one"]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+
+test("Deep querying 1b", async () =>
+  await runIt(`{allBlogs(author: {knicknames_contains: "one"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+
+test("Deep querying 1c", async () =>
+  await runIt(`{allBlogs(author: {knicknames_in: [[], ["a1", "one"]]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+
+test("Deep querying 1d", async () =>
+  await runIt(`{allBlogs(author: {luckyNumbers: [1, 11]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+
+test("Deep querying 1e", async () =>
+  await runIt(`{allBlogs(author: {luckyNumbers_contains: 11}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+
+test("Deep querying 1f", async () =>
+  await runIt(`{allBlogs(author: {luckyNumbers_in: [[], [1, 11]]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+
 test("Deep querying 2", async () => await runIt(`{allBlogs(author: {name_endsWith: "2"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 3" }]));
 test("Deep querying 3", async () =>
   await runIt(`{allBlogs(author: {birthday_gt: "1982-07-03"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 4" }, { title: "Blog 5" }]));
@@ -60,6 +114,47 @@ test("Deep querying 7", async () =>
 
 test("Deep querying 8", async () =>
   await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { name: "CA 3"}}] }, SORT: {title: 1}){ title }}`, [
+    { title: "Blog 1" },
+    { title: "Blog 4" },
+    { title: "Blog 5" }
+  ]));
+
+test("Deep querying 8a", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames: ["c3", "cthree"]}}] }, SORT: {title: 1}){ title }}`, [
+    { title: "Blog 1" },
+    { title: "Blog 4" },
+    { title: "Blog 5" }
+  ]));
+
+test("Deep querying 8b", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames_contains: "cthree" }}] }, SORT: {title: 1}){ title }}`, [
+    { title: "Blog 1" },
+    { title: "Blog 4" },
+    { title: "Blog 5" }
+  ]));
+
+test("Deep querying 8c", async () =>
+  await runIt(
+    `{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames_in: [[], ["a"], ["c3", "cthree"]] }}] }, SORT: {title: 1}){ title }}`,
+    [{ title: "Blog 1" }, { title: "Blog 4" }, { title: "Blog 5" }]
+  ));
+
+test("Deep querying 8d", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers: [3, 33]}}] }, SORT: {title: 1}){ title }}`, [
+    { title: "Blog 1" },
+    { title: "Blog 4" },
+    { title: "Blog 5" }
+  ]));
+
+test("Deep querying 8e", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers_contains: 3 }}] }, SORT: {title: 1}){ title }}`, [
+    { title: "Blog 1" },
+    { title: "Blog 4" },
+    { title: "Blog 5" }
+  ]));
+
+test("Deep querying 8f", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers_in: [[], [1], [3, 33]] }}] }, SORT: {title: 1}){ title }}`, [
     { title: "Blog 1" },
     { title: "Blog 4" },
     { title: "Blog 5" }

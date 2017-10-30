@@ -1,4 +1,4 @@
-import { MongoIdType, DateType, StringType, IntType, FloatType } from "./dataTypes";
+import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(requestMap, objectMetaData, args) {
@@ -78,6 +78,10 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
             hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+          }
+        } else if (field === StringArrayType || field === IntArrayType) {
+          if (queryOperation == "contains") {
+            hash[fieldName] = args[k];
           }
         } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
