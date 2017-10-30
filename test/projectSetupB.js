@@ -1,5 +1,17 @@
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+const {
+  MongoIdType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  DateType,
+  arrayOf,
+  objectOf,
+  formattedDate,
+  typeLiteral
+} = dataTypes;
 
 const Subject = {
   table: "subjects",
@@ -20,6 +32,8 @@ const Tag = {
 const User = {
   fields: {
     name: StringType,
+    knicknames: StringArrayType,
+    luckyNumbers: IntArrayType,
     birthday: DateType,
     tagsSubscribed: arrayOf(Tag),
     favoriteTag: objectOf(Tag)
