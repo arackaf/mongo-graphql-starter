@@ -100,8 +100,13 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
   return hash;
 }
 
-export function parseRequestedFields(ast) {
+export function parseRequestedFields(ast, queryName) {
   let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
+
+  if (queryName) {
+    fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == queryName);
+  }
+
   if (fieldNode) {
     return getSelections(fieldNode);
   }
@@ -130,9 +135,9 @@ export function newObjectFromArgs(args, typeMetadata) {
   }, {});
 }
 
-export function decontructGraphqlQuery(args, ast, objectMetaData) {
+export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
-  let requestMap = parseRequestedFields(ast);
+  let requestMap = parseRequestedFields(ast, queryName);
   let $project = getMongoProjection(requestMap, objectMetaData, args);
   let sort = args.SORT;
   let sorts = args.SORTS;
