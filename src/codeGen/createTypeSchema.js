@@ -24,7 +24,13 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
     .join(`\n${TAB}`)}
   }
-  
+  ${objectToCreate.table
+    ? `
+  type ${name}QueryResults {
+    ${name}s: [${name}]
+  }
+`
+    : ""}
   input ${name}Input {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k], true)}`)
@@ -83,7 +89,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
         .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
         .concat(dateFields.map(f => `${f}_format: String`))
         .join(`,\n${TAB2}${TAB}`)}
-    ): [${name}]
+    ): ${name}QueryResults
   
   ${TAB}get${name}(
   ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}${TAB}`)}
