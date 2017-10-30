@@ -1,15 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray } from "../testUtil";
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 
   await db.collection("books").insert({ title: "Book 4", pages: 200 });
   await db.collection("books").insert({ title: "Book 6", pages: 200 });
@@ -29,8 +22,6 @@ afterAll(async () => {
 
 test("Sort test 1", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{allBooks(SORT: {title: 1}){title, pages}}",
     coll: "allBooks",
     results: [
@@ -48,8 +39,6 @@ test("Sort test 1", async () => {
 
 test("Sort test 2", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{allBooks(SORTS: [{pages: 1}, {title: 1}]){title, pages}}",
     coll: "allBooks",
     results: [
@@ -67,8 +56,6 @@ test("Sort test 2", async () => {
 
 test("Sort test 3", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{allBooks(SORTS: [{pages: 1}, {title: -1}]){title, pages}}",
     coll: "allBooks",
     results: [
@@ -86,8 +73,6 @@ test("Sort test 3", async () => {
 
 test("Sort test 4", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{allBooks(SORTS: [{pages: -1}, {title: 1}]){title, pages}}",
     coll: "allBooks",
     results: [
@@ -105,8 +90,6 @@ test("Sort test 4", async () => {
 
 test("Sort test 5", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{allBooks(SORTS: [{pages: -1}, {title: -1}]){title, pages}}",
     coll: "allBooks",
     results: [

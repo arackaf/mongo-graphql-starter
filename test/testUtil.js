@@ -1,6 +1,11 @@
 import { MongoClient } from "mongodb";
 import { graphql } from "graphql";
 
+let connectionUid = 1;
+const localConn = "mongodb://localhost:27017/mongo-graphql-starter";
+
+export const nextConnectionString = () => localConn + "-" + connectionUid++;
+
 export async function queryAndMatchArray({ schema, db, query, variables, coll, results }) {
   let allResults = await graphql(schema, query, { db });
   if (!allResults.data || allResults.data[coll] === void 0) {

@@ -1,15 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray, runMutation } from "../testUtil";
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 });
 
 afterAll(async () => {
@@ -20,8 +13,6 @@ afterAll(async () => {
 
 test("Deep querying 1", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `
       createBlog(Blog: {
         title: "Blog 1", 
@@ -45,8 +36,6 @@ test("Deep querying 1", async () => {
   });
 
   await queryAndMatchArray({
-    schema,
-    db,
     query: `{getBlog(_id: "${obj._id}"){
       title, 
       content, 
@@ -102,8 +91,6 @@ test("Deep querying 1", async () => {
 
 test("Deep querying 2", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `
       createBlog(Blog: {
         title: "Blog 1", 
@@ -127,8 +114,6 @@ test("Deep querying 2", async () => {
   });
 
   await queryAndMatchArray({
-    schema,
-    db,
     query: `{getBlog(_id: "${obj._id}"){
       title, 
       content, 
@@ -183,8 +168,6 @@ test("Deep querying 2", async () => {
 
 test("Deep querying 3", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `
       createBlog(Blog: {
         title: "Blog 1", 
@@ -208,8 +191,6 @@ test("Deep querying 3", async () => {
   });
 
   await queryAndMatchArray({
-    schema,
-    db,
     query: `{getBlog(_id: "${obj._id}"){
       title, 
       content, 
@@ -252,8 +233,6 @@ test("Deep querying 3", async () => {
 
 test("Deep querying 4", async () => {
   let obj = await runMutation({
-    schema,
-    db,
     mutation: `
       createBlog(Blog: {
         title: "Blog 1", 
@@ -277,8 +256,6 @@ test("Deep querying 4", async () => {
   });
 
   await queryAndMatchArray({
-    schema,
-    db,
     query: `{getBlog(_id: "${obj._id}"){
       title, 
       content, 

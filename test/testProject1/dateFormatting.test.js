@@ -1,16 +1,8 @@
-import { MongoClient } from "mongodb";
-import resolvers from "./graphQL/resolver";
-import typeDefs from "./graphQL/schema";
-import { makeExecutableSchema } from "graphql-tools";
+import spinUp from "./spinUp";
 
-import { queryAndMatchArray } from "../testUtil";
-
-import conn from "./connection";
-
-let db, schema;
+let db, schema, queryAndMatchArray;
 beforeAll(async () => {
-  db = await MongoClient.connect(conn);
-  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
+  ({ db, schema, queryAndMatchArray } = await spinUp());
 
   await db
     .collection("books")
@@ -35,8 +27,6 @@ test("Date display default", async () => {
 
 test("Date display custom", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: "{allBooks(pages: 100){createdOnYearOnly}}",
     coll: "allBooks",
     results: [{ createdOnYearOnly: "2004" }]
@@ -45,8 +35,6 @@ test("Date display custom", async () => {
 
 test("Date display default - override", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: `{allBooks(pages: 100, createdOn_format: "%m"){createdOn}}`,
     coll: "allBooks",
     results: [{ createdOn: "06" }]
@@ -55,8 +43,6 @@ test("Date display default - override", async () => {
 
 test("Date display custom - override", async () => {
   await queryAndMatchArray({
-    schema,
-    db,
     query: `{allBooks(pages: 100, createdOnYearOnly_format: "%m"){createdOnYearOnly}}`,
     coll: "allBooks",
     results: [{ createdOnYearOnly: "06" }]
