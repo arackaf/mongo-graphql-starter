@@ -32,7 +32,7 @@ afterAll(async () => {
 
 test("Test multiple middleware 1", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(pages_lte: 89){title, pages}}",
+    query: "{allBooks(pages_lte: 89){Books{title, pages}}}",
     coll: "allBooks",
     results: [{ title: "Book 3", pages: 90 }]
   });

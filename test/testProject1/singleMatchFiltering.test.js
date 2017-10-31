@@ -32,7 +32,7 @@ test("Match single 2", async () => {
 
 test("Match single", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(_id: "59e3dbdf94dc6983d41deece"){title}}`,
+    query: `{allBooks(_id: "59e3dbdf94dc6983d41deece"){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 1" }]
   });
