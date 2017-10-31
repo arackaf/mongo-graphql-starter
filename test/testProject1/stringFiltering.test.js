@@ -16,27 +16,27 @@ afterAll(async () => {
 });
 
 test("String match", async () => {
-  await queryAndMatchArray({ query: '{allBooks(title: "Book 1"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
+  await queryAndMatchArray({ query: '{allBooks(title: "Book 1"){Books{title}}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });
 
 test("String in", async () => {
   await queryAndMatchArray({
     schema,
     db,
-    query: '{allBooks(title_in: ["X", "Book 1", "Y"]){title}}',
+    query: '{allBooks(title_in: ["X", "Book 1", "Y"]){Books{title}}}',
     coll: "allBooks",
     results: [{ title: "Book 1" }]
   });
 });
 
 test("String startsWith", async () => {
-  await queryAndMatchArray({ query: '{allBooks(title_startsWith: "B"){title}}', coll: "allBooks", results: [{ title: "Book 1" }] });
+  await queryAndMatchArray({ query: '{allBooks(title_startsWith: "B"){Books{title}}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });
 
 test("String endsWith", async () => {
-  await queryAndMatchArray({ query: '{allBooks(title_endsWith: "k"){title}}', coll: "allBooks", results: [{ title: "Second Book" }] });
+  await queryAndMatchArray({ query: '{allBooks(title_endsWith: "k"){Books{title}}}', coll: "allBooks", results: [{ title: "Second Book" }] });
 });
 
 test("String contains", async () => {
-  await queryAndMatchArray({ query: '{allBooks(title_contains: "x"){title}}', coll: "allBooks", results: [{ title: "Title x 1" }] });
+  await queryAndMatchArray({ query: '{allBooks(title_contains: "x"){Books{title}}}', coll: "allBooks", results: [{ title: "Title x 1" }] });
 });

@@ -17,12 +17,12 @@ afterAll(async () => {
 });
 
 test("String array match 1", async () => {
-  await queryAndMatchArray({ query: '{allBooks(keywords: ["c#", "development"]){title}}', coll: "allBooks", results: [{ title: "Book 3" }] });
+  await queryAndMatchArray({ query: '{allBooks(keywords: ["c#", "development"]){Books{title}}}', coll: "allBooks", results: [{ title: "Book 3" }] });
 });
 
 test("String array match 2", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(keywords: ["javascript", "development", "coding"], SORT: {title: 1}){title}}',
+    query: '{allBooks(keywords: ["javascript", "development", "coding"], SORT: {title: 1}){Books{title}}}',
     coll: "allBooks",
     results: [{ title: "Book 1" }, { title: "Book 2" }]
   });
@@ -30,7 +30,7 @@ test("String array match 2", async () => {
 
 test("String array match in", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(keywords_in: [[], ["javascript"], ["c#", "development"]], SORT: {title: 1}){title}}',
+    query: '{allBooks(keywords_in: [[], ["javascript"], ["c#", "development"]], SORT: {title: 1}){Books{title}}}',
     coll: "allBooks",
     results: [{ title: "Book 3" }]
   });
@@ -38,7 +38,7 @@ test("String array match in", async () => {
 
 test("String array match - order matters", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(keywords: ["development", "c#"]){title}}',
+    query: '{allBooks(keywords: ["development", "c#"]){Books{title}}}',
     coll: "allBooks",
     results: []
   });
@@ -46,7 +46,7 @@ test("String array match - order matters", async () => {
 
 test("String array match - contains", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(keywords_contains: "development", SORT: {title: 1}){title}}',
+    query: '{allBooks(keywords_contains: "development", SORT: {title: 1}){Books{title}}}',
     coll: "allBooks",
     results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 3" }]
   });
@@ -54,7 +54,7 @@ test("String array match - contains", async () => {
 
 test("String array match - contains 2", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(keywords_contains: "c#", SORT: {title: 1}){title}}',
+    query: '{allBooks(keywords_contains: "c#", SORT: {title: 1}){Books{title}}}',
     coll: "allBooks",
     results: [{ title: "Book 3" }]
   });

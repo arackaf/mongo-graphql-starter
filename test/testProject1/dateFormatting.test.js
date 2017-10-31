@@ -22,12 +22,18 @@ afterAll(async () => {
 });
 
 test("Date display default", async () => {
-  await queryAndMatchArray({ schema, db, query: "{allBooks(pages: 100){createdOn}}", coll: "allBooks", results: [{ createdOn: "06/02/2004" }] });
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: "{allBooks(pages: 100){Books{createdOn}}}",
+    coll: "allBooks",
+    results: [{ createdOn: "06/02/2004" }]
+  });
 });
 
 test("Date display custom", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(pages: 100){createdOnYearOnly}}",
+    query: "{allBooks(pages: 100){Books{createdOnYearOnly}}}",
     coll: "allBooks",
     results: [{ createdOnYearOnly: "2004" }]
   });
@@ -35,7 +41,7 @@ test("Date display custom", async () => {
 
 test("Date display default - override", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(pages: 100, createdOn_format: "%m"){createdOn}}`,
+    query: `{allBooks(pages: 100, createdOn_format: "%m"){Books{createdOn}}}`,
     coll: "allBooks",
     results: [{ createdOn: "06" }]
   });
@@ -43,7 +49,7 @@ test("Date display default - override", async () => {
 
 test("Date display custom - override", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(pages: 100, createdOnYearOnly_format: "%m"){createdOnYearOnly}}`,
+    query: `{allBooks(pages: 100, createdOnYearOnly_format: "%m"){Books{createdOnYearOnly}}}`,
     coll: "allBooks",
     results: [{ createdOnYearOnly: "06" }]
   });

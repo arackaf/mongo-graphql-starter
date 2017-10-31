@@ -21,5 +21,5 @@ test("Deletion works", async () => {
     mutation: `deleteBook(_id: "${obj._id}")`,
     result: "deleteBook"
   });
-  await queryAndMatchArray({ schema, db, query: "{allBooks{title}}", coll: "allBooks", results: [] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks{Books{title}}}", coll: "allBooks", results: [] });
 });

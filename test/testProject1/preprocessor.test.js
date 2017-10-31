@@ -31,7 +31,7 @@ afterAll(async () => {
 
 test("Paging 1", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORT: {title: 1}){title, pages}}",
+    query: "{allBooks(SORT: {title: 1}){Books{title, pages}}}",
     coll: "allBooks",
     results: [{ title: "Book 4", pages: 200 }, { title: "Book 5", pages: 200 }, { title: "Book 6", pages: 200 }]
   });
@@ -39,7 +39,7 @@ test("Paging 1", async () => {
 
 test("Paging 2", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORTS: [{pages: 1}, {title: -1}]){title, pages}}",
+    query: "{allBooks(SORTS: [{pages: 1}, {title: -1}]){Books{title, pages}}}",
     coll: "allBooks",
     results: [{ title: "Book 8", pages: 200 }, { title: "Book 6", pages: 200 }, { title: "Book 5", pages: 200 }]
   });

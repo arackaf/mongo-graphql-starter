@@ -17,7 +17,7 @@ afterAll(async () => {
 
 test("OR filters 1", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(OR: [{title: "Book 1"}]){title, pages}}',
+    query: '{allBooks(OR: [{title: "Book 1"}]){Books{title, pages}}}',
     coll: "allBooks",
     results: [{ title: "Book 1", pages: 100 }]
   });
@@ -25,7 +25,7 @@ test("OR filters 1", async () => {
 
 test("OR filters 2", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1"}]){title, pages}}',
+    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1"}]){Books{title, pages}}}',
     coll: "allBooks",
     results: [{ title: "Book 1", pages: 100 }]
   });
@@ -33,7 +33,7 @@ test("OR filters 2", async () => {
 
 test("OR filters 3", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{pages: 100}]}]){title, pages}}',
+    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{pages: 100}]}]){Books{title, pages}}}',
     coll: "allBooks",
     results: [{ title: "Book 1", pages: 100 }]
   });
@@ -41,7 +41,7 @@ test("OR filters 3", async () => {
 
 test("OR filters 4", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{title: "XXX"}, {pages: 100}]}]){title, pages}}',
+    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{title: "XXX"}, {pages: 100}]}]){Books{title, pages}}}',
     coll: "allBooks",
     results: [{ title: "Book 1", pages: 100 }]
   });
@@ -49,7 +49,7 @@ test("OR filters 4", async () => {
 
 test("OR filters 5 - AND and OR", async () => {
   await queryAndMatchArray({
-    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{pages: 101}]}]){title, pages}}',
+    query: '{allBooks(title: "Book 1", OR: [{title: "XXXXXX"}, {title: "Book 1", OR: [{pages: 101}]}]){Books{title, pages}}}',
     coll: "allBooks",
     results: []
   });
