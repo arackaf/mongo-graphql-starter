@@ -4,6 +4,7 @@ export const StringArrayType = "StringArray";
 export const IntType = "Int";
 export const IntArrayType = "IntArray";
 export const FloatType = "Float";
+export const FloatArrayType = "FloatArray";
 export const DateType = "Date";
 export const arrayOf = type => {
   type.__usedInArray = true;

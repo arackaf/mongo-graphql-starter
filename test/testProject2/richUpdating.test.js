@@ -445,3 +445,29 @@ test("CONCAT to author's knicknames", async () => {
   });
   expect(result).toEqual({ author: { name: "Adam", knicknames: ["a", "b", "c", "d"] } });
 });
+
+test("PUSH to author's weights", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {name: "Adam", weights: [0.1, 1.9]} }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { weights_PUSH: 2.3 } }){Blog{ author{name, weights}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ author: { name: "Adam", weights: [0.1, 1.9, 2.3] } });
+});
+
+test("CONCAT to author's weights", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {name: "Adam", weights: [0.1, 1.9]} }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { weights_CONCAT: [2.3, 3.4] } }){Blog{ author{name, weights}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ author: { name: "Adam", weights: [0.1, 1.9, 2.3, 3.4] } });
+});

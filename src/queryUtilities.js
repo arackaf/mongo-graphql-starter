@@ -1,4 +1,4 @@
-import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType } from "./dataTypes";
+import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(requestMap, objectMetaData, args) {
@@ -200,13 +200,13 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
       } else if (queryOperation === "DEC") {
         $inc[prefix + fieldName] = args[k] * -1;
       } else if (queryOperation === "PUSH") {
-        if (field === StringArrayType || field === IntArrayType) {
+        if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
           $push[prefix + fieldName] = args[k];
         } else {
           $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
         }
       } else if (queryOperation === "CONCAT") {
-        if (field === StringArrayType || field === IntArrayType) {
+        if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
           $push[prefix + fieldName] = { $each: args[k] };
         } else {
           $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
