@@ -393,3 +393,55 @@ test("Nested mutation", async () => {
 
   expect(obj).toEqual({ title: "Blog 1", author: { name: "Adam Auth", favoriteTag: { name: "ft", description: "desc" } } });
 });
+
+test("PUSH to author's luckynumbers", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {name: "Adam", luckyNumbers: [0, 1]} }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { luckyNumbers_PUSH: 2 } }){Blog{ author{name, luckyNumbers}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ author: { name: "Adam", luckyNumbers: [0, 1, 2] } });
+});
+
+test("CONCAT to author's luckynumbers", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {name: "Adam", luckyNumbers: [0, 1]} }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { luckyNumbers_CONCAT: [2, 3] } }){Blog{ author{name, luckyNumbers}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ author: { name: "Adam", luckyNumbers: [0, 1, 2, 3] } });
+});
+
+test("PUSH to author's knicknames", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {name: "Adam", knicknames: ["a", "b"]} }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { knicknames_PUSH: "c" } }){Blog{ author{name, knicknames}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ author: { name: "Adam", knicknames: ["a", "b", "c"] } });
+});
+
+test("CONCAT to author's knicknames", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {name: "Adam", knicknames: ["a", "b"]} }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { knicknames_CONCAT: ["c", "d"] } }){Blog{ author{name, knicknames}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({ author: { name: "Adam", knicknames: ["a", "b", "c", "d"] } });
+});
