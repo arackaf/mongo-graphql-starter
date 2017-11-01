@@ -111,7 +111,7 @@ test("Modification mutation works", async () => {
       strArrs: [["d"], ["e", "f"]], 
       createdOn: "2004-06-04", 
       createdOnYearOnly: "2004-06-05"
-    }){
+    }){Book{
       title, 
       pages, 
       weight, 
@@ -126,7 +126,7 @@ test("Modification mutation works", async () => {
       strArrs, 
       createdOn, 
       createdOnYearOnly
-    }`,
+    }}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
@@ -148,7 +148,7 @@ test("Modification mutation works", async () => {
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}}){title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `updateBook(_id: "${obj._id}", Book: {authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
@@ -201,7 +201,7 @@ test("Partial modification mutation works", async () => {
     mutation: `updateBook(_id: "${obj._id}", Book: {
       title: "Book 2a", 
       pages: 101
-    }){
+    }){Book{
       title, 
       pages, 
       weight, 
@@ -216,7 +216,7 @@ test("Partial modification mutation works", async () => {
       strArrs, 
       createdOn, 
       createdOnYearOnly
-    }`,
+    }}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
@@ -238,7 +238,7 @@ test("No modification mutation works", async () => {
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}"){title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `updateBook(_id: "${obj._id}"){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
