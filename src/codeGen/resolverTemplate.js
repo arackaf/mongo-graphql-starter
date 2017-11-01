@@ -53,10 +53,12 @@ export default {
         await db.collection("${table}").update({ _id: ObjectId(args._id) }, updates);
       }
 
-      let requestMap = parseRequestedFields(ast);
+      let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
       
-      return (await db.collection("${table}").aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }]).toArray())[0];
+      return {
+        ${objName}: (await db.collection("${table}").aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }]).toArray())[0]
+      }
     },
     async delete${objName}(root, args, context, ast) {
       if (!args._id){

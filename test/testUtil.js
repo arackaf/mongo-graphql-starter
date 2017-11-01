@@ -46,9 +46,9 @@ export async function runMutation({ schema, db, mutation, variables, result }) {
     throw result + " not found on mutation result";
   }
 
-  let needsReplacing = /^create/.test(result);
+  let needsReplacing = /^create/.test(result) || /^update/.test(result);
   if (needsReplacing) {
-    return mutationResult.data[result][result.replace(/^create/, "")];
+    return mutationResult.data[result][result.replace(/^create/, "").replace(/^update/, "")];
   }
 
   return mutationResult.data[result];

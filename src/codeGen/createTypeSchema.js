@@ -81,7 +81,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
   ${TAB}update${name}(
   ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `${name}: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
-    ): ${name}
+    ): ${name}MutationResult
   
   ${TAB}delete${name}(
   ${TAB2}${[`_id: String`]}
