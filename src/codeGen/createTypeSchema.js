@@ -27,7 +27,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   ${objectToCreate.table
     ? `
   type ${name}QueryResults {
-    ${name}s: [${name}]
+    ${name}s: [${name}],
+    Meta: QueryResultsMetadata
   }
 
   type ${name}SingleQueryResult {
