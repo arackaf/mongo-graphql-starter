@@ -29,7 +29,8 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
     throw msg;
   }
 
-  let res = /^all/.test(coll) ? allResults.data[coll][coll.replace(/^all/, "")] : allResults.data[coll];
+  let needsReplacing = /^all/.test(coll) || /^get/.test(coll);
+  let res = needsReplacing ? allResults.data[coll][coll.replace(/^all/, "").replace(/^get/, "")] : allResults.data[coll];
 
   expect(res).toEqual(results);
 }
@@ -41,9 +42,14 @@ export async function runMutation({ schema, db, mutation, variables, result }) {
     throw "Failed with \n\n" + mutationResult.errors;
   }
 
-  if (mutationResult.data && mutationResult.data[result]) {
-    return mutationResult.data[result];
-  } else {
+  if (!(mutationResult.data && mutationResult.data[result])) {
     throw result + " not found on mutation result";
   }
+
+  let needsReplacing = /^create/.test(result);
+  if (needsReplacing) {
+    return mutationResult.data[result][result.replace(/^create/, "")];
+  }
+
+  return mutationResult.data[result];
 }

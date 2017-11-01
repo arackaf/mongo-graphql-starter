@@ -13,7 +13,7 @@ afterAll(async () => {
 
 test("Create minimal object", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){title, content, comments{text}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){Blog{title, content, comments{text}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: null });
@@ -21,16 +21,16 @@ test("Create minimal object", async () => {
 
 test("_id added automatically", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello"}){Blog{_id}}`,
     result: "createBlog"
   });
 
-  await queryAndMatchArray({ schema, db, query: `{getBlog(_id: "${obj._id}"){title}}`, coll: "getBlog", results: { title: "Blog 1" } });
+  await queryAndMatchArray({ schema, db, query: `{getBlog(_id: "${obj._id}"){Blog{title}}}`, coll: "getBlog", results: { title: "Blog 1" } });
 });
 
 test("Add comment", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1"}]}){title, content, comments{text}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1"}]}){Blog{title, content, comments{text}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1" }] });
@@ -38,7 +38,7 @@ test("Add comment", async () => {
 
 test("Add author to comment", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22"}}]}){title, content, comments{text, author{name, birthday}}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22"}}]}){Blog{title, content, comments{text, author{name, birthday}}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({ title: "Blog 1", content: "Hello", comments: [{ text: "C1", author: { name: "Adam", birthday: "03/22/1982" } }] });
@@ -46,7 +46,7 @@ test("Add author to comment", async () => {
 
 test("Add tags to author", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"}, {name: "t2"}]}}]}){title, content, comments{text, author{name, birthday, tagsSubscribed{name}}}}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", content: "Hello", comments: [{text: "C1", author: {name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"}, {name: "t2"}]}}]}){Blog{title, content, comments{text, author{name, birthday, tagsSubscribed{name}}}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({
@@ -75,7 +75,7 @@ test("Add reviewers with tags to author", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", tagsSubscribed: [{name: "t1"},  {name: "t2"}]} 
         }]
-      }){title, content, comments{text, reviewers{name, birthday, tagsSubscribed{name}}, author{name, birthday, tagsSubscribed{name}}}}`,
+      }){Blog{title, content, comments{text, reviewers{name, birthday, tagsSubscribed{name}}, author{name, birthday, tagsSubscribed{name}}}}}`,
     result: "createBlog"
   });
   expect(obj).toEqual({
@@ -114,7 +114,7 @@ test("Add favorite tag to author and reviewers reviewers with tags to author", a
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      }){
+      }){Blog{
         title, 
         content, 
         author{
@@ -147,7 +147,7 @@ test("Add favorite tag to author and reviewers reviewers with tags to author", a
             }
           }
         }
-      }`,
+      }}`,
     result: "createBlog"
   });
   expect(obj).toEqual({

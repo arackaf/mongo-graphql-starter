@@ -29,6 +29,14 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   type ${name}QueryResults {
     ${name}s: [${name}]
   }
+
+  type ${name}SingleQueryResult {
+    ${name}: ${name}
+  }
+
+  type ${name}MutationResult {
+    ${name}: ${name}
+  }
 `
     : ""}
   input ${name}Input {
@@ -69,7 +77,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
   ${TAB}create${name}(
   ${TAB2}${[`${name}: ${name}Input`].join(`,\n${TAB2}`)}
-    ): ${name}
+    ): ${name}MutationResult
   
   ${TAB}update${name}(
   ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `${name}: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
@@ -93,7 +101,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
   ${TAB}get${name}(
   ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}${TAB}`)}
-    ): ${name}
+    ): ${name}SingleQueryResult
   
   \`;
   

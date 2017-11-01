@@ -31,12 +31,12 @@ test("Deep querying 1", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      }){_id}`,
+      }){Blog{_id}}`,
     result: "createBlog"
   });
 
   await queryAndMatchArray({
-    query: `{getBlog(_id: "${obj._id}"){
+    query: `{getBlog(_id: "${obj._id}"){Blog{
       title, 
       content, 
       author{
@@ -69,7 +69,7 @@ test("Deep querying 1", async () => {
           }
         }
       }
-    }}`,
+    }}}`,
     coll: "getBlog",
     results: {
       title: "Blog 1",
@@ -109,12 +109,12 @@ test("Deep querying 2", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      }){_id}`,
+      }){Blog{_id}}`,
     result: "createBlog"
   });
 
   await queryAndMatchArray({
-    query: `{getBlog(_id: "${obj._id}"){
+    query: `{getBlog(_id: "${obj._id}"){Blog{
       title, 
       content, 
       author{
@@ -146,7 +146,7 @@ test("Deep querying 2", async () => {
           }
         }
       }
-    }}`,
+    }}}`,
     coll: "getBlog",
     results: {
       title: "Blog 1",
@@ -186,12 +186,12 @@ test("Deep querying 3", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      }){_id}`,
+      }){Blog{_id}}`,
     result: "createBlog"
   });
 
   await queryAndMatchArray({
-    query: `{getBlog(_id: "${obj._id}"){
+    query: `{getBlog(_id: "${obj._id}"){Blog{
       title, 
       content, 
       author{
@@ -211,7 +211,7 @@ test("Deep querying 3", async () => {
           name
         }
       }
-    }}`,
+    }}}`,
     coll: "getBlog",
     results: {
       title: "Blog 1",
@@ -251,12 +251,12 @@ test("Deep querying 4", async () => {
           }],
           author: { name: "Adam", birthday: "1982-03-22", favoriteTag: {name: "tf"}, tagsSubscribed: [{name: "t1"}, {name: "t2"}]} 
         }]
-      }){_id}`,
+      }){Blog{_id}}`,
     result: "createBlog"
   });
 
   await queryAndMatchArray({
-    query: `{getBlog(_id: "${obj._id}"){
+    query: `{getBlog(_id: "${obj._id}"){Blog{
       title, 
       content, 
       author{
@@ -278,7 +278,7 @@ test("Deep querying 4", async () => {
           }
         }
       }
-    }}`,
+    }}}`,
     coll: "getBlog",
     results: {
       title: "Blog 1",

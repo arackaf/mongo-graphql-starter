@@ -13,7 +13,7 @@ afterAll(async () => {
 
 test("Basic increment", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -27,7 +27,7 @@ test("Basic increment", async () => {
 
 test("Basic increment 2", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -41,7 +41,7 @@ test("Basic increment 2", async () => {
 
 test("Basic decrement", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -55,7 +55,7 @@ test("Basic decrement", async () => {
 
 test("Basic decrement 2", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -69,7 +69,7 @@ test("Basic decrement 2", async () => {
 
 test("Push new comment", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -82,7 +82,7 @@ test("Push new comment", async () => {
 
 test("Concat new comments", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -95,7 +95,7 @@ test("Concat new comments", async () => {
 
 test("Update comment", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -108,7 +108,7 @@ test("Update comment", async () => {
 
 test("Update comment 2", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", upVotes: 2}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", upVotes: 2}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -121,7 +121,7 @@ test("Update comment 2", async () => {
 
 test("Update comment 3", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", upVotes: 2}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", upVotes: 2}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -134,7 +134,7 @@ test("Update comment 3", async () => {
 
 test("Update comment's author", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam"}}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam"}}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -147,7 +147,7 @@ test("Update comment's author", async () => {
 
 test("Update comment's author - add favorite tag", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam"}}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam"}}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -163,7 +163,7 @@ test("Update comment's author - add favorite tag", async () => {
 
 test("Update comment's author's favorite tag", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft"}}}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft"}}}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -179,7 +179,7 @@ test("Update comment's author's favorite tag", async () => {
 
 test("Update comment's author's favorite tag 2", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft", timesUsed: 2}}}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft", timesUsed: 2}}}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -195,7 +195,7 @@ test("Update comment's author's favorite tag 2", async () => {
 
 test("Update deep author info 1", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft"}, tagsSubscribed: [{name: "t1"}]}}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft"}, tagsSubscribed: [{name: "t1"}]}}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -221,7 +221,7 @@ test("Update deep author info 1", async () => {
 
 test("Update deep author info 2", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft"}, tagsSubscribed: [{name: "t1"}]}}]}){_id}`,
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1", author: {name: "Adam", favoriteTag: {name: "ft"}, tagsSubscribed: [{name: "t1"}]}}]}){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -259,7 +259,7 @@ test("Update deep author info 3", async () => {
             }
           }
         ]
-      }){_id}`,
+      }){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -317,7 +317,7 @@ test("Update deep author info 4", async () => {
           tagsSubscribed: []
         }
       }]
-    }){_id}`,
+    }){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -354,7 +354,7 @@ test("Update deep author info 4", async () => {
 
 test("Add mutate author - add favorite tag and birthday", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth"} }){ _id }`,
+    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth"} }){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -368,7 +368,7 @@ test("Add mutate author - add favorite tag and birthday", async () => {
 
 test("Add mutate author - add favorite tag and birthday", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth", birthday: "2004-06-02"} }){ _id }`,
+    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth", birthday: "2004-06-02"} }){Blog{_id}}`,
     result: "createBlog"
   });
 
@@ -382,7 +382,7 @@ test("Add mutate author - add favorite tag and birthday", async () => {
 
 test("Nested mutation", async () => {
   let obj = await runMutation({
-    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth", favoriteTag: { name: "ft" }} }){ _id }`,
+    mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth", favoriteTag: { name: "ft" }} }){Blog{_id}}`,
     result: "createBlog"
   });
 

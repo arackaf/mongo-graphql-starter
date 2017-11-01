@@ -23,11 +23,11 @@ afterAll(async () => {
 });
 
 test("Match single", async () => {
-  await queryAndMatchArray({ query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){title}}`, coll: "getBook", results: { title: "Book 1" } });
+  await queryAndMatchArray({ query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){Book{title}}}`, coll: "getBook", results: { title: "Book 1" } });
 });
 
 test("Match single 2", async () => {
-  await queryAndMatchArray({ query: `{getBook(_id: "59e41fc694dc6983d41deed1"){title}}`, coll: "getBook", results: { title: "Book 2" } });
+  await queryAndMatchArray({ query: `{getBook(_id: "59e41fc694dc6983d41deed1"){Book{title}}}`, coll: "getBook", results: { title: "Book 2" } });
 });
 
 test("Match single", async () => {
@@ -40,7 +40,7 @@ test("Match single", async () => {
 
 test("Match single with date", async () => {
   await queryAndMatchArray({
-    query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){createdOn}}`,
+    query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){Book{createdOn}}}`,
     coll: "getBook",
     results: { createdOn: "06/02/2004" }
   });
@@ -48,7 +48,7 @@ test("Match single with date", async () => {
 
 test("Match single with date and manual format", async () => {
   await queryAndMatchArray({
-    query: `{getBook(_id: "59e3dbdf94dc6983d41deece", createdOn_format: "%m"){createdOn}}`,
+    query: `{getBook(_id: "59e3dbdf94dc6983d41deece", createdOn_format: "%m"){Book{createdOn}}}`,
     coll: "getBook",
     results: { createdOn: "06" }
   });
@@ -56,7 +56,7 @@ test("Match single with date and manual format", async () => {
 
 test("Match single with year-only date", async () => {
   await queryAndMatchArray({
-    query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){createdOnYearOnly}}`,
+    query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){Book{createdOnYearOnly}}}`,
     coll: "getBook",
     results: { createdOnYearOnly: "2004" }
   });
@@ -64,7 +64,7 @@ test("Match single with year-only date", async () => {
 
 test("Match single with year-only date and manual format", async () => {
   await queryAndMatchArray({
-    query: `{getBook(_id: "59e3dbdf94dc6983d41deece", createdOnYearOnly_format: "%m"){createdOnYearOnly}}`,
+    query: `{getBook(_id: "59e3dbdf94dc6983d41deece", createdOnYearOnly_format: "%m"){Book{createdOnYearOnly}}}`,
     coll: "getBook",
     results: { createdOnYearOnly: "06" }
   });

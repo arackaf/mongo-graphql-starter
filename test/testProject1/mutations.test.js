@@ -12,27 +12,27 @@ afterAll(async () => {
 });
 
 test("Creation mutation runs", async () => {
-  await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){title, pages}`, result: "createBook" });
+  await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}`, result: "createBook" });
 });
 
 test("Creation mutation runs and returns object", async () => {
-  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 2", pages: 100}){title, pages}`, result: "createBook" });
+  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 2", pages: 100}){Book{title, pages}}`, result: "createBook" });
   expect(obj).toEqual({ title: "Book 2", pages: 100 });
 });
 
 test("Creation mutation runs and returns object, then searched with graphQL", async () => {
-  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 3", pages: 150}){_id}`, result: "createBook" });
+  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 3", pages: 150}){Book{_id}}`, result: "createBook" });
   await queryAndMatchArray({
-    query: `{getBook(_id: "${obj._id}"){title, pages}}`,
+    query: `{getBook(_id: "${obj._id}"){Book{title, pages}}}`,
     coll: "getBook",
     results: { title: "Book 3", pages: 150 }
   });
 });
 
 test("Creation mutation runs and returns object, then searched with graphQL. Check non-created fields", async () => {
-  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 3", pages: 150}){_id}`, result: "createBook" });
+  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 3", pages: 150}){Book{_id}}`, result: "createBook" });
   await queryAndMatchArray({
-    query: `{getBook(_id: "${obj._id}"){title, pages, weight}}`,
+    query: `{getBook(_id: "${obj._id}"){Book{title, pages, weight}}}`,
     coll: "getBook",
     results: { title: "Book 3", pages: 150, weight: null }
   });
@@ -40,7 +40,7 @@ test("Creation mutation runs and returns object, then searched with graphQL. Che
 
 test("Creation mutation runs and returns object with formatting", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "createBook"
   });
   expect(obj).toEqual({
@@ -78,7 +78,7 @@ test("Modification mutation works", async () => {
       strArrs: [["a"], ["b", "c"]], 
       createdOn: "2004-06-03", 
       createdOnYearOnly: "2004-06-03"
-    }){
+    }){Book{
       _id, 
       title, 
       pages, 
@@ -94,7 +94,7 @@ test("Modification mutation works", async () => {
       strArrs, 
       createdOn, 
       createdOnYearOnly
-    }`,
+    }}`,
     result: "createBook"
   });
 
@@ -143,7 +143,7 @@ test("Modification mutation works", async () => {
 
 test("Modification mutation works", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {authors: [{birthday: "1982-03-22", name: "Adam"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}}){_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `createBook(Book: {authors: [{birthday: "1982-03-22", name: "Adam"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}}){Book{_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "createBook"
   });
 
@@ -177,7 +177,7 @@ test("Partial modification mutation works", async () => {
       strArrs: [["a"], ["b", "c"]], 
       createdOn: "2004-06-03", 
       createdOnYearOnly: "2004-06-03"
-    }){
+    }){Book{
       _id, 
       title, 
       pages, 
@@ -193,7 +193,7 @@ test("Partial modification mutation works", async () => {
       strArrs, 
       createdOn, 
       createdOnYearOnly
-    }`,
+    }}`,
     result: "createBook"
   });
 
@@ -233,7 +233,7 @@ test("Partial modification mutation works", async () => {
 
 test("No modification mutation works", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}`,
+    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){Book{_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "createBook"
   });
 
