@@ -6,7 +6,7 @@ const localConn = "mongodb://localhost:27017/mongo-graphql-starter";
 
 export const nextConnectionString = () => localConn + "-" + connectionUid++;
 
-export async function queryAndMatchArray({ schema, db, query, variables, coll, results }) {
+export async function queryAndMatchArray({ schema, db, query, variables, coll, results, meta }) {
   let allResults = await graphql(schema, query, { db });
 
   if (!allResults.data || allResults.data[coll] === void 0) {
@@ -19,7 +19,7 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
       } catch (err) {}
     }
     throw msg;
-  } else if (allResults.data && allResults.data[coll] === null && results !== null) {
+  } else if (allResults.data && allResults.data[coll] == null && results != null) {
     let msg = "Null came back unexpectadly on filter";
     try {
       msg += "\n\n" + JSON.parse(allResults);
@@ -29,10 +29,17 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
     throw msg;
   }
 
-  let needsReplacing = /^all/.test(coll) || /^get/.test(coll);
-  let res = needsReplacing ? allResults.data[coll][coll.replace(/^all/, "").replace(/^get/, "")] : allResults.data[coll];
+  if (results != null) {
+    let needsReplacing = /^all/.test(coll) || /^get/.test(coll);
+    let res = needsReplacing ? allResults.data[coll][coll.replace(/^all/, "").replace(/^get/, "")] : allResults.data[coll];
 
-  expect(res).toEqual(results);
+    expect(res).toEqual(results);
+  }
+
+  if (meta != null) {
+    let metaResult = allResults.data[coll].Meta;
+    expect(meta).toEqual(metaResult);
+  }
 }
 
 export async function runMutation({ schema, db, mutation, variables, result }) {

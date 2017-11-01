@@ -109,6 +109,8 @@ export function parseRequestedFields(ast, queryName) {
 
   if (fieldNode) {
     return getSelections(fieldNode);
+  } else {
+    return new Map();
   }
 }
 
@@ -138,7 +140,11 @@ export function newObjectFromArgs(args, typeMetadata) {
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
   let requestMap = parseRequestedFields(ast, queryName);
-  let $project = getMongoProjection(requestMap, objectMetaData, args);
+  let metadataRequested = parseRequestedFields(ast, "Meta");
+  let $project = null;
+  if (requestMap.size) {
+    $project = getMongoProjection(requestMap, objectMetaData, args);
+  }
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
@@ -162,7 +168,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
   }
 
-  return { $match, $project, $sort, $limit, $skip };
+  return { $match, $project, $sort, $limit, $skip, metadataRequested };
 }
 
 export function getUpdateObject(args, typeMetadata) {
@@ -220,4 +226,30 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
       }
     }
   });
+}
+
+async function f() {
+  let aggregateItems = [
+    { $match },
+    { $project },
+    $sort ? { $sort } : null,
+    $skip != null ? { $skip } : null,
+    $limit != null ? { $limit } : null
+  ].filter(item => item);
+
+  let aggregateItems = [
+    { $match },
+    { $project },
+    $sort ? { $sort } : null,
+    $skip != null ? { $skip } : null,
+    $limit != null ? { $limit } : null
+  ].filter(item => item);
+
+  let { $match, $project, $sort, $limit, $skip, metadataRequested } = await middleware.process(
+    decontructGraphqlQuery(args, ast, objName, "${objName}sssssssssssssssssss"),
+    root,
+    args,
+    context,
+    ast
+  );
 }
