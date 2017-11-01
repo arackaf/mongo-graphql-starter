@@ -1,4 +1,4 @@
-import { MongoIdType, StringType, StringArrayType, IntType, IntArrayType, FloatType, DateType, arrayOf } from "../dataTypes";
+import { MongoIdType, StringType, StringArrayType, IntType, IntArrayType, FloatType, FloatArrayType, DateType, arrayOf } from "../dataTypes";
 import { TAB } from "./utilities";
 
 export default function createGraphqlTypeSchema(objectToCreate) {
@@ -120,6 +120,8 @@ function displaySchemaValue(value, useInputs) {
         return "[String]";
       case IntArrayType:
         return "[Int]";
+      case FloatArrayType:
+        return "[Float]";
       default:
         return `${value == MongoIdType || value == DateType ? "String" : value}`;
     }
@@ -148,6 +150,8 @@ function getMutations(k, fields) {
       return [`${k}: [String]`, `${k}_PUSH: String`, `${k}_CONCAT: [String]`];
     } else if (value === IntArrayType) {
       return [`${k}: [Int]`, `${k}_PUSH: Int`, `${k}_CONCAT: [Int]`];
+    } else if (value === FloatArrayType) {
+      return [`${k}: [Float]`, `${k}_PUSH: Float`, `${k}_CONCAT: [Float]`];
     }
 
     return [`${k}: String`];
@@ -188,6 +192,9 @@ function queriesForField(fieldName, realFieldType) {
       break;
     case IntArrayType:
       result.push(...[`${fieldName}: [Int]`, `${fieldName}_in: [[Int]]`, `${fieldName}_contains: Int`]);
+      break;
+    case FloatArrayType:
+      result.push(...[`${fieldName}: [Float]`, `${fieldName}_in: [[Float]]`, `${fieldName}_contains: Float`]);
       break;
   }
 
