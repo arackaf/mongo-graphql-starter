@@ -21,16 +21,18 @@ For any type which is contained in a Mongo collection—ie has a `table` propert
 **projectSetupA.js**
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { 
-  MongoIdType, 
-  StringType, 
-  IntType, 
-  FloatType, 
-  DateType, 
-  arrayOf, 
-  objectOf, 
-  formattedDate, 
-  typeLiteral 
+const {
+  MongoIdType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  DateType,
+  arrayOf,
+  objectOf,
+  formattedDate,
+  typeLiteral
 } = dataTypes;
 
 const Author = {
@@ -47,6 +49,8 @@ const Book = {
     title: StringType,
     pages: IntType,
     weight: FloatType,
+    keywords: StringArrayType,
+    editions: IntArrayType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
@@ -125,16 +129,18 @@ Here are the valid types you can import from `mongo-graphql-starter`
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { 
-  MongoIdType, 
-  StringType, 
-  IntType, 
-  FloatType, 
-  DateType, 
-  arrayOf, 
-  objectOf, 
-  formattedDate, 
-  typeLiteral 
+const {
+  MongoIdType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  DateType,
+  arrayOf,
+  objectOf,
+  formattedDate,
+  typeLiteral
 } = dataTypes;
 ```
 
@@ -142,7 +148,9 @@ Type|Description
 ----|-----------
 `MongoId`|Will create your field as a string, and will return whatever Mongo uid that was created.  Any filters using this id will wrap the string in Mongo's `ObjectId` function.
 `String`|Self explanatory
+`StringArrayType`|An array of strings
 `Int`|Self explanatory
+`IntArrayType`|An array of integers
 `Float`|Self explanatory
 `Date`|Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo.  Moreoever, querying this date will by default format it as `MM/DD/YYYY`.  To override this, use `formattedDate`. 
 `formattedDate`|Function: Pass it an object with a format property to create a date field with that (Mongo) format.  For example, `createdOnYearOnly: formattedDate({ format: "%Y" })`
@@ -199,27 +207,21 @@ test("Circular dependencies work", async () => {
   let tag = await runMutation({ 
     schema, 
     db, 
-    mutation: `createTag(Tag: {tagName: "JavaScript"}){_id}`, 
+    mutation: `createTag(Tag: {tagName: "JavaScript"}){Tag{_id}}`, 
     result: "createTag" 
   });
-  let author = await runMutation({ schema, db, result: "createAuthor"
-    mutation: `createAuthor(Author: { 
-      name: "Adam", 
-      tags: [{_id: "${tag._id}", tagName: "${tag.tagName}"}]
-    }){_id, name}`,
+  let author = await runMutation({
+    mutation: `createAuthor(Author: { name: "Adam", tags: [{_id: "${tag._id}", tagName: "${tag.tagName}"}]}){Author{_id, name}}`,
+    result: "createAuthor"
   });
 
-  await runMutation({ schema, db, result: "updateTag"
-    mutation: `updateTag(_id: "${tag._id}", 
-      Tag: { 
-        authors: [{_id: "${author._id}", name: "${author.name}"}]
-      }){_id}`,
+  await runMutation({
+    mutation: `updateTag(_id: "${tag._id}", Tag: { authors: [{_id: "${author._id}", name: "${author.name}"}]}){Tag{_id}}`,
+    result: "updateTag"
   });
 
   await queryAndMatchArray({
-    schema,
-    db,
-    query: `{getTag(_id: "${tag._id}"){tagName, authors{ _id, name }}}`,
+    query: `{getTag(_id: "${tag._id}"){Tag{tagName, authors{ _id, name }}}}`,
     coll: "getTag",
     results: { tagName: "JavaScript", authors: [{ _id: author._id, name: "Adam" }] }
   });
@@ -228,13 +230,33 @@ test("Circular dependencies work", async () => {
 
 ## Queries created
 
-For each queryable type, there will be a `get<Type>` query which receives an `_id` argument, and returns the single, matching object; as well as an `all<Type>s` query which receives filters for each field, described below, and returns an array of matching results.
+For each queryable type, there will be a `get<Type>` query which receives an `_id` argument, and returns the single, matching object keyed under `<Type>`. 
+
+For example
+
+```javascript
+{getBook(_id: "59e3dbdf94dc6983d41deece"){Book{createdOn}}}
+```
+
+Will retrieve that book, bringing back only the createdOn field.
+
+---
+
+There is also an `all<Type>s` query which receives filters for each field, described below, and returns an array of matching results under `<Type>s`, as well as a Meta object which has a count property, and if specified, will retrieve the record count for the entire query, beyond just the current page.
+
+For example
+
+```javascript
+{allBooks(SORT: {title: 1}, PAGE: 1, PAGE_SIZE: 5){Books{title}, Meta{count}}}
+```
+
+Will retrieve the first page of books' titles, as well as the `count` of all books matching whatever filters were specified in the query (in this case there were none).
 
 ## All filters available
 
 This section describes the filters available in the `all<Type>s` query for each queryable type.
 
-string, int, float, MongoId and date fields will all have the following filters created
+string, stringArray, int, intArray, float, MongoId and date fields will all have the following filters created
 
 Exact match
 
@@ -242,9 +264,9 @@ Exact match
 
 In match
 
-`field_in: [<value1>, <value2>]` - will match results which match any of those exact values
+`field_in: [<value1>, <value2>]` - will match results which match any of those exact values.  
 
-Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.
+Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For string and int arrays, the value will be an entire array, which will be matched by Mongo item by item.
 
 ### String filters
 
@@ -256,6 +278,14 @@ String contains|`title_contains: "My"` - will match results with the string `My`
 String starts with|`title_startsWith: "My"` - will match results that start with the string `My`, case insensitively. 
 String ends with|`title_endsWith: "title"` - will match results that end with the string `title`, case insensitively. 
 
+### String array filters
+
+If your field is named `keywords` then the following filters will be available
+
+Filter|Description
+------|-----------
+String array contains|`keywords_contains: "JavaScript"` - will match results with an array containing the string `JavaScript`. 
+
 ### Int filters
 
 If your field is named `pages` then the following filters will be available
@@ -266,6 +296,14 @@ Less than|`pages_lt: 200` - will match results where `pages` is less than 200
 Less than or equal|`pages_lte: 200` - will match results where `pages` is less than or equal to 200 
 Greater than|`pages_gt: 200` - will match results where `pages` is greater than 200 
 Greater than or equal|`pages_gte: 200` - will match results where `pages` is greater than or equal to 200 
+
+### Int array filters
+
+If your field is named `editions` then the following filters will be available
+
+Filter|Description
+------|-----------
+Int array contains|`editions_contains: 2` - will match results with an array containing the value `2`. 
 
 ### Float filters
 
@@ -311,11 +349,13 @@ Combining filters with Mongo's `$or` is easy.  Just use the same API, but with `
       {title: "Book 1", pages: 100}, 
       {title_contains: "ook", OR: [{weight_gt: 2}, {pages_lt: 0}]}
     ]
-  ) {
-    _id
-    title
-    pages
-    weight
+  ) { 
+    Book {
+      _id
+      title
+      pages
+      weight
+    }
   }
 }
 ```
@@ -352,7 +392,7 @@ For example
     } 
   }, 
   SORT: {title: 1}
-){ title }}
+){ Blogs{ title }}}
 ```
 
 Will query blogs that have at least one comment which has 4 upvotes, and also has an author with either a name of "CA 3", or a favoriteTag with a name of "T1"
@@ -369,7 +409,7 @@ Or you could do
     ]
   }, 
   SORT: {title: 1}
-){ title }}
+){ Blogs{ title }}}
 ```
 
 which is identical.
@@ -502,14 +542,14 @@ test("Deep querying 4", async () => {
             tagsSubscribed: [{name: "t1"}, {name: "t2"}]
           } 
         }]
-      ){_id}`,
+      ){Blog{_id}}`,
     result: "createBlog"
   });
 
   await queryAndMatchArray({
     schema,
     db,
-    query: `{getBlog(_id: "${obj._id}"){
+    query: `{getBlog(_id: "${obj._id}"){Blog{
       title, 
       content, 
       author{
@@ -531,7 +571,7 @@ test("Deep querying 4", async () => {
           }
         }
       }
-    }}`,
+    }}}`,
     coll: "getBlog",
     results: {
       title: "Blog 1",
