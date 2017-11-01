@@ -144,7 +144,12 @@ function getMutations(k, fields) {
       return [`${k}: Int`, `${k}_INC: Int`, `${k}_DEC: Int`];
     } else if (value === "Float") {
       return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
+    } else if (value === StringArrayType) {
+      return [`${k}: [String]`, `${k}_PUSH: String`, `${k}_CONCAT: [String]`];
+    } else if (value === IntArrayType) {
+      return [`${k}: [Int]`, `${k}_PUSH: Int`, `${k}_CONCAT: [Int]`];
     }
+
     return [`${k}: String`];
   } else if (typeof value === "object") {
     if (value.__isArray) {

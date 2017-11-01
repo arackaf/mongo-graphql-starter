@@ -200,9 +200,17 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
       } else if (queryOperation === "DEC") {
         $inc[prefix + fieldName] = args[k] * -1;
       } else if (queryOperation === "PUSH") {
-        $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
+        if (field === StringArrayType || field === IntArrayType) {
+          $push[prefix + fieldName] = args[k];
+        } else {
+          $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
+        }
       } else if (queryOperation === "CONCAT") {
-        $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+        if (field === StringArrayType || field === IntArrayType) {
+          $push[prefix + fieldName] = { $each: args[k] };
+        } else {
+          $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+        }
       } else if (queryOperation === "UPDATE") {
         if (field.__isArray) {
           getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push);
@@ -226,30 +234,4 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
       }
     }
   });
-}
-
-async function f() {
-  let aggregateItems = [
-    { $match },
-    { $project },
-    $sort ? { $sort } : null,
-    $skip != null ? { $skip } : null,
-    $limit != null ? { $limit } : null
-  ].filter(item => item);
-
-  let aggregateItems = [
-    { $match },
-    { $project },
-    $sort ? { $sort } : null,
-    $skip != null ? { $skip } : null,
-    $limit != null ? { $limit } : null
-  ].filter(item => item);
-
-  let { $match, $project, $sort, $limit, $skip, metadataRequested } = await middleware.process(
-    decontructGraphqlQuery(args, ast, objName, "${objName}sssssssssssssssssss"),
-    root,
-    args,
-    context,
-    ast
-  );
 }
