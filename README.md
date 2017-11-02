@@ -456,155 +456,7 @@ Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$sk
 
 ## Projecting results from queries
 
-Use standard GraphQL syntax to select only the fields you want from your query.  The incoming ast will be parsed, and the generated query will only pull what was requested.  This applies to nested fields as well.  For example, with this project setup
-
-```javascript
-import { dataTypes } from "mongo-graphql-starter";
-const { 
-  MongoIdType, 
-  StringType, 
-  IntType, 
-  FloatType, 
-  DateType, 
-  arrayOf, 
-  objectOf, 
-  formattedDate, 
-  typeLiteral 
-} = dataTypes;
-
-const Subject = {
-  table: "subjects",
-  fields: {
-    _id: MongoIdType,
-    name: StringType
-  }
-};
-
-const Tag = {
-  fields: {
-    name: StringType
-  }
-};
-
-const User = {
-  fields: {
-    name: StringType,
-    birthday: DateType,
-    tagsSubscribed: arrayOf(Tag),
-    favoriteTag: objectOf(Tag)
-  }
-};
-
-const Comment = {
-  fields: {
-    text: StringType,
-    upVotes: IntType,
-    downVotes: IntType,
-    author: objectOf(User),
-    reviewers: arrayOf(User)
-  }
-};
-
-const Blog = {
-  table: "blogs",
-  fields: {
-    author: objectOf(User),
-    title: StringType,
-    content: StringType,
-    comments: arrayOf(Comment)
-  }
-};
-
-export default {
-  User,
-  Blog,
-  Comment,
-  Tag
-};
-```
-
-This unit test demonstrates the degree to which you can select nested field values
-
-```javascript
-test("Deep querying 4", async () => {
-  let obj = await runMutation({
-    schema,
-    db,
-    mutation: `
-      createBlog(
-        title: "Blog 1", 
-        content: "Hello", 
-        author: { 
-          name: "Adam Auth", 
-          birthday: "2004-06-02", 
-          favoriteTag: {name: "tf"}, 
-          tagsSubscribed: [{name: "t1"}, {name: "t2"}]
-        },
-        comments: [{
-          text: "C1", 
-          reviewers: [{
-            name: "Adam", 
-            birthday: "1982-03-22", 
-            tagsSubscribed: [{name: "t1"}, {name: "t2"}]
-          }, {
-            name: "Adam2", 
-            birthday: "1982-03-23", 
-            tagsSubscribed: [{name: "t3"}, {name: "t4"}]
-          }],
-          author: { 
-            name: "Adam", 
-            birthday: "1982-03-22", 
-            favoriteTag: {name: "tf"}, 
-            tagsSubscribed: [{name: "t1"}, {name: "t2"}]
-          } 
-        }]
-      ){Blog{_id}}`,
-    result: "createBlog"
-  });
-
-  await queryAndMatchArray({
-    schema,
-    db,
-    query: `{getBlog(_id: "${obj._id}"){Blog{
-      title, 
-      content, 
-      author{
-        favoriteTag{
-          name
-        }, 
-        tagsSubscribed{
-          name
-        }
-      }, 
-      comments{
-        text,
-        author{
-          favoriteTag{
-            name
-          }, 
-          tagsSubscribed{
-            name
-          }
-        }
-      }
-    }}}`,
-    coll: "getBlog",
-    results: {
-      title: "Blog 1",
-      content: "Hello",
-      author: { favoriteTag: { name: "tf" }, tagsSubscribed: [{ name: "t1" }, { name: "t2" }] },
-      comments: [
-        {
-          text: "C1",
-          author: { favoriteTag: { name: "tf" }, tagsSubscribed: [{ name: "t1" }, { name: "t2" }] }
-        }
-      ]
-    }
-  });
-});
-```
-
-For more examples, check out [the full test suite](test/testProject2/richQuerying.test.js)
+Use standard GraphQL syntax to select only the fields you want from your query.  The incoming ast will be parsed, and the generated query will only pull what was requested.  This applies to nested fields as well.  For example, given [this GraphQL setup](test/projectSetupB.js), [this unit test](test/testProject2/richQuerying.test.js#L234), and the others in the suite demonstrate the degree to which you can select nested field values.
 
 ## Mutations
 
@@ -636,8 +488,8 @@ Argument|For types|Description
 `<fieldName>_DEC`|Numeric|Decrements the current value by the amount specified.  For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.
 `<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.  Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.
 `<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added.
-`<fieldName>_UPDATE`|Arrays|Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specific `field_INC`, `field_PUSH`, etc, recursively. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.
-`<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.
+`<fieldName>_UPDATE`|Arrays|**For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For IntArrays, FloatArrays, or StringArrays**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type.  Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`
+`<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.
 `<fieldName>_UPDATE`|Objects|Implements the specified changes on the nested object.  The provided update object is of the same form specified here.  For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2
 
 Full examples are below.
