@@ -22,7 +22,7 @@ afterAll(async () => {
 
 test("Basic date match", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly: "2004-06-02T03:00:10"){title}}`,
+    query: `{allBooks(createdOnYearOnly: "2004-06-02T03:00:10"){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 7" }]
   });
@@ -30,7 +30,7 @@ test("Basic date match", async () => {
 
 test("Date in", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly_in: ["2004-06-02T03:00:09", "2004-06-02T03:00:10", "2004-06-02T03:00:11"]){title}}`,
+    query: `{allBooks(createdOnYearOnly_in: ["2004-06-02T03:00:09", "2004-06-02T03:00:10", "2004-06-02T03:00:11"]){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 7" }]
   });
@@ -38,7 +38,7 @@ test("Date in", async () => {
 
 test("Date lt", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly_lt: "2004-06-02T01:30:10"){title}}`,
+    query: `{allBooks(createdOnYearOnly_lt: "2004-06-02T01:30:10"){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 1" }]
   });
@@ -46,7 +46,7 @@ test("Date lt", async () => {
 
 test("Date lte", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly_lte: "2004-06-02T01:30:10", SORT: {title: 1}){title}}`,
+    query: `{allBooks(createdOnYearOnly_lte: "2004-06-02T01:30:10", SORT: {title: 1}){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 1" }, { title: "Book 2" }]
   });
@@ -54,7 +54,7 @@ test("Date lte", async () => {
 
 test("Date gt", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly_gt: "2004-06-02T03:00:10"){title}}`,
+    query: `{allBooks(createdOnYearOnly_gt: "2004-06-02T03:00:10"){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 8" }]
   });
@@ -62,7 +62,7 @@ test("Date gt", async () => {
 
 test("Date gte", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly_gte: "2004-06-02T03:00:10", SORT: {title: 1}){title}}`,
+    query: `{allBooks(createdOnYearOnly_gte: "2004-06-02T03:00:10", SORT: {title: 1}){Books{title}}}`,
     coll: "allBooks",
     results: [{ title: "Book 7" }, { title: "Book 8" }]
   });

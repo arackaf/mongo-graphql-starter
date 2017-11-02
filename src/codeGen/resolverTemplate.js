@@ -9,32 +9,79 @@ export default {
     async all${objName}s(root, args, context, ast) {
       await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      let { $match, $project, $sort, $limit, $skip } = await middleware.process(decontructGraphqlQuery(args, ast, ${objName}), root, args, context, ast);
-      let aggregateItems = [{ $match }, { $project }].concat([
-        $sort ? { $sort } : null, 
-        $skip != null ? { $skip } : null, 
-        $limit != null ? { $limit } : null
-      ].filter(item => item));
-    
-      return (await db.collection("${table}").aggregate(aggregateItems)).toArray();
+      let { $match, $project, $sort, $limit, $skip, metadataRequested } = await middleware.process(
+        decontructGraphqlQuery(args, ast, ${objName}, "${objName}s"), 
+        root, 
+        args, 
+        context, 
+        ast
+      );
+      
+      let result = {};
+
+      if ($project){
+        let aggregateItems = [
+          { $match }, 
+          { $project },
+          $sort ? { $sort } : null, 
+          $skip != null ? { $skip } : null, 
+          $limit != null ? { $limit } : null
+        ].filter(item => item)
+      
+        result.${objName}s = await db
+          .collection("${table}")
+          .aggregate(aggregateItems)
+          .toArray()
+      }
+
+      if (metadataRequested.size){
+        result.Meta = {};
+
+        if (metadataRequested.get("count")){
+          let countResults = (await db
+            .collection("${table}")
+            .aggregate([{ $match }, { $group: { _id: null, count: { $sum: 1 } } }])
+            .toArray());
+            
+          result.Meta.count = countResults.length ? countResults[0].count : 0;
+        }
+      }
+
+      return result;
     },
     async get${objName}(root, args, context, ast) {
       await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      let { $match, $project } = await middleware.process(decontructGraphqlQuery(args, ast, ${objName}), root, args, context, ast);
+      let { $match, $project } = await middleware.process(
+        decontructGraphqlQuery(args, ast, ${objName}, "${objName}"), 
+        root, 
+        args, 
+        context, 
+        ast
+      );
 
-      return (await db.collection("${table}").aggregate([{ $match }, { $project }, { $limit: 1 }]).toArray())[0];
+      return {
+        ${objName}: (await db
+          .collection("${table}")
+          .aggregate([{ $match }, { $project }, { $limit: 1 }])
+          .toArray())[0]
+      };
     }
   },
   Mutation: {
     async create${objName}(root, args, context, ast) {
       let db = await root.db;
       let newObject = newObjectFromArgs(args.${objName}, ${objName});
-      let requestMap = parseRequestedFields(ast);
+      let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
       
       await db.collection("${table}").insert(newObject);
-      return (await db.collection("${table}").aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }]).toArray())[0];
+      return {
+        ${objName}: (await db
+          .collection("${table}")
+          .aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }])
+          .toArray())[0]
+      };
     },
     async update${objName}(root, args, context, ast) {
       if (!args._id){
@@ -47,10 +94,15 @@ export default {
         await db.collection("${table}").update({ _id: ObjectId(args._id) }, updates);
       }
 
-      let requestMap = parseRequestedFields(ast);
+      let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
       
-      return (await db.collection("${table}").aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }]).toArray())[0];
+      return {
+        ${objName}: (await db
+          .collection("${table}")
+          .aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }])
+          .toArray())[0]
+      }
     },
     async delete${objName}(root, args, context, ast) {
       if (!args._id){

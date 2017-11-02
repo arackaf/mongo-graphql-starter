@@ -22,7 +22,7 @@ afterAll(async () => {
 
 test("Sort test 1", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORT: {title: 1}){title, pages}}",
+    query: "{allBooks(SORT: {title: 1}){Books{title, pages}}}",
     coll: "allBooks",
     results: [
       { title: "Book 1", pages: 100 },
@@ -39,7 +39,7 @@ test("Sort test 1", async () => {
 
 test("Sort test 2", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORTS: [{pages: 1}, {title: 1}]){title, pages}}",
+    query: "{allBooks(SORTS: [{pages: 1}, {title: 1}]){Books{title, pages}}}",
     coll: "allBooks",
     results: [
       { title: "Book 3", pages: 90 },
@@ -56,7 +56,7 @@ test("Sort test 2", async () => {
 
 test("Sort test 3", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORTS: [{pages: 1}, {title: -1}]){title, pages}}",
+    query: "{allBooks(SORTS: [{pages: 1}, {title: -1}]){Books{title, pages}}}",
     coll: "allBooks",
     results: [
       { title: "Book 3", pages: 90 },
@@ -73,7 +73,7 @@ test("Sort test 3", async () => {
 
 test("Sort test 4", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORTS: [{pages: -1}, {title: 1}]){title, pages}}",
+    query: "{allBooks(SORTS: [{pages: -1}, {title: 1}]){Books{title, pages}}}",
     coll: "allBooks",
     results: [
       { title: "Book 7", pages: 210 },
@@ -90,7 +90,7 @@ test("Sort test 4", async () => {
 
 test("Sort test 5", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(SORTS: [{pages: -1}, {title: -1}]){title, pages}}",
+    query: "{allBooks(SORTS: [{pages: -1}, {title: -1}]){Books{title, pages}}}",
     coll: "allBooks",
     results: [
       { title: "Book 7", pages: 210 },

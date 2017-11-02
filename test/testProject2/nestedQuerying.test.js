@@ -70,119 +70,125 @@ afterAll(async () => {
   db = null;
 });
 
-test("Deep querying 1", async () =>
-  await runIt(`{allBlogs(author: {name: "A 1"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1", async () =>
+  await runIt(`{allBlogs(author: {name: "A 1"}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
-test("Deep querying 1a", async () =>
-  await runIt(`{allBlogs(author: {knicknames: ["a1", "one"]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1a", async () =>
+  await runIt(`{allBlogs(author: {knicknames: ["a1", "one"]}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
-test("Deep querying 1b", async () =>
-  await runIt(`{allBlogs(author: {knicknames_contains: "one"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1b", async () =>
+  await runIt(`{allBlogs(author: {knicknames_contains: "one"}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
-test("Deep querying 1c", async () =>
-  await runIt(`{allBlogs(author: {knicknames_in: [[], ["a1", "one"]]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1c", async () =>
+  await runIt(`{allBlogs(author: {knicknames_in: [[], ["a1", "one"]]}, SORT: {title: 1}){Blogs{ title }}}`, [
+    { title: "Blog 1" },
+    { title: "Blog 2" }
+  ]));
 
-test("Deep querying 1d", async () =>
-  await runIt(`{allBlogs(author: {luckyNumbers: [1, 11]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1d", async () =>
+  await runIt(`{allBlogs(author: {luckyNumbers: [1, 11]}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
-test("Deep querying 1e", async () =>
-  await runIt(`{allBlogs(author: {luckyNumbers_contains: 11}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1e", async () =>
+  await runIt(`{allBlogs(author: {luckyNumbers_contains: 11}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
-test("Deep querying 1f", async () =>
-  await runIt(`{allBlogs(author: {luckyNumbers_in: [[], [1, 11]]}, SORT: {title: 1}){ title }}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
+test("Nested querying 1f", async () =>
+  await runIt(`{allBlogs(author: {luckyNumbers_in: [[], [1, 11]]}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 
-test("Deep querying 2", async () => await runIt(`{allBlogs(author: {name_endsWith: "2"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 3" }]));
-test("Deep querying 3", async () =>
-  await runIt(`{allBlogs(author: {birthday_gt: "1982-07-03"}, SORT: {title: 1}){ title }}`, [{ title: "Blog 4" }, { title: "Blog 5" }]));
-test("Deep querying 4", async () =>
-  await runIt(`{allBlogs(author: {favoriteTag: { name: "T1" }}, SORT: {title: 1}){ title }}`, [
+test("Nested querying 2", async () =>
+  await runIt(`{allBlogs(author: {name_endsWith: "2"}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 3" }]));
+test("Nested querying 3", async () =>
+  await runIt(`{allBlogs(author: {birthday_gt: "1982-07-03"}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 4" }, { title: "Blog 5" }]));
+test("Nested querying 4", async () =>
+  await runIt(`{allBlogs(author: {favoriteTag: { name: "T1" }}, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 2" },
     { title: "Blog 3" }
   ]));
 
-test("Deep querying 5", async () => await runIt(`{allBlogs(comments: {text: "Comment 6", upVotes: 4 }){ title }}`, [{ title: "Blog 4" }]));
-test("Deep querying 6", async () =>
-  await runIt(`{allBlogs(comments: {text: "Comment 6", author: { name: "CA 1" }}){ title }}`, [{ title: "Blog 4" }]));
+test("Nested querying 5", async () => await runIt(`{allBlogs(comments: {text: "Comment 6", upVotes: 4 }){Blogs{ title }}}`, [{ title: "Blog 4" }]));
+test("Nested querying 6", async () =>
+  await runIt(`{allBlogs(comments: {text: "Comment 6", author: { name: "CA 1" }}){Blogs{ title }}}`, [{ title: "Blog 4" }]));
 
-test("Deep querying 7", async () =>
-  await runIt(`{allBlogs(comments: {text_startsWith: "Comm", author: { name: "CA 1" }}, SORT: {title: 1}){ title }}`, [
+test("Nested querying 7", async () =>
+  await runIt(`{allBlogs(comments: {text_startsWith: "Comm", author: { name: "CA 1" }}, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 3" },
     { title: "Blog 4" }
   ]));
 
-test("Deep querying 8", async () =>
-  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { name: "CA 3"}}] }, SORT: {title: 1}){ title }}`, [
+test("Nested querying 8", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { name: "CA 3"}}] }, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 4" },
     { title: "Blog 5" }
   ]));
 
-test("Deep querying 8a", async () =>
-  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames: ["c3", "cthree"]}}] }, SORT: {title: 1}){ title }}`, [
+test("Nested querying 8a", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames: ["c3", "cthree"]}}] }, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 4" },
     { title: "Blog 5" }
   ]));
 
-test("Deep querying 8b", async () =>
-  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames_contains: "cthree" }}] }, SORT: {title: 1}){ title }}`, [
+test("Nested querying 8b", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames_contains: "cthree" }}] }, SORT: {title: 1}){Blogs{title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 4" },
     { title: "Blog 5" }
   ]));
 
-test("Deep querying 8c", async () =>
+test("Nested querying 8c", async () =>
   await runIt(
-    `{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames_in: [[], ["a"], ["c3", "cthree"]] }}] }, SORT: {title: 1}){ title }}`,
+    `{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { knicknames_in: [[], ["a"], ["c3", "cthree"]] }}] }, SORT: {title: 1}){Blogs{ title }}}`,
     [{ title: "Blog 1" }, { title: "Blog 4" }, { title: "Blog 5" }]
   ));
 
-test("Deep querying 8d", async () =>
-  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers: [3, 33]}}] }, SORT: {title: 1}){ title }}`, [
+test("Nested querying 8d", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers: [3, 33]}}] }, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 4" },
     { title: "Blog 5" }
   ]));
 
-test("Deep querying 8e", async () =>
-  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers_contains: 3 }}] }, SORT: {title: 1}){ title }}`, [
+test("Nested querying 8e", async () =>
+  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers_contains: 3 }}] }, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 4" },
     { title: "Blog 5" }
   ]));
 
-test("Deep querying 8f", async () =>
-  await runIt(`{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers_in: [[], [1], [3, 33]] }}] }, SORT: {title: 1}){ title }}`, [
-    { title: "Blog 1" },
-    { title: "Blog 4" },
-    { title: "Blog 5" }
-  ]));
-
-test("Deep querying 9", async () =>
-  await runIt(`{allBlogs(comments: {text_endsWith: "6", author: { name: "CA 3" }}, SORT: {title: 1}){ title }}`, []));
-
-test("Deep querying 10", async () =>
-  await runIt(`{allBlogs(comments: {upVotes: 4, author: { OR: [{ name: "CA 3" }, { favoriteTag: {name: "T1"} }]}}, SORT: {title: 1}){ title }}`, [
-    { title: "Blog 1" },
-    { title: "Blog 4" },
-    { title: "Blog 5" }
-  ]));
-test("Deep querying 11", async () =>
+test("Nested querying 8f", async () =>
   await runIt(
-    `{allBlogs(comments: {upVotes: 4, OR: [{author: { name: "CA 3" } }, {author: { favoriteTag: {name: "T1"}}}]}, SORT: {title: 1}){ title }}`,
+    `{allBlogs(comments: { OR: [{text_endsWith: "6"}, {author: { luckyNumbers_in: [[], [1], [3, 33]] }}] }, SORT: {title: 1}){Blogs{ title }}}`,
     [{ title: "Blog 1" }, { title: "Blog 4" }, { title: "Blog 5" }]
   ));
-test("Deep querying 12", async () =>
-  await runIt(`{allBlogs(comments: {upVotes: 4, author: { OR: [{ name: "XXX" }, { favoriteTag: {name: "T2"} }]}}, SORT: {title: 1}){ title }}`, [
-    { title: "Blog 5" }
-  ]));
-test("Deep querying 13", async () =>
-  await runIt(`{allBlogs(comments: {upVotes: 4, author: { OR: [{ name: "XXX" }, { favoriteTag: {name: "X"} }]}}, SORT: {title: 1}){ title }}`, []));
 
-test("Deep querying 14", async () =>
-  await runIt(`{allBlogs(comments: {author: { name: "CA 1", favoriteTag: {name: "T1"} }}, SORT: {title: 1}){ title }}`, [
+test("Nested querying 9", async () =>
+  await runIt(`{allBlogs(comments: {text_endsWith: "6", author: { name: "CA 3" }}, SORT: {title: 1}){Blogs{ title }}}`, []));
+
+test("Nested querying 10", async () =>
+  await runIt(
+    `{allBlogs(comments: {upVotes: 4, author: { OR: [{ name: "CA 3" }, { favoriteTag: {name: "T1"} }]}}, SORT: {title: 1}){Blogs{ title }}}`,
+    [{ title: "Blog 1" }, { title: "Blog 4" }, { title: "Blog 5" }]
+  ));
+test("Nested querying 11", async () =>
+  await runIt(
+    `{allBlogs(comments: {upVotes: 4, OR: [{author: { name: "CA 3" } }, {author: { favoriteTag: {name: "T1"}}}]}, SORT: {title: 1}){Blogs{ title }}}`,
+    [{ title: "Blog 1" }, { title: "Blog 4" }, { title: "Blog 5" }]
+  ));
+test("Nested querying 12", async () =>
+  await runIt(
+    `{allBlogs(comments: {upVotes: 4, author: { OR: [{ name: "XXX" }, { favoriteTag: {name: "T2"} }]}}, SORT: {title: 1}){Blogs{ title }}}`,
+    [{ title: "Blog 5" }]
+  ));
+test("Nested querying 13", async () =>
+  await runIt(
+    `{allBlogs(comments: {upVotes: 4, author: { OR: [{ name: "XXX" }, { favoriteTag: {name: "X"} }]}}, SORT: {title: 1}){Blogs{ title }}}`,
+    []
+  ));
+
+test("Nested querying 14", async () =>
+  await runIt(`{allBlogs(comments: {author: { name: "CA 1", favoriteTag: {name: "T1"} }}, SORT: {title: 1}){Blogs{ title }}}`, [
     { title: "Blog 1" },
     { title: "Blog 3" },
     { title: "Blog 4" }

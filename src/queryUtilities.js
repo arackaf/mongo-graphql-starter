@@ -1,4 +1,4 @@
-import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType } from "./dataTypes";
+import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(requestMap, objectMetaData, args) {
@@ -79,7 +79,7 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === StringArrayType || field === IntArrayType) {
+        } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
           if (queryOperation == "contains") {
             hash[fieldName] = args[k];
           }
@@ -100,10 +100,17 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
   return hash;
 }
 
-export function parseRequestedFields(ast) {
+export function parseRequestedFields(ast, queryName) {
   let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
+
+  if (queryName) {
+    fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == queryName);
+  }
+
   if (fieldNode) {
     return getSelections(fieldNode);
+  } else {
+    return new Map();
   }
 }
 
@@ -130,10 +137,14 @@ export function newObjectFromArgs(args, typeMetadata) {
   }, {});
 }
 
-export function decontructGraphqlQuery(args, ast, objectMetaData) {
+export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
-  let requestMap = parseRequestedFields(ast);
-  let $project = getMongoProjection(requestMap, objectMetaData, args);
+  let requestMap = parseRequestedFields(ast, queryName);
+  let metadataRequested = parseRequestedFields(ast, "Meta");
+  let $project = null;
+  if (requestMap.size) {
+    $project = getMongoProjection(requestMap, objectMetaData, args);
+  }
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
@@ -157,7 +168,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData) {
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
   }
 
-  return { $match, $project, $sort, $limit, $skip };
+  return { $match, $project, $sort, $limit, $skip, metadataRequested };
 }
 
 export function getUpdateObject(args, typeMetadata) {
@@ -189,19 +200,35 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
       } else if (queryOperation === "DEC") {
         $inc[prefix + fieldName] = args[k] * -1;
       } else if (queryOperation === "PUSH") {
-        $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
+        if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
+          $push[prefix + fieldName] = args[k];
+        } else {
+          $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
+        }
       } else if (queryOperation === "CONCAT") {
-        $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+        if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
+          $push[prefix + fieldName] = { $each: args[k] };
+        } else {
+          $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+        }
       } else if (queryOperation === "UPDATE") {
-        if (field.__isArray) {
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+          $set[prefix + `${fieldName}.${args[k].index}`] = args[k].value;
+        } else if (field.__isArray) {
           getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push);
         } else {
           getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push);
         }
       } else if (queryOperation === "UPDATES") {
-        args[k].forEach(update => {
-          getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push);
-        });
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+          args[k].forEach(update => {
+            $set[prefix + `${fieldName}.${update.index}`] = update.value;
+          });
+        } else {
+          args[k].forEach(update => {
+            getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push);
+          });
+        }
       }
     } else {
       if (field == DateType || (typeof field === "object" && field.__isDate)) {
