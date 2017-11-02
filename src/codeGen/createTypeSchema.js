@@ -147,11 +147,11 @@ function getMutations(k, fields) {
     } else if (value === "Float") {
       return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
     } else if (value === StringArrayType) {
-      return [`${k}: [String]`, `${k}_PUSH: String`, `${k}_CONCAT: [String]`];
+      return [`${k}: [String]`, `${k}_PUSH: String`, `${k}_CONCAT: [String]`, `${k}_UPDATE: StringArrayUpdate`, `${k}_UPDATES: [StringArrayUpdate]`];
     } else if (value === IntArrayType) {
-      return [`${k}: [Int]`, `${k}_PUSH: Int`, `${k}_CONCAT: [Int]`];
+      return [`${k}: [Int]`, `${k}_PUSH: Int`, `${k}_CONCAT: [Int]`, `${k}_UPDATE: IntArrayUpdate`, `${k}_UPDATES: [IntArrayUpdate]`];
     } else if (value === FloatArrayType) {
-      return [`${k}: [Float]`, `${k}_PUSH: Float`, `${k}_CONCAT: [Float]`];
+      return [`${k}: [Float]`, `${k}_PUSH: Float`, `${k}_CONCAT: [Float]`, `${k}_UPDATE: FloatArrayUpdate`, `${k}_UPDATES: [FloatArrayUpdate]`];
     }
 
     return [`${k}: String`];

@@ -212,15 +212,23 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
           $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
         }
       } else if (queryOperation === "UPDATE") {
-        if (field.__isArray) {
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+          $set[prefix + `${fieldName}.${args[k].index}`] = args[k].value;
+        } else if (field.__isArray) {
           getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push);
         } else {
           getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push);
         }
       } else if (queryOperation === "UPDATES") {
-        args[k].forEach(update => {
-          getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push);
-        });
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+          args[k].forEach(update => {
+            $set[prefix + `${fieldName}.${update.index}`] = update.value;
+          });
+        } else {
+          args[k].forEach(update => {
+            getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push);
+          });
+        }
       }
     } else {
       if (field == DateType || (typeof field === "object" && field.__isDate)) {
