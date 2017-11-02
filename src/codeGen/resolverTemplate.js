@@ -34,14 +34,16 @@ export default {
           .toArray()
       }
 
-      if (metadataRequested){
+      if (metadataRequested.size){
         result.Meta = {};
 
         if (metadataRequested.get("count")){
-          result.Meta.count = (await db
+          let countResults = (await db
             .collection("${table}")
             .aggregate([{ $match }, { $group: { _id: null, count: { $sum: 1 } } }])
-            .toArray())[0].count;
+            .toArray());
+            
+          result.Meta.count = countResults.length ? countResults[0].count : 0;
         }
       }
 
