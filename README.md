@@ -87,7 +87,7 @@ import path from "path";
 createGraphqlSchema(projectSetup, path.resolve("./test/testProject1"));
 ```
 
-There should now be a graphQL folder containing schema, resolver, and type metadata files for your types, as well as a master resolver and schema files which are aggregates over all the types.
+There should now be a graphQL folder containing schema, resolver, and type metadata files for your types, as well as a master resolver and schema file, which are aggregates over all the types.
 
 ![Image of basic scaffolding](docs-img/initialCreated.png)
 
@@ -121,7 +121,7 @@ app.use(
 app.listen(3000);
 ```
 
-Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run basic queries.
+Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run queries.
 
 ![Image of graphiQL](docs-img/graphiQL-running.png)
 
@@ -256,7 +256,9 @@ For example
 
 Will retrieve the first page of books' titles, as well as the `count` of all books matching whatever filters were specified in the query (in this case there were none).
 
-Note, if you don't query `Meta.count` from the results, then the total query will not be execute.  Similarly, if the above query did not query anything from the Books result set, then that query would not execute at all.  The generated resolvers will analyze the AST and only query what you ask for.
+Note, if you don't query `Meta.count` from the results, then the total query will not be execute.  Similarly, if you don't query anything from the main result set, then that query will not execute.
+
+The generated resolvers will analyze the AST and only query what you ask for.
 
 ## All filters available
 
@@ -390,7 +392,7 @@ pages is greater than 50
 
 ### Nested object and array filters
 
-For nested arrays or objects, you can pass a filter with the name of the field, that's of the same form as the corresponding type's normal filters.  For arrays, whatever you pass in will be translated into [`$elemMatch`](https://docs.mongodb.com/manual/reference/operator/query/elemMatch/), which means the record will have to have at least one array member which matches all of your criteria to be returned.  Similarly, for nested objects the record will have to have an object value which matches all criteria to be returned.
+For nested arrays or objects, you can pass a filter with the name of the field, that's of the same form as the corresponding type's normal filters.  For arrays, whatever you pass in will be translated into [`$elemMatch`](https://docs.mongodb.com/manual/reference/operator/query/elemMatch/), which means the record will have to have at least one array member which matches all of your criteria for it to be returned.  Similarly, for nested objects the record will have to have an object value which matches all criteria to be returned.
 
 For example
 
@@ -648,13 +650,13 @@ Full examples are below.
 
 ### Mutation examples
 
-[Example of create and delete, together](test/testProject1/deletion.test.js#L22)
+[Example of create and delete, together](test/testProject1/deletion.test.js#L14)
 
-[Example of a basic update](test/testProject1/mutations.test.js#L188)
+[Example of a basic update](test/testProject1/mutations.test.js#L144)
 
-[Full example of nested updates](test/testProject2/richUpdating.test.js#L335)
+[Full example of nested updates](test/testProject2/richUpdating.test.js#L439)
 
-[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L397)
+[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L466)
 
 ## Middleware
 
