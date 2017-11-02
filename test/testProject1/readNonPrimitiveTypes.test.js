@@ -26,7 +26,7 @@ afterAll(async () => {
 
 test("Fetches primary author", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(pages: 10){title, primaryAuthor { birthday, name }}}",
+    query: "{allBooks(pages: 10){Books{title, primaryAuthor { birthday, name }}}}",
     coll: "allBooks",
     results: [{ title: "Book 10", primaryAuthor: { birthday: "06/03/2004", name: "Adam R" } }]
   });
@@ -34,7 +34,7 @@ test("Fetches primary author", async () => {
 
 test("Fetches authors", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(pages: 100){title, authors { birthday, name }}}",
+    query: "{allBooks(pages: 100){Books{title, authors { birthday, name }}}}",
     coll: "allBooks",
     results: [{ title: "Book 100", authors: [{ birthday: "06/02/2004", name: "Adam" }] }]
   });
@@ -42,7 +42,7 @@ test("Fetches authors", async () => {
 
 test("Fetches strArrays", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(pages: 100){title, strArrs}}",
+    query: "{allBooks(pages: 100){Books{title, strArrs}}}",
     coll: "allBooks",
     results: [{ title: "Book 100", strArrs: [["a"], ["b", "c"]] }]
   });
@@ -50,7 +50,7 @@ test("Fetches strArrays", async () => {
 
 test("Fetches both", async () => {
   await queryAndMatchArray({
-    query: "{allBooks(pages: 100){title, strArrs, authors { birthday, name }}}",
+    query: "{allBooks(pages: 100){Books{title, strArrs, authors { birthday, name }}}}",
     coll: "allBooks",
     results: [{ title: "Book 100", authors: [{ birthday: "06/02/2004", name: "Adam" }], strArrs: [["a"], ["b", "c"]] }]
   });

@@ -6,6 +6,7 @@ const {
   IntType,
   IntArrayType,
   FloatType,
+  FloatArrayType,
   DateType,
   arrayOf,
   objectOf,
@@ -34,6 +35,7 @@ const User = {
     name: StringType,
     knicknames: StringArrayType,
     luckyNumbers: IntArrayType,
+    weights: FloatArrayType,
     birthday: DateType,
     tagsSubscribed: arrayOf(Tag),
     favoriteTag: objectOf(Tag)
@@ -55,6 +57,7 @@ const Blog = {
   fields: {
     author: objectOf(User),
     words: IntType,
+    rating: FloatType,
     title: StringType,
     content: StringType,
     comments: arrayOf(Comment)

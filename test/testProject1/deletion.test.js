@@ -13,7 +13,7 @@ afterAll(async () => {
 
 test("Deletion works", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 2"}){_id}`,
+    mutation: `createBook(Book: {title: "Book 2"}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -21,5 +21,5 @@ test("Deletion works", async () => {
     mutation: `deleteBook(_id: "${obj._id}")`,
     result: "deleteBook"
   });
-  await queryAndMatchArray({ schema, db, query: "{allBooks{title}}", coll: "allBooks", results: [] });
+  await queryAndMatchArray({ schema, db, query: "{allBooks{Books{title}}}", coll: "allBooks", results: [] });
 });

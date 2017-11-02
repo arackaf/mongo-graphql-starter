@@ -29,7 +29,7 @@ afterAll(async () => {
 
 test("Test middleware 1", async () => {
   await queryAndMatchArray({
-    query: "{allBooks{title, pages}}",
+    query: "{allBooks{Books{title, pages}}}",
     coll: "allBooks",
     results: [{ title: "Book 1", pages: 100 }]
   });

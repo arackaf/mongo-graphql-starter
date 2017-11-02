@@ -16,21 +16,24 @@ Let's work through a simple example.
 
 First, create your db metadata like this.  Each mongo collection you'd like added to your GraphQL endpoint needs to contain the table name, and all of the fields, keyed off of the data types provided.  If you're creating a type which will only exist inside another type's Mongo fields, then you can omit the table property.
 
-For any type which is contained in a Mongo collection—ie has a `table` property—if you leave off the `_id` field, one will be added for you, of type `MongoIdType`.  These types with a table property will hereafter be referred to as "queryable."
+For any type which is contained in a Mongo collection—ie has a `table` property—if you leave off the `_id` field, one will be added for you, of type `MongoIdType`.  Types with a `table` property will hereafter be referred to as "queryable."
 
 **projectSetupA.js**
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { 
-  MongoIdType, 
-  StringType, 
-  IntType, 
-  FloatType, 
-  DateType, 
-  arrayOf, 
-  objectOf, 
-  formattedDate, 
-  typeLiteral 
+const {
+  MongoIdType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  FloatArrayType,
+  DateType,
+  arrayOf,
+  objectOf,
+  formattedDate,
+  typeLiteral
 } = dataTypes;
 
 const Author = {
@@ -47,6 +50,9 @@ const Book = {
     title: StringType,
     pages: IntType,
     weight: FloatType,
+    keywords: StringArrayType,
+    editions: IntArrayType,
+    prices: FloatArrayType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
@@ -81,7 +87,7 @@ import path from "path";
 createGraphqlSchema(projectSetup, path.resolve("./test/testProject1"));
 ```
 
-There should now be a graphQL folder containing schema, resolver, and type metadata files for your types, as well as a master resolver and schema  which are aggregates over all the types.
+There should now be a graphQL folder containing schema, resolver, and type metadata files for your types, as well as a master resolver and schema file, which are aggregates over all the types.
 
 ![Image of basic scaffolding](docs-img/initialCreated.png)
 
@@ -115,7 +121,7 @@ app.use(
 app.listen(3000);
 ```
 
-Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run basic queries.
+Now `http://localhost:3000/graphql` should, assuming the database above exists, and has data, allow you to run queries.
 
 ![Image of graphiQL](docs-img/graphiQL-running.png)
 
@@ -125,16 +131,19 @@ Here are the valid types you can import from `mongo-graphql-starter`
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { 
-  MongoIdType, 
-  StringType, 
-  IntType, 
-  FloatType, 
-  DateType, 
-  arrayOf, 
-  objectOf, 
-  formattedDate, 
-  typeLiteral 
+const {
+  MongoIdType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  FloatArrayType,
+  DateType,
+  arrayOf,
+  objectOf,
+  formattedDate,
+  typeLiteral
 } = dataTypes;
 ```
 
@@ -142,8 +151,11 @@ Type|Description
 ----|-----------
 `MongoId`|Will create your field as a string, and will return whatever Mongo uid that was created.  Any filters using this id will wrap the string in Mongo's `ObjectId` function.
 `String`|Self explanatory
+`StringArrayType`|An array of strings
 `Int`|Self explanatory
+`IntArrayType`|An array of integers
 `Float`|Self explanatory
+`FloatArrayType`|An array of floating point numbers
 `Date`|Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo.  Moreoever, querying this date will by default format it as `MM/DD/YYYY`.  To override this, use `formattedDate`. 
 `formattedDate`|Function: Pass it an object with a format property to create a date field with that (Mongo) format.  For example, `createdOnYearOnly: formattedDate({ format: "%Y" })`
 `objectOf`|Function: Pass it a type you've created to specify a single object of that type
@@ -199,27 +211,21 @@ test("Circular dependencies work", async () => {
   let tag = await runMutation({ 
     schema, 
     db, 
-    mutation: `createTag(Tag: {tagName: "JavaScript"}){_id}`, 
+    mutation: `createTag(Tag: {tagName: "JavaScript"}){Tag{_id}}`, 
     result: "createTag" 
   });
-  let author = await runMutation({ schema, db, result: "createAuthor"
-    mutation: `createAuthor(Author: { 
-      name: "Adam", 
-      tags: [{_id: "${tag._id}", tagName: "${tag.tagName}"}]
-    }){_id, name}`,
+  let author = await runMutation({
+    mutation: `createAuthor(Author: { name: "Adam", tags: [{_id: "${tag._id}", tagName: "${tag.tagName}"}]}){Author{_id, name}}`,
+    result: "createAuthor"
   });
 
-  await runMutation({ schema, db, result: "updateTag"
-    mutation: `updateTag(_id: "${tag._id}", 
-      Tag: { 
-        authors: [{_id: "${author._id}", name: "${author.name}"}]
-      }){_id}`,
+  await runMutation({
+    mutation: `updateTag(_id: "${tag._id}", Tag: { authors: [{_id: "${author._id}", name: "${author.name}"}]}){Tag{_id}}`,
+    result: "updateTag"
   });
 
   await queryAndMatchArray({
-    schema,
-    db,
-    query: `{getTag(_id: "${tag._id}"){tagName, authors{ _id, name }}}`,
+    query: `{getTag(_id: "${tag._id}"){Tag{tagName, authors{ _id, name }}}}`,
     coll: "getTag",
     results: { tagName: "JavaScript", authors: [{ _id: author._id, name: "Adam" }] }
   });
@@ -228,23 +234,47 @@ test("Circular dependencies work", async () => {
 
 ## Queries created
 
-For each queryable type, there will be a `get<Type>` query which receives an `_id` argument, and returns the single, matching object; as well as an `all<Type>s` query which receives filters for each field, described below, and returns an array of matching results.
+For each queryable type, there will be a `get<Type>` query which receives an `_id` argument, and returns the single, matching object keyed under `<Type>`. 
+
+For example
+
+```javascript
+{getBook(_id: "59e3dbdf94dc6983d41deece"){Book{createdOn}}}
+```
+
+will retrieve that book, bringing back only the `createdOn` field.
+
+---
+
+There will also be an `all<Type>s` query created, which receives filters for each field, described below. This query returns an array of matching results under the `<Type>s` key, as well as a Meta object which has a count property, and if specified, will return the record count for the entire query, beyond just the current page.
+
+For example
+
+```javascript
+{allBooks(SORT: {title: 1}, PAGE: 1, PAGE_SIZE: 5){Books{title}, Meta{count}}}
+```
+
+Will retrieve the first page of books' titles, as well as the `count` of all books matching whatever filters were specified in the query (in this case there were none).
+
+Note, if you don't query `Meta.count` from the results, then the total query will not be execute.  Similarly, if you don't query anything from the main result set, then that query will not execute.
+
+The generated resolvers will analyze the AST and only query what you ask for.
 
 ## All filters available
 
 This section describes the filters available in the `all<Type>s` query for each queryable type.
 
-string, int, float, MongoId and date fields will all have the following filters created
+`string`, `stringArray`, `int`, `intArray`, `float`, `MongoId` and `date` fields will all have the following filters created
 
 Exact match
 
 `field: <value>` - will match results with exactly that value
 
-In match
+`in` match
 
-`field_in: [<value1>, <value2>]` - will match results which match any of those exact values
+`field_in: [<value1>, <value2>]` - will match results which match any of those exact values.  
 
-Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.
+Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For string, int and float arrays, the value will be an entire array, which will be matched by Mongo item by item.
 
 ### String filters
 
@@ -255,6 +285,14 @@ Filter|Description
 String contains|`title_contains: "My"` - will match results with the string `My` anywhere inside, case insensitively. 
 String starts with|`title_startsWith: "My"` - will match results that start with the string `My`, case insensitively. 
 String ends with|`title_endsWith: "title"` - will match results that end with the string `title`, case insensitively. 
+
+### String array filters
+
+If your field is named `keywords` then the following filters will be available
+
+Filter|Description
+------|-----------
+String array contains|`keywords_contains: "JavaScript"` - will match results with an array containing the string `JavaScript`. 
 
 ### Int filters
 
@@ -267,6 +305,14 @@ Less than or equal|`pages_lte: 200` - will match results where `pages` is less t
 Greater than|`pages_gt: 200` - will match results where `pages` is greater than 200 
 Greater than or equal|`pages_gte: 200` - will match results where `pages` is greater than or equal to 200 
 
+### Int array filters
+
+If your field is named `editions` then the following filters will be available
+
+Filter|Description
+------|-----------
+Int array contains|`editions_contains: 2` - will match results with an array containing the value `2`. 
+
 ### Float filters
 
 If your field is named `weight` then the following filters will be available 
@@ -277,6 +323,14 @@ Less than|`weight_lt: 200` - will match results where `weight` is less than 200
 Less than or equal|`weight_lte: 200` - will match results where `weight` is less than or equal to 200 
 Greater than|`weight_gt: 200` - will match results where `weight` is greater than 200 
 Greater than or equal|`weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
+
+### Float array filters
+
+If your field is named `prices` then the following filters will be available
+
+Filter|Description
+------|-----------
+Float array contains|`prices_contains: 19.99` - will match results with an array containing the value `19.99`. 
 
 ### Date filters
 
@@ -311,11 +365,13 @@ Combining filters with Mongo's `$or` is easy.  Just use the same API, but with `
       {title: "Book 1", pages: 100}, 
       {title_contains: "ook", OR: [{weight_gt: 2}, {pages_lt: 0}]}
     ]
-  ) {
-    _id
-    title
-    pages
-    weight
+  ) { 
+    Book {
+      _id
+      title
+      pages
+      weight
+    }
   }
 }
 ```
@@ -336,7 +392,7 @@ pages is greater than 50
 
 ### Nested object and array filters
 
-For nested arrays or objects, you can pass a filter with the name of the field, that's of the same form as the corresponding type's normal filters.  For arrays, whatever you pass in will be translated into [`$elemMatch`](https://docs.mongodb.com/manual/reference/operator/query/elemMatch/), which means the record will have to have at least one array member which matches all of your criteria to be returned.  Similarly, for nested objects the record will have to have an object value which matches all criteria to be returned.
+For nested arrays or objects, you can pass a filter with the name of the field, that's of the same form as the corresponding type's normal filters.  For arrays, whatever you pass in will be translated into [`$elemMatch`](https://docs.mongodb.com/manual/reference/operator/query/elemMatch/), which means the record will have to have at least one array member which matches all of your criteria for it to be returned.  Similarly, for nested objects the record will have to have an object value which matches all criteria to be returned.
 
 For example
 
@@ -352,7 +408,7 @@ For example
     } 
   }, 
   SORT: {title: 1}
-){ title }}
+){ Blogs{ title }}}
 ```
 
 Will query blogs that have at least one comment which has 4 upvotes, and also has an author with either a name of "CA 3", or a favoriteTag with a name of "T1"
@@ -369,7 +425,7 @@ Or you could do
     ]
   }, 
   SORT: {title: 1}
-){ title }}
+){ Blogs{ title }}}
 ```
 
 which is identical.
@@ -400,165 +456,29 @@ Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$sk
 
 ## Projecting results from queries
 
-Use standard GraphQL syntax to select only the fields you want from your query.  The incoming ast will be parsed, and the generated query will only pull what was requested.  This applies to nested fields as well.  For example, with this project setup
-
-```javascript
-import { dataTypes } from "mongo-graphql-starter";
-const { 
-  MongoIdType, 
-  StringType, 
-  IntType, 
-  FloatType, 
-  DateType, 
-  arrayOf, 
-  objectOf, 
-  formattedDate, 
-  typeLiteral 
-} = dataTypes;
-
-const Subject = {
-  table: "subjects",
-  fields: {
-    _id: MongoIdType,
-    name: StringType
-  }
-};
-
-const Tag = {
-  fields: {
-    name: StringType
-  }
-};
-
-const User = {
-  fields: {
-    name: StringType,
-    birthday: DateType,
-    tagsSubscribed: arrayOf(Tag),
-    favoriteTag: objectOf(Tag)
-  }
-};
-
-const Comment = {
-  fields: {
-    text: StringType,
-    upVotes: IntType,
-    downVotes: IntType,
-    author: objectOf(User),
-    reviewers: arrayOf(User)
-  }
-};
-
-const Blog = {
-  table: "blogs",
-  fields: {
-    author: objectOf(User),
-    title: StringType,
-    content: StringType,
-    comments: arrayOf(Comment)
-  }
-};
-
-export default {
-  User,
-  Blog,
-  Comment,
-  Tag
-};
-```
-
-This unit test demonstrates the degree to which you can select nested field values
-
-```javascript
-test("Deep querying 4", async () => {
-  let obj = await runMutation({
-    schema,
-    db,
-    mutation: `
-      createBlog(
-        title: "Blog 1", 
-        content: "Hello", 
-        author: { 
-          name: "Adam Auth", 
-          birthday: "2004-06-02", 
-          favoriteTag: {name: "tf"}, 
-          tagsSubscribed: [{name: "t1"}, {name: "t2"}]
-        },
-        comments: [{
-          text: "C1", 
-          reviewers: [{
-            name: "Adam", 
-            birthday: "1982-03-22", 
-            tagsSubscribed: [{name: "t1"}, {name: "t2"}]
-          }, {
-            name: "Adam2", 
-            birthday: "1982-03-23", 
-            tagsSubscribed: [{name: "t3"}, {name: "t4"}]
-          }],
-          author: { 
-            name: "Adam", 
-            birthday: "1982-03-22", 
-            favoriteTag: {name: "tf"}, 
-            tagsSubscribed: [{name: "t1"}, {name: "t2"}]
-          } 
-        }]
-      ){_id}`,
-    result: "createBlog"
-  });
-
-  await queryAndMatchArray({
-    schema,
-    db,
-    query: `{getBlog(_id: "${obj._id}"){
-      title, 
-      content, 
-      author{
-        favoriteTag{
-          name
-        }, 
-        tagsSubscribed{
-          name
-        }
-      }, 
-      comments{
-        text,
-        author{
-          favoriteTag{
-            name
-          }, 
-          tagsSubscribed{
-            name
-          }
-        }
-      }
-    }}`,
-    coll: "getBlog",
-    results: {
-      title: "Blog 1",
-      content: "Hello",
-      author: { favoriteTag: { name: "tf" }, tagsSubscribed: [{ name: "t1" }, { name: "t2" }] },
-      comments: [
-        {
-          text: "C1",
-          author: { favoriteTag: { name: "tf" }, tagsSubscribed: [{ name: "t1" }, { name: "t2" }] }
-        }
-      ]
-    }
-  });
-});
-```
-
-For more examples, check out [the full test suite](test/testProject2/richQuerying.test.js)
+Use standard GraphQL syntax to select only the fields you want from your query.  The incoming ast will be parsed, and the generated query will only pull what was requested.  This applies to nested fields as well.  For example, given [this GraphQL setup](test/projectSetupB.js), [this unit test](test/testProject2/richQuerying.test.js#L234), and the others in the suite demonstrate the degree to which you can select nested field values.
 
 ## Mutations
 
 Each queryable type will also generate a `create<Type>`, `update<Type>` and `delete<Type>` mutation.  
 
-`create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object, or at least the pieces thereof which you specify in your mutation.
+`create<Type>` will create a new object.  Pass a single `<Type>` argument with properties for each field on the type, and it will return back the new, created object under the `<Type>` key, or at least the pieces thereof which you specify in your mutation.
+
+For example
+
+```javascript
+createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
+```
 
 ---
 
-`update<Type>` requires an `_id` argument, as well as an update argument, named for your `Type`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+`update<Type>` requires an `_id` argument, as well as an update argument, named for your `<Type>`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+
+For example
+
+```javascript
+updateBlog(_id: "${obj._id}", Blog: {words: 100}){Blog{title, words}}
+```
 
 In addition, the following arguments are supported
 
@@ -566,10 +486,10 @@ Argument|For types|Description
 ------|-------|------
 `<fieldName>_INC`|Numeric|Increments the current value by the amount specified.  For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.  
 `<fieldName>_DEC`|Numeric|Decrements the current value by the amount specified.  For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.
-`<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.
-`<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array.
-`<fieldName>_UPDATE`|Arrays|Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specific `field_INC`, `field_PUSH`, etc, recursively. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.
-`<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.
+`<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.  Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.
+`<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added.
+`<fieldName>_UPDATE`|Arrays|**For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For IntArrays, FloatArrays, or StringArrays**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type.  Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`
+`<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.
 `<fieldName>_UPDATE`|Objects|Implements the specified changes on the nested object.  The provided update object is of the same form specified here.  For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2
 
 Full examples are below.
@@ -582,13 +502,13 @@ Full examples are below.
 
 ### Mutation examples
 
-[Example of create and delete, together](test/testProject1/deletion.test.js#L22)
+[Example of create and delete, together](test/testProject1/deletion.test.js#L14)
 
-[Example of a basic update](test/testProject1/mutations.test.js#L188)
+[Example of a basic update](test/testProject1/mutations.test.js#L144)
 
-[Full example of nested updates](test/testProject2/richUpdating.test.js#L335)
+[Full example of nested updates](test/testProject2/richUpdating.test.js#L439)
 
-[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L397)
+[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L466)
 
 ## Middleware
 

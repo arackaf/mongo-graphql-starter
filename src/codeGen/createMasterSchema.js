@@ -7,6 +7,26 @@ export default function createMasterSchema(names, namesWithTables, namesWithoutT
   return `${schemaImports}
     
 export default \`
+
+  type QueryResultsMetadata {
+    count: Int
+  }
+
+  input StringArrayUpdate {
+    index: Int,
+    value: String
+  }
+
+  input IntArrayUpdate {
+    index: Int,
+    value: Int
+  }
+
+  input FloatArrayUpdate {
+    index: Int,
+    value: Float
+  }
+
   ${names.map(n => "${" + n + "Type}").join("\n\n  ")}
 
   type Query {
@@ -18,4 +38,10 @@ export default \`
   }
 
 \``;
+}
+
+async function fp() {
+  if (metadataRequested.get("count")) {
+    let totalCount = (await db.collection("${table}").aggregate([{ $match }, { $group: { _id: null, count: { $sum: 1 } } }])).count;
+  }
 }
