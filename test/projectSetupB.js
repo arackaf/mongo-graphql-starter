@@ -57,6 +57,7 @@ const Blog = {
   fields: {
     author: objectOf(User),
     words: IntType,
+    rating: FloatType,
     title: StringType,
     content: StringType,
     comments: arrayOf(Comment)

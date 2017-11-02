@@ -25,6 +25,20 @@ test("Basic increment", async () => {
   expect(obj).toEqual({ title: "Blog 1", words: 101 });
 });
 
+test("Basic float increment", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", rating: 3.5}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_INC: 1}){Blog{title, rating}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", rating: 4.5 });
+});
+
 test("Basic increment 2", async () => {
   let obj = await runMutation({
     mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,
@@ -37,6 +51,20 @@ test("Basic increment 2", async () => {
   });
 
   expect(obj).toEqual({ title: "Blog 1", words: 104 });
+});
+
+test("Basic float increment 2", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", rating: 3.5}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_INC: 2}){Blog{title, rating}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", rating: 5.5 });
 });
 
 test("Basic decrement", async () => {
@@ -53,6 +81,20 @@ test("Basic decrement", async () => {
   expect(obj).toEqual({ title: "Blog 1", words: 99 });
 });
 
+test("Basic float increment", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", rating: 3.5}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_DEC: 1}){Blog{title, rating}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", rating: 2.5 });
+});
+
 test("Basic decrement 2", async () => {
   let obj = await runMutation({
     mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,
@@ -65,6 +107,20 @@ test("Basic decrement 2", async () => {
   });
 
   expect(obj).toEqual({ title: "Blog 1", words: 96 });
+});
+
+test("Basic float decrement 2", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", rating: 3.5}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_DEC: 2}){Blog{title, rating}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", rating: 1.5 });
 });
 
 test("Push new comment", async () => {

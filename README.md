@@ -16,7 +16,7 @@ Let's work through a simple example.
 
 First, create your db metadata like this.  Each mongo collection you'd like added to your GraphQL endpoint needs to contain the table name, and all of the fields, keyed off of the data types provided.  If you're creating a type which will only exist inside another type's Mongo fields, then you can omit the table property.
 
-For any type which is contained in a Mongo collection—ie has a `table` property—if you leave off the `_id` field, one will be added for you, of type `MongoIdType`.  These types with a table property will hereafter be referred to as "queryable."
+For any type which is contained in a Mongo collection—ie has a `table` property—if you leave off the `_id` field, one will be added for you, of type `MongoIdType`.  Types with a `table` property will hereafter be referred to as "queryable."
 
 **projectSetupA.js**
 ```javascript
@@ -28,6 +28,7 @@ const {
   IntType,
   IntArrayType,
   FloatType,
+  FloatArrayType,
   DateType,
   arrayOf,
   objectOf,
@@ -51,6 +52,7 @@ const Book = {
     weight: FloatType,
     keywords: StringArrayType,
     editions: IntArrayType,
+    prices: FloatArrayType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
@@ -85,7 +87,7 @@ import path from "path";
 createGraphqlSchema(projectSetup, path.resolve("./test/testProject1"));
 ```
 
-There should now be a graphQL folder containing schema, resolver, and type metadata files for your types, as well as a master resolver and schema  which are aggregates over all the types.
+There should now be a graphQL folder containing schema, resolver, and type metadata files for your types, as well as a master resolver and schema files which are aggregates over all the types.
 
 ![Image of basic scaffolding](docs-img/initialCreated.png)
 
@@ -136,6 +138,7 @@ const {
   IntType,
   IntArrayType,
   FloatType,
+  FloatArrayType,
   DateType,
   arrayOf,
   objectOf,
@@ -152,6 +155,7 @@ Type|Description
 `Int`|Self explanatory
 `IntArrayType`|An array of integers
 `Float`|Self explanatory
+`FloatArrayType`|An array of floating point numbers
 `Date`|Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo.  Moreoever, querying this date will by default format it as `MM/DD/YYYY`.  To override this, use `formattedDate`. 
 `formattedDate`|Function: Pass it an object with a format property to create a date field with that (Mongo) format.  For example, `createdOnYearOnly: formattedDate({ format: "%Y" })`
 `objectOf`|Function: Pass it a type you've created to specify a single object of that type
@@ -238,11 +242,11 @@ For example
 {getBook(_id: "59e3dbdf94dc6983d41deece"){Book{createdOn}}}
 ```
 
-Will retrieve that book, bringing back only the createdOn field.
+will retrieve that book, bringing back only the `createdOn` field.
 
 ---
 
-There is also an `all<Type>s` query which receives filters for each field, described below, and returns an array of matching results under `<Type>s`, as well as a Meta object which has a count property, and if specified, will retrieve the record count for the entire query, beyond just the current page.
+There will also be an `all<Type>s` query created, which receives filters for each field, described below. This query returns an array of matching results under the `<Type>s` key, as well as a Meta object which has a count property, and if specified, will return the record count for the entire query, beyond just the current page.
 
 For example
 
@@ -252,21 +256,23 @@ For example
 
 Will retrieve the first page of books' titles, as well as the `count` of all books matching whatever filters were specified in the query (in this case there were none).
 
+Note, if you don't query `Meta.count` from the results, then the total query will not be execute.  Similarly, if the above query did not query anything from the Books result set, then that query would not execute at all.  The generated resolvers will analyze the AST and only query what you ask for.
+
 ## All filters available
 
 This section describes the filters available in the `all<Type>s` query for each queryable type.
 
-string, stringArray, int, intArray, float, MongoId and date fields will all have the following filters created
+`string`, `stringArray`, `int`, `intArray`, `float`, `MongoId` and `date` fields will all have the following filters created
 
 Exact match
 
 `field: <value>` - will match results with exactly that value
 
-In match
+`in` match
 
 `field_in: [<value1>, <value2>]` - will match results which match any of those exact values.  
 
-Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For string and int arrays, the value will be an entire array, which will be matched by Mongo item by item.
+Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For string, int and float arrays, the value will be an entire array, which will be matched by Mongo item by item.
 
 ### String filters
 
@@ -315,6 +321,14 @@ Less than|`weight_lt: 200` - will match results where `weight` is less than 200
 Less than or equal|`weight_lte: 200` - will match results where `weight` is less than or equal to 200 
 Greater than|`weight_gt: 200` - will match results where `weight` is greater than 200 
 Greater than or equal|`weight_gte: 200` - will match results where `weight` is greater than or equal to 200 
+
+### Float array filters
+
+If your field is named `prices` then the following filters will be available
+
+Filter|Description
+------|-----------
+Float array contains|`prices_contains: 19.99` - will match results with an array containing the value `19.99`. 
 
 ### Date filters
 
@@ -594,11 +608,23 @@ For more examples, check out [the full test suite](test/testProject2/richQueryin
 
 Each queryable type will also generate a `create<Type>`, `update<Type>` and `delete<Type>` mutation.  
 
-`create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object, or at least the pieces thereof which you specify in your mutation.
+`create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object under the `<type>` key, or at least the pieces thereof which you specify in your mutation.
+
+For example
+
+```javascript
+createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
+```
 
 ---
 
-`update<Type>` requires an `_id` argument, as well as an update argument, named for your `Type`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+`update<Type>` requires an `_id` argument, as well as an update argument, named for your `<type>`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+
+For example
+
+```javascript
+updateBlog(_id: "${obj._id}", Blog: {words: 100}){Blog{title, words}}
+```
 
 In addition, the following arguments are supported
 
