@@ -1,4 +1,4 @@
-import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "../dataTypes";
+import { MongoIdType, StringType, StringArrayType, IntType, IntArrayType, FloatType, DateType, arrayOf } from "../dataTypes";
 import { TAB } from "./utilities";
 
 export default function createGraphqlTypeSchema(objectToCreate) {
@@ -100,7 +100,14 @@ function displaySchemaValue(value, useInputs) {
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
-    return `${value == MongoIdType || value == DateType ? "String" : value}`;
+    switch (value) {
+      case StringArrayType:
+        return "[String]";
+      case IntArrayType:
+        return "[Int]";
+      default:
+        return `${value == MongoIdType || value == DateType ? "String" : value}`;
+    }
   } else if (typeof value === "object") {
     if (value.__isArray) {
       return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
@@ -155,6 +162,12 @@ function queriesForField(fieldName, realFieldType) {
     case FloatType:
     case DateType:
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
+      break;
+    case StringArrayType:
+      result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`]);
+      break;
+    case IntArrayType:
+      result.push(...[`${fieldName}: [Int]`, `${fieldName}_in: [[Int]]`, `${fieldName}_contains: Int`]);
       break;
   }
 

@@ -1,6 +1,8 @@
 export const MongoIdType = "MongoId";
 export const StringType = "String";
+export const StringArrayType = "StringArray";
 export const IntType = "Int";
+export const IntArrayType = "IntArray";
 export const FloatType = "Float";
 export const DateType = "Date";
 export const arrayOf = type => {
