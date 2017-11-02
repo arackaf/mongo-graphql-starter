@@ -95,6 +95,98 @@ test("Basic float increment", async () => {
   expect(obj).toEqual({ title: "Blog 1", rating: 2.5 });
 });
 
+//-----------------------------------------------------------------------------------------
+
+test("float array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {weights: [1.1, 2.9]}}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {weights_UPDATE: {index: 1, value: 2.2} }}) {Blog{title, author{weights}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { weights: [1.1, 2.2] } });
+});
+
+test("float array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {weights: [1.1, 2.9]}}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {weights_UPDATES: [{index: 0, value: 1.0}, {index: 1, value: 2.2}] }}) {Blog{title, author{weights}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { weights: [1.0, 2.2] } });
+});
+
+//-----------------------------------------------------------------------------------------
+
+test("int array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {luckyNumbers: [6, 10]}}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {luckyNumbers_UPDATE: {index: 1, value: 11} }}) {Blog{title, author{luckyNumbers}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { luckyNumbers: [6, 11] } });
+});
+
+test("int array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {luckyNumbers: [6, 10]}}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {luckyNumbers_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }}) {Blog{title, author{luckyNumbers}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { luckyNumbers: [7, 11] } });
+});
+
+//-----------------------------------------------------------------------------------------
+
+test("string array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {knicknames: ["c", "d"]}}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {knicknames_UPDATE: {index: 1, value: "b"} }}) {Blog{title, author{knicknames}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { knicknames: ["c", "b"] } });
+});
+
+test("string array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", author: {knicknames: ["c", "d"]}}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {knicknames_UPDATES: [{index: 0, value: "a"}, {index: 1, value: "b"}] }}) {Blog{title, author{knicknames}}}`,
+    result: "updateBlog"
+  });
+
+  expect(obj).toEqual({ title: "Blog 1", author: { knicknames: ["a", "b"] } });
+});
+
+//-----------------------------------------------------------------------------------------
+
 test("Basic decrement 2", async () => {
   let obj = await runMutation({
     mutation: `createBlog(Blog: {title: "Blog 1", words: 100}){Blog{_id}}`,

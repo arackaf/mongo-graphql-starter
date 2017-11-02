@@ -610,7 +610,7 @@ For more examples, check out [the full test suite](test/testProject2/richQueryin
 
 Each queryable type will also generate a `create<Type>`, `update<Type>` and `delete<Type>` mutation.  
 
-`create<Type>` will create a new object.  Pass a single `Type` argument with properties for each field on the type, and it will return back the new, created object under the `<type>` key, or at least the pieces thereof which you specify in your mutation.
+`create<Type>` will create a new object.  Pass a single `<Type>` argument with properties for each field on the type, and it will return back the new, created object under the `<Type>` key, or at least the pieces thereof which you specify in your mutation.
 
 For example
 
@@ -620,7 +620,7 @@ createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
 
 ---
 
-`update<Type>` requires an `_id` argument, as well as an update argument, named for your `<type>`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+`update<Type>` requires an `_id` argument, as well as an update argument, named for your `<Type>`. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
 
 For example
 
@@ -634,8 +634,8 @@ Argument|For types|Description
 ------|-------|------
 `<fieldName>_INC`|Numeric|Increments the current value by the amount specified.  For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.  
 `<fieldName>_DEC`|Numeric|Decrements the current value by the amount specified.  For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.
-`<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.
-`<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array.
+`<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.  Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.
+`<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added.
 `<fieldName>_UPDATE`|Arrays|Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specific `field_INC`, `field_PUSH`, etc, recursively. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.
 `<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.
 `<fieldName>_UPDATE`|Objects|Implements the specified changes on the nested object.  The provided update object is of the same form specified here.  For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2

@@ -252,3 +252,95 @@ test("No modification mutation works", async () => {
     createdOnYearOnly: "2004"
   });
 });
+
+//-----------------------------------------------------------------------------------------
+
+test("float array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.9]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { prices_UPDATE: {index: 1, value: 2.2 }}) {Book{title, prices}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", prices: [1.1, 2.2] });
+});
+
+test("float array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.9]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { prices_UPDATES: [{index: 0, value: 1.0}, {index: 1, value: 2.2}] }) {Book{title, prices}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", prices: [1.0, 2.2] });
+});
+
+//-----------------------------------------------------------------------------------------
+
+test("int array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", editions: [6, 10]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", editions: [6, 11] });
+});
+
+test("int array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", editions: [6, 10]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", editions: [7, 11] });
+});
+
+//-----------------------------------------------------------------------------------------
+
+test("string array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: {keywords_UPDATE: {index: 1, value: "b"} }) {Book{title, keywords}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", keywords: ["c", "b"] });
+});
+
+test("string array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: {keywords_UPDATES: [{index: 0, value: "a"}, {index: 1, value: "b"}] }) {Book{title, keywords}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", keywords: ["a", "b"] });
+});
+
+//-----------------------------------------------------------------------------------------
