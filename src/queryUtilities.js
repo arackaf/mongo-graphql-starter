@@ -79,7 +79,7 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === StringArrayType || field === IntArrayType) {
+        } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
           if (queryOperation == "contains") {
             hash[fieldName] = args[k];
           }
