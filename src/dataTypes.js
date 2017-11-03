@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 export const MongoIdType = "MongoId";
 export const StringType = "String";
 export const StringArrayType = "StringArray";
@@ -31,4 +33,26 @@ export const formattedDate = options => {
     ...options,
     __isDate: true
   };
+};
+
+export const multiRelationship = ({ source, type, fkField }) => {
+  let result = {
+    type
+  };
+
+  if (fkField) {
+    let sourceField = source.fields[fkField];
+
+    if (sourceField === StringArrayType) {
+      result.identifySingle = owner => ({ _id: { $in: owner[fkField].map(owner => ObjectId(owner[fkField])) } });
+      result.identifyMultiple = owners => ({ _id: { $in: flatMap(owners.map(owner => owner[fkField]), ids => ids.map(id => ObjectId(id))) } });
+    } else if (0 && sourceField) {
+      result.identifySingle = owners => ({ _id: { $in: owners.map(owner => owner[fkField]) } });
+      result.identifyMultiple = owners => ({ _id: { $in: owners.map(owner => owner[fkField]) } });
+    } else {
+      throw "Invalid type for foreign key " + fkField + " which is a " + +" for type " + type;
+    }
+  }
+
+  return result;
 };
