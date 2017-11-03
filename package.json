@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@std/esm": "0.12.5",
+    "lodash.flatmap": "^4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
   }
