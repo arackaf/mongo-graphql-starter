@@ -1,9 +1,3 @@
-import { middleware, preprocessor, queryUtilities } from "mongo-graphql-starter";
-const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject } = queryUtilities
-
-import { ObjectId } from "mongodb";
-import ${objName} from "./${objName}";
-
 export default {
   Query: {
     async all${objName}s(root, args, context, ast) {
