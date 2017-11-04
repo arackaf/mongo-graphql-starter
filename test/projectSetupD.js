@@ -12,7 +12,7 @@ const {
   objectOf,
   formattedDate,
   typeLiteral,
-  multiRelationship
+  relationshipHelpers
 } = dataTypes;
 
 const Author = {
@@ -32,12 +32,10 @@ const Book = {
     weight: FloatType,
     authorIds: StringArrayType,
     primaryAuthorId: StringType
-  },
-  relationships: {}
+  }
 };
 
-Book.relationships.authors = multiRelationship({
-  source: Book,
+relationshipHelpers.projectIds(Book, "authors", {
   type: Author,
   fkField: "authorIds"
 });
