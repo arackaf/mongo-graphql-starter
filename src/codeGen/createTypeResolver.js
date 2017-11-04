@@ -4,7 +4,12 @@ import path from "path";
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
   let projectIdsTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsTemplate.js"), { encoding: "utf8" });
-  let result = "";
+  let result = `import { middleware, preprocessor, queryUtilities } from "mongo-graphql-starter";
+const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject } = queryUtilities
+  
+import { ObjectId } from "mongodb";
+import ${objectToCreate.__name} from "./${objectToCreate.__name}";
+`;
 
   if (objectToCreate.relationships) {
     Object.keys(objectToCreate.relationships).forEach(relationshipName => {
