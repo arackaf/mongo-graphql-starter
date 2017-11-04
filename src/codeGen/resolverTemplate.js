@@ -9,10 +9,12 @@ export async function load${objName}s(db, queryPacket){
     $limit != null ? { $limit } : null
   ].filter(item => item)
 
-  return db
+  let ${objName}s = await db
     .collection("${table}")
     .aggregate(aggregateItems)
-    .toArray()
+    .toArray();
+  ${relationships}
+  return ${objName}s;
 }
 
 export default {
