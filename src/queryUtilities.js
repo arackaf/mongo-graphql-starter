@@ -145,6 +145,21 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   if (requestMap.size) {
     $project = getMongoProjection(requestMap, objectMetaData, args);
   }
+  let extrasPackets = new Map([]);
+
+  if (objectMetaData.relationships) {
+    Object.keys(objectMetaData.relationships).forEach(name => {
+      let requestMap = parseRequestedFields(ast, name);
+      let relationship = objectMetaData.relationships[name];
+
+      if (requestMap.size) {
+        extrasPackets.set(name, {
+          requestMap,
+          $project: getMongoProjection(requestMap, relationship.type, {})
+        });
+      }
+    });
+  }
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
@@ -168,7 +183,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
   }
 
-  return { $match, $project, $sort, $limit, $skip, metadataRequested };
+  return { $match, $project, $sort, $limit, $skip, metadataRequested, extrasPackets };
 }
 
 export function getUpdateObject(args, typeMetadata) {
