@@ -1,9 +1,26 @@
+export async function load${objName}s(db, queryPacket){
+  let { $match, $project, $sort, $limit, $skip } = queryPacket;
+
+  let aggregateItems = [
+    { $match }, 
+    { $project },
+    $sort ? { $sort } : null, 
+    $skip != null ? { $skip } : null, 
+    $limit != null ? { $limit } : null
+  ].filter(item => item)
+
+  return db
+    .collection("${table}")
+    .aggregate(aggregateItems)
+    .toArray()
+}
+
 export default {
   Query: {
     async all${objName}s(root, args, context, ast) {
       await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      let { $match, $project, $sort, $limit, $skip, metadataRequested } = await middleware.process(
+      let queryPacket = await middleware.process(
         decontructGraphqlQuery(args, ast, ${objName}, "${objName}s"), 
         root, 
         args, 
@@ -13,28 +30,17 @@ export default {
       
       let result = {};
 
-      if ($project){
-        let aggregateItems = [
-          { $match }, 
-          { $project },
-          $sort ? { $sort } : null, 
-          $skip != null ? { $skip } : null, 
-          $limit != null ? { $limit } : null
-        ].filter(item => item)
-      
-        result.${objName}s = await db
-          .collection("${table}")
-          .aggregate(aggregateItems)
-          .toArray()
+      if (queryPacket.$project){
+        result.${objName}s = await load${objName}s(db, queryPacket);
       }
 
-      if (metadataRequested.size){
+      if (queryPacket.metadataRequested.size){
         result.Meta = {};
 
-        if (metadataRequested.get("count")){
+        if (queryPacket.metadataRequested.get("count")){
           let countResults = (await db
             .collection("${table}")
-            .aggregate([{ $match }, { $group: { _id: null, count: { $sum: 1 } } }])
+            .aggregate([{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }])
             .toArray());
             
           result.Meta.count = countResults.length ? countResults[0].count : 0;
@@ -46,7 +52,7 @@ export default {
     async get${objName}(root, args, context, ast) {
       await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      let { $match, $project } = await middleware.process(
+      let queryPacket = await middleware.process(
         decontructGraphqlQuery(args, ast, ${objName}, "${objName}"), 
         root, 
         args, 
@@ -54,11 +60,10 @@ export default {
         ast
       );
 
+      let results = await load${objName}s(db, queryPacket);
+
       return {
-        ${objName}: (await db
-          .collection("${table}")
-          .aggregate([{ $match }, { $project }, { $limit: 1 }])
-          .toArray())[0]
+        ${objName}: results[0] || null
       };
     }
   },

@@ -46,7 +46,7 @@ test("Metadata works 3", async () => {
   });
 });
 
-test("Metadata works nore results 1", async () => {
+test("Metadata works more results 1", async () => {
   await queryAndMatchArray({
     query: `{allBooks(title: "XXX", PAGE: 1, PAGE_SIZE: 5){Books{title}, Meta{count}}}`,
     coll: "allBooks",
@@ -55,7 +55,7 @@ test("Metadata works nore results 1", async () => {
   });
 });
 
-test("Metadata works nore results 2", async () => {
+test("Metadata works more results 2", async () => {
   await queryAndMatchArray({
     query: `{allBooks(title: "XXX", PAGE: 2, PAGE_SIZE: 7){Books{title, pages}, Meta{count}}}`,
     coll: "allBooks",
@@ -64,7 +64,7 @@ test("Metadata works nore results 2", async () => {
   });
 });
 
-test("Metadata works nore results 3", async () => {
+test("Metadata works more results 3", async () => {
   await queryAndMatchArray({
     query: `{allBooks(title: "XXX", PAGE: 2, PAGE_SIZE: 7){Meta{count}}}`,
     coll: "allBooks",
