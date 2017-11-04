@@ -26,6 +26,10 @@ test("Match single", async () => {
   await queryAndMatchArray({ query: `{getBook(_id: "59e3dbdf94dc6983d41deece"){Book{title}}}`, coll: "getBook", results: { title: "Book 1" } });
 });
 
+test("Match single - not found", async () => {
+  await queryAndMatchArray({ query: `{getBook(_id: "XXX"){Book{title}}}`, coll: "getBook", results: null });
+});
+
 test("Match single 2", async () => {
   await queryAndMatchArray({ query: `{getBook(_id: "59e41fc694dc6983d41deed1"){Book{title}}}`, coll: "getBook", results: { title: "Book 2" } });
 });
