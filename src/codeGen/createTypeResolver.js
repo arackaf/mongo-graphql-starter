@@ -3,5 +3,23 @@ import path from "path";
 
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
-  return template.replace(/\${table}/g, objectToCreate.table).replace(/\${objName}/g, objectToCreate.__name);
+  let projectIdsTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsTemplate.js"), { encoding: "utf8" });
+  let result = "";
+
+  if (objectToCreate.relationships) {
+    Object.keys(objectToCreate.relationships).forEach(relationshipName => {
+      let relationship = objectToCreate.relationships[relationshipName];
+
+      result += projectIdsTemplate
+        .replace(/\${table}/g, relationship.type.table)
+        .replace(/\${fkField}/g, relationship.fkField)
+        .replace(/\${targetObjName}/g, relationshipName)
+        .replace(/\${targetTypeName}/g, relationship.type.__name)
+        .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
+        .replace(/\${sourceObjName}/g, objectToCreate.__name);
+    });
+  }
+
+  result += template.replace(/\${table}/g, objectToCreate.table).replace(/\${objName}/g, objectToCreate.__name);
+  return result;
 }

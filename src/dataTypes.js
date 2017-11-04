@@ -35,24 +35,31 @@ export const formattedDate = options => {
   };
 };
 
-export const multiRelationship = ({ source, type, fkField }) => {
-  let result = {
-    type
-  };
-
-  if (fkField) {
-    let sourceField = source.fields[fkField];
-
-    if (sourceField === StringArrayType) {
-      result.identifySingle = owner => ({ _id: { $in: owner[fkField].map(owner => ObjectId(owner[fkField])) } });
-      result.identifyMultiple = owners => ({ _id: { $in: flatMap(owners.map(owner => owner[fkField]), ids => ids.map(id => ObjectId(id))) } });
-    } else if (0 && sourceField) {
-      result.identifySingle = owners => ({ _id: { $in: owners.map(owner => owner[fkField]) } });
-      result.identifyMultiple = owners => ({ _id: { $in: owners.map(owner => owner[fkField]) } });
-    } else {
-      throw "Invalid type for foreign key " + fkField + " which is a " + +" for type " + type;
+export const relationshipHelpers = {
+  projectIds: (source, field, { type, fkField }) => {
+    if (!source.relationships) {
+      source.relationships = {};
     }
-  }
 
-  return result;
+    let result = {
+      type,
+      fkField
+    };
+
+    if (fkField) {
+      let sourceField = source.fields[fkField];
+
+      if (sourceField === StringArrayType) {
+        result.identifySingle = owner => ({ _id: { $in: owner[fkField].map(owner => ObjectId(owner[fkField])) } });
+        result.identifyMultiple = owners => ({ _id: { $in: flatMap(owners.map(owner => owner[fkField]), ids => ids.map(id => ObjectId(id))) } });
+      } else if (0 && sourceField) {
+        result.identifySingle = owners => ({ _id: { $in: owners.map(owner => owner[fkField]) } });
+        result.identifyMultiple = owners => ({ _id: { $in: owners.map(owner => owner[fkField]) } });
+      } else {
+        throw "Invalid type for foreign key " + fkField + " which is a " + +" for type " + type;
+      }
+    }
+
+    source.relationships[field] = result;
+  }
 };
