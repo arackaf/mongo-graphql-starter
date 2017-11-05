@@ -15,12 +15,25 @@ const {
   relationshipHelpers
 } = dataTypes;
 
+const Keyword = {
+  table: "keywords",
+  fields: {
+    keywordName: StringType
+  }
+};
+
 const Subject = {
   table: "subjects",
   fields: {
-    name: StringType
+    name: StringType,
+    keywordIds: StringArrayType
   }
 };
+
+relationshipHelpers.projectIds(Subject, "keywords", {
+  type: Keyword,
+  fkField: "keywordIds"
+});
 
 const Author = {
   table: "authors",
@@ -56,5 +69,6 @@ relationshipHelpers.projectIds(Book, "authors", {
 export default {
   Book,
   Author,
-  Subject
+  Subject,
+  Keyword
 };
