@@ -25,7 +25,7 @@ test("Modification mutation works", async () => {
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { 
+    mutation: `updateBook(_id: "${obj._id}", Book: {
       authors_PULL: {name_startsWith: "A"}, 
     }){Book{
       title, 
