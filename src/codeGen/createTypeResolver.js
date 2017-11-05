@@ -23,6 +23,11 @@ export default function createGraphqlResolver(objectToCreate) {
         imports.push(`import { load${relationship.type.__name}s} from "../${relationship.type.__name}/resolver";`);
       }
 
+      if (!typeImports.has("flatMap")) {
+        typeImports.add("flatMap");
+        imports.push(`import flatMap from "lodash.flatmap";`);
+      }
+
       relationships += projectIdsTemplate
         .replace(/\${table}/g, relationship.type.table)
         .replace(/\${fkField}/g, relationship.fkField)

@@ -1,12 +1,15 @@
 import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
-export function getMongoProjection(requestMap, objectMetaData, args) {
-  return getProjectionObject(requestMap, objectMetaData, args);
+export function getMongoProjection(requestMap, objectMetaData, args, extrasPackets) {
+  return getProjectionObject(requestMap, objectMetaData, args, extrasPackets);
 }
-function getProjectionObject(requestMap, objectMetaData, args = {}, currentObject = "", increment = 0) {
-  return [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
+function getProjectionObject(requestMap, objectMetaData, args = {}, extrasPackets, currentObject = "", increment = 0) {
+  let result = [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
     let entry = objectMetaData.fields[field];
+    if (!entry) {
+      return hash;
+    }
 
     if (selectionEntry === true) {
       if (entry.__isDate) {
@@ -21,14 +24,25 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, currentObjec
         $map: {
           input: currentObject ? currentObject + "." + field : "$" + field,
           as: currentObjName,
-          in: getProjectionObject(selectionEntry, entry.type, {}, "$$" + currentObjName, increment + 1)
+          in: getProjectionObject(selectionEntry, entry.type, {}, null, "$$" + currentObjName, increment + 1)
         }
       };
     } else {
-      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, currentObject ? currentObject + "." + field : "$" + field, increment);
+      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, null, currentObject ? currentObject + "." + field : "$" + field, increment);
     }
     return hash;
   }, {});
+
+  if (extrasPackets && extrasPackets.size && objectMetaData.relationships) {
+    Object.keys(objectMetaData.relationships).forEach(relationshipName => {
+      let relationship = objectMetaData.relationships[relationshipName];
+      if (extrasPackets.get(relationshipName)) {
+        result[relationship.fkField] = 1;
+      }
+    });
+  }
+
+  return result;
 }
 
 export function getMongoFilters(args, objectMetaData) {
@@ -104,7 +118,9 @@ export function parseRequestedFields(ast, queryName) {
   let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
 
   if (queryName) {
-    fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == queryName);
+    for (let path of queryName.split(".")) {
+      fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == path);
+    }
   }
 
   if (fieldNode) {
@@ -142,15 +158,12 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let requestMap = parseRequestedFields(ast, queryName);
   let metadataRequested = parseRequestedFields(ast, "Meta");
   let $project = null;
-  if (requestMap.size) {
-    $project = getMongoProjection(requestMap, objectMetaData, args);
-  }
   let extrasPackets = new Map([]);
 
   if (objectMetaData.relationships) {
     Object.keys(objectMetaData.relationships).forEach(name => {
-      let requestMap = parseRequestedFields(ast, name);
       let relationship = objectMetaData.relationships[name];
+      let requestMap = parseRequestedFields(ast, queryName + "." + name);
 
       if (requestMap.size) {
         extrasPackets.set(name, {
@@ -160,6 +173,11 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
       }
     });
   }
+
+  if (requestMap.size) {
+    $project = getMongoProjection(requestMap, objectMetaData, args, extrasPackets);
+  }
+
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;

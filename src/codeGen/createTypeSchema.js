@@ -2,12 +2,13 @@ import { MongoIdType, StringType, StringArrayType, IntType, IntArrayType, FloatT
 import { TAB } from "./utilities";
 
 export default function createGraphqlTypeSchema(objectToCreate) {
-  let fields = objectToCreate.fields,
-    name = objectToCreate.__name,
-    allQueryFields = [],
-    allFields = [],
-    allFieldsMutation = [],
-    TAB2 = TAB + TAB;
+  let fields = objectToCreate.fields || {};
+  let relationships = objectToCreate.relationships || {};
+  let name = objectToCreate.__name;
+  let allQueryFields = [];
+  let allFields = [];
+  let allFieldsMutation = [];
+  let TAB2 = TAB + TAB;
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -22,6 +23,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   type ${name} {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
+    .join(`\n${TAB}`)}
+  ${Object.keys(relationships)
+    .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k])}`)
     .join(`\n${TAB}`)}
   }
   ${objectToCreate.table
@@ -133,6 +137,12 @@ function displaySchemaValue(value, useInputs) {
     } else if (value.__isObject) {
       return `${value.type.__name}${useInputs ? "Input" : ""}`;
     }
+  }
+}
+
+function displayRelationshipSchemaValue(value, useInputs) {
+  if (value.__isArray) {
+    return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
   }
 }
 

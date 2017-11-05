@@ -43,7 +43,8 @@ export const relationshipHelpers = {
 
     let result = {
       type,
-      fkField
+      fkField,
+      __isArray: true
     };
 
     if (fkField) {
