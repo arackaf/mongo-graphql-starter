@@ -15,13 +15,26 @@ const {
   relationshipHelpers
 } = dataTypes;
 
+const Subject = {
+  table: "subjects",
+  fields: {
+    name: StringType
+  }
+};
+
 const Author = {
   table: "authors",
   fields: {
     name: StringType,
-    birthday: DateType
+    birthday: DateType,
+    subjectIds: StringArrayType
   }
 };
+
+relationshipHelpers.projectIds(Author, "subjects", {
+  type: Subject,
+  fkField: "subjectIds"
+});
 
 const Book = {
   table: "books",
@@ -42,5 +55,6 @@ relationshipHelpers.projectIds(Book, "authors", {
 
 export default {
   Book,
-  Author
+  Author,
+  Subject
 };

@@ -115,7 +115,11 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
 }
 
 export function parseRequestedFields(ast, queryName) {
-  let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
+  let { requestMap } = getNestedQueryInfo(ast, queryName);
+  return requestMap;
+}
+export function getNestedQueryInfo(ast, queryName) {
+  let fieldNode = ast.fieldNodes ? ast.fieldNodes.find(fn => fn.kind == "Field") : ast;
 
   if (queryName) {
     for (let path of queryName.split(".")) {
@@ -124,9 +128,15 @@ export function parseRequestedFields(ast, queryName) {
   }
 
   if (fieldNode) {
-    return getSelections(fieldNode);
+    return {
+      requestMap: getSelections(fieldNode),
+      ast: fieldNode
+    };
   } else {
-    return new Map();
+    return {
+      requestMap: new Map(),
+      ast: null
+    };
   }
 }
 
@@ -153,6 +163,27 @@ export function newObjectFromArgs(args, typeMetadata) {
   }, {});
 }
 
+function getRelationshipPacket(ast, queryName, requestMap, type) {
+  let extrasPackets = new Map([]);
+
+  if (type.relationships) {
+    Object.keys(type.relationships).forEach(name => {
+      let relationship = type.relationships[name];
+      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, name);
+
+      if (requestMap.size) {
+        extrasPackets.set(name, getRelationshipPacket(astNew, name, requestMap, relationship.type));
+      }
+    });
+  }
+
+  return {
+    extrasPackets,
+    requestMap,
+    $project: getMongoProjection(requestMap, type, {}, extrasPackets)
+  };
+}
+
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
   let requestMap = parseRequestedFields(ast, queryName);
@@ -163,13 +194,10 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   if (objectMetaData.relationships) {
     Object.keys(objectMetaData.relationships).forEach(name => {
       let relationship = objectMetaData.relationships[name];
-      let requestMap = parseRequestedFields(ast, queryName + "." + name);
+      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, queryName + "." + name);
 
       if (requestMap.size) {
-        extrasPackets.set(name, {
-          requestMap,
-          $project: getMongoProjection(requestMap, relationship.type, {})
-        });
+        extrasPackets.set(name, getRelationshipPacket(astNew, name, requestMap, relationship.type));
       }
     });
   }
