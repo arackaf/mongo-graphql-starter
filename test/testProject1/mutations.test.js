@@ -283,6 +283,20 @@ test("float array updates", async () => {
   expect(obj).toEqual({ title: "Book 1", prices: [1.0, 2.2] });
 });
 
+test("float array pull", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.2, 3.3]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { prices_PULL: [1.1, 3.3] }) {Book{title, prices}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", prices: [2.2] });
+});
+
 //-----------------------------------------------------------------------------------------
 
 test("int array update", async () => {
@@ -313,6 +327,20 @@ test("int array updates", async () => {
   expect(obj).toEqual({ title: "Book 1", editions: [7, 11] });
 });
 
+test("int array pull", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", editions: [4, 6, 10]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", editions: [10] });
+});
+
 //-----------------------------------------------------------------------------------------
 
 test("string array update", async () => {
@@ -341,6 +369,20 @@ test("string array updates", async () => {
   });
 
   expect(obj).toEqual({ title: "Book 1", keywords: ["a", "b"] });
+});
+
+test("string array pull", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d", "e"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { keywords_PULL: ["c", "e"] }) {Book{title, keywords}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", keywords: ["d"] });
 });
 
 //-----------------------------------------------------------------------------------------
