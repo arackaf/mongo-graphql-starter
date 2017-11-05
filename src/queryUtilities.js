@@ -175,8 +175,9 @@ export function getUpdateObject(args, typeMetadata) {
   let $set = {};
   let $inc = {};
   let $push = {};
-  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push);
-  let result = { $set, $inc, $push };
+  let $pull = {};
+  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push, $pull);
+  let result = { $set, $inc, $push, $pull };
   Object.keys(result).forEach(k => {
     if (!Object.keys(result[k]).length) {
       delete result[k];
@@ -185,7 +186,7 @@ export function getUpdateObject(args, typeMetadata) {
   return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) {
+function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, $pull) {
   Object.keys(args).forEach(k => {
     let field = typeMetadata.fields[k];
 
@@ -215,9 +216,9 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
           $set[prefix + `${fieldName}.${args[k].index}`] = args[k].value;
         } else if (field.__isArray) {
-          getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push);
+          getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push, $pull);
         } else {
-          getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push);
+          getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull);
         }
       } else if (queryOperation === "UPDATES") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
@@ -226,8 +227,13 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push) 
           });
         } else {
           args[k].forEach(update => {
-            getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push);
+            getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push, $pull);
           });
+        }
+      } else if (queryOperation === "PULL") {
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+        } else {
+          $pull[prefix + fieldName] = fillMongoFiltersObject(args[k], field.type);
         }
       }
     } else {

@@ -500,6 +500,154 @@ test("Update deep author info 4", async () => {
   });
 });
 
+test("Deep pull", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {
+      title: "Blog 1", 
+      comments: [{
+        text: "C1", 
+        author: {
+          name: "Adam", 
+          favoriteTag: {name: "ft"}, 
+          tagsSubscribed: []
+        }
+      }, {
+        text: "C2", 
+        author: {
+          name: "Bob", 
+          favoriteTag: {name: "ft"}, 
+          tagsSubscribed: []
+        }
+      }, {
+        text: "C3", 
+        author: {
+          name: "Alan", 
+          favoriteTag: {name: "ft"}, 
+          tagsSubscribed: []
+        }
+      }]
+    }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+      comments_PULL: {
+        author: { 
+          name_startsWith: "A" 
+        } 
+      } 
+    }){Blog{title, comments{text}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({
+    title: "Blog 1",
+    comments: [
+      {
+        text: "C2"
+      }
+    ]
+  });
+});
+
+test("Deep pull 2", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {
+      title: "Blog 1", 
+      comments: [{
+        text: "C1", 
+        author: {
+          name: "Adam", 
+          favoriteTag: {name: "a"}, 
+          tagsSubscribed: []
+        }
+      }, {
+        text: "C2", 
+        author: {
+          name: "Bob", 
+          favoriteTag: {name: "b"}, 
+          tagsSubscribed: []
+        }
+      }, {
+        text: "C3", 
+        author: {
+          name: "Alan", 
+          favoriteTag: {name: "aaa"}, 
+          tagsSubscribed: []
+        }
+      }]
+    }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+      comments_PULL: {
+        author: { 
+          favoriteTag: { name_startsWith: "a"}
+        } 
+      } 
+    }){Blog{title, comments{text}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({
+    title: "Blog 1",
+    comments: [
+      {
+        text: "C2"
+      }
+    ]
+  });
+});
+
+test("Deep pull 3", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {
+      title: "Blog 1", 
+      comments: [{
+        text: "C1", 
+        author: {
+          name: "Adam",  
+          tagsSubscribed: [{name: "a"}, {name: "aa"}]
+        }
+      }, {
+        text: "C2", 
+        author: {
+          name: "Bob", 
+          tagsSubscribed: [{name: "b"}]
+        }
+      }, {
+        text: "C3", 
+        author: {
+          name: "Alan", 
+          favoriteTag: {name: "aaa"}, 
+          tagsSubscribed: [{name: "aaaa"}]
+        }
+      }]
+    }){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+      comments_PULL: {
+        author: { 
+          tagsSubscribed: { name_startsWith: "a"}
+        } 
+      } 
+    }){Blog{title, comments{text}}}`,
+    result: "updateBlog"
+  });
+  expect(result).toEqual({
+    title: "Blog 1",
+    comments: [
+      {
+        text: "C2"
+      }
+    ]
+  });
+});
+
 test("Add mutate author - add favorite tag and birthday", async () => {
   let obj = await runMutation({
     mutation: `createBlog(Blog: {title: "Blog 1", author: { name: "Adam Auth"} }){Blog{_id}}`,
