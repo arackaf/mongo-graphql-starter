@@ -162,7 +162,8 @@ function getMutations(k, fields) {
         `${k}_PUSH: ${value.type.__name}Input`,
         `${k}_CONCAT: [${value.type.__name}Input]`,
         `${k}_UPDATE: ${value.type.__name}ArrayMutationInput`,
-        `${k}_UPDATES: [${value.type.__name}ArrayMutationInput]`
+        `${k}_UPDATES: [${value.type.__name}ArrayMutationInput]`,
+        `${k}_PULL: ${value.type.__name}Filters`
       ];
     } else if (value.__isLiteral) {
       return [`${k}: ${value.type}`];
