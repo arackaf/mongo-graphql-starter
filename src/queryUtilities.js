@@ -163,16 +163,16 @@ export function newObjectFromArgs(args, typeMetadata) {
   }, {});
 }
 
-function getRelationshipPacket(ast, queryName, requestMap, type) {
+function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
   let extrasPackets = new Map([]);
 
   if (type.relationships) {
     Object.keys(type.relationships).forEach(name => {
       let relationship = type.relationships[name];
-      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, name);
+      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, anchor ? anchor + "." + name : name);
 
       if (requestMap.size) {
-        extrasPackets.set(name, getRelationshipPacket(astNew, name, requestMap, relationship.type));
+        extrasPackets.set(name, parseRequestedHierarchy(astNew, requestMap, relationship.type));
       }
     });
   }
@@ -180,7 +180,7 @@ function getRelationshipPacket(ast, queryName, requestMap, type) {
   return {
     extrasPackets,
     requestMap,
-    $project: getMongoProjection(requestMap, type, {}, extrasPackets)
+    $project: requestMap.size ? getMongoProjection(requestMap, type, args, extrasPackets) : null
   };
 }
 
@@ -188,24 +188,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
   let requestMap = parseRequestedFields(ast, queryName);
   let metadataRequested = parseRequestedFields(ast, "Meta");
-  let $project = null;
-  let extrasPackets = new Map([]);
-
-  if (objectMetaData.relationships) {
-    Object.keys(objectMetaData.relationships).forEach(name => {
-      let relationship = objectMetaData.relationships[name];
-      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, queryName + "." + name);
-
-      if (requestMap.size) {
-        extrasPackets.set(name, getRelationshipPacket(astNew, name, requestMap, relationship.type));
-      }
-    });
-  }
-
-  if (requestMap.size) {
-    $project = getMongoProjection(requestMap, objectMetaData, args, extrasPackets);
-  }
-
+  let { $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName);
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
