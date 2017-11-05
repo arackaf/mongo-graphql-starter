@@ -1,4 +1,15 @@
-import { MongoIdType, StringType, StringArrayType, IntType, IntArrayType, FloatType, FloatArrayType, DateType, arrayOf } from "../dataTypes";
+import {
+  MongoIdType,
+  MongoIdArrayType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  FloatArrayType,
+  DateType,
+  arrayOf
+} from "../dataTypes";
 import { TAB } from "./utilities";
 
 export default function createGraphqlTypeSchema(objectToCreate) {
@@ -126,6 +137,8 @@ function displaySchemaValue(value, useInputs) {
         return "[Int]";
       case FloatArrayType:
         return "[Float]";
+      case MongoIdArrayType:
+        return "[String]";
       default:
         return `${value == MongoIdType || value == DateType ? "String" : value}`;
     }
@@ -183,6 +196,15 @@ function getMutations(k, fields) {
         `${k}_UPDATES: [FloatArrayUpdate]`,
         `${k}_PULL: [Float]`
       ];
+    } else if (value === MongoIdArrayType) {
+      return [
+        `${k}: [String]`,
+        `${k}_PUSH: String`,
+        `${k}_CONCAT: [String]`,
+        `${k}_UPDATE: StringArrayUpdate`,
+        `${k}_UPDATES: [StringArrayUpdate]`,
+        `${k}_PULL: [String]`
+      ];
     }
 
     return [`${k}: String`];
@@ -220,6 +242,7 @@ function queriesForField(fieldName, realFieldType) {
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
       break;
     case StringArrayType:
+    case MongoIdArrayType:
       result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`]);
       break;
     case IntArrayType:

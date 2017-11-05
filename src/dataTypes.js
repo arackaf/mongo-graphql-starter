@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 
 export const MongoIdType = "MongoId";
+export const MongoIdArrayType = "MongoIdArray";
 export const StringType = "String";
 export const StringArrayType = "StringArray";
 export const IntType = "Int";
