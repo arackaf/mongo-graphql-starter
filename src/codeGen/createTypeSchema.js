@@ -147,11 +147,32 @@ function getMutations(k, fields) {
     } else if (value === "Float") {
       return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
     } else if (value === StringArrayType) {
-      return [`${k}: [String]`, `${k}_PUSH: String`, `${k}_CONCAT: [String]`, `${k}_UPDATE: StringArrayUpdate`, `${k}_UPDATES: [StringArrayUpdate]`];
+      return [
+        `${k}: [String]`,
+        `${k}_PUSH: String`,
+        `${k}_CONCAT: [String]`,
+        `${k}_UPDATE: StringArrayUpdate`,
+        `${k}_UPDATES: [StringArrayUpdate]`,
+        `${k}_PULL: [String]`
+      ];
     } else if (value === IntArrayType) {
-      return [`${k}: [Int]`, `${k}_PUSH: Int`, `${k}_CONCAT: [Int]`, `${k}_UPDATE: IntArrayUpdate`, `${k}_UPDATES: [IntArrayUpdate]`];
+      return [
+        `${k}: [Int]`,
+        `${k}_PUSH: Int`,
+        `${k}_CONCAT: [Int]`,
+        `${k}_UPDATE: IntArrayUpdate`,
+        `${k}_UPDATES: [IntArrayUpdate]`,
+        `${k}_PULL: [Int]`
+      ];
     } else if (value === FloatArrayType) {
-      return [`${k}: [Float]`, `${k}_PUSH: Float`, `${k}_CONCAT: [Float]`, `${k}_UPDATE: FloatArrayUpdate`, `${k}_UPDATES: [FloatArrayUpdate]`];
+      return [
+        `${k}: [Float]`,
+        `${k}_PUSH: Float`,
+        `${k}_CONCAT: [Float]`,
+        `${k}_UPDATE: FloatArrayUpdate`,
+        `${k}_UPDATES: [FloatArrayUpdate]`,
+        `${k}_PULL: [Float]`
+      ];
     }
 
     return [`${k}: String`];

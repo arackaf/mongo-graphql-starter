@@ -232,6 +232,7 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
         }
       } else if (queryOperation === "PULL") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+          $pull[prefix + fieldName] = { $in: args[k] };
         } else {
           $pull[prefix + fieldName] = fillMongoFiltersObject(args[k], field.type);
         }
