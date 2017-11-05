@@ -4,7 +4,7 @@
 
     let results = await load${targetTypeName}s(db, { 
       $match,
-      $project: queryPacket.extrasPackets.get("${targetObjName}").$project
+      ...queryPacket.extrasPackets.get("${targetObjName}")
     });
 
     let ${targetTypeNameLower}DestinationMap = new Map([]);

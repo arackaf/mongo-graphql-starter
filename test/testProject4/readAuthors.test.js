@@ -12,7 +12,7 @@ beforeAll(async () => {
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
 
   await db.collection("books").insert({ title: "Book 1", pages: 100, authorIds: ["" + adam._id] });
-  await db.collection("books").insert({ title: "Book 2", pages: 150, authorIds: ["" + adam._id, "" + laura._id] });
+  await db.collection("books").insert({ title: "Book 2", pages: 150, authorIds: ["" + adam._id] });
   await db.collection("books").insert({ title: "Book 3", pages: 200, authorIds: ["" + katie._id] });
 });
 
@@ -29,7 +29,7 @@ test("Read authors", async () => {
     coll: "allBooks",
     results: [
       { title: "Book 1", authors: [{ name: "Adam" }] },
-      { title: "Book 2", authors: [{ name: "Adam" }, { name: "Laura" }] },
+      { title: "Book 2", authors: [{ name: "Adam" }] },
       { title: "Book 3", authors: [{ name: "Katie" }] }
     ]
   });
