@@ -27,7 +27,7 @@ const Subject = {
   table: "subjects",
   fields: {
     name: StringType,
-    keywordIds: StringArrayType
+    keywordIds: MongoIdArrayType
   }
 };
 
@@ -57,7 +57,7 @@ const Book = {
     title: StringType,
     pages: IntType,
     weight: FloatType,
-    authorIds: StringArrayType,
+    authorIds: MongoIdArrayType,
     primaryAuthorId: StringType
   }
 };
