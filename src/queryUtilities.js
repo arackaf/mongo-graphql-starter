@@ -1,4 +1,4 @@
-import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
+import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
 export function getMongoProjection(requestMap, objectMetaData, args, extrasPackets) {
@@ -67,6 +67,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
         return;
       } else if (fields[k] === MongoIdType) {
         args[k] = ObjectId(args[k]);
+      } else if (fields[k] === MongoIdArrayType) {
+        args[k] = args[k].map(val => ObjectId(val));
       }
 
       hash[prefix + k] = args[k];
@@ -83,7 +85,11 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
       }
 
       if (queryOperation === "in") {
-        hash[fieldName] = { $in: args[k] };
+        if (field === MongoIdArrayType) {
+          hash[fieldName] = { $in: args[k].map(arr => arr.map(val => ObjectId(val))) };
+        } else {
+          hash[fieldName] = { $in: args[k] };
+        }
       } else {
         if (field === StringType) {
           if (queryOperation === "contains") {
@@ -93,9 +99,9 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+        } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
           if (queryOperation == "contains") {
-            hash[fieldName] = args[k];
+            hash[fieldName] = field === MongoIdArrayType ? ObjectId(args[k]) : args[k];
           }
         } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
