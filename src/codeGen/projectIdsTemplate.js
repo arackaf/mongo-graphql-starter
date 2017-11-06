@@ -1,5 +1,5 @@
   if (${sourceObjName}s.length && queryPacket.extrasPackets.has("${targetObjName}")) {
-    let $match = { _id: { $in: flatMap(${sourceObjName}s.map(${objNameLower} => ${objNameLower}.${fkField}), ids => ids.map(id => ObjectId(id))) } };  
+    let $match = { _id: { $in: flatMap(${sourceObjName}s.map(${objNameLower} => ${objNameLower}.${fkField} || []), ids => ids.map(id => ObjectId(id))) } };  
     let $project = {};
 
     let results = await load${targetTypeName}s(db, { 
@@ -11,11 +11,13 @@
 
     for (let ${objNameLower} of ${sourceObjName}s) {
       ${objNameLower}.${targetObjName} = [];
-      for (let _id of ${objNameLower}.${fkField}) {
-        if (!${targetTypeNameLower}DestinationMap.has("" + _id, )){
-          ${targetTypeNameLower}DestinationMap.set("" + _id, []);
+      if (${objNameLower}.${fkField}) {
+        for (let _id of ${objNameLower}.${fkField}) {
+          if (!${targetTypeNameLower}DestinationMap.has("" + _id, )){
+            ${targetTypeNameLower}DestinationMap.set("" + _id, []);
+          }
+          ${targetTypeNameLower}DestinationMap.get("" + _id).push(${objNameLower}.${targetObjName});
         }
-        ${targetTypeNameLower}DestinationMap.get("" + _id).push(${objNameLower}.${targetObjName});
       }
     }
 
