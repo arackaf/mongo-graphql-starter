@@ -24,8 +24,6 @@ afterAll(async () => {
 });
 
 test("Read authors", async () => {
-  expect(1).toBe(1);
-  return;
   await queryAndMatchArray({
     query: `{allBooks(title_startsWith: "B"){Books{title, authors{name}}}}`,
     coll: "allBooks",
