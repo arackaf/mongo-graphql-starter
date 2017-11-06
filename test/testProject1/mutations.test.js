@@ -1,4 +1,5 @@
 import spinUp from "./spinUp";
+import { ObjectId } from "mongodb";
 
 let db, schema, queryAndMatchArray, runMutation;
 beforeAll(async () => {
@@ -383,6 +384,75 @@ test("string array pull", async () => {
   });
 
   expect(obj).toEqual({ title: "Book 1", keywords: ["d"] });
+});
+
+//-----------------------------------------------------------------------------------------
+
+const id1 = ObjectId("59ff9b246d61043f186dcfed");
+const id2 = ObjectId("59ff9b246d61043f186dcfee");
+const id3 = ObjectId("59ff9b246d61043f186dcfef");
+const idCrap = ObjectId("59ff9b246d61043f186dcfe9");
+
+test("Manual mongoId", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {_id: "${idCrap}" title: "Book temp"}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  expect(obj._id).toBe("" + idCrap);
+
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${idCrap}"){Book{title}}}`,
+    coll: "getBook",
+    results: { title: "Book temp" }
+  });
+
+  await runMutation({
+    mutation: `deleteBook(_id: "${idCrap}")`,
+    result: "deleteBook"
+  });
+});
+
+test("MongoId array update", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id2}", "${idCrap}"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: {mongoIds_UPDATE: {index: 1, value: "${id3}"} }) {Book{title, mongoIds}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", mongoIds: ["" + id2, "" + id3] });
+});
+
+test("MongoId array updates", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id3}", "${idCrap}"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: {mongoIds_UPDATES: [{index: 0, value: "${id1}"}, {index: 1, value: "${id2}"}] }) {Book{title, mongoIds}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", mongoIds: ["" + id1, "" + id2] });
+});
+
+test("MongoId array pull", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id1}", "${id2}", "${id3}"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Book: { mongoIds_PULL: ["${id2}", "${id3}"] }) {Book{title, mongoIds}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", mongoIds: ["" + id1] });
 });
 
 //-----------------------------------------------------------------------------------------
