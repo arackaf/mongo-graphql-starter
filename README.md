@@ -23,6 +23,7 @@ For any type which is contained in a Mongo collection—ie has a `table` propert
 import { dataTypes } from "mongo-graphql-starter";
 const {
   MongoIdType,
+  MongoIdArrayType,
   StringType,
   StringArrayType,
   IntType,
@@ -53,6 +54,7 @@ const Book = {
     keywords: StringArrayType,
     editions: IntArrayType,
     prices: FloatArrayType,
+    mongoIds: MongoIdArrayType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
@@ -133,6 +135,7 @@ Here are the valid types you can import from `mongo-graphql-starter`
 import { dataTypes } from "mongo-graphql-starter";
 const {
   MongoIdType,
+  MongoIdArrayType,
   StringType,
   StringArrayType,
   IntType,
@@ -150,6 +153,7 @@ const {
 Type|Description
 ----|-----------
 `MongoId`|Will create your field as a string, and will return whatever Mongo uid that was created.  Any filters using this id will wrap the string in Mongo's `ObjectId` function.
+`MongoIdArrayType`|An array of mongo ids
 `String`|Self explanatory
 `StringArrayType`|An array of strings
 `Int`|Self explanatory
@@ -264,7 +268,7 @@ The generated resolvers will analyze the AST and only query what you ask for.
 
 This section describes the filters available in the `all<Type>s` query for each queryable type.
 
-`string`, `stringArray`, `int`, `intArray`, `float`, `MongoId` and `date` fields will all have the following filters created
+All fields of built-in types will all have the following filters created
 
 Exact match
 
@@ -274,7 +278,7 @@ Exact match
 
 `field_in: [<value1>, <value2>]` - will match results which match any of those exact values.  
 
-Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For string, int and float arrays, the value will be an entire array, which will be matched by Mongo item by item.
+Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For the array types, the value will be an entire array, which will be matched by Mongo item by item.
 
 ### String filters
 
@@ -488,10 +492,10 @@ Argument|For types|Description
 `<fieldName>_DEC`|Numeric|Decrements the current value by the amount specified.  For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.
 `<fieldName>_PUSH`|Arrays|Pushes the specified value onto the array.  For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array.  Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.
 `<fieldName>_CONCAT`|Arrays|Pushes the specified values onto the array.  For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added.
-`<fieldName>_UPDATE`|Arrays|**For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For IntArrays, FloatArrays, or StringArrays**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type.  Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`
+`<fieldName>_UPDATE`|Arrays|**For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type.  Updates the object at `index` with the changes specified.  Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type.  Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`
 `<fieldName>_UPDATES`|Arrays|Same as UPDATE, but takes an array of these same inputs.  For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.
 `<fieldName>_UPDATE`|Objects|Implements the specified changes on the nested object.  The provided update object is of the same form specified here.  For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2
-`<fieldName>_PULL`|Arrays|Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray` and `FloatArray`**<br /><br />Takes an array of items to remove.  For example, `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match.  For example, `updateBook(_id: "${obj._id}", Book: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"
+`<fieldName>_PULL`|Arrays|Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove.  For example, `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match.  For example, `updateBook(_id: "${obj._id}", Book: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"
 
 Full examples are below.
 
