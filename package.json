@@ -15,14 +15,14 @@
   "jest": {},
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
-    "babel-jest": "^21.2.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
-    "del": "^3.0.0",
-    "express": "^4.16.1",
-    "express-graphql": "^0.6.11",
-    "graphql": "*.*.*",
-    "graphql-tools": "*.*.*",
-    "jest": "^21.2.1"
+    "babel-jest": "21.2.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
+    "del": "3.0.0",
+    "express": "4.16.1",
+    "express-graphql": "0.6.11",
+    "graphql": "0.11.7",
+    "graphql-tools": "2.7.2",
+    "jest": "21.2.1"
   },
   "scripts": {
     "test": "node test/masterSetup && jest --runInBand",
