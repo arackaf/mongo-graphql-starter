@@ -33,7 +33,7 @@
     "test5": "node test/masterSetup && jest --runInBand --config=jest.config5.json"
   },
   "dependencies": {
-    "@std/esm": "0.12.5",
+    "@std/esm": "0.15.0",
     "lodash.flatmap": "^4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
