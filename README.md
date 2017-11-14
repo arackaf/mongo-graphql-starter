@@ -515,6 +515,14 @@ Full examples are below.
 
 [Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L466)
 
+## Defining relationships between types (wip)
+
+Relationships can also be defined between queryable types.  This allows you to normalize your data into separate Mongo collections, related by foreign keys.
+
+These features are still a work in progress, so expect some features to be missing, or incomplete.
+
+### Defining an array of foreign keys
+
 ## Middleware
 
 Middleware allows you to add cross cutting concerns to your resolvers. After your query is processed, and all of the Mongo filters, projections, paging, etc are computed, these values are passed through each registered middleware, allowing them to modify these values as needed.  For example
