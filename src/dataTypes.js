@@ -57,5 +57,26 @@ export const relationshipHelpers = {
     }
 
     source.relationships[field] = result;
+  },
+  projectId: (source, field, { type, fkField }) => {
+    if (!source.relationships) {
+      source.relationships = {};
+    }
+
+    let result = {
+      type,
+      fkField,
+      __isObject: true
+    };
+
+    if (fkField) {
+      let sourceField = source.fields[fkField];
+
+      if (!(sourceField === StringType || sourceField === MongoIdType)) {
+        throw "Invalid type for foreign key " + fkField + " which is a " + +" for type " + type;
+      }
+    }
+
+    source.relationships[field] = result;
   }
 };
