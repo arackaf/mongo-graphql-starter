@@ -1,5 +1,5 @@
   if (${sourceObjName}s.length && queryPacket.extrasPackets.has("${targetObjName}")) {
-    let $match = { _id: { $in: flatMap(${sourceObjName}s.map(${objNameLower} => ${objNameLower}.${fkField} || []), ids => ids.map(id => ObjectId(id))) } };  
+    let $match = { _id: { $in: ${sourceObjName}s.map(${objNameLower} => ${objNameLower}.${fkField}).filter(id => id).map(id => ObjectId(id)) } };  
     let $project = {};
 
     let results = await load${targetTypeName}s(db, { 

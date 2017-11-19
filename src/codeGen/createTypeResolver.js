@@ -16,7 +16,7 @@ export default function createGraphqlResolver(objectToCreate) {
   let relationships = "";
 
   if (objectToCreate.relationships) {
-    Object.keys(objectToCreate.relationships).forEach(relationshipName => {
+    Object.keys(objectToCreate.relationships).forEach((relationshipName, index, all) => {
       let relationship = objectToCreate.relationships[relationshipName];
 
       if (!typeImports.has(relationship.type.__name)) {
@@ -47,6 +47,10 @@ export default function createGraphqlResolver(objectToCreate) {
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name);
+      }
+
+      if (index < all.length - 1) {
+        relationships += "\n\n";
       }
     });
 
