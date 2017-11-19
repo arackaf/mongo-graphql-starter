@@ -156,6 +156,8 @@ function displaySchemaValue(value, useInputs) {
 function displayRelationshipSchemaValue(value, useInputs) {
   if (value.__isArray) {
     return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
+  } else if (value.__isObject) {
+    return `${value.type.__name}${useInputs ? "Input" : ""}`;
   }
 }
 
