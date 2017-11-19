@@ -14,6 +14,6 @@
     }
 
     for (let ${objNameLower} of ${sourceObjName}s) {
-      ${objNameLower}.${targetObjName} = ${targetTypeNameLower}DestinationMap.get(${objNameLower}.${fkField}) || null;
+      ${objNameLower}.${targetObjName} = ${targetTypeNameLower}DestinationMap.get("" + ${objNameLower}.${fkField}) || null;
     }
   }
