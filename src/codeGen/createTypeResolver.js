@@ -4,6 +4,7 @@ import path from "path";
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
   let projectIdsTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsTemplate.js"), { encoding: "utf8" });
+  let projectIdTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdTemplate.js"), { encoding: "utf8" });
   let result = "";
   let imports = [
     `import { middleware, preprocessor, queryUtilities } from "mongo-graphql-starter";`,
@@ -28,14 +29,25 @@ export default function createGraphqlResolver(objectToCreate) {
         imports.push(`import flatMap from "lodash.flatmap";`);
       }
 
-      relationships += projectIdsTemplate
-        .replace(/\${table}/g, relationship.type.table)
-        .replace(/\${fkField}/g, relationship.fkField)
-        .replace(/\${targetObjName}/g, relationshipName)
-        .replace(/\${targetTypeName}/g, relationship.type.__name)
-        .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
-        .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
-        .replace(/\${sourceObjName}/g, objectToCreate.__name);
+      if (relationship.__isArray) {
+        relationships += projectIdsTemplate
+          .replace(/\${table}/g, relationship.type.table)
+          .replace(/\${fkField}/g, relationship.fkField)
+          .replace(/\${targetObjName}/g, relationshipName)
+          .replace(/\${targetTypeName}/g, relationship.type.__name)
+          .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
+          .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
+          .replace(/\${sourceObjName}/g, objectToCreate.__name);
+      } else if (relationship.__isObject) {
+        relationships += projectIdTemplate
+          .replace(/\${table}/g, relationship.type.table)
+          .replace(/\${fkField}/g, relationship.fkField)
+          .replace(/\${targetObjName}/g, relationshipName)
+          .replace(/\${targetTypeName}/g, relationship.type.__name)
+          .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
+          .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
+          .replace(/\${sourceObjName}/g, objectToCreate.__name);
+      }
     });
 
     relationships = "\n" + relationships + "\n";
