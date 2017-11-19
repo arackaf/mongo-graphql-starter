@@ -57,6 +57,7 @@ const Book = {
     title: StringType,
     pages: IntType,
     weight: FloatType,
+    mainAuthorId: MongoIdType,
     authorIds: MongoIdArrayType,
     primaryAuthorId: StringType
   }
@@ -65,6 +66,11 @@ const Book = {
 relationshipHelpers.projectIds(Book, "authors", {
   type: Author,
   fkField: "authorIds"
+});
+
+relationshipHelpers.projectId(Book, "mainAuthor", {
+  type: Author,
+  fkField: "mainAuthorId"
 });
 
 export default {
