@@ -567,7 +567,7 @@ relationshipHelpers.projectIds(Book, "authors", {
 });
 ```
 
-This adds a new `authors` collection to the Book type, which are read from the authors collection, by `_id`, based on the values in a book's `authorIds` array.  Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
+This adds a new `authors` array to the Book type, which are read from the authors collection, by `_id`, based on the values in a book's `authorIds` array.  Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
 
 ### Defining a single foreign key
 
@@ -586,7 +586,7 @@ This adds a new `mainAuthor` object to the Book type, which is read from the aut
 
 In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested as normal in your GraphQL queries. If you do not request anything, then nothing will be fetched from Mongo, as usual.  If you do request them then, as normal, the ast will be parsed, and only the queried author fields will fetched, and returned.
 
-Note that, for any `Book` query, the resulting books are read from Mongo first.  Then, if `authors` or `mainAuthor` is requested, then a single query is issued for each, to get the needed authors for the current books, which are then matched appropriately.  In other words, the generated code does not suffer from the Select N + 1 problem.
+Note that, for any `Book` query, the books from the current query are read from Mongo first.  Then, if `authors` or `mainAuthor` is requested, then a single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately.  In other words, the generated code does not suffer from the Select N + 1 problem.
 
 ## Middleware
 
