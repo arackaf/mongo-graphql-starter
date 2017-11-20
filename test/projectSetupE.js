@@ -42,7 +42,7 @@ const Author = {
     name: StringType,
     birthday: DateType,
     subjectIds: MongoIdArrayType,
-    firstBookId: StringType
+    firstBookId: MongoIdType
   }
 };
 
@@ -60,7 +60,7 @@ const Book = {
     weight: FloatType,
     mainAuthorId: MongoIdType,
     authorIds: MongoIdArrayType,
-    primaryAuthorId: StringType
+    primaryAuthorId: MongoIdType
   }
 };
 
