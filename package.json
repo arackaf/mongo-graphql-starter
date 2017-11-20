@@ -15,23 +15,26 @@
   "jest": {},
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
-    "babel-jest": "^21.2.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
-    "del": "^3.0.0",
-    "express": "^4.16.1",
-    "express-graphql": "^0.6.11",
-    "graphql": "*.*.*",
-    "graphql-tools": "*.*.*",
-    "jest": "^21.2.1"
+    "babel-jest": "21.2.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
+    "del": "3.0.0",
+    "express": "4.16.1",
+    "express-graphql": "0.6.11",
+    "graphql": "0.11.7",
+    "graphql-tools": "2.7.2",
+    "jest": "21.2.1"
   },
   "scripts": {
     "test": "node test/masterSetup && jest --runInBand",
-    "test1": "node test/masterSetup && jest --runInBand --config=jest.config1.json",
-    "test2": "node test/masterSetup && jest --runInBand --config=jest.config2.json",
-    "test3": "node test/masterSetup && jest --runInBand --config=jest.config3.json"
+    "test1": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config1.json",
+    "test2": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config2.json",
+    "test3": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config3.json",
+    "test4": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config4.json",
+    "test5": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config5.json"
   },
   "dependencies": {
-    "@std/esm": "0.12.5",
+    "@std/esm": "0.15.0",
+    "lodash.flatmap": "^4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
   }

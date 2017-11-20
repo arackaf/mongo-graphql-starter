@@ -1,12 +1,15 @@
-import { MongoIdType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
+import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 
-export function getMongoProjection(requestMap, objectMetaData, args) {
-  return getProjectionObject(requestMap, objectMetaData, args);
+export function getMongoProjection(requestMap, objectMetaData, args, extrasPackets) {
+  return getProjectionObject(requestMap, objectMetaData, args, extrasPackets);
 }
-function getProjectionObject(requestMap, objectMetaData, args = {}, currentObject = "", increment = 0) {
-  return [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
+function getProjectionObject(requestMap, objectMetaData, args = {}, extrasPackets, currentObject = "", increment = 0) {
+  let result = [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
     let entry = objectMetaData.fields[field];
+    if (!entry) {
+      return hash;
+    }
 
     if (selectionEntry === true) {
       if (entry.__isDate) {
@@ -21,14 +24,25 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, currentObjec
         $map: {
           input: currentObject ? currentObject + "." + field : "$" + field,
           as: currentObjName,
-          in: getProjectionObject(selectionEntry, entry.type, {}, "$$" + currentObjName, increment + 1)
+          in: getProjectionObject(selectionEntry, entry.type, {}, null, "$$" + currentObjName, increment + 1)
         }
       };
     } else {
-      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, currentObject ? currentObject + "." + field : "$" + field, increment);
+      hash[field] = getProjectionObject(selectionEntry, entry.type, {}, null, currentObject ? currentObject + "." + field : "$" + field, increment);
     }
     return hash;
   }, {});
+
+  if (extrasPackets && extrasPackets.size && objectMetaData.relationships) {
+    Object.keys(objectMetaData.relationships).forEach(relationshipName => {
+      let relationship = objectMetaData.relationships[relationshipName];
+      if (extrasPackets.get(relationshipName)) {
+        result[relationship.fkField] = 1;
+      }
+    });
+  }
+
+  return result;
 }
 
 export function getMongoFilters(args, objectMetaData) {
@@ -53,6 +67,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
         return;
       } else if (fields[k] === MongoIdType) {
         args[k] = ObjectId(args[k]);
+      } else if (fields[k] === MongoIdArrayType) {
+        args[k] = args[k].map(val => ObjectId(val));
       }
 
       hash[prefix + k] = args[k];
@@ -69,7 +85,11 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
       }
 
       if (queryOperation === "in") {
-        hash[fieldName] = { $in: args[k] };
+        if (field === MongoIdArrayType) {
+          hash[fieldName] = { $in: args[k].map(arr => arr.map(val => ObjectId(val))) };
+        } else {
+          hash[fieldName] = { $in: args[k] };
+        }
       } else {
         if (field === StringType) {
           if (queryOperation === "contains") {
@@ -79,9 +99,9 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
-        } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+        } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
           if (queryOperation == "contains") {
-            hash[fieldName] = args[k];
+            hash[fieldName] = field === MongoIdArrayType ? ObjectId(args[k]) : args[k];
           }
         } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
@@ -101,16 +121,28 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
 }
 
 export function parseRequestedFields(ast, queryName) {
-  let fieldNode = ast.fieldNodes.find(fn => fn.kind == "Field");
+  let { requestMap } = getNestedQueryInfo(ast, queryName);
+  return requestMap;
+}
+export function getNestedQueryInfo(ast, queryName) {
+  let fieldNode = ast.fieldNodes ? ast.fieldNodes.find(fn => fn.kind == "Field") : ast;
 
   if (queryName) {
-    fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == queryName);
+    for (let path of queryName.split(".")) {
+      fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == path);
+    }
   }
 
   if (fieldNode) {
-    return getSelections(fieldNode);
+    return {
+      requestMap: getSelections(fieldNode),
+      ast: fieldNode
+    };
   } else {
-    return new Map();
+    return {
+      requestMap: new Map(),
+      ast: null
+    };
   }
 }
 
@@ -129,6 +161,10 @@ export function newObjectFromArgs(args, typeMetadata) {
       obj[k] = args[k].map(argItem => newObjectFromArgs(argItem, field.type));
     } else if (field.__isObject) {
       obj[k] = newObjectFromArgs(args[k], field.type);
+    } else if (field === MongoIdArrayType) {
+      obj[k] = args[k].map(val => ObjectId(val));
+    } else if (field === MongoIdType) {
+      obj[k] = ObjectId(args[k]);
     } else {
       obj[k] = args[k];
     }
@@ -137,14 +173,32 @@ export function newObjectFromArgs(args, typeMetadata) {
   }, {});
 }
 
+function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
+  let extrasPackets = new Map([]);
+
+  if (type.relationships) {
+    Object.keys(type.relationships).forEach(name => {
+      let relationship = type.relationships[name];
+      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, anchor ? anchor + "." + name : name);
+
+      if (requestMap.size) {
+        extrasPackets.set(name, parseRequestedHierarchy(astNew, requestMap, relationship.type));
+      }
+    });
+  }
+
+  return {
+    extrasPackets,
+    requestMap,
+    $project: requestMap.size ? getMongoProjection(requestMap, type, args, extrasPackets) : null
+  };
+}
+
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
   let requestMap = parseRequestedFields(ast, queryName);
   let metadataRequested = parseRequestedFields(ast, "Meta");
-  let $project = null;
-  if (requestMap.size) {
-    $project = getMongoProjection(requestMap, objectMetaData, args);
-  }
+  let { $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName);
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
@@ -168,7 +222,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
   }
 
-  return { $match, $project, $sort, $limit, $skip, metadataRequested };
+  return { $match, $project, $sort, $limit, $skip, metadataRequested, extrasPackets };
 }
 
 export function getUpdateObject(args, typeMetadata) {
@@ -213,17 +267,17 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
           $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
         }
       } else if (queryOperation === "UPDATE") {
-        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
-          $set[prefix + `${fieldName}.${args[k].index}`] = args[k].value;
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
+          $set[prefix + `${fieldName}.${args[k].index}`] = field === MongoIdArrayType ? ObjectId(args[k].value) : args[k].value;
         } else if (field.__isArray) {
           getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push, $pull);
         } else {
           getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull);
         }
       } else if (queryOperation === "UPDATES") {
-        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
           args[k].forEach(update => {
-            $set[prefix + `${fieldName}.${update.index}`] = update.value;
+            $set[prefix + `${fieldName}.${update.index}`] = field === MongoIdArrayType ? ObjectId(update.value) : update.value;
           });
         } else {
           args[k].forEach(update => {
@@ -231,8 +285,8 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
           });
         }
       } else if (queryOperation === "PULL") {
-        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType) {
-          $pull[prefix + fieldName] = { $in: args[k] };
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
+          $pull[prefix + fieldName] = { $in: field === MongoIdArrayType ? args[k].map(val => ObjectId(val)) : args[k] };
         } else {
           $pull[prefix + fieldName] = fillMongoFiltersObject(args[k], field.type);
         }
