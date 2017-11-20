@@ -41,7 +41,7 @@ const Author = {
   fields: {
     name: StringType,
     birthday: DateType,
-    subjectIds: StringArrayType,
+    subjectIds: MongoIdArrayType,
     firstBookId: StringType
   }
 };

@@ -16,10 +16,10 @@ beforeAll(async () => {
 
   await Promise.all([js, af, lit].map(subject => db.collection("subjects").insert(subject)));
 
-  let adam = { name: "Adam", birthday: new Date("1982-03-22"), subjectIds: ["" + js._id] };
+  let adam = { name: "Adam", birthday: new Date("1982-03-22"), subjectIds: [js._id] };
   let katie = { name: "Katie", birthday: new Date("2009-08-05") };
-  let laura = { name: "Laura", birthday: new Date("1974-12-19"), subjectIds: ["" + af._id] };
-  let mallory = { name: "Mallory", birthday: new Date("1956-08-02"), subjectIds: ["" + lit._id] };
+  let laura = { name: "Laura", birthday: new Date("1974-12-19"), subjectIds: [af._id] };
+  let mallory = { name: "Mallory", birthday: new Date("1956-08-02"), subjectIds: [lit._id] };
 
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
 
