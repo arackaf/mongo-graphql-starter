@@ -59,8 +59,7 @@ const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: MongoIdType,
-    authorIds: MongoIdArrayType,
-    primaryAuthorId: MongoIdType
+    authorIds: MongoIdArrayType
   }
 };
 
