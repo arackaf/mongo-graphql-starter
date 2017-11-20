@@ -278,7 +278,7 @@ Exact match
 
 `field_in: [<value1>, <value2>]` - will match results which match any of those exact values.  
 
-Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied, before running the filter.  For the array types, the value will be an entire array, which will be matched by Mongo item by item.
+Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo.  Similarly, for MongoIds, the Mongo `ObjectId` method will be applied before running the filter.  For the array types, the value will be an entire array, which will be matched by Mongo item by item.
 
 ### String filters
 
@@ -517,9 +517,9 @@ Full examples are below.
 
 ## Defining relationships between types (wip)
 
-Relationships can also be defined between queryable types.  This allows you to normalize your data into separate Mongo collections, related by foreign keys.
+Relationships can be defined between queryable types.  This allows you to normalize your data into separate Mongo collections, related by foreign keys.
 
-This feature is still a work in progress, so expect some things to be missing, or incomplete.
+This feature is still a work in progress, so expect some things to be missing or incomplete, and of course the API may change.
 
 For the following examples, consider this setup
 
@@ -529,41 +529,17 @@ const {
   MongoIdType,
   MongoIdArrayType,
   StringType,
-  StringArrayType,
   IntType,
-  IntArrayType,
   FloatType,
-  FloatArrayType,
   DateType,
-  arrayOf,
-  objectOf,
-  formattedDate,
-  typeLiteral,
   relationshipHelpers
 } = dataTypes;
-
-const Keyword = {
-  table: "keywords",
-  fields: {
-    keywordName: StringType
-  }
-};
-
-const Subject = {
-  table: "subjects",
-  fields: {
-    name: StringType,
-    keywordIds: MongoIdArrayType
-  }
-};
 
 const Author = {
   table: "authors",
   fields: {
     name: StringType,
     birthday: DateType,
-    subjectIds: MongoIdArrayType,
-    firstBookId: MongoIdType
   }
 };
 
@@ -575,15 +551,14 @@ const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: MongoIdType,
-    authorIds: MongoIdArrayType,
-    primaryAuthorId: MongoIdType
+    authorIds: MongoIdArrayType
   }
 };
 ```
 
 ### Defining an array of foreign keys
 
-To declare that the Book object's `authorIds` represents an array of foreign keys to the authors collection, you'd use the `relationshipHelpers.projectIds` method, like so
+To declare that the Book type's `authorIds` field represents an array of foreign keys to the authors collection, you'd use the `relationshipHelpers.projectIds` method, like so
 
 ```javascript
 relationshipHelpers.projectIds(Book, "authors", {
@@ -592,11 +567,11 @@ relationshipHelpers.projectIds(Book, "authors", {
 });
 ```
 
-This adds a new `authors` collection to the Book type, which are read from the authors collection, by `_id`, based on the values in any book's `authorIds` array.  Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
+This adds a new `authors` collection to the Book type, which are read from the authors collection, by `_id`, based on the values in a book's `authorIds` array.  Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
 
 ### Defining a single foreign key
 
-To declare that the Book object's `mainAuthorId` represents a foreign key to the authors collection, you'd use the `relationshipHelpers.projectId` method, like so
+To declare that the Book type's `mainAuthorId` represents a foreign key to the authors collection, you'd use the `relationshipHelpers.projectId` method, like so
 
 ```javascript
 relationshipHelpers.projectId(Book, "mainAuthor", {
@@ -605,11 +580,11 @@ relationshipHelpers.projectId(Book, "mainAuthor", {
 });
 ```
 
-This adds a new `mainAithor` object to the Book type, which is read from the authors collection, by `_id`, based on the value in the book's `mainAuthorId` field.  Note that `mainAuthorId` must either be a `StringType` or `MongoIdType`.
+This adds a new `mainAuthor` object to the Book type, which is read from the authors collection, by `_id`, based on the value in the book's `mainAuthorId` field.  Note that `mainAuthorId` must either be a `StringType` or `MongoIdType`.
 
 ### Using relationships
 
-In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested as normal in your GraphQL queries. If you do not request anything, then those nested queries will not be run.  If you do request the fields then, as normal, the ast will be parsed, and only the queried author fields will fetched, and returned.
+In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested as normal in your GraphQL queries. If you do not request anything, then nothing will be fetched from Mongo, as usual.  If you do request them then, as normal, the ast will be parsed, and only the queried author fields will fetched, and returned.
 
 Note that, for any `Book` query, the resulting books are read from Mongo first.  Then, if `authors` or `mainAuthor` is requested, then a single query is issued for each, to get the needed authors for the current books, which are then matched appropriately.  In other words, the generated code does not suffer from the Select N + 1 problem.
 
