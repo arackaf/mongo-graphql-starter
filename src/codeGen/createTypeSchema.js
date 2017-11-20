@@ -1,13 +1,25 @@
-import { MongoIdType, StringType, StringArrayType, IntType, IntArrayType, FloatType, FloatArrayType, DateType, arrayOf } from "../dataTypes";
+import {
+  MongoIdType,
+  MongoIdArrayType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  FloatArrayType,
+  DateType,
+  arrayOf
+} from "../dataTypes";
 import { TAB } from "./utilities";
 
 export default function createGraphqlTypeSchema(objectToCreate) {
-  let fields = objectToCreate.fields,
-    name = objectToCreate.__name,
-    allQueryFields = [],
-    allFields = [],
-    allFieldsMutation = [],
-    TAB2 = TAB + TAB;
+  let fields = objectToCreate.fields || {};
+  let relationships = objectToCreate.relationships || {};
+  let name = objectToCreate.__name;
+  let allQueryFields = [];
+  let allFields = [];
+  let allFieldsMutation = [];
+  let TAB2 = TAB + TAB;
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -22,6 +34,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   type ${name} {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
+    .join(`\n${TAB}`)}
+  ${Object.keys(relationships)
+    .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k])}`)
     .join(`\n${TAB}`)}
   }
   ${objectToCreate.table
@@ -122,6 +137,8 @@ function displaySchemaValue(value, useInputs) {
         return "[Int]";
       case FloatArrayType:
         return "[Float]";
+      case MongoIdArrayType:
+        return "[String]";
       default:
         return `${value == MongoIdType || value == DateType ? "String" : value}`;
     }
@@ -133,6 +150,14 @@ function displaySchemaValue(value, useInputs) {
     } else if (value.__isObject) {
       return `${value.type.__name}${useInputs ? "Input" : ""}`;
     }
+  }
+}
+
+function displayRelationshipSchemaValue(value, useInputs) {
+  if (value.__isArray) {
+    return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
+  } else if (value.__isObject) {
+    return `${value.type.__name}${useInputs ? "Input" : ""}`;
   }
 }
 
@@ -173,6 +198,15 @@ function getMutations(k, fields) {
         `${k}_UPDATES: [FloatArrayUpdate]`,
         `${k}_PULL: [Float]`
       ];
+    } else if (value === MongoIdArrayType) {
+      return [
+        `${k}: [String]`,
+        `${k}_PUSH: String`,
+        `${k}_CONCAT: [String]`,
+        `${k}_UPDATE: StringArrayUpdate`,
+        `${k}_UPDATES: [StringArrayUpdate]`,
+        `${k}_PULL: [String]`
+      ];
     }
 
     return [`${k}: String`];
@@ -210,6 +244,7 @@ function queriesForField(fieldName, realFieldType) {
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
       break;
     case StringArrayType:
+    case MongoIdArrayType:
       result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`]);
       break;
     case IntArrayType:

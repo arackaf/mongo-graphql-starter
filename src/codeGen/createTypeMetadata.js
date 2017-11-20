@@ -5,6 +5,8 @@ const defaultDateFormat = "%m/%d/%Y";
 
 export default function createOutputTypeMetadata(objectToCreate) {
   let fields = objectToCreate.fields;
+  let relationships = objectToCreate.relationships;
+
   let types = new Set([]);
 
   Object.keys(fields).forEach(k => {
@@ -14,66 +16,92 @@ export default function createOutputTypeMetadata(objectToCreate) {
     }
   });
 
+  if (typeof relationships === "object") {
+    Object.keys(relationships).forEach(k => types.add(relationships[k].type.__name));
+  }
+
   let imports = types.size ? [...types].map(n => `import ${n} from "../${n}/${n}";`).join("\n") + "\n\n" : "";
 
   return (
-    createObject(imports + "export default {", [
-      objectToCreate.table
-        ? {
-            name: "table",
-            value: objectToCreate.table
-          }
-        : null,
-      {
-        name: "typeName",
-        value: objectToCreate.__name
-      },
-      {
-        name: "fields",
-        value: Object.keys(fields).map(k => {
-          let entry = fields[k];
-          if (entry === DateType || (typeof entry === "object" && entry.__isDate)) {
-            return {
-              name: k,
-              value: createObject(
-                "{",
-                [
-                  {
-                    name: "__isDate",
-                    value: true,
-                    literal: true
-                  },
-                  {
-                    name: "format",
-                    value: entry.format || defaultDateFormat
-                  }
-                ],
-                3
-              ),
+    createObject(
+      imports + "export default {",
+      [
+        objectToCreate.table
+          ? {
+              name: "table",
+              value: objectToCreate.table
+            }
+          : null,
+        {
+          name: "typeName",
+          value: objectToCreate.__name
+        },
+        {
+          name: "fields",
+          value: Object.keys(fields).map(k => {
+            let entry = fields[k];
+            if (entry === DateType || (typeof entry === "object" && entry.__isDate)) {
+              return {
+                name: k,
+                value: createObject(
+                  "{",
+                  [
+                    {
+                      name: "__isDate",
+                      value: true,
+                      literal: true
+                    },
+                    {
+                      name: "format",
+                      value: entry.format || defaultDateFormat
+                    }
+                  ],
+                  3
+                ),
+                literal: true
+              };
+            } else if (typeof entry === "object" && (entry.__isArray || entry.__isObject)) {
+              return {
+                name: k,
+                value: createObject(
+                  "{",
+                  [
+                    { name: entry.__isArray ? "__isArray" : "__isObject", value: true, literal: true },
+                    { definition: "get type(){ return " + entry.type.__name + "; }" }
+                  ],
+                  3
+                ),
+                literal: true
+              };
+            } else {
+              return {
+                name: k,
+                value: fields[k]
+              };
+            }
+          })
+        },
+        relationships
+          ? {
+              name: "relationships",
+              value: Object.keys(relationships).map(k => {
+                let relationship = relationships[k];
+
+                return {
+                  name: k,
+                  value: createObject(
+                    "{",
+                    [{ definition: "get type(){ return " + relationship.type.__name + "; }" }, { definition: `fkField: "${relationship.fkField}"` }],
+                    3
+                  ),
+                  literal: true
+                };
+              }),
               literal: true
-            };
-          } else if (typeof entry === "object" && (entry.__isArray || entry.__isObject)) {
-            return {
-              name: k,
-              value: createObject(
-                "{",
-                [
-                  { name: entry.__isArray ? "__isArray" : "__isObject", value: true, literal: true },
-                  { definition: "get type(){ return " + entry.type.__name + "; }" }
-                ],
-                3
-              ),
-              literal: true
-            };
-          } else {
-            return {
-              name: k,
-              value: fields[k]
-            };
-          }
-        })
-      }
-    ]) + ";"
+            }
+          : null
+      ].filter(o => o)
+    ) + ";"
   );
 }
 
@@ -89,15 +117,13 @@ ${declarationTab}}`.trim();
 
 function createProperties(properties, offset) {
   let propertyTab = TAB.repeat(offset);
-  let nestedObjTab = TAB.repeat(offset + 1);
 
   return properties
     .filter(prop => prop)
     .map(({ name, value, literal, definition }) => {
       return (
         propertyTab +
-        (definition ||
-          `${name}: ${Array.isArray(value) ? `${createObject(" {", value, offset + 1)}${propertyTab}` : displayMetadataValue(value, literal)}`)
+        (definition || `${name}: ${Array.isArray(value) ? `${createObject(" {", value, offset + 1)}` : displayMetadataValue(value, literal)}`)
       );
     })
     .join(",\n");
