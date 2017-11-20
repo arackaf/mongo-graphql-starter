@@ -519,9 +519,99 @@ Full examples are below.
 
 Relationships can also be defined between queryable types.  This allows you to normalize your data into separate Mongo collections, related by foreign keys.
 
-These features are still a work in progress, so expect some features to be missing, or incomplete.
+This feature is still a work in progress, so expect some things to be missing, or incomplete.
+
+For the following examples, consider this setup
+
+```javascript
+import { dataTypes } from "mongo-graphql-starter";
+const {
+  MongoIdType,
+  MongoIdArrayType,
+  StringType,
+  StringArrayType,
+  IntType,
+  IntArrayType,
+  FloatType,
+  FloatArrayType,
+  DateType,
+  arrayOf,
+  objectOf,
+  formattedDate,
+  typeLiteral,
+  relationshipHelpers
+} = dataTypes;
+
+const Keyword = {
+  table: "keywords",
+  fields: {
+    keywordName: StringType
+  }
+};
+
+const Subject = {
+  table: "subjects",
+  fields: {
+    name: StringType,
+    keywordIds: MongoIdArrayType
+  }
+};
+
+const Author = {
+  table: "authors",
+  fields: {
+    name: StringType,
+    birthday: DateType,
+    subjectIds: MongoIdArrayType,
+    firstBookId: MongoIdType
+  }
+};
+
+const Book = {
+  table: "books",
+  fields: {
+    _id: MongoIdType,
+    title: StringType,
+    pages: IntType,
+    weight: FloatType,
+    mainAuthorId: MongoIdType,
+    authorIds: MongoIdArrayType,
+    primaryAuthorId: MongoIdType
+  }
+};
+```
 
 ### Defining an array of foreign keys
+
+To declare that the Book object's `authorIds` represents an array of foreign keys to the authors collection, you'd use the `relationshipHelpers.projectIds` method, like so
+
+```javascript
+relationshipHelpers.projectIds(Book, "authors", {
+  type: Author,
+  fkField: "authorIds"
+});
+```
+
+This adds a new `authors` collection to the Book type, which are read from the authors collection, by `_id`, based on the values in any book's `authorIds` array.  Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
+
+### Defining a single foreign key
+
+To declare that the Book object's `mainAuthorId` represents a foreign key to the authors collection, you'd use the `relationshipHelpers.projectId` method, like so
+
+```javascript
+relationshipHelpers.projectId(Book, "mainAuthor", {
+  type: Author,
+  fkField: "mainAuthorId"
+});
+```
+
+This adds a new `mainAithor` object to the Book type, which is read from the authors collection, by `_id`, based on the value in the book's `mainAuthorId` field.  Note that `mainAuthorId` must either be a `StringType` or `MongoIdType`.
+
+### Using relationships
+
+In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested as normal in your GraphQL queries. If you do not request anything, then those nested queries will not be run.  If you do request the fields then, as normal, the ast will be parsed, and only the queried author fields will fetched, and returned.
+
+Note that, for any `Book` query, the resulting books are read from Mongo first.  Then, if `authors` or `mainAuthor` is requested, then a single query is issued for each, to get the needed authors for the current books, which are then matched appropriately.  In other words, the generated code does not suffer from the Select N + 1 problem.
 
 ## Middleware
 
