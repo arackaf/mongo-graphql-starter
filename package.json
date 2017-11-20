@@ -26,11 +26,11 @@
   },
   "scripts": {
     "test": "node test/masterSetup && jest --runInBand",
-    "test1": "node test/masterSetup && jest --runInBand --config=jest.config1.json",
-    "test2": "node test/masterSetup && jest --runInBand --config=jest.config2.json",
-    "test3": "node test/masterSetup && jest --runInBand --config=jest.config3.json",
-    "test4": "node test/masterSetup && jest --runInBand --config=jest.config4.json",
-    "test5": "node test/masterSetup && jest --runInBand --config=jest.config5.json"
+    "test1": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config1.json",
+    "test2": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config2.json",
+    "test3": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config3.json",
+    "test4": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config4.json",
+    "test5": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config5.json"
   },
   "dependencies": {
     "@std/esm": "0.15.0",
