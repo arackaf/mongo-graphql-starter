@@ -41,7 +41,8 @@ const Author = {
   fields: {
     name: StringType,
     birthday: DateType,
-    subjectIds: StringArrayType
+    subjectIds: StringArrayType,
+    firstBookId: StringType
   }
 };
 
@@ -71,6 +72,11 @@ relationshipHelpers.projectIds(Book, "authors", {
 relationshipHelpers.projectId(Book, "mainAuthor", {
   type: Author,
   fkField: "mainAuthorId"
+});
+
+relationshipHelpers.projectId(Author, "firstBook", {
+  type: Book,
+  fkField: "firstBookId"
 });
 
 export default {
