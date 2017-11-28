@@ -26,3 +26,11 @@ test("Bool match true", async () => {
 test("Bool match false", async () => {
   await queryAndMatchArray({ query: "{allBooks(isRead: false, SORT: {title: 1}){Books{title}}}", coll: "allBooks", results: [{ title: "Book 2" }] });
 });
+
+test("Bool match in", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(isRead_in: [true, false], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 3" }]
+  });
+});
