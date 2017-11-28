@@ -8,7 +8,8 @@ import {
   FloatType,
   FloatArrayType,
   DateType,
-  arrayOf
+  arrayOf,
+  BoolType
 } from "../dataTypes";
 import { TAB } from "./utilities";
 
@@ -39,8 +40,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k])}`)
     .join(`\n${TAB}`)}
   }
-  ${objectToCreate.table
-    ? `
+  ${
+    objectToCreate.table
+      ? `
   type ${name}QueryResults {
     ${name}s: [${name}],
     Meta: QueryResultsMetadata
@@ -54,7 +56,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     ${name}: ${name}
   }
 `
-    : ""}
+      : ""
+  }
   input ${name}Input {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k], true)}`)
@@ -67,14 +70,16 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     .reduce((inputs, k) => (inputs.push(...getMutations(k, fields).map(val => TAB + val)), inputs), [])
     .join(`\n${TAB}`)}
   }
-  ${objectToCreate.__usedInArray
-    ? `
+  ${
+    objectToCreate.__usedInArray
+      ? `
   input ${name}ArrayMutationInput {
   ${TAB}index: Int,
   ${TAB}${name}: ${name}MutationInput
   }
   `
-    : ""}
+      : ""
+  }
   input ${name}Sort {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: Int`)
@@ -87,8 +92,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
   \`;
   
-  ${objectToCreate.table
-    ? `
+  ${
+    objectToCreate.table
+      ? `
   export const mutation = \`
   
   ${TAB}create${name}(
@@ -110,9 +116,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
   ${TAB}all${name}s(
   ${TAB2}${allQueryFields
-        .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
-        .concat(dateFields.map(f => `${f}_format: String`))
-        .join(`,\n${TAB2}${TAB}`)}
+          .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+          .concat(dateFields.map(f => `${f}_format: String`))
+          .join(`,\n${TAB2}${TAB}`)}
     ): ${name}QueryResults
   
   ${TAB}get${name}(
@@ -122,7 +128,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   \`;
   
   `
-    : ""}
+      : ""
+  }
   `;
 }
 
@@ -167,7 +174,9 @@ function getMutations(k, fields) {
   if (typeof value === "object" && value.__isDate) {
     return [`${k}: String`];
   } else if (typeof value === "string") {
-    if (value === "Int") {
+    if (value === BoolType) {
+      return [`${k}: Boolean`];
+    } else if (value === "Int") {
       return [`${k}: Int`, `${k}_INC: Int`, `${k}_DEC: Int`];
     } else if (value === "Float") {
       return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
@@ -235,6 +244,9 @@ function queriesForField(fieldName, realFieldType) {
   let result = [];
   let fieldType = realFieldType === DateType || realFieldType === MongoIdType ? "String" : realFieldType;
   switch (realFieldType) {
+    case BoolType:
+      result.push(`${fieldName}: Boolean`);
+      break;
     case StringType:
       result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`));
       break;
@@ -261,6 +273,7 @@ function queriesForField(fieldName, realFieldType) {
     case IntType:
     case FloatType:
     case DateType:
+    case BoolType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
