@@ -273,6 +273,7 @@ function queriesForField(fieldName, realFieldType) {
     case IntType:
     case FloatType:
     case DateType:
+    case BoolType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
