@@ -1,4 +1,9 @@
-export async function load${objName}s(db, queryPacket){
+import { queryUtilities } from "mongo-graphql-starter";
+const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject } = queryUtilities;
+import { ObjectId } from "mongodb";
+import Type4 from "./Type4";
+
+export async function loadType4s(db, queryPacket){
   let { $match, $project, $sort, $limit, $skip } = queryPacket;
 
   let aggregateItems = [
@@ -9,23 +14,23 @@ export async function load${objName}s(db, queryPacket){
     $limit != null ? { $limit } : null
   ].filter(item => item)
 
-  let ${objName}s = await db
-    .collection("${table}")
+  let Type4s = await db
+    .collection("type4")
     .aggregate(aggregateItems)
     .toArray();
-  ${relationships}
-  return ${objName}s;
+  
+  return Type4s;
 }
 
 export default {
   Query: {
-    async all${objName}s(root, args, context, ast) {
+    async allType4s(root, args, context, ast) {
       //await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}s");
+      let queryPacket = decontructGraphqlQuery(args, ast, Type4, "Type4s");
       /*
       let queryPacket = await middleware.process(
-        decontructGraphqlQuery(args, ast, ${objName}, "${objName}s"), 
+        decontructGraphqlQuery(args, ast, Type4, "Type4s"), 
         root, 
         args, 
         context, 
@@ -36,7 +41,7 @@ export default {
       let result = {};
 
       if (queryPacket.$project){
-        result.${objName}s = await load${objName}s(db, queryPacket);
+        result.Type4s = await loadType4s(db, queryPacket);
       }
 
       if (queryPacket.metadataRequested.size){
@@ -44,7 +49,7 @@ export default {
 
         if (queryPacket.metadataRequested.get("count")){
           let countResults = (await db
-            .collection("${table}")
+            .collection("type4")
             .aggregate([{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }])
             .toArray());
             
@@ -54,13 +59,13 @@ export default {
 
       return result;
     },
-    async get${objName}(root, args, context, ast) {
+    async getType4(root, args, context, ast) {
       //await preprocessor.process(root, args, context, ast);
       let db = await root.db;
-      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}");
+      let queryPacket = decontructGraphqlQuery(args, ast, Type4, "Type4");
       /*
       let queryPacket = await middleware.process(
-        decontructGraphqlQuery(args, ast, ${objName}, "${objName}"), 
+        decontructGraphqlQuery(args, ast, Type4, "Type4"), 
         root, 
         args, 
         context, 
@@ -68,56 +73,56 @@ export default {
       );
       */
 
-      let results = await load${objName}s(db, queryPacket);
+      let results = await loadType4s(db, queryPacket);
 
       return {
-        ${objName}: results[0] || null
+        Type4: results[0] || null
       };
     }
   },
   Mutation: {
-    async create${objName}(root, args, context, ast) {
+    async createType4(root, args, context, ast) {
       let db = await root.db;
-      let newObject = newObjectFromArgs(args.${objName}, ${objName});
-      let requestMap = parseRequestedFields(ast, "${objName}");
-      let $project = getMongoProjection(requestMap, ${objName}, args);
+      let newObject = newObjectFromArgs(args.Type4, Type4);
+      let requestMap = parseRequestedFields(ast, "Type4");
+      let $project = getMongoProjection(requestMap, Type4, args);
       
-      await db.collection("${table}").insert(newObject);
+      await db.collection("type4").insert(newObject);
       return {
-        ${objName}: (await db
-          .collection("${table}")
+        Type4: (await db
+          .collection("type4")
           .aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }])
           .toArray())[0]
       };
     },
-    async update${objName}(root, args, context, ast) {
+    async updateType4(root, args, context, ast) {
       if (!args._id){
         throw "No _id sent";
       }
       let db = await root.db;
-      let updates = getUpdateObject(args.${objName} || {}, ${objName});
+      let updates = getUpdateObject(args.Type4 || {}, Type4);
 
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
-        await db.collection("${table}").update({ _id: ObjectId(args._id) }, updates);
+        await db.collection("type4").update({ _id: ObjectId(args._id) }, updates);
       }
 
-      let requestMap = parseRequestedFields(ast, "${objName}");
-      let $project = getMongoProjection(requestMap, ${objName}, args);
+      let requestMap = parseRequestedFields(ast, "Type4");
+      let $project = getMongoProjection(requestMap, Type4, args);
       
       return {
-        ${objName}: (await db
-          .collection("${table}")
+        Type4: (await db
+          .collection("type4")
           .aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }])
           .toArray())[0]
       }
     },
-    async delete${objName}(root, args, context, ast) {
+    async deleteType4(root, args, context, ast) {
       if (!args._id){
         throw "No _id sent";
       }
       let db = await root.db;
 
-      await db.collection("${table}").remove({ _id: ObjectId(args._id) });
+      await db.collection("type4").remove({ _id: ObjectId(args._id) });
       return true;
     }
   }
