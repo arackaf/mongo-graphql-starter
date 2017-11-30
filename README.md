@@ -286,6 +286,11 @@ Exact match
 
 `field: <value>` - will match results with exactly that value
 
+Not equal
+
+`field_ne: <value>` - will match results that do not have this value. For array types, pass in a whole array of values, and Mongo will do an element
+by element comparison.
+
 `in` match
 
 `field_in: [<value1>, <value2>]` - will match results which match any of those exact values.

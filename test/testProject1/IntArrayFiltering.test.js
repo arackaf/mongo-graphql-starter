@@ -25,6 +25,14 @@ test("Array match 1", async () => {
   });
 });
 
+test("Array_ne match 1", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(editions_ne: [1, 2, 3], SORT: { title: 1 }){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 3" }, { title: "Book 4" }, { title: "Book 5" }]
+  });
+});
+
 test("Array match 2", async () => {
   await queryAndMatchArray({
     query: "{allBooks(editions: [], SORT: {title: 1}){Books{title}}}",

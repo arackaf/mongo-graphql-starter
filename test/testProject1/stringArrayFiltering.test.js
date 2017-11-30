@@ -20,6 +20,14 @@ test("String array match 1", async () => {
   await queryAndMatchArray({ query: '{allBooks(keywords: ["c#", "development"]){Books{title}}}', coll: "allBooks", results: [{ title: "Book 3" }] });
 });
 
+test("String array_ne match 1", async () => {
+  await queryAndMatchArray({
+    query: '{allBooks(keywords_ne: ["c#", "development"], SORT: { title: 1 }){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 4" }]
+  });
+});
+
 test("String array match 2", async () => {
   await queryAndMatchArray({
     query: '{allBooks(keywords: ["javascript", "development", "coding"], SORT: {title: 1}){Books{title}}}',
