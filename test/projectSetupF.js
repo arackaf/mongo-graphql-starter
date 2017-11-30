@@ -1,13 +1,12 @@
 import { dataTypes } from "mongo-graphql-starter";
-const { StringType, StringArrayType } = dataTypes;
+const { StringType, StringArrayType, IntType } = dataTypes;
 
 const fields = {
   field1: StringType,
   field2: StringType,
-  field3: StringType,
-  field4: StringType,
-  field5: StringType,
-  field6: StringType
+  poisonField: IntType,
+  autoUpdateField: StringType,
+  userId: IntType
 };
 
 const Type1 = {
