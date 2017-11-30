@@ -19,6 +19,14 @@ test("Int match", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages: 100){Books{title}}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });
 
+test("Int_ne match", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(pages_ne: 100, SORT: { title: 1 }){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 150" }, { title: "Book 200" }]
+  });
+});
+
 test("Int in", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages_in: [99, 100, 101]){Books{title}}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });

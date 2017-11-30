@@ -257,13 +257,13 @@ function queriesForField(fieldName, realFieldType) {
       break;
     case StringArrayType:
     case MongoIdArrayType:
-      result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`]);
+      result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`, `${fieldName}_ne: [String]`]);
       break;
     case IntArrayType:
-      result.push(...[`${fieldName}: [Int]`, `${fieldName}_in: [[Int]]`, `${fieldName}_contains: Int`]);
+      result.push(...[`${fieldName}: [Int]`, `${fieldName}_in: [[Int]]`, `${fieldName}_contains: Int`, `${fieldName}_ne: [Int]`]);
       break;
     case FloatArrayType:
-      result.push(...[`${fieldName}: [Float]`, `${fieldName}_in: [[Float]]`, `${fieldName}_contains: Float`]);
+      result.push(...[`${fieldName}: [Float]`, `${fieldName}_in: [[Float]]`, `${fieldName}_contains: Float`, `${fieldName}_ne: [Float]`]);
       break;
   }
 
@@ -275,6 +275,7 @@ function queriesForField(fieldName, realFieldType) {
     case DateType:
     case BoolType:
       result.push(`${fieldName}: ${fieldType}`);
+      result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
 

@@ -90,6 +90,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
         } else {
           hash[fieldName] = { $in: args[k] };
         }
+      } else if (queryOperation == "ne") {
+        hash[fieldName] = { $ne: args[k] };
       } else {
         if (field === StringType) {
           if (queryOperation === "contains") {
