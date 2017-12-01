@@ -16,8 +16,12 @@ beforeAll(async () => {
     `{ field1: "no", field2: "A", autoUpdateField: 7, autoAdjustField: 1, poisonField: 0 }`
   ];
   let staticObjects = [
+    { field1: "G", field2: "W", poisonField: 2, userId: 2, autoAdjustField: 1 },
     { field1: "1 a", field2: "xxx", poisonField: 1, userId: 0 },
-    { field1: "1 a", autoAdjustField: 1, field2: "D", poisonField: "a", userId: 0 }
+    { field1: "1 a", autoAdjustField: 1, field2: "D", poisonField: "a", userId: 0 },
+    { field1: "no", autoAdjustField: 1, field2: "D", poisonField: 1, userId: 0 },
+    { field1: "no", autoAdjustField: 1, field2: "D", poisonField: 2, userId: 0 },
+    { field1: "no", autoAdjustField: 1, field2: "D", poisonField: 0, userId: 0 }
   ];
 
   for (let o of objects) {
@@ -45,11 +49,19 @@ afterAll(async () => {
 });
 
 //pre-insert hooks auto tested by virtue of the userId needing to be right for any of the queries below to be right
-test("Test query pre-processor A", async () => {
+test("Test query pre-processor 1", async () => {
   await queryAndMatchArray({
     query: `{allType1s(field1: "no"){Type1s{autoAdjustField}}}`,
     coll: "allType1s",
     results: []
+  });
+});
+
+test("Test query pre-processor 2", async () => {
+  await queryAndMatchArray({
+    query: `{allType2s(field1: "no"){Type2s{field2, autoAdjustField}}}`,
+    coll: "allType2s",
+    results: [{ field2: "2 a", autoAdjustField: 3 }]
   });
 });
 
@@ -61,11 +73,11 @@ test("Test query data-adjust 1", async () => {
   });
 });
 
-test("Test query pre-processor 2", async () => {
+test("Test query data-adjust 2", async () => {
   await queryAndMatchArray({
-    query: `{allType2s(field1: "no"){Type2s{field2, autoAdjustField}}}`,
+    query: `{allType2s(field2: "W"){Type2s{autoAdjustField}}}`,
     coll: "allType2s",
-    results: [{ field2: "2 a", autoAdjustField: 3 }]
+    results: [{ autoAdjustField: 3 }]
   });
 });
 

@@ -20,6 +20,17 @@ export async function load${objName}s(db, queryPacket){
 
 export default {
   Query: {
+    async get${objName}(root, args, context, ast) {
+      await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
+      let db = await root.db;
+      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}");
+      await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
+      let results = await load${objName}s(db, queryPacket);
+
+      return {
+        ${objName}: results[0] || null
+      };
+    },
     async all${objName}s(root, args, context, ast) {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
@@ -45,26 +56,6 @@ export default {
       }
 
       return result;
-    },
-    async get${objName}(root, args, context, ast) {
-      //await preprocessor.process(root, args, context, ast);
-      let db = await root.db;
-      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}");
-      /*
-      let queryPacket = await middleware.process(
-        decontructGraphqlQuery(args, ast, ${objName}, "${objName}"), 
-        root, 
-        args, 
-        context, 
-        ast
-      );
-      */
-
-      let results = await load${objName}s(db, queryPacket);
-
-      return {
-        ${objName}: results[0] || null
-      };
     }
   },
   Mutation: {

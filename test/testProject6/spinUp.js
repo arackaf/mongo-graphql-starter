@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { queryAndMatchArray, runMutation, nextConnectionString } from "../testUtil";
+import { runQuery, queryAndMatchArray, runMutation, nextConnectionString } from "../testUtil";
 import resolvers from "./graphQL/resolver";
 import typeDefs from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
@@ -12,6 +12,7 @@ export default async function() {
   return {
     db,
     schema,
+    runQuery: options => runQuery({ schema, db, ...options }),
     queryAndMatchArray: options => queryAndMatchArray({ schema, db, ...options }),
     runMutation: options => runMutation({ schema, db, ...options })
   };
