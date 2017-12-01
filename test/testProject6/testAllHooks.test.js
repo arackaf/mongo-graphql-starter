@@ -38,7 +38,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   for (let type of types) {
-    await db.collection(type.toLowerCase()).remove({});
+    //await db.collection(type.toLowerCase()).remove({});
   }
   db.close();
   db = null;
@@ -71,7 +71,7 @@ test("Test query pre-processor 2", async () => {
 
 test("Test query middleware 1", async () => {
   await queryAndMatchArray({
-    query: `{allType1s(field1: "1 a"){Type2s{field2}}}`,
+    query: `{allType1s(field1: "1 a"){Type1s{field2}}}`,
     coll: "allType1s",
     results: [{ field2: "C" }]
   });

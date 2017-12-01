@@ -24,16 +24,7 @@ export default {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
       let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}s");
-      /*
-      let queryPacket = await middleware.process(
-        decontructGraphqlQuery(args, ast, ${objName}, "${objName}s"), 
-        root, 
-        args, 
-        context, 
-        ast
-      );
-      */
-      
+      await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
       let result = {};
 
       if (queryPacket.$project){
@@ -82,6 +73,7 @@ export default {
       let newObject = newObjectFromArgs(args.${objName}, ${objName});
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
+      await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast);
       
       await db.collection("${table}").insert(newObject);
       return {
