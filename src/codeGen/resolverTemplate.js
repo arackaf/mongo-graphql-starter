@@ -81,27 +81,27 @@ export default {
           .collection("${table}")
           .aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }])
           .toArray())[0]
-      };
-    },
-    async update${objName}(root, args, context, ast) {
-      if (!args._id){
-        throw "No _id sent";
-      }
-      let db = await root.db;
-      let updates = getUpdateObject(args.${objName} || {}, ${objName});
+        };
+      },
+      async update${objName}(root, args, context, ast) {
+        if (!args._id){
+          throw "No _id sent";
+        }
+        let db = await root.db;
+        let filters = { _id: ObjectId(args._id) };
+        let updates = getUpdateObject(args.${objName} || {}, ${objName});
+        await processHook(hooksObj, "${objName}", "beforeUpdate", filters, updates, root, args, context, ast);
 
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
-        await db.collection("${table}").update({ _id: ObjectId(args._id) }, updates);
+        await db.collection("${table}").update(filters, updates);
       }
 
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
       
+      let result = (await load${objName}s(db, { $match: { _id: ObjectId(args._id) }, $project, $limit: 1 }))[0];
       return {
-        ${objName}: (await db
-          .collection("${table}")
-          .aggregate([{ $match: { _id: ObjectId(args._id) } }, { $project }, { $limit: 1 }])
-          .toArray())[0]
+        ${objName}: result
       }
     },
     async delete${objName}(root, args, context, ast) {
