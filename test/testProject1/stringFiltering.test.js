@@ -19,6 +19,14 @@ test("String match", async () => {
   await queryAndMatchArray({ query: '{allBooks(title: "Book 1"){Books{title}}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });
 
+test("String_ne match", async () => {
+  await queryAndMatchArray({
+    query: '{allBooks(title_ne: "Book 1", SORT: { title: 1 }){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Second Book" }, { title: "Title x 1" }]
+  });
+});
+
 test("String in", async () => {
   await queryAndMatchArray({
     schema,
