@@ -13,5 +13,8 @@ export default {
   },
   beforeInsert(obj, root, args, context, ast) {
     //this will be called
+  },
+  adjustResults(results) {
+    //this will be called
   }
 };
