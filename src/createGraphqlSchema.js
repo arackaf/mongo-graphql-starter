@@ -21,7 +21,7 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
 }
 
 export default function(source, destPath) {
-  Promise.resolve(source).then(module => {
+  return Promise.resolve(source).then(module => {
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
       mkdirp.sync(rootDir);

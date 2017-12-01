@@ -20,17 +20,17 @@ beforeAll(async () => {
     { field1: "1 a", autoAdjustField: 1, field2: "D", poisonField: "a", userId: 0 }
   ];
 
-  for (let o in objects) {
-    for (let type in types) {
+  for (let o of objects) {
+    for (let type of types) {
       await runMutation({
-        mutation: `create${type}(${type}: ${o}){Type1{field1, field2, poisonField, userId}}`,
+        mutation: `create${type}(${type}: ${o}){${type}{field1, field2, poisonField, userId}}`,
         result: `create${type}`
       });
     }
   }
 
-  for (let o in staticObjects) {
-    for (let type in types) {
+  for (let o of staticObjects) {
+    for (let type of types) {
       await db.collection(type).insert(o);
     }
   }
@@ -44,15 +44,12 @@ afterAll(async () => {
   }
   db.close();
   db = null;
-
-  middleware.clearAll();
 });
 
 //pre-insert hooks auto tested by virtue of the userId needing to be right for any of the queries below to be right
-
-test("Test query pre-processor 1", async () => {
+test("Test query pre-processor A", async () => {
   await queryAndMatchArray({
-    query: `{allType1s(field1: "no"){Type1{title, pages}}}`,
+    query: `{allType1s(field1: "no"){Type1s{autoAdjustField}}}`,
     coll: "allType1s",
     results: []
   });
@@ -60,7 +57,7 @@ test("Test query pre-processor 1", async () => {
 
 test("Test query data-adjust 1", async () => {
   await queryAndMatchArray({
-    query: `{allType1s(field2: "C"){Type1{autoAdjustField}}}`,
+    query: `{allType1s(field2: "C"){Type1s{autoAdjustField}}}`,
     coll: "allType1s",
     results: [{ autoAdjustField: 2 }]
   });
@@ -68,7 +65,7 @@ test("Test query data-adjust 1", async () => {
 
 test("Test query pre-processor 2", async () => {
   await queryAndMatchArray({
-    query: `{allType2s(field1: "no"){Type1{field2, autoAdjustField}}}`,
+    query: `{allType2s(field1: "no"){Type2s{field2, autoAdjustField}}}`,
     coll: "allType2s",
     results: [{ field2: "A", autoAdjustField: 3 }]
   });
@@ -76,7 +73,7 @@ test("Test query pre-processor 2", async () => {
 
 test("Test query middleware 1", async () => {
   await queryAndMatchArray({
-    query: `{allType1s(field1: "1 a"){Type1{field2}}}`,
+    query: `{allType1s(field1: "1 a"){Type2s{field2}}}`,
     coll: "allType1s",
     results: [{ field2: "C" }]
   });
@@ -84,7 +81,7 @@ test("Test query middleware 1", async () => {
 
 test("Test query middleware 2", async () => {
   await queryAndMatchArray({
-    query: `{allType2s(field1: "no", SORT: {field2: 1}){Type2{field2}}}`,
+    query: `{allType2s(field1: "no", SORT: {field2: 1}){Type2s{field2}}}`,
     coll: "allType2s",
     results: [{ field2: "C" }, { field2: "D" }]
   });
