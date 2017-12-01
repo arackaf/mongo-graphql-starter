@@ -25,6 +25,14 @@ test("Array match 1", async () => {
   });
 });
 
+test("Array ne match 1", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(prices_ne: [1.1, 2.2, 3.3], SORT: { title: 1 }){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 3" }, { title: "Book 4" }, { title: "Book 5" }]
+  });
+});
+
 test("Array match 2", async () => {
   await queryAndMatchArray({
     query: "{allBooks(prices: [], SORT: {title: 1}){Books{title}}}",
