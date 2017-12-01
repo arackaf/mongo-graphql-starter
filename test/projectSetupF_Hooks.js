@@ -8,22 +8,15 @@ export default {
     }
     queryPacket.$match.userId = 1;
   },
-  beforeMutate(filter, updates, root, args, context, ast) {
-    filter.userId = 1;
-    if (!updates.$inc) {
-      updates.$inc = {};
-    }
-    updates.$inc.autoUpdateField = 1;
-  },
-  beforeMutate(filter, updates, root, args, context, ast) {
-    filter.userId = 1;
-    if (!updates.$inc) {
-      updates.$inc = {};
-    }
-    updates.$inc.autoUpdateField = 1;
-  },
   beforeInsert(obj, root, args, context, ast) {
     obj.userId = 1;
+  },
+  beforeUpdate(filters, updates, root, args, context, ast) {
+    filters.userId = 1;
+    if (!updates.$inc) {
+      updates.$inc = {};
+    }
+    updates.$inc.autoUpdateField = 1;
   },
   adjustResults(results) {
     results.forEach(result => {
@@ -37,7 +30,14 @@ export default {
       args.poisonField++;
     },
     queryMiddleware(queryPacket, root, args, context, ast) {
-      //
+      queryPacket.$match.userId++;
+    },
+    beforeInsert(obj, root, args, context, ast) {
+      obj.userId++;
+    },
+    beforeUpdate(filters, updates, root, args, context, ast) {
+      filters.userId++;
+      updates.$inc.autoUpdateField++;
     },
     adjustResults(results) {
       results.forEach(result => {

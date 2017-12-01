@@ -16,7 +16,7 @@ beforeAll(async () => {
     `{ field1: "no", field2: "A", autoUpdateField: 7, autoAdjustField: 1, poisonField: 0 }`
   ];
   let staticObjects = [
-    { field1: "1 a", field2: "xxx", poisonField: 1, userId: 2 },
+    { field1: "1 a", field2: "xxx", poisonField: 1, userId: 0 },
     { field1: "1 a", autoAdjustField: 1, field2: "D", poisonField: "a", userId: 0 }
   ];
 
@@ -38,7 +38,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   for (let type of types) {
-    //await db.collection(type.toLowerCase()).remove({});
+    await db.collection(type.toLowerCase()).remove({});
   }
   db.close();
   db = null;
@@ -81,13 +81,13 @@ test("Test query middleware 2", async () => {
   await queryAndMatchArray({
     query: `{allType2s(field1: "no", SORT: {field2: 1}){Type2s{field2}}}`,
     coll: "allType2s",
-    results: [{ field2: "C" }, { field2: "D" }]
+    results: [{ field2: "2 a" }]
   });
 });
 
 test("Test query update middleware 1", async () => {
   let obj = (await db
-    .collection("Type1")
+    .collection("type1")
     .find({ field2: "A" })
     .toArray())[0];
 
@@ -102,7 +102,7 @@ test("Test query update middleware 1", async () => {
 
 test("Test query update middleware 2", async () => {
   let obj = (await db
-    .collection("Type2")
+    .collection("type2")
     .find({ field2: "A" })
     .toArray())[0];
 
