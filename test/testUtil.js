@@ -6,6 +6,24 @@ const localConn = "mongodb://localhost:27017/mongo-graphql-starter";
 
 export const nextConnectionString = () => localConn;
 
+export async function runQuery({ schema, db, query, variables, coll, results, meta }) {
+  let allResults = await graphql(schema, query, { db });
+
+  if (!allResults.data || allResults.data[coll] === void 0) {
+    let msg = "Expected result not found: probable error.";
+    if (allResults.errors) {
+      msg += "\n\n" + allResults.errors.map(err => err.message).join("\n\n");
+    } else {
+      try {
+        msg += JSON.stringify(allResults);
+      } catch (err) {}
+    }
+    throw msg;
+  } else {
+    return allResults.data[coll];
+  }
+}
+
 export async function queryAndMatchArray({ schema, db, query, variables, coll, results, meta }) {
   let allResults = await graphql(schema, query, { db });
 
