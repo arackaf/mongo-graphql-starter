@@ -20,7 +20,7 @@ export async function load${objName}s(db, queryPacket){
 export default {
   Query: {
     async all${objName}s(root, args, context, ast) {
-      //await preprocessor.process(root, args, context, ast);
+      await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
       let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}s");
       /*

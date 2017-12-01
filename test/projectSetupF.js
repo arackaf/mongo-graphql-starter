@@ -4,6 +4,7 @@ const { StringType, StringArrayType, IntType } = dataTypes;
 const fields = {
   field1: StringType,
   field2: StringType,
+  autoAdjustField: IntType,
   poisonField: IntType,
   autoUpdateField: StringType,
   userId: IntType
