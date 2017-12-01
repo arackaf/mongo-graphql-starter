@@ -6,7 +6,7 @@ const fields = {
   field2: StringType,
   autoAdjustField: IntType,
   poisonField: IntType,
-  autoUpdateField: StringType,
+  autoUpdateField: IntType,
   userId: IntType
 };
 

@@ -30,7 +30,8 @@
     "test2": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config2.json",
     "test3": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config3.json",
     "test4": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config4.json",
-    "test5": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config5.json"
+    "test5": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config5.json",
+    "test6": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config6.json"
   },
   "dependencies": {
     "@std/esm": "0.17.3",
