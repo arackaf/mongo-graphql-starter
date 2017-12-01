@@ -14,6 +14,7 @@ export async function load${objName}s(db, queryPacket){
     .aggregate(aggregateItems)
     .toArray();
   ${relationships}
+  await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   return ${objName}s;
 }
 

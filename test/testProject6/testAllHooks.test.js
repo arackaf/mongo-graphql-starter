@@ -31,16 +31,14 @@ beforeAll(async () => {
 
   for (let o of staticObjects) {
     for (let type of types) {
-      await db.collection(type).insert(o);
+      await db.collection(type.toLowerCase()).insert(o);
     }
   }
 });
 
 afterAll(async () => {
-  for (let o in staticObjects) {
-    for (let type in types) {
-      await db.collection(type).remove({});
-    }
+  for (let type of types) {
+    await db.collection(type.toLowerCase()).remove({});
   }
   db.close();
   db = null;
@@ -67,7 +65,7 @@ test("Test query pre-processor 2", async () => {
   await queryAndMatchArray({
     query: `{allType2s(field1: "no"){Type2s{field2, autoAdjustField}}}`,
     coll: "allType2s",
-    results: [{ field2: "A", autoAdjustField: 3 }]
+    results: [{ field2: "2 a", autoAdjustField: 3 }]
   });
 });
 
