@@ -76,30 +76,29 @@ export default {
       await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast);
       
       await db.collection("${table}").insert(newObject);
+
+      let result = (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
       return {
-        ${objName}: (await db
-          .collection("${table}")
-          .aggregate([{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }])
-          .toArray())[0]
-        };
-      },
-      async update${objName}(root, args, context, ast) {
-        if (!args._id){
-          throw "No _id sent";
-        }
-        let db = await root.db;
-        let filters = { _id: ObjectId(args._id) };
-        let updates = getUpdateObject(args.${objName} || {}, ${objName});
-        await processHook(hooksObj, "${objName}", "beforeUpdate", filters, updates, root, args, context, ast);
+        ${objName}: result
+      }
+    },
+    async update${objName}(root, args, context, ast) {
+      if (!args._id){
+        throw "No _id sent";
+      }
+      let db = await root.db;
+      let $match = { _id: ObjectId(args._id) };
+      let updates = getUpdateObject(args.${objName} || {}, ${objName});
+      await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
 
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
-        await db.collection("${table}").update(filters, updates);
+        await db.collection("${table}").update($match, updates);
       }
 
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
       
-      let result = (await load${objName}s(db, { $match: { _id: ObjectId(args._id) }, $project, $limit: 1 }))[0];
+      let result = (await load${objName}s(db, { $match, $project, $limit: 1 }))[0];
       return {
         ${objName}: result
       }

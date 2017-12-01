@@ -117,44 +117,51 @@ test("Test query update middleware 2", async () => {
 
 test("Test query update middleware 3", async () => {
   let obj = (await db
-    .collection("Type1")
+    .collection("type1")
     .find({ field2: "D" })
     .toArray())[0];
 
-  await runMutation({
-    mutation: `updateType2(_id: "${obj._id}", Type2: { field2: "ZZZ" }) {Type2{autoUpdateField, autoAdjustField}}`,
-    result: "updateType2"
+  let emptyObj = await runMutation({
+    mutation: `updateType1(_id: "${obj._id}", Type1: { field2: "ZZZ" }) {Type1{autoUpdateField, autoAdjustField}}`,
+    result: "updateType1"
   });
 
+  expect(emptyObj).toBe(null);
+
   obj = (await db
-    .collection("Type1")
+    .collection("type1")
     .find({ field2: "D" })
     .toArray())[0];
+
+  expect(obj.field2).toBe("D");
 });
-//TODO: duplicate this to make sure nothing returned -> ie run query middleware through the mutate stuff
 
 test("Test query update middleware 4", async () => {
   let obj = (await db
-    .collection("Type2")
+    .collection("type2")
     .find({ field2: "xxx" })
     .toArray())[0];
 
-  obj = await runMutation({
-    mutation: `updateType2(_id: "${obj._id}", Type2: { field2: "yyy" }) {Type2{autoUpdateField, autoAdjustField}}`,
+  let _id = obj._id;
+
+  let emptyObj = await runMutation({
+    mutation: `updateType2(_id: "${obj._id}", Type2: { field2: "yyy" }) {Type2{field1, field2}}`,
     result: "updateType2"
   });
 
+  expect(emptyObj).toBe(null);
+
   obj = (await db
-    .collection("Type2")
-    .find({ _id: obj._id })
+    .collection("type2")
+    .find({ _id })
     .toArray())[0];
 
-  expect(obj.field2).toBe("yyy"); //should work - nested middleware should set userId to 2
+  expect(obj.field2).toBe("xxx");
 });
 
 test("Test data adjust on insert 1", async () => {
-  obj = await runMutation({
-    mutation: `createType2(Type1: { autoAdjustField: 1 }) {Type2{autoAdjustField}}`,
+  let obj = await runMutation({
+    mutation: `createType1(Type1: { autoAdjustField: 1 }) {Type1{autoAdjustField}}`,
     result: "createType1"
   });
 
@@ -162,7 +169,7 @@ test("Test data adjust on insert 1", async () => {
 });
 
 test("Test data adjust on insert 2", async () => {
-  obj = await runMutation({
+  let obj = await runMutation({
     mutation: `createType2(Type2: { autoAdjustField: 1 }) {Type2{autoAdjustField}}`,
     result: "createType2"
   });
