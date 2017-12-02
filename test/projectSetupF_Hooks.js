@@ -24,6 +24,9 @@ export default {
     await db.collection("updateInfo").remove({});
     await db.collection("updateInfo").insert({ updatedId: match._id, x: updates.x });
   },
+  beforeDelete(match, root, args, context, ast) {
+    match.userId = 1;
+  },
   async afterDelete(match, root, args, context, ast) {
     match.x = 1;
     let db = await root.db;
@@ -56,6 +59,9 @@ export default {
       let db = await root.db;
       await db.collection("updateInfo").remove({});
       await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
+    },
+    beforeDelete(match, root, args, context, ast) {
+      match.field1 = { $ne: "XXX" };
     },
     async afterDelete(match, root, args, context, ast) {
       match.x++;

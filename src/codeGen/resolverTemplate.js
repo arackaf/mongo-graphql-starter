@@ -80,8 +80,8 @@ export default {
       let db = await root.db;
       let $match = { _id: ObjectId(args._id) };
       let updates = getUpdateObject(args.${objName} || {}, ${objName});
+
       await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
         await db.collection("${table}").update($match, updates);
       }
@@ -100,8 +100,9 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      
       let $match = { _id: ObjectId(args._id) };
+      
+      await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast);
       await db.collection("${table}").remove($match);
       await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
       return true;
