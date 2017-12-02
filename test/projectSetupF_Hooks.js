@@ -18,6 +18,12 @@ export default {
     }
     updates.$inc.autoUpdateField = 1;
   },
+  async afterUpdate(filters, updates, root, args, context, ast) {
+    updates.x = 1;
+    let db = await root.db;
+    await db.collection("updateInfo").remove({});
+    await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
+  },
   adjustResults(results) {
     results.forEach(result => {
       if (result.autoAdjustField != null) {
@@ -38,6 +44,12 @@ export default {
     beforeUpdate(filters, updates, root, args, context, ast) {
       filters.userId++;
       updates.$inc.autoUpdateField++;
+    },
+    async afterUpdate(filters, updates, root, args, context, ast) {
+      updates.x++;
+      let db = await root.db;
+      await db.collection("updateInfo").remove({});
+      await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
     },
     adjustResults(results) {
       results.forEach(result => {

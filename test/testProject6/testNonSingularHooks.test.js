@@ -44,6 +44,8 @@ afterAll(async () => {
   for (let type of types) {
     await db.collection(type.toLowerCase()).remove({});
   }
+  await db.collection("updateInfo").remove({});
+  await db.collection("deleteInfo").remove({});
   db.close();
   db = null;
 });
@@ -97,7 +99,7 @@ test("Test query middleware 2", async () => {
   });
 });
 
-test("Test query update middleware 1", async () => {
+test("Test query update middleware and auto adjust 1", async () => {
   let obj = (await db
     .collection("type1")
     .find({ field2: "A" })
@@ -112,7 +114,7 @@ test("Test query update middleware 1", async () => {
   expect(obj.autoAdjustField).toBe(2);
 });
 
-test("Test query update middleware 2", async () => {
+test("Test query update middleware and auto adjust 2", async () => {
   let obj = (await db
     .collection("type2")
     .find({ field2: "A" })
@@ -127,7 +129,7 @@ test("Test query update middleware 2", async () => {
   expect(obj.autoAdjustField).toBe(3);
 });
 
-test("Test query update middleware 3", async () => {
+test("Test query update middleware 3 and auto adjust", async () => {
   let obj = (await db
     .collection("type1")
     .find({ field2: "D" })
@@ -169,6 +171,48 @@ test("Test query update middleware 4", async () => {
     .toArray())[0];
 
   expect(obj.field2).toBe("xxx");
+});
+
+test("Test query onUpdate hook 1", async () => {
+  let obj = (await db
+    .collection("type1")
+    .find({ field1: "4 a" })
+    .toArray())[0];
+
+  let _id = obj._id;
+
+  let emptyObj = await runMutation({
+    mutation: `updateType1(_id: "${obj._id}", Type1: { field1: "4 a" }) {Type1{field1}}`,
+    result: "updateType1"
+  });
+
+  let updateObj = (await db
+    .collection("updateInfo")
+    .find({ updatedId: _id })
+    .toArray())[0];
+
+  expect(updateObj.x).toBe(1);
+});
+
+test("Test query onUpdate hook 2", async () => {
+  let obj = (await db
+    .collection("type2")
+    .find({ field1: "4 a" })
+    .toArray())[0];
+
+  let _id = obj._id;
+
+  let emptyObj = await runMutation({
+    mutation: `updateType2(_id: "${obj._id}", Type2: { field1: "4 a" }) {Type2{field1}}`,
+    result: "updateType2"
+  });
+
+  let updateObj = (await db
+    .collection("updateInfo")
+    .find({ updatedId: _id })
+    .toArray())[0];
+
+  expect(updateObj.x).toBe(2);
 });
 
 test("Test data adjust on insert 1", async () => {
