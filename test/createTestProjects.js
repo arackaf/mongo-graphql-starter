@@ -5,6 +5,7 @@ import projectSetupC from "./projectSetupC";
 import projectSetupD from "./projectSetupD";
 import projectSetupE from "./projectSetupE";
 import projectSetupF from "./projectSetupF";
+import projectSetupG from "./projectSetupG";
 
 import path from "path";
 import fs from "fs";
@@ -19,5 +20,12 @@ Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProj
   fs.writeFileSync(
     path.resolve("./test/testProject6/graphQL/hooks.js"),
     fs.readFileSync(path.resolve(__dirname, "./projectSetupF_Hooks.js"), { encoding: "utf8" })
+  );
+});
+
+Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProject7"))).then(() => {
+  fs.writeFileSync(
+    path.resolve("./test/testProject7/graphQL/hooks.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupG_Hooks.js"), { encoding: "utf8" })
   );
 });
