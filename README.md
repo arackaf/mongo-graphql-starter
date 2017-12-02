@@ -518,15 +518,15 @@ updateBlog(_id: "${obj._id}", Blog: {words: 100}){Blog{title, words}}
 In addition, the following arguments are supported
 
 | Argument              | For types | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| --------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<fieldName>_INC`     | Numeric   | Increments the current value by the amount specified. For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `<fieldName>_DEC`     | Numeric   | Decrements the current value by the amount specified. For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `<fieldName>_PUSH`    | Arrays    | Pushes the specified value onto the array. For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array. Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `<fieldName>_CONCAT`  | Arrays    | Pushes the specified values onto the array. For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------- | --------- | --------------------------------------- |
+| `<fieldName>_INC`     | Numeric   | Increments the current value by the amount specified. For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.                                                                                      |
+| `<fieldName>_DEC`     | Numeric   | Decrements the current value by the amount specified. For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.                                                                                                                     |
+| `<fieldName>_PUSH`    | Arrays    | Pushes the specified value onto the array. For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array. Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.                                                                                                                               |
+| `<fieldName>_CONCAT`  | Arrays    | Pushes the specified values onto the array. For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added. |
 | `<fieldName>_UPDATE`  | Arrays    | **For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type. Updates the object at `index` with the changes specified. Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type. Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}` |
-| `<fieldName>_UPDATES` | Arrays    | Same as UPDATE, but takes an array of these same inputs. For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.                                                                                                                                                                                                                                                                                                                                                                               |
-| `<fieldName>_UPDATE`  | Objects   | Implements the specified changes on the nested object. The provided update object is of the same form specified here. For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Book: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"                                                                                                                                                                                                                                                            |
+| `<fieldName>_UPDATES` | Arrays    | Same as UPDATE, but takes an array of these same inputs. For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.  |
+| `<fieldName>_UPDATE`  | Objects   | Implements the specified changes on the nested object. The provided update object is of the same form specified here. For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2 |
+| `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Book: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"  |
 
 Full examples are below.
 
@@ -619,38 +619,12 @@ Note that, for any `Book` query, the books from the current query are read from 
 single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately. In other
 words, the generated code does not suffer from the Select N + 1 problem.
 
-## Middleware
+## Lifecycle hooks
 
-Middleware allows you to add cross cutting concerns to your resolvers. After your query is processed, and all of the Mongo filters, projections,
-paging, etc are computed, these values are passed through each registered middleware, allowing them to modify these values as needed. For example
+Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap
+into, in order to change default behavior.
 
-```javascript
-import { middleware } from "mongo-graphql-starter";
-
-middleware.use((deconstructedQuery, root, args, context, ast) => {
-  deconstructedQuery.$match.title = "Book 1";
-});
-```
-
-will, uselessly, force every query run on every type to add a title match of "Book 1".
-
-A more useful example, coming soon, would be middleware that takes the `userId` value from the Express request object, representing the logged-on
-user, and adds it to all queries so they only return results belonging to the current user.
-
----
-
-From the middleware shown above, `deconstructedQuery` is the entire packet of Mongo query items that were calculated from the args passed to your
-resolver. This object contains:
-
-| Property   | Description                 |
-| ---------- | --------------------------- |
-| `$match`   | The Mongo filters           |
-| `$project` | The Mongo projection object |
-| `$sort`    | The Mongo sort object       |
-| `$limit`   | The limit value             |
-| `$skip`    | The skip value              |
-
-This is your opportunity to mutate any of these values. The remaining arguments passed to your middleware are the same ones passed to all resolvers:
+Most of the hooks receive these arguments, among others, which are defined here, once.
 
 | Argument  | Description                                                                                         |
 | --------- | --------------------------------------------------------------------------------------------------- |
@@ -659,25 +633,19 @@ This is your opportunity to mutate any of these values. The remaining arguments 
 | `context` | By default your Express request object                                                              |
 | `ast`     | The entire graphQL query AST with complete info about your query: query name, fields requested, etc |
 
-If you need to do asynchronous work, just have the method return a Promise. The generated graphQL resolver will `await` each middleware you register,
-then continue on and run the Mongo query with whatever values you leave in `deconstructedQuery`.
+### All available hooks
 
-### Preprocessor
-
-Similar to middleware, preprocessors run before any work is done in the resolvers, and are passed the `root`, `args`, `context` and `ast` objects to
-be mutated as needed. Use this as an opportunity to amend or validate what the user sends over. For example,
-
-```javascript
-import { preprocessor } from "mongo-graphql-starter";
-
-preprocessor.use((root, args, context, ast) => {
-  args.PAGE = 2;
-  args.PAGE_SIZE = 3;
-});
-```
-
-will force every query to have a page size of 3, and request page number 2. A more useful example might enforce a maximum `PAGE_SIZE` value, so users
-don't request too much data in one request.
+| Hook                                                     | Description   |
+| -------------------------------------------------------- | --------------|
+| `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually set arguments the user has sent over, for example you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
+| `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. |
+| `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted  |
+| `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object  |
+| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is mutated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed directly to Mongo, to make the requested changes.  |
+| `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`  |
+| `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed right to Mongo to find the right object  |
+| `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
+| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations. Basically any generated query which returns `Type` or `[Type]`. The actual object queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust any data, however you want.  For example, you can format dates, adjust URLs, etc.  |
 
 ## A closer look at what's generated
 
