@@ -19,6 +19,8 @@ beforeAll(async () => {
     { field1: "G", field2: "W", poisonField: 2, userId: 2, autoAdjustField: 1 },
     { field1: "1 a", field2: "xxx", poisonField: 1, userId: 0 },
     { field1: "1 a", autoAdjustField: 1, field2: "D", poisonField: "a", userId: 0 },
+    { field1: "1 a", autoAdjustField: 1, field2: "D", poisonField: "a", userId: 0 },
+    { field1: "X", autoAdjustField: 1, field2: "D", poisonField: "a", userId: -1 },
     { field1: "no", autoAdjustField: 1, field2: "D", poisonField: 1, userId: 0 },
     { field1: "no", autoAdjustField: 1, field2: "D", poisonField: 2, userId: 0 },
     { field1: "no", autoAdjustField: 1, field2: "D", poisonField: 0, userId: 0 }
@@ -213,6 +215,44 @@ test("Test query afterUpdate hook 2", async () => {
     .toArray())[0];
 
   expect(updateObj.x).toBe(2);
+});
+
+test("Test query before delete hook 1", async () => {
+  let newO = { field1: "X", userId: 0 };
+  await db.collection("type1").insert(newO);
+
+  let _id = newO._id;
+
+  await runMutation({
+    mutation: `deleteType1(_id: "${_id}")`,
+    result: "deleteType1"
+  });
+
+  let deleteObj = (await db
+    .collection("type1")
+    .find({ _id })
+    .toArray())[0];
+
+  expect(typeof deleteObj).toBe("object");
+});
+
+test("Test query before delete hook 1", async () => {
+  let newO = { field1: "XXX", userId: 1 };
+  await db.collection("type2").insert(newO);
+
+  let _id = newO._id;
+
+  await runMutation({
+    mutation: `deleteType2(_id: "${_id}")`,
+    result: "deleteType2"
+  });
+
+  let deleteObj = (await db
+    .collection("type2")
+    .find({ _id })
+    .toArray())[0];
+
+  expect(typeof deleteObj).toBe("object");
 });
 
 test("Test query after delete hook 1", async () => {
