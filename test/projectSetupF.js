@@ -29,6 +29,14 @@ const UpdateInfo = {
   }
 };
 
+const InsertInfo = {
+  table: "insertInfo",
+  fields: {
+    insertedId: MongoIdType,
+    y: IntType
+  }
+};
+
 const DeleteInfo = {
   table: "deleteInfo",
   fields: {
@@ -41,5 +49,6 @@ export default {
   Type1,
   Type2,
   UpdateInfo,
+  InsertInfo,
   DeleteInfo
 };

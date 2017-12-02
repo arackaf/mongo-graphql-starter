@@ -70,9 +70,10 @@ export default {
       let newObject = newObjectFromArgs(args.Type2, Type2);
       let requestMap = parseRequestedFields(ast, "Type2");
       let $project = getMongoProjection(requestMap, Type2, args);
+
       await processHook(hooksObj, "Type2", "beforeInsert", newObject, root, args, context, ast);
-      
       await db.collection("type2").insert(newObject);
+      await processHook(hooksObj, "Type2", "afterInsert", newObject, root, args, context, ast);
 
       let result = (await loadType2s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
       return {

@@ -70,9 +70,10 @@ export default {
       let newObject = newObjectFromArgs(args.DeleteInfo, DeleteInfo);
       let requestMap = parseRequestedFields(ast, "DeleteInfo");
       let $project = getMongoProjection(requestMap, DeleteInfo, args);
+
       await processHook(hooksObj, "DeleteInfo", "beforeInsert", newObject, root, args, context, ast);
-      
       await db.collection("deleteInfo").insert(newObject);
+      await processHook(hooksObj, "DeleteInfo", "afterInsert", newObject, root, args, context, ast);
 
       let result = (await loadDeleteInfos(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
       return {

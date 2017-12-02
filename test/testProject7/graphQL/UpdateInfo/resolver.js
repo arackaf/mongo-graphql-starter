@@ -70,9 +70,10 @@ export default {
       let newObject = newObjectFromArgs(args.UpdateInfo, UpdateInfo);
       let requestMap = parseRequestedFields(ast, "UpdateInfo");
       let $project = getMongoProjection(requestMap, UpdateInfo, args);
+
       await processHook(hooksObj, "UpdateInfo", "beforeInsert", newObject, root, args, context, ast);
-      
       await db.collection("updateInfo").insert(newObject);
+      await processHook(hooksObj, "UpdateInfo", "afterInsert", newObject, root, args, context, ast);
 
       let result = (await loadUpdateInfos(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
       return {

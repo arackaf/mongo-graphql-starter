@@ -1,6 +1,7 @@
 import { query as Type1Query, mutation as Type1Mutation, type as Type1Type } from './Type1/schema';
 import { query as Type2Query, mutation as Type2Mutation, type as Type2Type } from './Type2/schema';
 import { query as UpdateInfoQuery, mutation as UpdateInfoMutation, type as UpdateInfoType } from './UpdateInfo/schema';
+import { query as InsertInfoQuery, mutation as InsertInfoMutation, type as InsertInfoType } from './InsertInfo/schema';
 import { query as DeleteInfoQuery, mutation as DeleteInfoMutation, type as DeleteInfoType } from './DeleteInfo/schema';
     
 export default `
@@ -30,6 +31,8 @@ export default `
 
   ${UpdateInfoType}
 
+  ${InsertInfoType}
+
   ${DeleteInfoType}
 
   type Query {
@@ -38,6 +41,8 @@ export default `
     ${Type2Query}
 
     ${UpdateInfoQuery}
+
+    ${InsertInfoQuery}
 
     ${DeleteInfoQuery}
   }
@@ -48,6 +53,8 @@ export default `
     ${Type2Mutation}
 
     ${UpdateInfoMutation}
+
+    ${InsertInfoMutation}
 
     ${DeleteInfoMutation}
   }

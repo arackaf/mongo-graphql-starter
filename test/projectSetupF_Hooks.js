@@ -12,6 +12,13 @@ export default {
     beforeInsert(obj, root, args, context, ast) {
       obj.userId = 1;
     },
+    async afterInsert(obj, root, args, context, ast) {
+      obj.y = 1;
+      let db = await root.db;
+
+      await db.collection("insertInfo").remove({});
+      await db.collection("insertInfo").insert({ insertedId: obj._id + "", y: obj.y });
+    },
     beforeUpdate(match, updates, root, args, context, ast) {
       match.userId = 1;
       if (!updates.$inc) {
@@ -51,6 +58,13 @@ export default {
     },
     beforeInsert(obj, root, args, context, ast) {
       obj.userId++;
+    },
+    async afterInsert(obj, root, args, context, ast) {
+      obj.y++;
+      let db = await root.db;
+
+      await db.collection("insertInfo").remove({});
+      await db.collection("insertInfo").insert({ insertedId: obj._id + "", y: obj.y });
     },
     beforeUpdate(filters, updates, root, args, context, ast) {
       filters.userId++;

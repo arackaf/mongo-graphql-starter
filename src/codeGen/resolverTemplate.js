@@ -64,9 +64,10 @@ export default {
       let newObject = newObjectFromArgs(args.${objName}, ${objName});
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
+
       await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast);
-      
       await db.collection("${table}").insert(newObject);
+      await processHook(hooksObj, "${objName}", "afterInsert", newObject, root, args, context, ast);
 
       let result = (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
       return {

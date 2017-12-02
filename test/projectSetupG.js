@@ -29,6 +29,14 @@ const UpdateInfo = {
   }
 };
 
+const InsertInfo = {
+  table: "insertInfo",
+  fields: {
+    insertedId: MongoIdType,
+    y: IntType
+  }
+};
+
 const DeleteInfo = {
   table: "deleteInfo",
   fields: {
