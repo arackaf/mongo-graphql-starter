@@ -7,6 +7,7 @@ try {
   del.sync("test/testProject4/graphQL");
   del.sync("test/testProject5/graphQL");
   del.sync("test/testProject6/graphQL");
+  del.sync("test/testProject7/graphQL");
 } catch (e) {}
 
 require = require("@std/esm")(module, { esm: "js", cjs: true });

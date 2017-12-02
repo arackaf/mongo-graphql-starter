@@ -1,44 +1,46 @@
 export default {
-  queryPreprocess(root, args, context, ast) {
-    args.poisonField = 1;
-  },
-  queryMiddleware(queryPacket, root, args, context, ast) {
-    if (!queryPacket.$match) {
-      queryPacket.$match = {};
-    }
-    queryPacket.$match.userId = 1;
-  },
-  beforeInsert(obj, root, args, context, ast) {
-    obj.userId = 1;
-  },
-  beforeUpdate(match, updates, root, args, context, ast) {
-    match.userId = 1;
-    if (!updates.$inc) {
-      updates.$inc = {};
-    }
-    updates.$inc.autoUpdateField = 1;
-  },
-  async afterUpdate(match, updates, root, args, context, ast) {
-    updates.x = 1;
-    let db = await root.db;
-    await db.collection("updateInfo").remove({});
-    await db.collection("updateInfo").insert({ updatedId: match._id, x: updates.x });
-  },
-  beforeDelete(match, root, args, context, ast) {
-    match.userId = 1;
-  },
-  async afterDelete(match, root, args, context, ast) {
-    match.x = 1;
-    let db = await root.db;
-    await db.collection("deleteInfo").remove({});
-    await db.collection("deleteInfo").insert({ deletedId: match._id, x: match.x });
-  },
-  adjustResults(results) {
-    results.forEach(result => {
-      if (result.autoAdjustField != null) {
-        result.autoAdjustField++;
+  Root: {
+    queryPreprocess(root, args, context, ast) {
+      args.poisonField = 1;
+    },
+    queryMiddleware(queryPacket, root, args, context, ast) {
+      if (!queryPacket.$match) {
+        queryPacket.$match = {};
       }
-    });
+      queryPacket.$match.userId = 1;
+    },
+    beforeInsert(obj, root, args, context, ast) {
+      obj.userId = 1;
+    },
+    beforeUpdate(match, updates, root, args, context, ast) {
+      match.userId = 1;
+      if (!updates.$inc) {
+        updates.$inc = {};
+      }
+      updates.$inc.autoUpdateField = 1;
+    },
+    async afterUpdate(match, updates, root, args, context, ast) {
+      updates.x = 1;
+      let db = await root.db;
+      await db.collection("updateInfo").remove({});
+      await db.collection("updateInfo").insert({ updatedId: match._id, x: updates.x });
+    },
+    beforeDelete(match, root, args, context, ast) {
+      match.userId = 1;
+    },
+    async afterDelete(match, root, args, context, ast) {
+      match.x = 1;
+      let db = await root.db;
+      await db.collection("deleteInfo").remove({});
+      await db.collection("deleteInfo").insert({ deletedId: match._id, x: match.x });
+    },
+    adjustResults(results) {
+      results.forEach(result => {
+        if (result.autoAdjustField != null) {
+          result.autoAdjustField++;
+        }
+      });
+    }
   },
   Type2: {
     queryPreprocess(root, args, context, ast) {

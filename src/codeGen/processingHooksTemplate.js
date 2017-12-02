@@ -1,17 +1,28 @@
 export default {
-  queryPreprocess(root, args, context, ast) {
-    //this will be called
-  },
-  queryMiddleware(queryPacket, root, args, context, ast) {
-    //this will be called
-  },
-  beforeInsert(obj, root, args, context, ast) {
-    //this will be called
-  },
-  beforeUpdate(filter, updates, root, args, context, ast) {
-    //this will be called
-  },
-  adjustResults(results) {
-    //this will be called
+  Root: {
+    queryPreprocess(root, args, context, ast) {
+      //This will be called
+    },
+    queryMiddleware(queryPacket, root, args, context, ast) {
+      //This will be called
+    },
+    beforeInsert(obj, root, args, context, ast) {
+      //This will be called
+    },
+    beforeUpdate(match, updates, root, args, context, ast) {
+      //This will be called
+    },
+    async afterUpdate(match, updates, root, args, context, ast) {
+      //This will be called
+    },
+    beforeDelete(match, root, args, context, ast) {
+      //This will be called
+    },
+    async afterDelete(match, root, args, context, ast) {
+      //This will be called
+    },
+    adjustResults(results) {
+      //This will be called
+    }
   }
 };
