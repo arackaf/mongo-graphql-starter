@@ -11,18 +11,24 @@ export default {
   beforeInsert(obj, root, args, context, ast) {
     obj.userId = 1;
   },
-  beforeUpdate(filters, updates, root, args, context, ast) {
-    filters.userId = 1;
+  beforeUpdate(match, updates, root, args, context, ast) {
+    match.userId = 1;
     if (!updates.$inc) {
       updates.$inc = {};
     }
     updates.$inc.autoUpdateField = 1;
   },
-  async afterUpdate(filters, updates, root, args, context, ast) {
+  async afterUpdate(match, updates, root, args, context, ast) {
     updates.x = 1;
     let db = await root.db;
     await db.collection("updateInfo").remove({});
-    await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
+    await db.collection("updateInfo").insert({ updatedId: match._id, x: updates.x });
+  },
+  async afterDelete(match, root, args, context, ast) {
+    match.x = 1;
+    let db = await root.db;
+    await db.collection("deleteInfo").remove({});
+    await db.collection("deleteInfo").insert({ deletedId: match._id, x: match.x });
   },
   adjustResults(results) {
     results.forEach(result => {
@@ -50,6 +56,12 @@ export default {
       let db = await root.db;
       await db.collection("updateInfo").remove({});
       await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
+    },
+    async afterDelete(match, root, args, context, ast) {
+      match.x++;
+      let db = await root.db;
+      await db.collection("deleteInfo").remove({});
+      await db.collection("deleteInfo").insert({ deletedId: match._id, x: match.x });
     },
     adjustResults(results) {
       results.forEach(result => {

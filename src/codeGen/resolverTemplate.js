@@ -86,7 +86,7 @@ export default {
         await db.collection("${table}").update($match, updates);
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
-
+      
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
       
@@ -100,8 +100,10 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-
-      await db.collection("${table}").remove({ _id: ObjectId(args._id) });
+      
+      let $match = { _id: ObjectId(args._id) };
+      await db.collection("${table}").remove($match);
+      await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
       return true;
     }
   }

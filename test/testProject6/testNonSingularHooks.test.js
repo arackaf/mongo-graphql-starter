@@ -173,7 +173,7 @@ test("Test query update middleware 4", async () => {
   expect(obj.field2).toBe("xxx");
 });
 
-test("Test query onUpdate hook 1", async () => {
+test("Test query afterUpdate hook 1", async () => {
   let obj = (await db
     .collection("type1")
     .find({ field1: "4 a" })
@@ -181,7 +181,7 @@ test("Test query onUpdate hook 1", async () => {
 
   let _id = obj._id;
 
-  let emptyObj = await runMutation({
+  await runMutation({
     mutation: `updateType1(_id: "${obj._id}", Type1: { field1: "4 a" }) {Type1{field1}}`,
     result: "updateType1"
   });
@@ -194,7 +194,7 @@ test("Test query onUpdate hook 1", async () => {
   expect(updateObj.x).toBe(1);
 });
 
-test("Test query onUpdate hook 2", async () => {
+test("Test query afterUpdate hook 2", async () => {
   let obj = (await db
     .collection("type2")
     .find({ field1: "4 a" })
@@ -202,7 +202,7 @@ test("Test query onUpdate hook 2", async () => {
 
   let _id = obj._id;
 
-  let emptyObj = await runMutation({
+  await runMutation({
     mutation: `updateType2(_id: "${obj._id}", Type2: { field1: "4 a" }) {Type2{field1}}`,
     result: "updateType2"
   });
@@ -213,6 +213,44 @@ test("Test query onUpdate hook 2", async () => {
     .toArray())[0];
 
   expect(updateObj.x).toBe(2);
+});
+
+test("Test query after delete hook 1", async () => {
+  let newO = { field1: "___" };
+  await db.collection("type1").insert(newO);
+
+  let _id = newO._id;
+
+  await runMutation({
+    mutation: `deleteType1(_id: "${_id}")`,
+    result: "deleteType1"
+  });
+
+  let deleteObj = (await db
+    .collection("deleteInfo")
+    .find({ deletedId: _id })
+    .toArray())[0];
+
+  expect(deleteObj.x).toBe(1);
+});
+
+test("Test query after delete hook 2", async () => {
+  let newO = { field1: "___" };
+  await db.collection("type2").insert(newO);
+
+  let _id = newO._id;
+
+  await runMutation({
+    mutation: `deleteType2(_id: "${_id}")`,
+    result: "deleteType2"
+  });
+
+  let deleteObj = (await db
+    .collection("deleteInfo")
+    .find({ deletedId: _id })
+    .toArray())[0];
+
+  expect(deleteObj.x).toBe(2);
 });
 
 test("Test data adjust on insert 1", async () => {
