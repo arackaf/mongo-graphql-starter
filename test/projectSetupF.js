@@ -1,4 +1,5 @@
 import { dataTypes } from "mongo-graphql-starter";
+import { MongoIdType } from "../src/dataTypes";
 const { StringType, StringArrayType, IntType } = dataTypes;
 
 const fields = {
@@ -20,19 +21,25 @@ const Type2 = {
   fields
 };
 
-const Type3 = {
-  table: "type3",
-  fields
+const UpdateInfo = {
+  table: "updateInfo",
+  fields: {
+    updatedId: MongoIdType,
+    x: IntType
+  }
 };
 
-const Type4 = {
-  table: "type4",
-  fields
+const DeleteInfo = {
+  table: "deleteInfo",
+  fields: {
+    deletedId: MongoIdType,
+    x: IntType
+  }
 };
 
 export default {
   Type1,
   Type2,
-  Type3,
-  Type4
+  UpdateInfo,
+  DeleteInfo
 };

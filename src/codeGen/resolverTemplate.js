@@ -81,10 +81,11 @@ export default {
       let $match = { _id: ObjectId(args._id) };
       let updates = getUpdateObject(args.${objName} || {}, ${objName});
       await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-
+      
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
         await db.collection("${table}").update($match, updates);
       }
+      await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
 
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
