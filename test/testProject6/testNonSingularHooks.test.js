@@ -102,6 +102,34 @@ test("Test query middleware 2", async () => {
   });
 });
 
+test("Test query before update 1", async () => {
+  let obj = (await db
+    .collection("type1")
+    .find({ field2: "A" })
+    .toArray())[0];
+
+  obj = await runMutation({
+    mutation: `updateType1(_id: "${obj._id}", Type1: { field1: "ABC123" }) {Type1{autoUpdateField, autoAdjustField}}`,
+    result: "updateType1"
+  });
+
+  expect(obj).toBe(null);
+});
+
+test("Test query before update 2", async () => {
+  let obj = (await db
+    .collection("type2")
+    .find({ field2: "A" })
+    .toArray())[0];
+
+  obj = await runMutation({
+    mutation: `updateType2(_id: "${obj._id}", Type2: { field1: "XYZ123" }) {Type2{autoUpdateField, autoAdjustField}}`,
+    result: "updateType2"
+  });
+
+  expect(obj).toBe(null);
+});
+
 test("Test query update middleware and auto adjust 1", async () => {
   let obj = (await db
     .collection("type1")

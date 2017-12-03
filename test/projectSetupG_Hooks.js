@@ -23,6 +23,9 @@ class HooksRoot {
   }
   beforeUpdate(match, updates, root, args, context, ast) {
     match.userId = 1;
+    if (args.Type1 && args.Type1.field1 === "ABC123") {
+      return false;
+    }
     if (!updates.$inc) {
       updates.$inc = {};
     }
@@ -76,6 +79,9 @@ class Type2Hooks {
     await db.collection("insertInfo").insert({ insertedId: obj._id + "", y: obj.y });
   }
   beforeUpdate(filters, updates, root, args, context, ast) {
+    if (args.Type2 && args.Type2.field1 === "XYZ123") {
+      return false;
+    }
     filters.userId++;
     updates.$inc.autoUpdateField++;
   }

@@ -90,7 +90,10 @@ export default {
       let $match = { _id: ObjectId(args._id) };
       let updates = getUpdateObject(args.DeleteInfo || {}, DeleteInfo);
 
-      await processHook(hooksObj, "DeleteInfo", "beforeUpdate", $match, updates, root, args, context, ast);
+      let res = await processHook(hooksObj, "DeleteInfo", "beforeUpdate", $match, updates, root, args, context, ast);
+      if (res === false){
+        return { DeleteInfo: null };
+      }
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
         await db.collection("deleteInfo").update($match, updates);
       }
