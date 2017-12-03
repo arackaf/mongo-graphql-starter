@@ -46,6 +46,7 @@ afterAll(async () => {
   for (let type of types) {
     await db.collection(type.toLowerCase()).remove({});
   }
+  await db.collection("insertInfo").remove({});
   await db.collection("updateInfo").remove({});
   await db.collection("deleteInfo").remove({});
   db.close();
@@ -309,4 +310,36 @@ test("Test data adjust on insert 2", async () => {
   });
 
   expect(obj.autoAdjustField).toBe(3);
+});
+
+test("Test after insert 1", async () => {
+  let obj = await runMutation({
+    mutation: `createType1(Type1: { field1: "___" }) {Type1{_id, field1}}`,
+    result: "createType1"
+  });
+
+  let updateObj = (await db
+    .collection("insertInfo")
+    .find({ insertedId: obj._id })
+    .toArray())[0];
+
+  expect(updateObj.y).toBe(1);
+
+  await db.collection("insertInfo").remove({});
+});
+
+test("Test after insert 2", async () => {
+  let obj = await runMutation({
+    mutation: `createType2(Type2: { field1: "___" }) {Type2{_id, field1}}`,
+    result: "createType2"
+  });
+
+  let updateObj = (await db
+    .collection("insertInfo")
+    .find({ insertedId: obj._id })
+    .toArray())[0];
+
+  expect(updateObj.y).toBe(2);
+
+  await db.collection("insertInfo").remove({});
 });
