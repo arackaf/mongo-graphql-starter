@@ -9,6 +9,9 @@ class HooksRoot {
     queryPacket.$match.userId = 1;
   }
   beforeInsert(obj, root, args, context, ast) {
+    if (obj.field1 === "KILL") {
+      return false;
+    }
     obj.userId = 1;
   }
   async afterInsert(obj, root, args, context, ast) {
@@ -57,6 +60,9 @@ class Type2Hooks {
     queryPacket.$match.userId++;
   }
   beforeInsert(obj, root, args, context, ast) {
+    if (obj.field1 === "BAD") {
+      return false;
+    }
     obj.userId++;
   }
   async afterInsert(obj, root, args, context, ast) {

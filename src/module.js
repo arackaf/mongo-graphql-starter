@@ -10,6 +10,8 @@ export { dataTypes };
 import * as queryUtilities from "./queryUtilities";
 export { queryUtilities };
 
+const shortCircuitHooks = new Set(["beforeInsert"]);
+
 export async function processHook(hooks, TypeName, hookName, ...args) {
   let rootHooks = hooks.Root;
   let typeHooks = hooks[TypeName];
@@ -18,7 +20,10 @@ export async function processHook(hooks, TypeName, hookName, ...args) {
       rootHooks = new rootHooks();
     }
     if (rootHooks[hookName]) {
-      await rootHooks[hookName](...args);
+      let res = await rootHooks[hookName](...args);
+      if (shortCircuitHooks.has(hookName) && res === false) {
+        return false;
+      }
     }
   }
   if (typeHooks) {
@@ -26,7 +31,10 @@ export async function processHook(hooks, TypeName, hookName, ...args) {
       typeHooks = new typeHooks();
     }
     if (typeHooks[hookName]) {
-      await typeHooks[hookName](...args);
+      let res = await typeHooks[hookName](...args);
+      if (shortCircuitHooks.has(hookName) && res === false) {
+        return false;
+      }
     }
   }
 }
