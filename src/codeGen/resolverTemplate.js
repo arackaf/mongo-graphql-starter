@@ -105,7 +105,10 @@ export default {
       let db = await root.db;
       let $match = { _id: ObjectId(args._id) };
       
-      await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast);
+      let res = await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast);
+      if (res === false){
+        return false;
+      }
       await db.collection("${table}").remove($match);
       await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
       return true;
