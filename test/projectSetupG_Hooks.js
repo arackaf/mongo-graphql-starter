@@ -35,6 +35,9 @@ class HooksRoot {
     await db.collection("updateInfo").insert({ updatedId: match._id, x: updates.x });
   }
   beforeDelete(match, root, args, context, ast) {
+    if (args._id == "59334468a71fc3de245e2d6d") {
+      return false;
+    }
     match.userId = 1;
   }
   async afterDelete(match, root, args, context, ast) {
@@ -83,6 +86,9 @@ class Type2Hooks {
     await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
   }
   beforeDelete(match, root, args, context, ast) {
+    if (args._id == "591b74d036f369d06bb7781d") {
+      return false;
+    }
     match.field1 = { $ne: "XXX" };
   }
   async afterDelete(match, root, args, context, ast) {

@@ -67,7 +67,7 @@ export async function runMutation({ schema, db, mutation, variables, result }) {
     throw "Failed with \n\n" + mutationResult.errors;
   }
 
-  if (!(mutationResult.data && mutationResult.data[result])) {
+  if (!(mutationResult.data && mutationResult.data[result] !== void 0)) {
     throw result + " not found on mutation result";
   }
 

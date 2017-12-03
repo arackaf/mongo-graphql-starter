@@ -237,7 +237,28 @@ test("Test query before delete hook 1", async () => {
   expect(typeof deleteObj).toBe("object");
 });
 
-test("Test query before delete hook 1", async () => {
+test("Test query before delete hook 1 A", async () => {
+  let newO = { field1: "XYZ", userId: 1, _id: "59334468a71fc3de245e2d6d" };
+  await db.collection("type1").insert(newO);
+  let _id = newO._id;
+
+  let result = await runMutation({
+    mutation: `deleteType1(_id: "${_id}")`,
+    result: "deleteType1"
+  });
+  expect(result).toBe(false);
+
+  let notDeletedObj = (await db
+    .collection("type1")
+    .find({ _id })
+    .toArray())[0];
+
+  expect(typeof notDeletedObj).toBe("object");
+
+  await db.collection("type1").remove({ _id });
+});
+
+test("Test query before delete hook 2", async () => {
   let newO = { field1: "XXX", userId: 1 };
   await db.collection("type2").insert(newO);
 
@@ -254,6 +275,27 @@ test("Test query before delete hook 1", async () => {
     .toArray())[0];
 
   expect(typeof deleteObj).toBe("object");
+});
+
+test("Test query before delete hook 2 A", async () => {
+  let newO = { field1: "XYZ", userId: 1, _id: "591b74d036f369d06bb7781d" };
+  await db.collection("type2").insert(newO);
+  let _id = newO._id;
+
+  let result = await runMutation({
+    mutation: `deleteType2(_id: "${_id}")`,
+    result: "deleteType2"
+  });
+  expect(result).toBe(false);
+
+  let notDeletedObj = (await db
+    .collection("type2")
+    .find({ _id })
+    .toArray())[0];
+
+  expect(typeof notDeletedObj).toBe("object");
+
+  await db.collection("type1").remove({ _id });
 });
 
 test("Test query after delete hook 1", async () => {

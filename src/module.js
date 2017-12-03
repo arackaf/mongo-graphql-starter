@@ -10,7 +10,7 @@ export { dataTypes };
 import * as queryUtilities from "./queryUtilities";
 export { queryUtilities };
 
-const shortCircuitHooks = new Set(["beforeInsert"]);
+const shortCircuitHooks = new Set(["beforeInsert", "beforeDelete"]);
 
 export async function processHook(hooks, TypeName, hookName, ...args) {
   let rootHooks = hooks.Root;
