@@ -671,6 +671,5 @@ and a resolver file will also be created defining the queries and mutations.
 
 ## What's next
 
-* Allow filtering through nested objects and arrays
-* Add more data types, and filters
-* Allow queryable types to define relationships between one another, so related data can be queries intelligently, without the SELECT N+1 problem
+* There's a new, far more robust middleware structure coming soon!
+* Expand existing relationships to allow more options and relationship types
