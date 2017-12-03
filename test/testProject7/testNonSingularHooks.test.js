@@ -328,6 +328,51 @@ test("Test after insert 1", async () => {
   await db.collection("insertInfo").remove({});
 });
 
+test("Test before insert 1 A", async () => {
+  let obj = await runMutation({
+    mutation: `createType1(Type1: { field1: "KILL" }) {Type1{_id, field1}}`,
+    result: "createType1"
+  });
+
+  let inserted = (await db
+    .collection("type1")
+    .find({ field1: "KILL" })
+    .toArray())[0];
+
+  expect(obj).toBe(null);
+  expect(inserted).toBe(void 0);
+});
+
+test("Test before insert 2 A", async () => {
+  let obj = await runMutation({
+    mutation: `createType2(Type2: { field1: "KILL" }) {Type2{_id, field1}}`,
+    result: "createType2"
+  });
+
+  let inserted = (await db
+    .collection("type2")
+    .find({ field1: "KILL" })
+    .toArray())[0];
+
+  expect(obj).toBe(null);
+  expect(inserted).toBe(void 0);
+});
+
+test("Test before insert 2 AA", async () => {
+  let obj = await runMutation({
+    mutation: `createType2(Type2: { field1: "BAD" }) {Type2{_id, field1}}`,
+    result: "createType2"
+  });
+
+  let inserted = (await db
+    .collection("type2")
+    .find({ field1: "KILL" })
+    .toArray())[0];
+
+  expect(obj).toBe(null);
+  expect(inserted).toBe(void 0);
+});
+
 test("Test after insert 2", async () => {
   let obj = await runMutation({
     mutation: `createType2(Type2: { field1: "___" }) {Type2{_id, field1}}`,

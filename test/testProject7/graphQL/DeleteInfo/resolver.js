@@ -71,7 +71,9 @@ export default {
       let requestMap = parseRequestedFields(ast, "DeleteInfo");
       let $project = getMongoProjection(requestMap, DeleteInfo, args);
 
-      await processHook(hooksObj, "DeleteInfo", "beforeInsert", newObject, root, args, context, ast);
+      if (await processHook(hooksObj, "DeleteInfo", "beforeInsert", newObject, root, args, context, ast) === false){
+        return { DeleteInfo: null };
+      }
       await db.collection("deleteInfo").insert(newObject);
       await processHook(hooksObj, "DeleteInfo", "afterInsert", newObject, root, args, context, ast);
 

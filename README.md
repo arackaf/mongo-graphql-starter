@@ -621,8 +621,7 @@ words, the generated code does not suffer from the Select N + 1 problem.
 
 ## Lifecycle hooks
 
-Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap
-into, in order to change default behavior.
+Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap into, to add custom behavior.
 
 Most of the hooks receive these arguments, among others, which are defined here, once.
 
@@ -640,12 +639,24 @@ Most of the hooks receive these arguments, among others, which are defined here,
 | `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually set arguments the user has sent over, for example you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
 | `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. |
 | `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted  |
-| `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object  |
+| `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
 | `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is mutated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed directly to Mongo, to make the requested changes.  |
-| `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`  |
+| `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
 | `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed right to Mongo to find the right object  |
 | `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
-| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations. Basically any generated query which returns `Type` or `[Type]`. The actual object queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust any data, however you want.  For example, you can format dates, adjust URLs, etc.  |
+| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`. The actual object queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed.  For example, you can format dates, adjust URLs, etc.  |
+
+#### The `queryPacket` argument to the queryMiddleware hook
+
+The `queryPacket` passed to the queryMiddleware hook will have all of the properties which are passed directly to Mongo. Mutate them as needed, for example to make sure that the current user is only querying data that belongs to her.
+
+| Property   | Description                                                                                         |
+| ---------  | --------------------------------------------------------------------------------------------------- |
+| `$match`   | The filters for the query            |
+| `$project` | The query's projections                                                                        |
+| `$sort`    | The sorting object                                                              |
+| `$skip`    | Self explanatory. This is calculated based on the paging parameters sent over, if any |
+| `$limit`   | Self explanatory. This is calculated based on the paging parameters sent over, if any |
 
 ## A closer look at what's generated
 

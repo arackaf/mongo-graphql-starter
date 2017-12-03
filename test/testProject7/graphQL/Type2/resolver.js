@@ -71,7 +71,9 @@ export default {
       let requestMap = parseRequestedFields(ast, "Type2");
       let $project = getMongoProjection(requestMap, Type2, args);
 
-      await processHook(hooksObj, "Type2", "beforeInsert", newObject, root, args, context, ast);
+      if (await processHook(hooksObj, "Type2", "beforeInsert", newObject, root, args, context, ast) === false){
+        return { Type2: null };
+      }
       await db.collection("type2").insert(newObject);
       await processHook(hooksObj, "Type2", "afterInsert", newObject, root, args, context, ast);
 
