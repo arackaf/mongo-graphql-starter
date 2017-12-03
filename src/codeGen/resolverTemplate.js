@@ -84,7 +84,10 @@ export default {
       let $match = { _id: ObjectId(args._id) };
       let updates = getUpdateObject(args.${objName} || {}, ${objName});
 
-      await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
+      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
+      if (res === false){
+        return { ${objName}: null };
+      }
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
         await db.collection("${table}").update($match, updates);
       }
