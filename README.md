@@ -636,15 +636,15 @@ Most of the hooks receive these arguments, among others, which are defined here,
 
 | Hook                                                     | Description   |
 | -------------------------------------------------------- | --------------|
-| `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually set arguments the user has sent over, for example you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
+| `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually set arguments the user has sent over; for example, you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
 | `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. |
-| `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted  |
+| `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` from this hook to cancel the insertion |
 | `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
-| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is mutated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed directly to Mongo, to make the requested changes.  |
+| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is mutated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed to Mongo, to make the requested changes. Return `false` from this hook to cancel the update.  |
 | `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
-| `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed right to Mongo to find the right object  |
+| `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` from this hook to cancel the deletion.  |
 | `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
-| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`. The actual object queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed.  For example, you can format dates, adjust URLs, etc.  |
+| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`—results will always be an array. The actual objects queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed, ie you can format dates, etc.  |
 
 #### The `queryPacket` argument to the queryMiddleware hook
 
@@ -657,6 +657,84 @@ The `queryPacket` passed to the queryMiddleware hook will have all of the proper
 | `$sort`    | The sorting object                                                              |
 | `$skip`    | Self explanatory. This is calculated based on the paging parameters sent over, if any |
 | `$limit`   | Self explanatory. This is calculated based on the paging parameters sent over, if any |
+
+### How to use processing hooks
+
+There should be a hooks.js file generated at the root of your graphQL folder, right next to the root resolver and schema, which should look like this
+
+```javascript
+export default {
+  Root: {
+    queryPreprocess(root, args, context, ast) {
+      //Called before query filters are processed
+    },
+    queryMiddleware(queryPacket, root, args, context, ast) {
+      //Called after query filters are processed, which are passed in queryPacket
+    },
+    beforeInsert(objToBeInserted, root, args, context, ast) {
+      //Called before an insertion occurs. Return false to cancel it
+    },
+    afterInsert(newObj, root, args, context, ast) {
+      //Called after an object is inserted
+    },
+    beforeUpdate(match, updates, root, args, context, ast) {
+      //Called before an update occurs. Return false to cancel it
+    },
+    afterUpdate(match, updates, root, args, context, ast) {
+      //Called after an update occurs. The filter match, and updates objects will be
+      //passed into the first two parameters, respectively
+    },
+    beforeDelete(match, root, args, context, ast) {
+      //Called before a deletion. Return false to cancel it.
+    },
+    afterDelete(match, root, args, context, ast) {
+      //Called after a deltion. The filter match will be passed into the first parameter.
+    },
+    adjustResults(results) {
+      //Called anytime objects are returned from a graphQL endpoint. Use this hook to make adjustments to them.
+    }
+  }
+};
+```
+
+add implementations to whichever methods you need.  These hooks under Root will be called every time, always. To create hooks that only apply to certain types, just add a key next to root, with the name of the type, with the same methods.  For example
+
+```javascript
+export default {
+  Root: {
+    queryPreprocess(root, args, context, ast) {
+      args.PAGE_SIZE = 50;
+    }
+  },
+  Book: {
+    queryPreprocess(root, args, context, ast) {
+      args.PAGE_SIZE = 100;
+    }
+  }
+};
+```
+
+will cause every query to have a PAGE_SIZE set always, except for `Book` queries, which wich will have it set to 100.
+
+If a hook is defined both in Root, and for a type, then, for that type, the root hook will be called first, followed by the one for the type. So above, PAGE_SIZE will first be set to 50, and then to 100.
+
+#### Doing asynchronous processing in hooks.
+
+The which actually calls these hook methods will do so with `await`.  That means if you need to do asynchronous work in any of these methods, you can just make the hook itself an async method, and `await` any async operation you need to.  Or of course you could also return a Promise if you want, which is essentially the same thing.
+
+#### Reusing code across types' hooks
+
+Many of these preprocessing hooks will be of a similar format, and so the risk of tedious duplication is high.  To help avoid this you can, if you want, just provide a class for either Root, or any Type. If you do, then the class will be instantiated, and the same hook methods will be looked for on the newly-created instance.  For example
+
+```javascript
+export default {
+  Root: HooksRoot,
+  Type2: Type2Hooks
+};
+```
+
+will work fine, assuming `HooksRoot` and `Type2Hooks` are JavaScript classes.
+
 
 ## A closer look at what's generated
 
