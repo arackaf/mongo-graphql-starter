@@ -612,8 +612,8 @@ This adds a new `mainAuthor` object to the Book type, which is read from the aut
 ### Using relationships
 
 In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested as normal in your GraphQL queries.
-If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them then, as normal, the ast will be parsed, and
-only the queried author fields will fetched, and returned.
+
+If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them then, as normal, the ast will be parsed, and only the queried author fields will fetched, and returned.
 
 Note that, for any `Book` query, the books from the current query are read from Mongo first. Then, if `authors` or `mainAuthor` is requested, then a
 single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately. In other
@@ -623,7 +623,7 @@ words, the generated code does not suffer from the Select N + 1 problem.
 
 Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap into, to add custom behavior.
 
-Most of the hooks receive these arguments, among others, which are defined here, once.
+Most of the hooks receive these arguments, and possibly others, which are defined here, once.
 
 | Argument  | Description                                                                                         |
 | --------- | --------------------------------------------------------------------------------------------------- |
@@ -636,11 +636,11 @@ Most of the hooks receive these arguments, among others, which are defined here,
 
 | Hook                                                     | Description   |
 | -------------------------------------------------------- | --------------|
-| `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually set arguments the user has sent over; for example, you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
-| `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. |
+| `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually adjust arguments the user has sent over; for example, you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
+| `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. This is your chance to adjust the query that's about to be run, possibly to add filters to ensure the user doesn't access data she's not entitled to. |
 | `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` from this hook to cancel the insertion |
 | `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
-| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is mutated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed to Mongo, to make the requested changes. Return `false` from this hook to cancel the update.  |
+| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed to Mongo, to make the requested changes. Return `false` from this hook to cancel the update.  |
 | `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
 | `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` from this hook to cancel the deletion.  |
 | `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
@@ -650,11 +650,11 @@ Most of the hooks receive these arguments, among others, which are defined here,
 
 The `queryPacket` passed to the queryMiddleware hook will have all of the properties which are passed directly to Mongo. Mutate them as needed, for example to make sure that the current user is only querying data that belongs to her.
 
-| Property   | Description                                                                                         |
-| ---------  | --------------------------------------------------------------------------------------------------- |
-| `$match`   | The filters for the query            |
-| `$project` | The query's projections                                                                        |
-| `$sort`    | The sorting object                                                              |
+| Property   | Description                                                                           |
+| ---------  | ------------------------------------------------------------------------------------- |
+| `$match`   | The filters for the query                                                             |
+| `$project` | The query's projections                                                               |
+| `$sort`    | The sorting object                                                                    |
 | `$skip`    | Self explanatory. This is calculated based on the paging parameters sent over, if any |
 | `$limit`   | Self explanatory. This is calculated based on the paging parameters sent over, if any |
 
@@ -697,7 +697,7 @@ export default {
 };
 ```
 
-add implementations to whichever methods you need.  These hooks under Root will be called every time, always. To create hooks that only apply to certain types, just add a key next to root, with the name of the type, with the same methods.  For example
+Add implementations to whichever methods you need.  These hooks under Root will be called every time, always. To create hooks that only apply to certain types, just add a key next to root, with the name of the type, with the same methods; you don't have to add all available methods, of course—just add the methods you need.  For example
 
 ```javascript
 export default {
@@ -714,13 +714,13 @@ export default {
 };
 ```
 
-will cause every query to have a PAGE_SIZE set always, except for `Book` queries, which wich will have it set to 100.
+will cause every query to have a PAGE_SIZE set to 50, always—except for `Book` queries, which wich will have it set to 100.
 
-If a hook is defined both in Root, and for a type, then, for that type, the root hook will be called first, followed by the one for the type. So above, PAGE_SIZE will first be set to 50, and then to 100.
+If a hook is defined both in Root, and for a type, then for operations on that type, the root hook will be called first, followed by the one for the type. So above, PAGE_SIZE will first be set to 50, and then to 100.
 
 #### Doing asynchronous processing in hooks.
 
-The which actually calls these hook methods will do so with `await`.  That means if you need to do asynchronous work in any of these methods, you can just make the hook itself an async method, and `await` any async operation you need to.  Or of course you could also return a Promise if you want, which is essentially the same thing.
+The code which calls these hook methods will do so with `await`.  That means if you need to do asynchronous work in any of these methods, you can just make the hook itself an async method, and `await` any async operation you need.  Or of course you could also return a Promise, which is essentially the same thing.
 
 #### Reusing code across types' hooks
 
@@ -760,5 +760,4 @@ and a resolver file will also be created defining the queries and mutations.
 
 ## What's next
 
-* There's a new, far more robust middleware structure coming soon!
 * Expand existing relationships to allow more options and relationship types
