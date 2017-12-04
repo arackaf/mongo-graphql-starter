@@ -240,17 +240,13 @@ For example
 {allBooks(SORT: {title: 1}, PAGE: 1, PAGE_SIZE: 5){Books{title}, Meta{count}}}
 ```
 
-Will retrieve the first page of books' titles, as well as the `count` of all books matching whatever filters were specified in the query (in this case
-there were none).
+Will retrieve the first page of books' titles, as well as the `count` of all books matching whatever filters were specified in the query (in this case there were none).
 
-Note, if you don't query `Meta.count` from the results, then the total query will not be execute. Similarly, if you don't query anything from the main
-result set, then that query will not execute.
+Note, if you don't query `Meta.count` from the results, then the total query will not be execute. Similarly, if you don't query anything from the main result set, then that query will not execute.
 
 The generated resolvers will analyze the AST and only query what you ask for.
 
 ## All filters available
-
-This section describes the filters available in the `all<Type>s` query for each queryable type.
 
 All scalar fields, and scalar array fields (`StringArray`, `IntArray`, etc) will have the following filters created
 
@@ -267,7 +263,7 @@ by element comparison.
 
 `field_in: [<value1>, <value2>]` - will match results which match any of those exact values.
 
-Note, for Date fields, the strings you send over will be converted to Date objects before being passed to Mongo. Similarly, for MongoIds, the Mongo
+For Date fields, the strings you send over will be converted to Date objects before being passed to Mongo. Similarly, for MongoIds, the Mongo
 `ObjectId` method will be applied before running the filter. For the array types, the value will be an entire array, which will be matched by Mongo
 item by item.
 
@@ -340,7 +336,7 @@ If your field is named `createdOn` then the following filters will be available
 
 ### Formatting dates
 
-Each date field will also have a dateField_format argument created for queries, allowing you to customize the date formatting for that field; the
+Each date field will also have a `dateField_format` argument created for queries, allowing you to customize the date formatting for that field; the
 format passed in should correspond to a valid Mongo date format. For example, if your date is called `createdOn`, then you can do
 
 ```
@@ -411,8 +407,7 @@ For example
 ){ Blogs{ title }}}
 ```
 
-Will query blogs that have at least one comment which has 4 upvotes, and also has an author with either a name of "CA 3", or a favoriteTag with a name
-of "T1"
+Will query blogs that have at least one comment which has 4 upvotes, and also has an author with either a name of "CA 3", or a favoriteTag with a name of "T1"
 
 Or you could do
 
@@ -489,7 +484,7 @@ updateBlog(_id: "${obj._id}", Blog: {words: 100}){Blog{title, words}}
 
 In addition, the following arguments are supported
 
-| Argument              | For types | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Argument              | For types | Description|
 | --------------------- | --------- | --------------------------------------- |
 | `<fieldName>_INC`     | Numeric   | Increments the current value by the amount specified. For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.                                                                                      |
 | `<fieldName>_DEC`     | Numeric   | Decrements the current value by the amount specified. For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.                                                                                                                     |
@@ -583,11 +578,11 @@ This adds a new `mainAuthor` object to the Book type, which is read from the aut
 
 ### Using relationships
 
-In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested as normal in your GraphQL queries.
+In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested normally in your GraphQL queries.
 
-If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them then, as normal, the ast will be parsed, and only the queried author fields will fetched, and returned.
+If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried author fields will fetched, and returned.
 
-Note that, for any `Book` query, the books from the current query are read from Mongo first. Then, if `authors` or `mainAuthor` is requested, then a
+Note that for any `Book` query, the books from the current query are read from Mongo first. Then, if `authors` or `mainAuthor` is requested, then a
 single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately. In other
 words, the generated code does not suffer from the Select N + 1 problem.
 
@@ -610,11 +605,11 @@ Most of the hooks receive these arguments, and possibly others, which are define
 | -------------------------------------------------------- | --------------|
 | `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually adjust arguments the user has sent over; for example, you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
 | `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. This is your chance to adjust the query that's about to be run, possibly to add filters to ensure the user doesn't access data she's not entitled to. |
-| `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` from this hook to cancel the insertion |
+| `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` to cancel the insertion |
 | `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
-| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed to Mongo, to make the requested changes. Return `false` from this hook to cancel the update.  |
+| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed to Mongo, to make the requested changes. Return `false` to cancel the update.  |
 | `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
-| `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` from this hook to cancel the deletion.  |
+| `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` to cancel the deletion.  |
 | `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
 | `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`—results will always be an array. The actual objects queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed, ie you can format dates, etc.  |
 
