@@ -185,7 +185,7 @@ const {
 
 ## Circular dependencies are fine
 
-Feel free to have your types reference each other - it should work fine. For example
+Feel free to have your types reference each other. For example, the following will generate a perfectly valid schema. 
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
@@ -213,34 +213,6 @@ export default {
   Author,
   Tag
 };
-```
-
-generates a graphQL schema where this code runs fine
-
-```javascript
-test("Circular dependencies work", async () => {
-  let tag = await runMutation({
-    schema,
-    db,
-    mutation: `createTag(Tag: {tagName: "JavaScript"}){Tag{_id}}`,
-    result: "createTag"
-  });
-  let author = await runMutation({
-    mutation: `createAuthor(Author: { name: "Adam", tags: [{_id: "${tag._id}", tagName: "${tag.tagName}"}]}){Author{_id, name}}`,
-    result: "createAuthor"
-  });
-
-  await runMutation({
-    mutation: `updateTag(_id: "${tag._id}", Tag: { authors: [{_id: "${author._id}", name: "${author.name}"}]}){Tag{_id}}`,
-    result: "updateTag"
-  });
-
-  await queryAndMatchArray({
-    query: `{getTag(_id: "${tag._id}"){Tag{tagName, authors{ _id, name }}}}`,
-    coll: "getTag",
-    results: { tagName: "JavaScript", authors: [{ _id: author._id, name: "Adam" }] }
-  });
-});
 ```
 
 ## Queries created
