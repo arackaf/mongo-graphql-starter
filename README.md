@@ -590,7 +590,7 @@ words, the generated code does not suffer from the Select N + 1 problem.
 
 Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap into, to add custom behavior.
 
-Most of the hooks receive these arguments, and possibly others, which are defined here, once.
+Most of the hooks receive these arguments (and possibly others) which are defined here, once.
 
 | Argument  | Description                                                                                         |
 | --------- | --------------------------------------------------------------------------------------------------- |
@@ -607,8 +607,8 @@ Most of the hooks receive these arguments, and possibly others, which are define
 | `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. This is your chance to adjust the query that's about to be run, possibly to add filters to ensure the user doesn't access data she's not entitled to. |
 | `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` to cancel the insertion |
 | `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
-| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo, to find the right object. `updates` is the update object that'll be passed to Mongo, to make the requested changes. Return `false` to cancel the update.  |
-| `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is mutated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
+| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo to find the right object. `updates` is the update object that'll be passed to Mongo to make the requested changes. Return `false` to cancel the update.  |
+| `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is updated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
 | `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` to cancel the deletion.  |
 | `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
 | `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`—results will always be an array. The actual objects queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed, ie you can format dates, etc.  |
