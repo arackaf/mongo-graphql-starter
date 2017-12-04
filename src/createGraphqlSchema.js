@@ -63,9 +63,11 @@ export default function(source, destPath) {
     fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
-    fs.writeFileSync(
-      path.join(rootDir, "hooks.js"),
-      fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" })
-    );
+    if (!fs.existsSync(path.join(rootDir, "hooks.js"))) {
+      fs.writeFileSync(
+        path.join(rootDir, "hooks.js"),
+        fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" })
+      );
+    }
   });
 }
