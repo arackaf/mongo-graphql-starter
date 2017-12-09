@@ -255,15 +255,24 @@ function queriesForField(fieldName, realFieldType) {
     case DateType:
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
       break;
+    case IntArrayType:
+    case FloatArrayType:
+      let singleType = realFieldType == IntArrayType ? "Int" : "Float";
+      result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${singleType}`));
+      result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
+      result.push(
+        ...[
+          `${fieldName}: [${singleType}]`,
+          `${fieldName}_in: [[${singleType}]]`,
+          `${fieldName}_contains: ${singleType}`,
+          `${fieldName}_ne: [${singleType}]`
+        ]
+      );
+      break;
     case StringArrayType:
+      result.push(...[`${fieldName}_textcontains: String`]);
     case MongoIdArrayType:
       result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`, `${fieldName}_ne: [String]`]);
-      break;
-    case IntArrayType:
-      result.push(...[`${fieldName}: [Int]`, `${fieldName}_in: [[Int]]`, `${fieldName}_contains: Int`, `${fieldName}_ne: [Int]`]);
-      break;
-    case FloatArrayType:
-      result.push(...[`${fieldName}: [Float]`, `${fieldName}_in: [[Float]]`, `${fieldName}_contains: Float`, `${fieldName}_ne: [Float]`]);
       break;
   }
 
