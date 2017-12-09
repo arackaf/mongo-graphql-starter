@@ -259,6 +259,7 @@ function queriesForField(fieldName, realFieldType) {
     case FloatArrayType:
       let singleType = realFieldType == IntArrayType ? "Int" : "Float";
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${singleType}`));
+      result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
       break;
     case StringArrayType:
     case MongoIdArrayType:

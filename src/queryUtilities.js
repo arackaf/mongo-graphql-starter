@@ -49,6 +49,7 @@ export function getMongoFilters(args, objectMetaData) {
   return fillMongoFiltersObject(args, objectMetaData);
 }
 const numberArrayOperations = new Set(["lt", "lte", "gt", "gte"]);
+const numberArrayEmOperations = new Set(["emlt", "emlte", "emgt", "emgte"]);
 function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
   let fields = objectMetaData.fields;
   Object.keys(args).forEach(k => {
@@ -120,6 +121,20 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
               hash[fieldName].$gt = args[k];
             } else if (queryOperation === "gte") {
               hash[fieldName].$gte = args[k];
+            }
+          } else if (numberArrayEmOperations.has(queryOperation)) {
+            if (!hash[fieldName].$elemMatch) {
+              hash[fieldName].$elemMatch = {};
+            }
+            if (queryOperation === "emlt") {
+              hash[fieldName].$elemMatch.$lt = args[k];
+            } else if (queryOperation === "emlte") {
+              hash[fieldName].$lte = args[k];
+              hash[fieldName].$elemMatch.$lte = args[k];
+            } else if (queryOperation === "emgt") {
+              hash[fieldName].$elemMatch.$gt = args[k];
+            } else if (queryOperation === "emgte") {
+              hash[fieldName].$elemMatch.$gte = args[k];
             }
           }
         } else if (field === IntType || field === FloatType || isDate) {

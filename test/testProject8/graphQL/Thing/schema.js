@@ -78,10 +78,18 @@ export const type = `
     ints_lte: Int
     ints_gt: Int
     ints_gte: Int
+    ints_emlt: Int
+    ints_emlte: Int
+    ints_emgt: Int
+    ints_emgte: Int
     floats_lt: Float
     floats_lte: Float
     floats_gt: Float
     floats_gte: Float
+    floats_emlt: Float
+    floats_emlte: Float
+    floats_emgt: Float
+    floats_emgte: Float
     OR: [ThingFilters]
   }
   
@@ -126,10 +134,18 @@ export const type = `
       ints_lte: Int,
       ints_gt: Int,
       ints_gte: Int,
+      ints_emlt: Int,
+      ints_emlte: Int,
+      ints_emgt: Int,
+      ints_emgte: Int,
       floats_lt: Float,
       floats_lte: Float,
       floats_gt: Float,
       floats_gte: Float,
+      floats_emlt: Float,
+      floats_emlte: Float,
+      floats_emgt: Float,
+      floats_emgte: Float,
       OR: [ThingFilters],
       SORT: ThingSort,
       SORTS: [ThingSort],
