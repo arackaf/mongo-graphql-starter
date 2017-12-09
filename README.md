@@ -281,9 +281,10 @@ If your field is named `title` then the following filters will be available
 
 If your field is named `keywords` then the following filters will be available
 
-| Filter                | Description                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------- |
-| String array contains | `keywords_contains: "JavaScript"` - will match results with an array containing the string `JavaScript`. |
+| Filter                        | Description                                                                                              |
+| ---------------------         | -------------------------------------------------------------------------------------------------------- |
+| String array contains         | `keywords_contains: "JavaScript"` - will match results with an array containing the string `JavaScript`. |
+| String array element contains | `keywords_textcontains: "scri"` - will match results with an array that has an entry containing the string `scri`. |
 
 ### Int filters
 
@@ -300,9 +301,18 @@ If your field is named `pages` then the following filters will be available
 
 If your field is named `editions` then the following filters will be available
 
-| Filter             | Description                                                                         |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| Int array contains | `editions_contains: 2` - will match results with an array containing the value `2`. |
+| Filter               | Description                                                                         |
+| ------------------   | ----------------------------------------------------------------------------------- |
+| Int array contains   | `editions_contains: 2` - will match results with an array containing the value `2` |
+| Int array lt         | `editions_lt: 2` - will match results with an array containing a value less than `2` |
+| Int array lte        | `editions_lte: 2` - will match results with an array containing a value less than or equal to `2` |
+| Int array gt         | `editions_gt: 2` - will match results with an array containing a value greater than `2` |
+| Int array gte        | `editions_gte: 2` - will match results with an array containing a value greater than or equal to `2` |
+| `$elemMatch` filters | The filters below are similar, but use $elemMatch. See the mongo docs for more information, but this means that specifying more than one of them will collectively apply to the same element. A query with `emlt` of `4` and `emgt` of `1` will match results that have an element in the array that's both less than 4, and also greater than 1. A query with `lt` of `4` and `gt` of `1` will match results that have an element in the array that's less than 4, and an element in the array that's greater than 1, though they may or may not be the same element.
+| Int array lt         | `editions_emlt: 2` - $elemMatch less than `2` |
+| Int array lte        | `editions_emlte: 2` - $elemMatch less than or equal to `2` |
+| Int array gt         | `editions_emgt: 2` - $elemMatch greater than `2` |
+| Int array gte        | `editions_emgte: 2` - $elemMatch greater than or equal to `2` |
 
 ### Float filters
 
@@ -322,6 +332,15 @@ If your field is named `prices` then the following filters will be available
 | Filter               | Description                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------- |
 | Float array contains | `prices_contains: 19.99` - will match results with an array containing the value `19.99`. |
+| Float array lt         | `prices_lt: 2.99` - will match results with an array containing a value less than `2.99` |
+| Float array lte        | `prices_lte: 2.99` - will match results with an array containing a value less than or equal to `2.99` |
+| Float array gt         | `prices_gt: 2.99` - will match results with an array containing a value greater than `2.99` |
+| Float array gte        | `prices_gte: 2.99` - will match results with an array containing a value greater than or equal to `2.99` |
+| `$elemMatch` filters   | See the explanation above, under Int array filters.
+| Float array emlt       | `prices_emlt: 2.99` - `$elemMatch` less than `2.99` |
+| Float array emlte      | `prices_emlte: 2.99` - `$elemMatch` less than or equal to `2.99` |
+| Float array emgt       | `prices_emgt: 2.99` - `$elemMatch` greater than `2.99` |
+| Float array emgte      | `prices_emgte: 2.99` - `$elemMatch` greater than or equal to `2.99` |
 
 ### Date filters
 
