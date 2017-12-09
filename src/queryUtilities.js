@@ -48,6 +48,8 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, extrasPacket
 export function getMongoFilters(args, objectMetaData) {
   return fillMongoFiltersObject(args, objectMetaData);
 }
+const numberArrayOperations = new Set(["lt", "lte", "gt", "gte"]);
+const numberArrayEmOperations = new Set(["emlt", "emlte", "emgt", "emgte"]);
 function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
   let fields = objectMetaData.fields;
   Object.keys(args).forEach(k => {
@@ -102,8 +104,40 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
           }
         } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
+          if (!hash[fieldName]) {
+            hash[fieldName] = {};
+          }
           if (queryOperation == "contains") {
-            hash[fieldName] = field === MongoIdArrayType ? ObjectId(args[k]) : args[k];
+            if (!hash[fieldName].$in) {
+              hash[fieldName].$in = [];
+            }
+            hash[fieldName].$in.push(field === MongoIdArrayType ? ObjectId(args[k]) : args[k]);
+          } else if (queryOperation == "textcontains") {
+            hash[fieldName].$regex = new RegExp(args[k], "i");
+          } else if (numberArrayOperations.has(queryOperation)) {
+            if (queryOperation === "lt") {
+              hash[fieldName].$lt = args[k];
+            } else if (queryOperation === "lte") {
+              hash[fieldName].$lte = args[k];
+            } else if (queryOperation === "gt") {
+              hash[fieldName].$gt = args[k];
+            } else if (queryOperation === "gte") {
+              hash[fieldName].$gte = args[k];
+            }
+          } else if (numberArrayEmOperations.has(queryOperation)) {
+            if (!hash[fieldName].$elemMatch) {
+              hash[fieldName].$elemMatch = {};
+            }
+            if (queryOperation === "emlt") {
+              hash[fieldName].$elemMatch.$lt = args[k];
+            } else if (queryOperation === "emlte") {
+              hash[fieldName].$lte = args[k];
+              hash[fieldName].$elemMatch.$lte = args[k];
+            } else if (queryOperation === "emgt") {
+              hash[fieldName].$elemMatch.$gt = args[k];
+            } else if (queryOperation === "emgte") {
+              hash[fieldName].$elemMatch.$gte = args[k];
+            }
           }
         } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
