@@ -262,6 +262,7 @@ function queriesForField(fieldName, realFieldType) {
       result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
       break;
     case StringArrayType:
+      result.push(...[`${fieldName}_textcontains: String`]);
     case MongoIdArrayType:
       result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`, `${fieldName}_ne: [String]`]);
       break;

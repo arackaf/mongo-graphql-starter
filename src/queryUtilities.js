@@ -112,6 +112,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
               hash[fieldName].$in = [];
             }
             hash[fieldName].$in.push(field === MongoIdArrayType ? ObjectId(args[k]) : args[k]);
+          } else if (queryOperation == "textcontains") {
+            hash[fieldName].$regex = new RegExp(args[k], "i");
           } else if (numberArrayOperations.has(queryOperation)) {
             if (queryOperation === "lt") {
               hash[fieldName].$lt = args[k];

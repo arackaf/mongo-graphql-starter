@@ -70,6 +70,7 @@ export const type = `
     name: String
     name_ne: String
     name_in: [String]
+    strs_textcontains: String
     strs: [String]
     strs_in: [[String]]
     strs_contains: String
@@ -126,6 +127,7 @@ export const type = `
       name: String,
       name_ne: String,
       name_in: [String],
+      strs_textcontains: String,
       strs: [String],
       strs_in: [[String]],
       strs_contains: String,
