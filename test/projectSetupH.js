@@ -9,7 +9,8 @@ const Thing = {
     strs: StringArrayType,
     ints: IntArrayType,
     floats: FloatArrayType
-  }
+  },
+  manualQueryArgs: [{ name: "ManualArg", type: "String" }]
 };
 
 export default {
