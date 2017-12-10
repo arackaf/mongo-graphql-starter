@@ -109,11 +109,15 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           if (!hash[fieldName]) {
             hash[fieldName] = {};
           }
-          if (queryOperation == "contains") {
+          if (queryOperation == "contains" || queryOperation == "containsAny") {
             if (!hash[fieldName].$in) {
               hash[fieldName].$in = [];
             }
-            hash[fieldName].$in.push(field === MongoIdArrayType ? ObjectId(args[k]) : args[k]);
+            if (queryOperation == "contains") {
+              hash[fieldName].$in.push(field === MongoIdArrayType ? ObjectId(args[k]) : args[k]);
+            } else {
+              hash[fieldName].$in.push(...args[k].map(item => (field === MongoIdArrayType ? ObjectId(item) : item)));
+            }
           } else if (queryOperation == "textContains") {
             hash[fieldName].$regex = new RegExp(args[k], "i");
           } else if (queryOperation === "startsWith") {
