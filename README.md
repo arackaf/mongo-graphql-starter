@@ -284,7 +284,8 @@ If your field is named `keywords` then the following filters will be available
 
 | Filter                        | Description                                                                                              |
 | ---------------------         | -------------------------------------------------------------------------------------------------------- |
-| String array contains         | `keywords_contains: "JavaScript"` - will match results with an array containing the string `JavaScript` case insensitively. |
+| String array contains         | `keywords_contains: "JavaScript"` - will match results with an array containing the string `JavaScript`. |
+| String array contains any     | `keywords_containsAny: ["c#", "JavaScript"]` - will match results with an array containing any of those strings. |
 | String array element contains | `keywords_textContains: "scri"` - will match results with an array that has an entry containing the string `scri` case insensitively. |
 | String array element starts with | `keywords_startsWith: "Ja"` - will match results with an array that has an entry starting with the string `Ja` case insensitively. |
 | String array element ends with | `keywords_endsWith: "ipt"` - will match results with an array that has an entry ending with the string `ipt` case insensitively. |
@@ -308,6 +309,7 @@ If your field is named `editions` then the following filters will be available
 | Filter               | Description                                                                         |
 | ------------------   | ----------------------------------------------------------------------------------- |
 | Int array contains   | `editions_contains: 2` - will match results with an array containing the value 2 |
+| Int array contains any   | `editions_containsAny: [2, 3]` - will match results with an array containing any of those values |
 | Int array lt         | `editions_lt: 2` - will match results with an array containing a value less than 2 |
 | Int array lte        | `editions_lte: 2` - will match results with an array containing a value less than or equal to 2 |
 | Int array gt         | `editions_gt: 2` - will match results with an array containing a value greater than 2 |
@@ -336,6 +338,7 @@ If your field is named `prices` then the following filters will be available
 | Filter               | Description                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------- |
 | Float array contains | `prices_contains: 19.99` - will match results with an array containing the value 19.99. |
+| Float array contains any | `prices_containsAny: [19.99, 20.99]` - will match results with an array containing any of those values. |
 | Float array lt         | `prices_lt: 2.99` - will match results with an array containing a value less than 2.99 |
 | Float array lte        | `prices_lte: 2.99` - will match results with an array containing a value less than or equal to 2.99 |
 | Float array gt         | `prices_gt: 2.99` - will match results with an array containing a value greater than 2.99 |

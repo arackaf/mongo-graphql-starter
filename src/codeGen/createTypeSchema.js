@@ -265,6 +265,7 @@ function queriesForField(fieldName, realFieldType) {
           `${fieldName}: [${singleType}]`,
           `${fieldName}_in: [[${singleType}]]`,
           `${fieldName}_contains: ${singleType}`,
+          `${fieldName}_containsAny: [${singleType}]`,
           `${fieldName}_ne: [${singleType}]`
         ]
       );
@@ -274,7 +275,15 @@ function queriesForField(fieldName, realFieldType) {
         ...[`${fieldName}_textContains: String`, `${fieldName}_startsWith: String`, `${fieldName}_endsWith: String`, `${fieldName}_regex: String`]
       );
     case MongoIdArrayType:
-      result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`, `${fieldName}_ne: [String]`]);
+      result.push(
+        ...[
+          `${fieldName}: [String]`,
+          `${fieldName}_in: [[String]]`,
+          `${fieldName}_contains: String`,
+          `${fieldName}_containsAny: [String]`,
+          `${fieldName}_ne: [String]`
+        ]
+      );
       break;
   }
 

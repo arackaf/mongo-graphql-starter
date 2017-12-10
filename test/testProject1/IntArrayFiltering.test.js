@@ -72,3 +72,19 @@ test("Array match - contains 2", async () => {
     results: [{ title: "Book 5" }]
   });
 });
+
+test("Array match - contains any", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(editions_containsAny: [2, 9], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 5" }]
+  });
+});
+
+test("Array match - both contains", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(editions_contains: 2, editions_containsAny: [9], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 5" }]
+  });
+});
