@@ -102,6 +102,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
             hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
           } else if (queryOperation === "endsWith") {
             hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+          } else if (queryOperation == "regex") {
+            hash[fieldName] = { $regex: new RegExp(args[k], "i") };
           }
         } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
           if (!hash[fieldName]) {
@@ -112,8 +114,14 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
               hash[fieldName].$in = [];
             }
             hash[fieldName].$in.push(field === MongoIdArrayType ? ObjectId(args[k]) : args[k]);
-          } else if (queryOperation == "textcontains") {
+          } else if (queryOperation == "textContains") {
             hash[fieldName].$regex = new RegExp(args[k], "i");
+          } else if (queryOperation === "startsWith") {
+            hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
+          } else if (queryOperation === "endsWith") {
+            hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+          } else if (queryOperation == "regex") {
+            hash[fieldName] = { $regex: new RegExp(args[k], "i") };
           } else if (numberArrayOperations.has(queryOperation)) {
             if (queryOperation === "lt") {
               hash[fieldName].$lt = args[k];

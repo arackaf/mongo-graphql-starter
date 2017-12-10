@@ -248,7 +248,7 @@ function queriesForField(fieldName, realFieldType) {
       result.push(`${fieldName}: Boolean`);
       break;
     case StringType:
-      result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`].map(p => `${p}: String`));
+      result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`, `${fieldName}_regex`].map(p => `${p}: String`));
       break;
     case IntType:
     case FloatType:
@@ -270,7 +270,9 @@ function queriesForField(fieldName, realFieldType) {
       );
       break;
     case StringArrayType:
-      result.push(...[`${fieldName}_textcontains: String`]);
+      result.push(
+        ...[`${fieldName}_textContains: String`, `${fieldName}_startsWith: String`, `${fieldName}_endsWith: String`, `${fieldName}_regex: String`]
+      );
     case MongoIdArrayType:
       result.push(...[`${fieldName}: [String]`, `${fieldName}_in: [[String]]`, `${fieldName}_contains: String`, `${fieldName}_ne: [String]`]);
       break;

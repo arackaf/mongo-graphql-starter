@@ -48,3 +48,7 @@ test("String endsWith", async () => {
 test("String contains", async () => {
   await queryAndMatchArray({ query: '{allBooks(title_contains: "x"){Books{title}}}', coll: "allBooks", results: [{ title: "Title x 1" }] });
 });
+
+test("String regex", async () => {
+  await queryAndMatchArray({ query: '{allBooks(title_regex: "^sec"){Books{title}}}', coll: "allBooks", results: [{ title: "Second Book" }] });
+});
