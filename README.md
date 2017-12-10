@@ -166,22 +166,22 @@ const {
 } = dataTypes;
 ```
 
-| Type               | Description                                                                                                                                                                                                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MongoIdType`      | Will create your field as a string, and will return whatever Mongo uid that was created. Any filters using this id will wrap the string in Mongo's `ObjectId` function.                                                                                                               |
-| `MongoIdArrayType` | An array of mongo ids                                                                                                                                                                                                                                                                 |
-| `BoolType`         | Self explanatory                                                                                                                                                                                                                                                                      |
-| `StringType`       | Self explanatory                                                                                                                                                                                                                                                                      |
-| `StringArrayType`  | An array of strings                                                                                                                                                                                                                                                                   |
-| `IntType`          | Self explanatory                                                                                                                                                                                                                                                                      |
-| `IntArrayType`     | An array of integers                                                                                                                                                                                                                                                                  |
-| `FloatType`        | Self explanatory                                                                                                                                                                                                                                                                      |
-| `FloatArrayType`   | An array of floating point numbers                                                                                                                                                                                                                                                    |
+| Type               | Description  |
+| ------------------ | ------------------------------------ |
+| `MongoIdType`      | Will create your field as a string, and will return whatever Mongo uid that was created. Any filters using this id will wrap the string in Mongo's `ObjectId` function.  | 
+| `MongoIdArrayType` | An array of mongo ids |
+| `BoolType`         | Self explanatory       |
+| `StringType`       | Self explanatory       |
+| `StringArrayType`  | An array of strings    |
+| `IntType`          | Self explanatory       |
+| `IntArrayType`     | An array of integers   |
+| `FloatType`        | Self explanatory       |
+| `FloatArrayType`   | An array of floating point numbers |
 | `DateType`         | Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo. Moreoever, querying this date will by default format it as `MM/DD/YYYY`. To override this, use `formattedDate`. |
-| `formattedDate`    | Function: Pass it an object with a format property to create a date field with that (Mongo) format. For example, `createdOnYearOnly: formattedDate({ format: "%Y" })`                                                                                                                 |
-| `objectOf`         | Function: Pass it a type you've created to specify a single object of that type                                                                                                                                                                                                       |
-| `arrayOf`          | Function: Pass it a type you've created to specify an array of that type                                                                                                                                                                                                              |
-| `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.                                                                   |
+| `formattedDate`    | Function: Pass it an object with a format property to create a date field with that (Mongo) format. For example, `createdOnYearOnly: formattedDate({ format: "%Y" })` |
+| `objectOf`         | Function: Pass it a type you've created to specify a single object of that type |
+| `arrayOf`          | Function: Pass it a type you've created to specify an array of that type |
+| `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.         |
 
 ## Circular dependencies are fine
 
@@ -245,6 +245,25 @@ Will retrieve the first page of books' titles, as well as the `count` of all boo
 Note, if you don't query `Meta.count` from the results, then the total query will not be execute. Similarly, if you don't query anything from the main result set, then that query will not execute.
 
 The generated resolvers will analyze the AST and only query what you ask for.
+
+## Custom query arguments
+
+If you'd like to add custom arguments to these queries, you can do so like this
+
+```javascript
+const Thing = {
+  table: "things",
+  fields: {
+    name: StringType,
+    strs: StringArrayType,
+    ints: IntArrayType,
+    floats: FloatArrayType
+  },
+  manualQueryArgs: [{ name: "ManualArg", type: "String" }]
+};
+```
+
+Now `ManualArg` can be sent over to the `getThing` and `allThings` queries.  This can be useful if you need to do custom processing in the middleware hooks (covered later)
 
 ## All filters available
 

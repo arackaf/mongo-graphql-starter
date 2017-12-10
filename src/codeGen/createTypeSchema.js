@@ -24,6 +24,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
+    if (Array.isArray(objectToCreate.manualQueryArgs)) {
+      allQueryFields.push(...objectToCreate.manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
+    }
     allFields.push(`${k}: ${displaySchemaValue(fields[k])}`);
     allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
   });
