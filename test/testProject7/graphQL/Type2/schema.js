@@ -68,12 +68,14 @@ export const type = `
     field1_contains: String
     field1_startsWith: String
     field1_endsWith: String
+    field1_regex: String
     field1: String
     field1_ne: String
     field1_in: [String]
     field2_contains: String
     field2_startsWith: String
     field2_endsWith: String
+    field2_regex: String
     field2: String
     field2_ne: String
     field2_in: [String]
@@ -138,12 +140,14 @@ export const type = `
       field1_contains: String,
       field1_startsWith: String,
       field1_endsWith: String,
+      field1_regex: String,
       field1: String,
       field1_ne: String,
       field1_in: [String],
       field2_contains: String,
       field2_startsWith: String,
       field2_endsWith: String,
+      field2_regex: String,
       field2: String,
       field2_ne: String,
       field2_in: [String],

@@ -6,6 +6,7 @@ beforeAll(async () => {
 
   await db.collection("things").insert({ name: "a", strs: [] });
   await db.collection("things").insert({ name: "b", strs: ["adam", "bob", "brian"] });
+  await db.collection("things").insert({ name: "c", strs: ["mike"] });
 });
 
 afterAll(async () => {
@@ -14,9 +15,41 @@ afterAll(async () => {
   db = null;
 });
 
-test("Int Array - adv match 1", async () => {
+test("Str Array - text contains", async () => {
   await queryAndMatchArray({
-    query: `{allThings(strs_textcontains: "a", SORT: {name: 1}){Things{name}}}`,
+    query: `{allThings(strs_textContains: "a", SORT: {name: 1}){Things{name}}}`,
+    coll: "allThings",
+    results: [{ name: "b" }]
+  });
+});
+
+test("Str Array - starts with 1", async () => {
+  await queryAndMatchArray({
+    query: `{allThings(strs_startsWith: "a", SORT: {name: 1}){Things{name}}}`,
+    coll: "allThings",
+    results: [{ name: "b" }]
+  });
+});
+
+test("Str Array - starts with 2", async () => {
+  await queryAndMatchArray({
+    query: `{allThings(strs_startsWith: "b", SORT: {name: 1}){Things{name}}}`,
+    coll: "allThings",
+    results: [{ name: "b" }]
+  });
+});
+
+test("Str Array - ends with 1", async () => {
+  await queryAndMatchArray({
+    query: `{allThings(strs_endsWith: "e", SORT: {name: 1}){Things{name}}}`,
+    coll: "allThings",
+    results: [{ name: "c" }]
+  });
+});
+
+test("Str Array - starts with and ends with 1", async () => {
+  await queryAndMatchArray({
+    query: `{allThings(strs_startsWith: "b", strs_endsWith: "b", SORT: {name: 1}){Things{name}}}`,
     coll: "allThings",
     results: [{ name: "b" }]
   });
