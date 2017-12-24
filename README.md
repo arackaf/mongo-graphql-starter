@@ -267,7 +267,7 @@ Now `ManualArg` can be sent over to the `getThing` and `allThings` queries.  Thi
 
 ## All filters available
 
-All scalar fields, and scalar array fields (`StringArray`, `IntArray`, etc) will have the following filters created
+**All scalar fields, and scalar array fields (`StringArray`, `IntArray`, etc) will have the following filters created**
 
 Exact match
 
@@ -285,6 +285,12 @@ by element comparison.
 For Date fields, the strings you send over will be converted to Date objects before being passed to Mongo. Similarly, for MongoIds, the Mongo
 `ObjectId` method will be applied before running the filter. For the array types, the value will be an entire array, which will be matched by Mongo
 item by item.
+
+**All array types, both of scalars, like `StringArray`, and of arrays of user-defined types, will support the following queries:**
+
+Count
+
+`field_count: <value>` - will match results with that number of entries in the array
 
 ### String filters
 

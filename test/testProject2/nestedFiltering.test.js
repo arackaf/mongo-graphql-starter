@@ -194,6 +194,8 @@ test("Nested querying 14", async () =>
     { title: "Blog 4" }
   ]));
 
+test("Nested querying 15 - commentsCount", async () => await runIt(`{allBlogs(comments_count: 3){Blogs{ title }}}`, [{ title: "Blog 1" }]));
+
 async function runIt(query, results) {
   await queryAndMatchArray({
     query,
