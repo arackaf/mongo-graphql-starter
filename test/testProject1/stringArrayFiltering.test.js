@@ -91,3 +91,11 @@ test("String array match - both contains", async () => {
     results: [{ title: "Book 1" }, { title: "Book 2" }]
   });
 });
+
+test("String array count match", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(keywords_count: 2, SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 3" }]
+  });
+});
