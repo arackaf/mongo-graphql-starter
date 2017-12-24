@@ -88,3 +88,11 @@ test("Array match - both contains", async () => {
     results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 5" }]
   });
 });
+
+test("Array count match", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(editions_count: 3, SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }]
+  });
+});
