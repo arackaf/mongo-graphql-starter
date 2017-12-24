@@ -261,6 +261,7 @@ function queriesForField(fieldName, realFieldType) {
     case IntArrayType:
     case FloatArrayType:
       let singleType = realFieldType == IntArrayType ? "Int" : "Float";
+      result.push(`${fieldName}_count: Int`);
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${singleType}`));
       result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
       result.push(
@@ -274,6 +275,7 @@ function queriesForField(fieldName, realFieldType) {
       );
       break;
     case StringArrayType:
+      result.push(`${fieldName}_count: Int`);
       result.push(
         ...[`${fieldName}_textContains: String`, `${fieldName}_startsWith: String`, `${fieldName}_endsWith: String`, `${fieldName}_regex: String`]
       );
@@ -303,6 +305,7 @@ function queriesForField(fieldName, realFieldType) {
   }
 
   if (realFieldType.__isObject || realFieldType.__isArray) {
+    result.push(`${fieldName}_count: Int`);
     result.push(`${fieldName}: ${realFieldType.type.__name}Filters`);
   }
 

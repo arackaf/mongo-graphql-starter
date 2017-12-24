@@ -86,7 +86,12 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
         args[k] = queryOperation === "in" ? args[k].map(val => new Date(val)) : new Date(args[k]);
       }
 
-      if (queryOperation === "in") {
+      if (queryOperation == "count") {
+        if (!hash[fieldName]) {
+          hash[fieldName] = {};
+        }
+        hash[fieldName].$size = args[k];
+      } else if (queryOperation === "in") {
         if (field === MongoIdArrayType) {
           hash[fieldName] = { $in: args[k].map(arr => arr.map(val => ObjectId(val))) };
         } else {
