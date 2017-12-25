@@ -72,3 +72,54 @@ test("String contains", async () => {
 test("String regex", async () => {
   await queryAndMatchArray({ query: '{allBooks(title_regex: "^sec"){Books{title}}}', coll: "allBooks", results: [{ title: "Second Book" }] });
 });
+
+test("String bad combo 1", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_endsWith: "1", title_startsWith: "B"){Books{title}}}',
+    error: true
+  });
+});
+test("String bad combo 2", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_endsWith: "1", title_contains: "B"){Books{title}}}',
+    error: true
+  });
+});
+test("String bad combo 3", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_endsWith: "1", title_regex: "B"){Books{title}}}',
+    error: true
+  });
+});
+
+test("String bad combo 4", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_startssWith: "1", title_contains: "B"){Books{title}}}',
+    error: true
+  });
+});
+test("String bad combo 5", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_startsWith: "1", title_regex: "B"){Books{title}}}',
+    error: true
+  });
+});
+
+test("String bad combo 6", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_contains: "1", title_regex: "B"){Books{title}}}',
+    error: true
+  });
+});

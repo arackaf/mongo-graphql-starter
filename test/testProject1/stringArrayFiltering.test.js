@@ -99,3 +99,56 @@ test("String array count match", async () => {
     results: [{ title: "Book 3" }]
   });
 });
+
+//-------------
+
+test("String bad combo 1", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(keywords_endsWith: "1", keywords_startsWith: "B"){Books{title}}}',
+    error: true
+  });
+});
+test("String bad combo 2", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(keywords_endsWith: "1", keywords_textContains: "B"){Books{title}}}',
+    error: true
+  });
+});
+test("String bad combo 3", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(keywords_endsWith: "1", keywords_regex: "B"){Books{title}}}',
+    error: true
+  });
+});
+
+test("String bad combo 4", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(keywords_startssWith: "1", keywords_textContains: "B"){Books{title}}}',
+    error: true
+  });
+});
+test("String bad combo 5", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(keywords_startsWith: "1", keywords_regex: "B"){Books{title}}}',
+    error: true
+  });
+});
+
+test("String bad combo 6", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(keywords_textContains: "1", keywords_regex: "B"){Books{title}}}',
+    error: true
+  });
+});
