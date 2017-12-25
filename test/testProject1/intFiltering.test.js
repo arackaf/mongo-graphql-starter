@@ -35,7 +35,7 @@ test("Int lt", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages_lt: 101){Books{title}}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });
 
-test("Int lts", async () => {
+test("Int lt", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages_lte: 100){Books{title}}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });
 
@@ -45,4 +45,8 @@ test("Int gt", async () => {
 
 test("Int gte", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages_gte: 200){Books{title}}}", coll: "allBooks", results: [{ title: "Book 200" }] });
+});
+
+test("Int lt and gt", async () => {
+  await queryAndMatchArray({ query: "{allBooks(pages_lt: 151, pages_gt: 149){Books{title}}}", coll: "allBooks", results: [{ title: "Book 150" }] });
 });

@@ -37,6 +37,26 @@ test("String in", async () => {
   });
 });
 
+test("String in and ne", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_in: ["Second Book", "Book 1", "Y"], title_ne: "Book 1"){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Second Book" }]
+  });
+});
+
+test("String endsWith and ne", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_endsWith: "1", title_ne: "Book 1"){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Title x 1" }]
+  });
+});
+
 test("String startsWith", async () => {
   await queryAndMatchArray({ query: '{allBooks(title_startsWith: "B"){Books{title}}}', coll: "allBooks", results: [{ title: "Book 1" }] });
 });

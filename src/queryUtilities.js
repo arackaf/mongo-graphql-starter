@@ -87,68 +87,59 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
       }
 
       if (queryOperation == "count") {
-        if (!hash[fieldName]) {
-          hash[fieldName] = {};
-        }
-        hash[fieldName].$size = args[k];
+        ensure(hash, fieldName, () => (hash[fieldName].$size = args[k]));
       } else if (queryOperation === "in") {
         if (field === MongoIdArrayType) {
-          hash[fieldName] = { $in: args[k].map(arr => arr.map(val => ObjectId(val))) };
+          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(arr => arr.map(val => ObjectId(val)))));
         } else {
-          hash[fieldName] = { $in: args[k] };
+          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k]));
         }
       } else if (queryOperation == "ne") {
-        hash[fieldName] = { $ne: args[k] };
+        ensure(hash, fieldName, () => (hash[fieldName].$ne = args[k]));
       } else {
         if (field === StringType) {
           if (queryOperation === "contains") {
-            hash[fieldName] = { $regex: new RegExp(args[k], "i") };
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           } else if (queryOperation === "startsWith") {
-            hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp("^" + args[k], "i")));
           } else if (queryOperation === "endsWith") {
-            hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k] + "$", "i")));
           } else if (queryOperation == "regex") {
-            hash[fieldName] = { $regex: new RegExp(args[k], "i") };
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           }
         } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
-          if (!hash[fieldName]) {
-            hash[fieldName] = {};
-          }
           if (queryOperation == "contains" || queryOperation == "containsAny") {
-            if (!hash[fieldName].$in) {
-              hash[fieldName].$in = [];
-            }
+            ensure(hash, fieldName);
+            ensureArr(hash[fieldName], "$in");
             if (queryOperation == "contains") {
               hash[fieldName].$in.push(field === MongoIdArrayType ? ObjectId(args[k]) : args[k]);
             } else {
               hash[fieldName].$in.push(...args[k].map(item => (field === MongoIdArrayType ? ObjectId(item) : item)));
             }
           } else if (queryOperation == "textContains") {
-            hash[fieldName].$regex = new RegExp(args[k], "i");
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           } else if (queryOperation === "startsWith") {
-            hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") };
+            ensure(hash, fieldName, () => (hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") }));
           } else if (queryOperation === "endsWith") {
-            hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") };
+            ensure(hash, fieldName, () => (hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") }));
           } else if (queryOperation == "regex") {
-            hash[fieldName] = { $regex: new RegExp(args[k], "i") };
+            ensure(hash, fieldName, () => (hash[fieldName] = { $regex: new RegExp(args[k], "i") }));
           } else if (numberArrayOperations.has(queryOperation)) {
             if (queryOperation === "lt") {
-              hash[fieldName].$lt = args[k];
+              ensure(hash, fieldName, () => (hash[fieldName].$lt = args[k]));
             } else if (queryOperation === "lte") {
-              hash[fieldName].$lte = args[k];
+              ensure(hash, fieldName, () => (hash[fieldName].$lte = args[k]));
             } else if (queryOperation === "gt") {
-              hash[fieldName].$gt = args[k];
+              ensure(hash, fieldName, () => (hash[fieldName].$gt = args[k]));
             } else if (queryOperation === "gte") {
-              hash[fieldName].$gte = args[k];
+              ensure(hash, fieldName, () => (hash[fieldName].$gte = args[k]));
             }
           } else if (numberArrayEmOperations.has(queryOperation)) {
-            if (!hash[fieldName].$elemMatch) {
-              hash[fieldName].$elemMatch = {};
-            }
+            ensure(hash, fieldName);
+            ensure(hash[fieldName], "$elemMatch");
             if (queryOperation === "emlt") {
               hash[fieldName].$elemMatch.$lt = args[k];
             } else if (queryOperation === "emlte") {
-              hash[fieldName].$lte = args[k];
               hash[fieldName].$elemMatch.$lte = args[k];
             } else if (queryOperation === "emgt") {
               hash[fieldName].$elemMatch.$gt = args[k];
@@ -158,19 +149,32 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           }
         } else if (field === IntType || field === FloatType || isDate) {
           if (queryOperation === "lt") {
-            hash[fieldName] = { $lt: args[k] };
+            ensure(hash, fieldName, () => (hash[fieldName].$lt = args[k]));
           } else if (queryOperation === "lte") {
-            hash[fieldName] = { $lte: args[k] };
+            ensure(hash, fieldName, () => (hash[fieldName].$lte = args[k]));
           } else if (queryOperation === "gt") {
-            hash[fieldName] = { $gt: args[k] };
+            ensure(hash, fieldName, () => (hash[fieldName].$gt = args[k]));
           } else if (queryOperation === "gte") {
-            hash[fieldName] = { $gte: args[k] };
+            ensure(hash, fieldName, () => (hash[fieldName].$gte = args[k]));
           }
         }
       }
     }
   });
   return hash;
+}
+
+function ensure(hash, fieldName, cb = () => {}) {
+  if (!hash[fieldName]) {
+    hash[fieldName] = {};
+  }
+  cb();
+}
+function ensureArr(hash, fieldName, cb = () => {}) {
+  if (!hash[fieldName]) {
+    hash[fieldName] = [];
+  }
+  cb();
 }
 
 export function parseRequestedFields(ast, queryName) {
