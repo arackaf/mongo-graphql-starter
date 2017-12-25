@@ -46,11 +46,3 @@ test("Str Array - ends with 1", async () => {
     results: [{ name: "c" }]
   });
 });
-
-test("Str Array - starts with and ends with 1", async () => {
-  await queryAndMatchArray({
-    query: `{allThings(strs_startsWith: "b", strs_endsWith: "b", SORT: {name: 1}){Things{name}}}`,
-    coll: "allThings",
-    results: [{ name: "b" }]
-  });
-});

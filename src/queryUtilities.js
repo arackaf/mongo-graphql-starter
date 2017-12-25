@@ -50,6 +50,8 @@ export function getMongoFilters(args, objectMetaData) {
 }
 const numberArrayOperations = new Set(["lt", "lte", "gt", "gte"]);
 const numberArrayEmOperations = new Set(["emlt", "emlte", "emgt", "emgte"]);
+const stringOps = new Set(["contains", "startsWith", "endsWith", "regex"]);
+const stringArrayOps = new Set(["textContains", "startsWith", "endsWith", "regex"]);
 function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
   let fields = objectMetaData.fields;
   Object.keys(args).forEach(k => {
@@ -98,6 +100,9 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
         ensure(hash, fieldName, () => (hash[fieldName].$ne = args[k]));
       } else {
         if (field === StringType) {
+          if (stringOps.has(queryOperation) && hash[fieldName] && hash[fieldName].$regex) {
+            throw "Only one of startsWith, endsWith, contains, and regex can be specified for a given string field. Combine all of these filters into a single regex";
+          }
           if (queryOperation === "contains") {
             ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           } else if (queryOperation === "startsWith") {
@@ -108,6 +113,9 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
             ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           }
         } else if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
+          if (stringArrayOps.has(queryOperation) && hash[fieldName] && hash[fieldName].$regex) {
+            throw "Only one of startsWith, endsWith, textContains, and regex can be specified for a given string field. Combine all of these filters into a single regex";
+          }
           if (queryOperation == "contains" || queryOperation == "containsAny") {
             ensure(hash, fieldName);
             ensureArr(hash[fieldName], "$in");
@@ -119,11 +127,11 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
           } else if (queryOperation == "textContains") {
             ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           } else if (queryOperation === "startsWith") {
-            ensure(hash, fieldName, () => (hash[fieldName] = { $regex: new RegExp("^" + args[k], "i") }));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp("^" + args[k], "i")));
           } else if (queryOperation === "endsWith") {
-            ensure(hash, fieldName, () => (hash[fieldName] = { $regex: new RegExp(args[k] + "$", "i") }));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k] + "$", "i")));
           } else if (queryOperation == "regex") {
-            ensure(hash, fieldName, () => (hash[fieldName] = { $regex: new RegExp(args[k], "i") }));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           } else if (numberArrayOperations.has(queryOperation)) {
             if (queryOperation === "lt") {
               ensure(hash, fieldName, () => (hash[fieldName].$lt = args[k]));

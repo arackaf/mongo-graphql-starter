@@ -24,8 +24,15 @@ export async function runQuery({ schema, db, query, variables, coll, results, me
   }
 }
 
-export async function queryAndMatchArray({ schema, db, query, variables, coll, results, meta }) {
+export async function queryAndMatchArray({ schema, db, query, variables, coll, results, meta, error }) {
   let allResults = await graphql(schema, query, { db });
+
+  if (error) {
+    if (!allResults.errors || !allResults.errors.length) {
+      throw "Expected an error but didn't get one";
+    }
+    return;
+  }
 
   if (!allResults.data || allResults.data[coll] === void 0) {
     let msg = "Expected result not found: probable error.";
