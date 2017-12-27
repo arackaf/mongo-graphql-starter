@@ -101,6 +101,28 @@ export default {
         ${objName}: result
       }
     },
+    async update${objName}s(root, args, context, ast) {
+      let db = await root.db;
+      let $match = { _id: ObjectId(args._id) };
+      let updates = getUpdateObject(args.Updates || {}, ${objName});
+
+      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
+      if (res === false){
+        return { ${objName}s: null };
+      }
+      if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
+        await db.collection("${table}").update($match, updates);
+      }
+      await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
+      
+      let requestMap = parseRequestedFields(ast, "${objName}");
+      let $project = getMongoProjection(requestMap, ${objName}, args);
+      
+      let result = (await load${objName}s(db, { $match, $project, $limit: 1 }))[0];
+      return {
+        ${objName}: result
+      }
+    },    
     async delete${objName}(root, args, context, ast) {
       if (!args._id){
         throw "No _id sent";
