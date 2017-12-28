@@ -17,7 +17,7 @@ afterEach(async () => {
 
 test("Bulk update 1", async () => {
   await runMutation({
-    mutation: `updateBooks(Match: {pages_gt: 100}, Book: {pages: 99})`,
+    mutation: `updateBooks(Match: {pages_gt: 100}, Updates: {pages: 99}){success}`,
     result: "updateBooks"
   });
 

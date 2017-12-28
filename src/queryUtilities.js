@@ -261,9 +261,14 @@ function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
 
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
-  let requestMap = parseRequestedFields(ast, queryName);
-  let metadataRequested = parseRequestedFields(ast, "Meta");
-  let { $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName);
+
+  let requestMap, metadataRequested, $project, extrasPackets;
+
+  if (ast) {
+    requestMap = parseRequestedFields(ast, queryName);
+    metadataRequested = parseRequestedFields(ast, "Meta");
+    ({ $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName));
+  }
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
