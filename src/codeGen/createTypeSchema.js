@@ -60,7 +60,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 
   type ${name}BulkMutationResult {
-    ${name}s: [${name}]
+    success: Boolean
   }  
 `
       : ""
@@ -113,7 +113,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     ): ${name}MutationResult
 
   ${TAB}update${name}s(
-  ${TAB2}${[`Match: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
+  ${TAB2}${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
     ): ${name}BulkMutationResult
   
   ${TAB}delete${name}(
