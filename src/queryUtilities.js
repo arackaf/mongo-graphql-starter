@@ -93,6 +93,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
       } else if (queryOperation === "in") {
         if (field === MongoIdArrayType) {
           ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(arr => arr.map(val => ObjectId(val)))));
+        } else if (field == MongoIdType) {
+          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(val => ObjectId(val))));
         } else {
           ensure(hash, fieldName, () => (hash[fieldName].$in = args[k]));
         }

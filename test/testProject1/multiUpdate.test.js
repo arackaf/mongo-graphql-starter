@@ -16,10 +16,17 @@ afterEach(async () => {
 });
 
 test("Bulk update 1", async () => {
-  await runMutation({
-    mutation: `updateBooksBulk(Match: {pages_gt: 100}, Updates: {pages: 99}){success}`,
-    result: "updateBooksBulk"
+  let books = await db
+    .collection("books")
+    .find({ pages: { $gt: 100 } }, { _id: 1 })
+    .toArray();
+
+  let results = await runMutation({
+    mutation: `updateBooks(_ids: [${books.map(b => '"' + b._id + '"').join(",")}], Updates: {pages: 99}){Books{pages}}`,
+    result: "updateBooks"
   });
+
+  expect(results).toEqual([{ pages: 99 }, { pages: 99 }]);
 
   await queryAndMatchArray({
     query: "{allBooks(SORT: { title: 1 }){Books{title, pages}}}",
