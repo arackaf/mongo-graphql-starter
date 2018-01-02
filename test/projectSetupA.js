@@ -51,8 +51,18 @@ const Subject = {
   }
 };
 
+const Tag = {
+  table: "tags",
+  fields: {
+    _id: StringType,
+    name: StringType,
+    count: IntType
+  }
+};
+
 export default {
   Book,
   Subject,
-  Author
+  Author,
+  Tag
 };
