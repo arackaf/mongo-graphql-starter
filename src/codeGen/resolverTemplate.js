@@ -81,7 +81,7 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      let { $match } = decontructGraphqlQuery({ _id: args._id }, null, ${objName}, "${objName}");
+      let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}, "${objName}");
       let updates = getUpdateObject(args.${objName} || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
@@ -93,9 +93,6 @@ export default {
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
-      let requestMap = parseRequestedFields(ast, "${objName}");
-      let $project = getMongoProjection(requestMap, ${objName}, args);
-      
       let result = (await load${objName}s(db, { $match, $project, $limit: 1 }))[0];
       return {
         ${objName}: result
@@ -103,7 +100,7 @@ export default {
     },
     async update${objName}s(root, args, context, ast) {
       let db = await root.db;
-      let { $match } = decontructGraphqlQuery({ _id_in: args._ids }, null, ${objName}, "${objName}s");
+      let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}, "${objName}s");
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
@@ -114,9 +111,6 @@ export default {
         await db.collection("${table}").update($match, updates, { multi: true });
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
-
-      let requestMap = parseRequestedFields(ast, "${objName}s");
-      let $project = getMongoProjection(requestMap, ${objName}, args);
       
       let result = await load${objName}s(db, { $match, $project });
       return {
@@ -125,7 +119,7 @@ export default {
     },
     async update${objName}sBulk(root, args, context, ast) {
       let db = await root.db;
-      let { $match } = decontructGraphqlQuery(args.Match, null, ${objName}, "${objName}s");
+      let { $match } = decontructGraphqlQuery(args.Match, null, ${objName});
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
