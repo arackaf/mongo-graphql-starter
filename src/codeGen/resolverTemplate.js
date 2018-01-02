@@ -81,8 +81,8 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      let $match = { _id: ObjectId(args._id) };
-      let updates = getUpdateObject(args.${objName} || {}, ${objName});
+      let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}, "${objName}");
+      let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
       if (res === false){
@@ -93,14 +93,48 @@ export default {
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
-      let requestMap = parseRequestedFields(ast, "${objName}");
-      let $project = getMongoProjection(requestMap, ${objName}, args);
-      
-      let result = (await load${objName}s(db, { $match, $project, $limit: 1 }))[0];
+      let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }))[0] : null;
       return {
-        ${objName}: result
+        ${objName}: result,
+        success: true
       }
     },
+    async update${objName}s(root, args, context, ast) {
+      let db = await root.db;
+      let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}, "${objName}s");
+      let updates = getUpdateObject(args.Updates || {}, ${objName});
+
+      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
+      if (res === false){
+        return { success: true };
+      }
+      if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
+        await db.collection("${table}").update($match, updates, { multi: true });
+      }
+      await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
+      
+      let result = $project ? await load${objName}s(db, { $match, $project }) : null;
+      return {
+        ${objName}s: result,
+        success: true
+      }
+    },
+    async update${objName}sBulk(root, args, context, ast) {
+      let db = await root.db;
+      let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName});
+      let updates = getUpdateObject(args.Updates || {}, ${objName});
+
+      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
+      if (res === false){
+        return { success: true };
+      }
+      if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
+        await db.collection("${table}").update($match, updates, { multi: true });
+      }
+      await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
+
+      return { success: true };
+    },    
     async delete${objName}(root, args, context, ast) {
       if (!args._id){
         throw "No _id sent";
