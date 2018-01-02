@@ -93,9 +93,10 @@ export default {
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
-      let result = (await load${objName}s(db, { $match, $project, $limit: 1 }))[0];
+      let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }))[0] : null;
       return {
-        ${objName}: result
+        ${objName}: result,
+        success: true
       }
     },
     async update${objName}s(root, args, context, ast) {
@@ -112,9 +113,10 @@ export default {
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
-      let result = await load${objName}s(db, { $match, $project });
+      let result = $project ? await load${objName}s(db, { $match, $project }) : null;
       return {
-        ${objName}s: result
+        ${objName}s: result,
+        success: true
       }
     },
     async update${objName}sBulk(root, args, context, ast) {

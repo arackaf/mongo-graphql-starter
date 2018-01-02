@@ -56,10 +56,12 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 
   type ${name}MutationResult {
+    success: Boolean
     ${name}: ${name}
   }
-
+  
   type ${name}MutationResultMulti {
+    success: Boolean
     ${name}s: [${name}]
   }  
 
