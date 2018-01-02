@@ -56,8 +56,18 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 
   type ${name}MutationResult {
+    success: Boolean
     ${name}: ${name}
   }
+  
+  type ${name}MutationResultMulti {
+    success: Boolean
+    ${name}s: [${name}]
+  }  
+
+  type ${name}BulkMutationResult {
+    success: Boolean
+  }  
 `
       : ""
   }
@@ -105,8 +115,16 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     ): ${name}MutationResult
   
   ${TAB}update${name}(
-  ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `${name}: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
+  ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
     ): ${name}MutationResult
+
+  ${TAB}update${name}s(
+  ${TAB2}${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
+    ): ${name}MutationResultMulti
+
+  ${TAB}update${name}sBulk(
+  ${TAB2}${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
+    ): ${name}BulkMutationResult    
   
   ${TAB}delete${name}(
   ${TAB2}${[`_id: String`]}

@@ -93,6 +93,8 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
       } else if (queryOperation === "in") {
         if (field === MongoIdArrayType) {
           ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(arr => arr.map(val => ObjectId(val)))));
+        } else if (field == MongoIdType) {
+          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(val => ObjectId(val))));
         } else {
           ensure(hash, fieldName, () => (hash[fieldName].$in = args[k]));
         }
@@ -261,9 +263,14 @@ function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
 
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
-  let requestMap = parseRequestedFields(ast, queryName);
-  let metadataRequested = parseRequestedFields(ast, "Meta");
-  let { $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName);
+
+  let requestMap, metadataRequested, $project, extrasPackets;
+
+  if (ast && queryName) {
+    requestMap = parseRequestedFields(ast, queryName);
+    metadataRequested = parseRequestedFields(ast, "Meta");
+    ({ $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName));
+  }
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
