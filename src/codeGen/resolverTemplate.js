@@ -81,7 +81,7 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      let $match = { _id: ObjectId(args._id) };
+      let { $match } = decontructGraphqlQuery({ _id: args._id }, null, ${objName}, "${objName}");
       let updates = getUpdateObject(args.${objName} || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
