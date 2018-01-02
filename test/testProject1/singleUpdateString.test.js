@@ -22,7 +22,7 @@ test("Bulk update 1", async () => {
     .toArray();
 
   let results = await runMutation({
-    mutation: `updateTag(_id: "${tags[0]._id}", Tag: {count: 99}){Tag{count}}`,
+    mutation: `updateTag(_id: "${tags[0]._id}", Updates: {count: 99}){Tag{count}}`,
     result: "updateTag"
   });
 

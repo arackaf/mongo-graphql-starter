@@ -100,7 +100,7 @@ test("Modification mutation works", async () => {
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { 
+    mutation: `updateBook(_id: "${obj._id}", Updates: { 
       title: "Book 2a", 
       pages: 101, 
       weight: 1.3, 
@@ -151,7 +151,7 @@ test("Modification mutation works", async () => {
   let updated = await runMutation({
     mutation: `updateBook(_id: "${
       obj._id
-    }", Book: {authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
+    }", Updates: {authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
@@ -201,7 +201,7 @@ test("Partial modification mutation works", async () => {
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {
+    mutation: `updateBook(_id: "${obj._id}", Updates: {
       title: "Book 2a", 
       pages: 101
     }){Book{
@@ -267,7 +267,7 @@ test("float array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { prices_UPDATE: {index: 1, value: 2.2 }}) {Book{title, prices}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { prices_UPDATE: {index: 1, value: 2.2 }}) {Book{title, prices}}`,
     result: "updateBook"
   });
 
@@ -281,7 +281,7 @@ test("float array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { prices_UPDATES: [{index: 0, value: 1.0}, {index: 1, value: 2.2}] }) {Book{title, prices}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { prices_UPDATES: [{index: 0, value: 1.0}, {index: 1, value: 2.2}] }) {Book{title, prices}}`,
     result: "updateBook"
   });
 
@@ -295,7 +295,7 @@ test("float array pull", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { prices_PULL: [1.1, 3.3] }) {Book{title, prices}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { prices_PULL: [1.1, 3.3] }) {Book{title, prices}}`,
     result: "updateBook"
   });
 
@@ -312,7 +312,7 @@ test("bool update", async () => {
   expect(obj.isRead).toEqual(true);
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { isRead: false }) {Book{title, isRead}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { isRead: false }) {Book{title, isRead}}`,
     result: "updateBook"
   });
 
@@ -328,7 +328,7 @@ test("int array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}`,
     result: "updateBook"
   });
 
@@ -342,7 +342,7 @@ test("int array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}`,
     result: "updateBook"
   });
 
@@ -356,7 +356,7 @@ test("int array pull", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { editions_PULL: [4, 6] }) {Book{title, editions}}`,
     result: "updateBook"
   });
 
@@ -372,7 +372,7 @@ test("string array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {keywords_UPDATE: {index: 1, value: "b"} }) {Book{title, keywords}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: {keywords_UPDATE: {index: 1, value: "b"} }) {Book{title, keywords}}`,
     result: "updateBook"
   });
 
@@ -386,7 +386,7 @@ test("string array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {keywords_UPDATES: [{index: 0, value: "a"}, {index: 1, value: "b"}] }) {Book{title, keywords}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: {keywords_UPDATES: [{index: 0, value: "a"}, {index: 1, value: "b"}] }) {Book{title, keywords}}`,
     result: "updateBook"
   });
 
@@ -400,7 +400,7 @@ test("string array pull", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { keywords_PULL: ["c", "e"] }) {Book{title, keywords}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { keywords_PULL: ["c", "e"] }) {Book{title, keywords}}`,
     result: "updateBook"
   });
 
@@ -441,7 +441,7 @@ test("MongoId array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {mongoIds_UPDATE: {index: 1, value: "${id3}"} }) {Book{title, mongoIds}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: {mongoIds_UPDATE: {index: 1, value: "${id3}"} }) {Book{title, mongoIds}}`,
     result: "updateBook"
   });
 
@@ -455,9 +455,9 @@ test("MongoId array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: {mongoIds_UPDATES: [{index: 0, value: "${id1}"}, {index: 1, value: "${
-      id2
-    }"}] }) {Book{title, mongoIds}}`,
+    mutation: `updateBook(_id: "${
+      obj._id
+    }", Updates: {mongoIds_UPDATES: [{index: 0, value: "${id1}"}, {index: 1, value: "${id2}"}] }) {Book{title, mongoIds}}`,
     result: "updateBook"
   });
 
@@ -471,7 +471,7 @@ test("MongoId array pull", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${obj._id}", Book: { mongoIds_PULL: ["${id2}", "${id3}"] }) {Book{title, mongoIds}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: { mongoIds_PULL: ["${id2}", "${id3}"] }) {Book{title, mongoIds}}`,
     result: "updateBook"
   });
 

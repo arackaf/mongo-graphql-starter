@@ -82,7 +82,7 @@ export default {
       }
       let db = await root.db;
       let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}, "${objName}");
-      let updates = getUpdateObject(args.${objName} || {}, ${objName});
+      let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
       if (res === false){
@@ -119,7 +119,7 @@ export default {
     },
     async update${objName}sBulk(root, args, context, ast) {
       let db = await root.db;
-      let { $match } = decontructGraphqlQuery(args.Match, null, ${objName});
+      let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName});
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
