@@ -511,7 +511,9 @@ values.
 
 ## Mutations
 
-Each queryable type will also generate a `create<Type>`, `update<Type>` and `delete<Type>` mutation.
+Each queryable type will also generate a `create<Type>`, `update<Type>`, `update<Type>s`, `update<Type>sBulk` and `delete<Type>` mutation.
+
+### Creations 
 
 `create<Type>` will create a new object. Pass a single `<Type>` argument with properties for each field on the type, and it will return back the new,
 created object under the `<Type>` key, or at least the pieces thereof which you specify in your mutation.
@@ -522,15 +524,24 @@ For example
 createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
 ```
 
----
+### Updates
 
-`update<Type>` requires an `_id` argument, as well as an update argument, named for your `<Type>`. This argument can receive fields corresponding to
-each field in your type. Any value you pass will replace the corresponding value in Mongo.
+All update mutations take an `Updates` argument, representing the mutations to make.  This argument is described below.
+
+`update<Type>` requires an `_id` argument of the object you want to update. 
+
+`update<Type>s` requires an `_ids` array argument, representing the _id's of the objects you want to update.
+
+`update<Type>sBulk` takes a `Match` argument, which can take all of the same filters which you pass to the `all<type>s` query. Pass whatever filters you'd like, and matching records will be updated, based on the `Updates` argument, explained below.
+
+#### The Updates argument
+
+This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
 
 For example
 
 ```javascript
-updateBlog(_id: "${obj._id}", Blog: {words: 100}){Blog{title, words}}
+updateBlog(_id: "${obj._id}", Updates: {words: 100}){Blog{title, words}}
 ```
 
 In addition, the following arguments are supported
@@ -541,28 +552,30 @@ In addition, the following arguments are supported
 | `<fieldName>_DEC`     | Numeric   | Decrements the current value by the amount specified. For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.                                                                                                                     |
 | `<fieldName>_PUSH`    | Arrays    | Pushes the specified value onto the array. For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array. Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.                                                                                                                               |
 | `<fieldName>_CONCAT`  | Arrays    | Pushes the specified values onto the array. For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added. |
-| `<fieldName>_UPDATE`  | Arrays    | **For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type. Updates the object at `index` with the changes specified. Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type. Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Book: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}` |
-| `<fieldName>_UPDATES` | Arrays    | Same as UPDATE, but takes an array of these same inputs. For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Book: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.  |
+| `<fieldName>_UPDATE`  | Arrays    | **For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, named for the array type. Updates the object at `index` with the changes specified. Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type. Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Updates: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}` |
+| `<fieldName>_UPDATES` | Arrays    | Same as UPDATE, but takes an array of these same inputs. For example `tagsSubscribed_UPDATES: [{index: 0, Tag: {name: "t1-update"} }, {index: 1, Tag: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Updates: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.  |
 | `<fieldName>_UPDATE`  | Objects   | Implements the specified changes on the nested object. The provided update object is of the same form specified here. For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2 |
-| `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Book: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Book: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"  |
+| `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Updates: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Updates: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"  |
 
-Full examples are below.
 
----
-
-`delete<Type>` takes a single `_id` argument, and deletes it.
-
----
-
-### Mutation examples
+#### Mutation examples
 
 [Example of create and delete, together](test/testProject1/deletion.test.js#L14)
 
-[Example of a basic update](test/testProject1/mutations.test.js#L144)
+[Example of a basic update](test/testProject1/mutations.test.js#L145)
 
-[Full example of nested updates](test/testProject2/richUpdating.test.js#L439)
+[Full example of nested updates](test/testProject2/richUpdating.test.js#L424)
 
-[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L466)
+[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L484)
+
+[Multi updates](test/testProject1/multiUpdate.test.js#L18)
+
+[Bulk updates](test/testProject1/bulkUpdate.test.js#L18)
+
+### Deleting
+
+`delete<Type>` takes a single `_id` argument, and deletes it.
+
 
 ## Defining relationships between types (wip)
 
