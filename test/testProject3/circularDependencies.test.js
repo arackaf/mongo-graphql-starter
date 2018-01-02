@@ -9,6 +9,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await db.collection("books").remove({});
+  await db.collection("tags").remove({});
   db.close();
   db = null;
 });
