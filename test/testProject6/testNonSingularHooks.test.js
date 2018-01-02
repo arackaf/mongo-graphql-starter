@@ -109,7 +109,7 @@ test("Test query before update 1", async () => {
     .toArray())[0];
 
   obj = await runMutation({
-    mutation: `updateType1(_id: "${obj._id}", Type1: { field1: "ABC123" }) {Type1{autoUpdateField, autoAdjustField}}`,
+    mutation: `updateType1(_id: "${obj._id}", Updates: { field1: "ABC123" }) {Type1{autoUpdateField, autoAdjustField}}`,
     result: "updateType1"
   });
 
@@ -123,7 +123,7 @@ test("Test query before update 2", async () => {
     .toArray())[0];
 
   obj = await runMutation({
-    mutation: `updateType2(_id: "${obj._id}", Type2: { field1: "XYZ123" }) {Type2{autoUpdateField, autoAdjustField}}`,
+    mutation: `updateType2(_id: "${obj._id}", Updates: { field1: "XYZ123" }) {Type2{autoUpdateField, autoAdjustField}}`,
     result: "updateType2"
   });
 
@@ -137,7 +137,7 @@ test("Test query update middleware and auto adjust 1", async () => {
     .toArray())[0];
 
   obj = await runMutation({
-    mutation: `updateType1(_id: "${obj._id}", Type1: { field1: "no" }) {Type1{autoUpdateField, autoAdjustField}}`,
+    mutation: `updateType1(_id: "${obj._id}", Updates: { field1: "no" }) {Type1{autoUpdateField, autoAdjustField}}`,
     result: "updateType1"
   });
 
@@ -152,7 +152,7 @@ test("Test query update middleware and auto adjust 2", async () => {
     .toArray())[0];
 
   obj = await runMutation({
-    mutation: `updateType2(_id: "${obj._id}", Type2: { field1: "no" }) {Type2{autoUpdateField, autoAdjustField}}`,
+    mutation: `updateType2(_id: "${obj._id}", Updates: { field1: "no" }) {Type2{autoUpdateField, autoAdjustField}}`,
     result: "updateType2"
   });
 
@@ -167,7 +167,7 @@ test("Test query update middleware 3 and auto adjust", async () => {
     .toArray())[0];
 
   let emptyObj = await runMutation({
-    mutation: `updateType1(_id: "${obj._id}", Type1: { field2: "ZZZ" }) {Type1{autoUpdateField, autoAdjustField}}`,
+    mutation: `updateType1(_id: "${obj._id}", Updates: { field2: "ZZZ" }) {Type1{autoUpdateField, autoAdjustField}}`,
     result: "updateType1"
   });
 
@@ -190,7 +190,7 @@ test("Test query update middleware 4", async () => {
   let _id = obj._id;
 
   let emptyObj = await runMutation({
-    mutation: `updateType2(_id: "${obj._id}", Type2: { field2: "yyy" }) {Type2{field1, field2}}`,
+    mutation: `updateType2(_id: "${obj._id}", Updates: { field2: "yyy" }) {Type2{field1, field2}}`,
     result: "updateType2"
   });
 
@@ -213,7 +213,7 @@ test("Test query afterUpdate hook 1", async () => {
   let _id = obj._id;
 
   await runMutation({
-    mutation: `updateType1(_id: "${obj._id}", Type1: { field1: "4 a" }) {Type1{field1}}`,
+    mutation: `updateType1(_id: "${obj._id}", Updates: { field1: "4 a" }) {Type1{field1}}`,
     result: "updateType1"
   });
 
@@ -234,7 +234,7 @@ test("Test query afterUpdate hook 2", async () => {
   let _id = obj._id;
 
   await runMutation({
-    mutation: `updateType2(_id: "${obj._id}", Type2: { field1: "4 a" }) {Type2{field1}}`,
+    mutation: `updateType2(_id: "${obj._id}", Updates: { field1: "4 a" }) {Type2{field1}}`,
     result: "updateType2"
   });
 

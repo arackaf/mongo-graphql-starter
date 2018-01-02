@@ -18,7 +18,7 @@ test("Basic increment", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {words_INC: 1}){Blog{title, words}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {words_INC: 1}){Blog{title, words}}`,
     result: "updateBlog"
   });
 
@@ -32,7 +32,7 @@ test("Basic float increment", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_INC: 1}){Blog{title, rating}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {rating_INC: 1}){Blog{title, rating}}`,
     result: "updateBlog"
   });
 
@@ -46,7 +46,7 @@ test("Basic increment 2", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {words_INC: 4}){Blog{title, words}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {words_INC: 4}){Blog{title, words}}`,
     result: "updateBlog"
   });
 
@@ -60,7 +60,7 @@ test("Basic float increment 2", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_INC: 2}){Blog{title, rating}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {rating_INC: 2}){Blog{title, rating}}`,
     result: "updateBlog"
   });
 
@@ -74,7 +74,7 @@ test("Basic decrement", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {words_DEC: 1}){Blog{title, words}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {words_DEC: 1}){Blog{title, words}}`,
     result: "updateBlog"
   });
 
@@ -88,7 +88,7 @@ test("Basic float increment", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_DEC: 1}){Blog{title, rating}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {rating_DEC: 1}){Blog{title, rating}}`,
     result: "updateBlog"
   });
 
@@ -104,7 +104,7 @@ test("float array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {weights_UPDATE: {index: 1, value: 2.2} }}) {Blog{title, author{weights}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {author_UPDATE: {weights_UPDATE: {index: 1, value: 2.2} }}) {Blog{title, author{weights}}}`,
     result: "updateBlog"
   });
 
@@ -118,7 +118,9 @@ test("float array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {weights_UPDATES: [{index: 0, value: 1.0}, {index: 1, value: 2.2}] }}) {Blog{title, author{weights}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {author_UPDATE: {weights_UPDATES: [{index: 0, value: 1.0}, {index: 1, value: 2.2}] }}) {Blog{title, author{weights}}}`,
     result: "updateBlog"
   });
 
@@ -134,7 +136,9 @@ test("int array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {luckyNumbers_UPDATE: {index: 1, value: 11} }}) {Blog{title, author{luckyNumbers}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {author_UPDATE: {luckyNumbers_UPDATE: {index: 1, value: 11} }}) {Blog{title, author{luckyNumbers}}}`,
     result: "updateBlog"
   });
 
@@ -148,7 +152,9 @@ test("int array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {luckyNumbers_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }}) {Blog{title, author{luckyNumbers}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {author_UPDATE: {luckyNumbers_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }}) {Blog{title, author{luckyNumbers}}}`,
     result: "updateBlog"
   });
 
@@ -164,7 +170,9 @@ test("string array update", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {knicknames_UPDATE: {index: 1, value: "b"} }}) {Blog{title, author{knicknames}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {author_UPDATE: {knicknames_UPDATE: {index: 1, value: "b"} }}) {Blog{title, author{knicknames}}}`,
     result: "updateBlog"
   });
 
@@ -178,7 +186,9 @@ test("string array updates", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {author_UPDATE: {knicknames_UPDATES: [{index: 0, value: "a"}, {index: 1, value: "b"}] }}) {Blog{title, author{knicknames}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {author_UPDATE: {knicknames_UPDATES: [{index: 0, value: "a"}, {index: 1, value: "b"}] }}) {Blog{title, author{knicknames}}}`,
     result: "updateBlog"
   });
 
@@ -194,7 +204,7 @@ test("Basic decrement 2", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {words_DEC: 4}){Blog{title, words}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {words_DEC: 4}){Blog{title, words}}`,
     result: "updateBlog"
   });
 
@@ -208,7 +218,7 @@ test("Basic float decrement 2", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {rating_DEC: 2}){Blog{title, rating}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {rating_DEC: 2}){Blog{title, rating}}`,
     result: "updateBlog"
   });
 
@@ -222,7 +232,7 @@ test("Push new comment", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {title: "Blog 1", comments_PUSH: {text: "C2"}}){Blog{title, comments{text}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {title: "Blog 1", comments_PUSH: {text: "C2"}}){Blog{title, comments{text}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }] });
@@ -235,7 +245,7 @@ test("Concat new comments", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {title: "Blog 1", comments_CONCAT: [{text: "C2"}, {text: "C3"}]}){Blog{title, comments{text}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {title: "Blog 1", comments_CONCAT: [{text: "C2"}, {text: "C3"}]}){Blog{title, comments{text}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }, { text: "C3" }] });
@@ -248,7 +258,9 @@ test("Update comment", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { upVotes: 2 } } }){Blog{title, comments{text, upVotes}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { upVotes: 2 } } }){Blog{title, comments{text, upVotes}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1", upVotes: 2 }] });
@@ -261,7 +273,9 @@ test("Update comment 2", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } } }){Blog{title, comments{text, upVotes}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { upVotes_INC: 1 } } }){Blog{title, comments{text, upVotes}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1", upVotes: 3 }] });
@@ -274,7 +288,9 @@ test("Update comment 3", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { upVotes_DEC: 1 } } }){Blog{title, comments{text, upVotes}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { upVotes_DEC: 1 } } }){Blog{title, comments{text, upVotes}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1", upVotes: 1 }] });
@@ -287,7 +303,9 @@ test("Update comment's author", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22" } } } }){Blog{title, comments{text, author{name, birthday}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22" } } } }){Blog{title, comments{text, author{name, birthday}}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1", author: { name: "Adam", birthday: "03/22/1982" } }] });
@@ -300,7 +318,9 @@ test("Update comment's author - add favorite tag", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag: {name: "ft"} } } } }){Blog{title, comments{text, author{name, birthday, favoriteTag{name}}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag: {name: "ft"} } } } }){Blog{title, comments{text, author{name, birthday, favoriteTag{name}}}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({
@@ -316,7 +336,9 @@ test("Update comment's author's favorite tag", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {description: "desc"} } } } }){Blog{title, comments{text, author{name, birthday, favoriteTag{name, description}}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {description: "desc"} } } } }){Blog{title, comments{text, author{name, birthday, favoriteTag{name, description}}}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({
@@ -332,7 +354,9 @@ test("Update comment's author's favorite tag 2", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {timesUsed_INC: 2} } } } }){Blog{title, comments{text, author{name, birthday, favoriteTag{name, timesUsed}}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {timesUsed_INC: 2} } } } }){Blog{title, comments{text, author{name, birthday, favoriteTag{name, timesUsed}}}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({
@@ -348,7 +372,9 @@ test("Update deep author info 1", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {description: "desc"}, tagsSubscribed_UPDATE: {index: 0, Tag: {name: "t1-update"} } } } } }){Blog{title, comments{text, author{name, birthday, tagsSubscribed{name}, favoriteTag{name, description}}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {description: "desc"}, tagsSubscribed_UPDATE: {index: 0, Tag: {name: "t1-update"} } } } } }){Blog{title, comments{text, author{name, birthday, tagsSubscribed{name}, favoriteTag{name, description}}}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({
@@ -374,7 +400,9 @@ test("Update deep author info 2", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {description: "desc"}, tagsSubscribed_PUSH: {name: "t2"} } } } }){Blog{title, comments{text, author{name, birthday, tagsSubscribed{name}, favoriteTag{name, description}}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {comments_UPDATE: {index: 0, Comment: { author_UPDATE: { birthday: "1982-03-22", favoriteTag_UPDATE: {description: "desc"}, tagsSubscribed_PUSH: {name: "t2"} } } } }){Blog{title, comments{text, author{name, birthday, tagsSubscribed{name}, favoriteTag{name, description}}}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({
@@ -412,7 +440,7 @@ test("Update deep author info 3", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {
       comments_UPDATE: {
         index: 0, 
         Comment: { 
@@ -470,7 +498,7 @@ test("Update deep author info 4", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {
       comments_UPDATE: {
         index: 0, 
         Comment: { 
@@ -531,7 +559,7 @@ test("Deep pull", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {
       comments_PULL: {
         author: { 
           name_startsWith: "A" 
@@ -581,7 +609,7 @@ test("Deep pull 2", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {
       comments_PULL: {
         author: { 
           favoriteTag: { name_startsWith: "a"}
@@ -629,7 +657,7 @@ test("Deep pull 3", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: {
+    mutation: `updateBlog(_id: "${obj._id}", Updates: {
       comments_PULL: {
         author: { 
           tagsSubscribed: { name_startsWith: "a"}
@@ -655,7 +683,9 @@ test("Add mutate author - add favorite tag and birthday", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { birthday: "2004-06-03", favoriteTag: {name: "tf"}}}){Blog{title, author{name, birthday, favoriteTag{name}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: { author_UPDATE: { birthday: "2004-06-03", favoriteTag: {name: "tf"}}}){Blog{title, author{name, birthday, favoriteTag{name}}}}`,
     result: "updateBlog"
   });
 
@@ -669,7 +699,9 @@ test("Add mutate author - add favorite tag and birthday", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { favoriteTag: {name: "ft"}}}){Blog{title, author{name, birthday, favoriteTag{name}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: { author_UPDATE: { favoriteTag: {name: "ft"}}}){Blog{title, author{name, birthday, favoriteTag{name}}}}`,
     result: "updateBlog"
   });
 
@@ -683,7 +715,9 @@ test("Nested mutation", async () => {
   });
 
   obj = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { favoriteTag_UPDATE: {description: "desc"}}}){Blog{title, author{name, favoriteTag{name, description}}}}`,
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: { author_UPDATE: { favoriteTag_UPDATE: {description: "desc"}}}){Blog{title, author{name, favoriteTag{name, description}}}}`,
     result: "updateBlog"
   });
 
@@ -697,7 +731,7 @@ test("PUSH to author's luckynumbers", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { luckyNumbers_PUSH: 2 } }){Blog{ author{name, luckyNumbers}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: { author_UPDATE: { luckyNumbers_PUSH: 2 } }){Blog{ author{name, luckyNumbers}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ author: { name: "Adam", luckyNumbers: [0, 1, 2] } });
@@ -710,7 +744,7 @@ test("CONCAT to author's luckynumbers", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { luckyNumbers_CONCAT: [2, 3] } }){Blog{ author{name, luckyNumbers}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: { author_UPDATE: { luckyNumbers_CONCAT: [2, 3] } }){Blog{ author{name, luckyNumbers}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ author: { name: "Adam", luckyNumbers: [0, 1, 2, 3] } });
@@ -723,7 +757,7 @@ test("PUSH to author's knicknames", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { knicknames_PUSH: "c" } }){Blog{ author{name, knicknames}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: { author_UPDATE: { knicknames_PUSH: "c" } }){Blog{ author{name, knicknames}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ author: { name: "Adam", knicknames: ["a", "b", "c"] } });
@@ -736,7 +770,7 @@ test("CONCAT to author's knicknames", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { knicknames_CONCAT: ["c", "d"] } }){Blog{ author{name, knicknames}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: { author_UPDATE: { knicknames_CONCAT: ["c", "d"] } }){Blog{ author{name, knicknames}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ author: { name: "Adam", knicknames: ["a", "b", "c", "d"] } });
@@ -749,7 +783,7 @@ test("PUSH to author's weights", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { weights_PUSH: 2.3 } }){Blog{ author{name, weights}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: { author_UPDATE: { weights_PUSH: 2.3 } }){Blog{ author{name, weights}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ author: { name: "Adam", weights: [0.1, 1.9, 2.3] } });
@@ -762,7 +796,7 @@ test("CONCAT to author's weights", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateBlog(_id: "${obj._id}", Blog: { author_UPDATE: { weights_CONCAT: [2.3, 3.4] } }){Blog{ author{name, weights}}}`,
+    mutation: `updateBlog(_id: "${obj._id}", Updates: { author_UPDATE: { weights_CONCAT: [2.3, 3.4] } }){Blog{ author{name, weights}}}`,
     result: "updateBlog"
   });
   expect(result).toEqual({ author: { name: "Adam", weights: [0.1, 1.9, 2.3, 3.4] } });

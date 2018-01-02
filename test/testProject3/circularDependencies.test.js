@@ -22,7 +22,7 @@ test("Circular dependencies work", async () => {
   });
 
   await runMutation({
-    mutation: `updateTag(_id: "${tag._id}", Tag: { authors: [{_id: "${author._id}", name: "${author.name}"}]}){Tag{_id}}`,
+    mutation: `updateTag(_id: "${tag._id}", Updates: { authors: [{_id: "${author._id}", name: "${author.name}"}]}){Tag{_id}}`,
     result: "updateTag"
   });
 

@@ -266,7 +266,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
 
   let requestMap, metadataRequested, $project, extrasPackets;
 
-  if (ast) {
+  if (ast && queryName) {
     requestMap = parseRequestedFields(ast, queryName);
     metadataRequested = parseRequestedFields(ast, "Meta");
     ({ $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName));
