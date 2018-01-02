@@ -490,7 +490,7 @@ test("Update deep author info 4", async () => {
         author: {
           name: "Adam", 
           favoriteTag: {name: "ft"}, 
-          tagsSubscribed: []
+          tagsSubscribed: [{name: "t0"}]
         }
       }]
     }){Blog{_id}}`,
@@ -520,7 +520,7 @@ test("Update deep author info 4", async () => {
         author: {
           name: "Adam",
           birthday: "03/22/1982",
-          tagsSubscribed: [{ name: "t1" }, { name: "t2" }],
+          tagsSubscribed: [{ name: "t0" }, { name: "t1" }, { name: "t2" }],
           favoriteTag: { name: "ft", description: "desc" }
         }
       }
