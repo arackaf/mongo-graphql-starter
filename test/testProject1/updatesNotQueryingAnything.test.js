@@ -15,18 +15,38 @@ afterEach(async () => {
   db = null;
 });
 
-test("Multi update 1", async () => {
+test("Single update", async () => {
+  let books = await db
+    .collection("books")
+    .find({ pages: { $gt: 150 } }, { _id: 1 })
+    .toArray();
+
+  let results = await runMutation({
+    mutation: `updateBook(_id: "${books[0]._id}", Updates: {pages: 99}){success}`,
+    rawResult: "updateBook"
+  });
+
+  expect(results).toEqual({ success: true });
+
+  await queryAndMatchArray({
+    query: "{allBooks(SORT: { title: 1 }){Books{title, pages}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1", pages: 100 }, { title: "Book 2", pages: 150 }, { title: "Book 3", pages: 99 }]
+  });
+});
+
+test("Multi update", async () => {
   let books = await db
     .collection("books")
     .find({ pages: { $gt: 100 } }, { _id: 1 })
     .toArray();
 
   let results = await runMutation({
-    mutation: `updateBooks(_ids: [${books.map(b => '"' + b._id + '"').join(",")}], Updates: {pages: 99}){Books{pages}}`,
-    result: "updateBooks"
+    mutation: `updateBooks(_ids: [${books.map(b => '"' + b._id + '"').join(",")}], Updates: {pages: 99}){success}`,
+    rawResult: "updateBooks"
   });
 
-  expect(results).toEqual([{ pages: 99 }, { pages: 99 }]);
+  expect(results).toEqual({ success: true });
 
   await queryAndMatchArray({
     query: "{allBooks(SORT: { title: 1 }){Books{title, pages}}}",

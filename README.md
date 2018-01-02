@@ -528,21 +528,23 @@ createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
 
 All update mutations take an `Updates` argument, representing the mutations to make.  This argument is described below.
 
-`update<Type>` requires an `_id` argument of the object you want to update. 
+`update<Type>` requires an `_id` argument of the object you want to update. This mutation returns a `success` field indicating that the operation completed, and a `<Type>` value (of the object that was just updated) that can be queried as needed.  If you leave the `<Type>` value off of the selection, no query will be made after the update.
 
-`update<Type>s` requires an `_ids` array argument, representing the _id's of the objects you want to update.
+`update<Type>s` requires an `_ids` array argument, representing the _id's of the objects you want to update.  This mutation returns a `success` field indicating that the operation completed, and a `<Type>s` array value (of the objects that were just updated) that can be queried as needed.  If you leave the `<Type>s` value off of the selection, no query will be made after the update.
 
-`update<Type>sBulk` takes a `Match` argument, which can take all of the same filters which you pass to the `all<type>s` query. Pass whatever filters you'd like, and matching records will be updated, based on the `Updates` argument, explained below.
+`update<Type>sBulk` takes a `Match` argument, which can take all of the same filters which you pass to the `all<type>s` query. Pass whatever filters you'd like, and matching records will be updated.  This mutation returns only a `success` property, indicating that the operation was completed, since it's not easy or efficient to keep track of exactly which records were updated.
 
 #### The Updates argument
 
-This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+All update mutations take an `Updates` argument, which indicate the updates to perform. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
 
 For example
 
 ```javascript
 updateBlog(_id: "${obj._id}", Updates: {words: 100}){Blog{title, words}}
 ```
+
+will set the `words` property to `100` for that blog.
 
 In addition, the following arguments are supported
 
@@ -557,8 +559,11 @@ In addition, the following arguments are supported
 | `<fieldName>_UPDATE`  | Objects   | Implements the specified changes on the nested object. The provided update object is of the same form specified here. For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2 |
 | `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Updates: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Updates: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"  |
 
+### Deleting
 
-#### Mutation examples
+`delete<Type>` takes a single `_id` argument, and deletes it.
+
+### Mutation examples
 
 [Example of create and delete, together](test/testProject1/deletion.test.js#L14)
 
@@ -572,9 +577,6 @@ In addition, the following arguments are supported
 
 [Bulk updates](test/testProject1/bulkUpdate.test.js#L18)
 
-### Deleting
-
-`delete<Type>` takes a single `_id` argument, and deletes it.
 
 
 ## Defining relationships between types (wip)
