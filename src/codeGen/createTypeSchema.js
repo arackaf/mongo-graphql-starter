@@ -38,10 +38,14 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   type ${name} {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
-    .join(`\n${TAB}`)}
-  ${Object.keys(relationships)
-    .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k])}`)
-    .join(`\n${TAB}`)}
+    .join(`\n${TAB}`)}${
+    Object.keys(relationships).length
+      ? `\n${TAB}` +
+        Object.keys(relationships)
+          .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k])}`)
+          .join(`\n${TAB}`)
+      : ""
+  }
   }
   ${
     objectToCreate.table
@@ -103,50 +107,50 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}${TAB}`)}
   }
   
-  \`;
+\`;
   
   ${
     objectToCreate.table
       ? `
-  export const mutation = \`
+export const mutation = \`
   
-  ${TAB}create${name}(
-  ${TAB2}${[`${name}: ${name}Input`].join(`,\n${TAB2}`)}
-    ): ${name}MutationResult
+  create${name}(
+    ${[`${name}: ${name}Input`].join(`,\n${TAB}`)}
+  ): ${name}MutationResult
   
-  ${TAB}update${name}(
-  ${TAB2}${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
-    ): ${name}MutationResult
+  update${name}(
+    ${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
+  ): ${name}MutationResult
 
-  ${TAB}update${name}s(
-  ${TAB2}${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
-    ): ${name}MutationResultMulti
+  update${name}s(
+    ${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
+  ): ${name}MutationResultMulti
 
-  ${TAB}update${name}sBulk(
-  ${TAB2}${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB2}${TAB}`)}
-    ): ${name}BulkMutationResult    
+  update${name}sBulk(
+    ${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
+  ): ${name}BulkMutationResult    
   
-  ${TAB}delete${name}(
-  ${TAB2}${[`_id: String`]}
-    ): Boolean
+  delete${name}(
+    ${[`_id: String`]}
+  ): Boolean
   
-  \`;
+\`;
   
   
-  export const query = \`
+export const query = \`
   
-  ${TAB}all${name}s(
-  ${TAB2}${allQueryFields
-          .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
-          .concat(dateFields.map(f => `${f}_format: String`))
-          .join(`,\n${TAB2}${TAB}`)}
-    ): ${name}QueryResults
+  all${name}s(
+    ${allQueryFields
+      .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+      .concat(dateFields.map(f => `${f}_format: String`))
+      .join(`,\n${TAB2}`)}
+  ): ${name}QueryResults
   
-  ${TAB}get${name}(
-  ${TAB2}${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}${TAB}`)}
-    ): ${name}SingleQueryResult
+  get${name}(
+    ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
+  ): ${name}SingleQueryResult
   
-  \`;
+\`;
   
   `
       : ""
