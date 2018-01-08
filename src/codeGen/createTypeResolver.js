@@ -8,7 +8,7 @@ export default function createGraphqlResolver(objectToCreate) {
   let result = "";
   let imports = [
     `import { queryUtilities, processHook } from "mongo-graphql-starter";`,
-    `import hooksObj from "../hooks"`,
+    `import hooksObj from "../hooks";`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name} from "./${objectToCreate.__name}";`

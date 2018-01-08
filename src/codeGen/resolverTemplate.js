@@ -1,4 +1,4 @@
-export async function load${objName}s(db, queryPacket){
+export async function load${objName}s(db, queryPacket) {
   let { $match, $project, $sort, $limit, $skip } = queryPacket;
 
   let aggregateItems = [
@@ -7,7 +7,7 @@ export async function load${objName}s(db, queryPacket){
     $sort ? { $sort } : null, 
     $skip != null ? { $skip } : null, 
     $limit != null ? { $limit } : null
-  ].filter(item => item)
+  ].filter(item => item);
 
   let ${objName}s = await db
     .collection("${table}")
@@ -97,7 +97,7 @@ export default {
       return {
         ${objName}: result,
         success: true
-      }
+      };
     },
     async update${objName}s(root, args, context, ast) {
       let db = await root.db;
@@ -105,7 +105,7 @@ export default {
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false){
+      if (res === false) {
         return { success: true };
       }
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
@@ -117,7 +117,7 @@ export default {
       return {
         ${objName}s: result,
         success: true
-      }
+      };
     },
     async update${objName}sBulk(root, args, context, ast) {
       let db = await root.db;
@@ -125,7 +125,7 @@ export default {
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false){
+      if (res === false) {
         return { success: true };
       }
       if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
@@ -136,14 +136,14 @@ export default {
       return { success: true };
     },    
     async delete${objName}(root, args, context, ast) {
-      if (!args._id){
+      if (!args._id) {
         throw "No _id sent";
       }
       let db = await root.db;
       let $match = { _id: ObjectId(args._id) };
       
       let res = await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast);
-      if (res === false){
+      if (res === false) {
         return false;
       }
       await db.collection("${table}").remove($match);
