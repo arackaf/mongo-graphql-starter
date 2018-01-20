@@ -302,6 +302,20 @@ test("float array pull", async () => {
   expect(obj).toEqual({ title: "Book 1", prices: [2.2] });
 });
 
+test("float array add to set", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.2, 3.3]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Updates: { prices_ADDTOSET: [1.1, 3.3, 3.3, 4.4] }) {Book{title, prices}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", prices: [1.1, 2.2, 3.3, 4.4] });
+});
+
 //-----------------------------------------------------------------------------------------
 
 test("bool update", async () => {
@@ -363,6 +377,20 @@ test("int array pull", async () => {
   expect(obj).toEqual({ title: "Book 1", editions: [10] });
 });
 
+test("int array add to set", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", editions: [4, 6, 10]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Updates: { editions_ADDTOSET: [4, 6, 11] }) {Book{title, editions}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", editions: [4, 6, 10, 11] });
+});
+
 //-----------------------------------------------------------------------------------------
 
 test("string array update", async () => {
@@ -405,6 +433,20 @@ test("string array pull", async () => {
   });
 
   expect(obj).toEqual({ title: "Book 1", keywords: ["d"] });
+});
+
+test("string array add to set", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d", "e"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Updates: { keywords_ADDTOSET: ["c", "d", "e", "f"] }) {Book{title, keywords}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", keywords: ["c", "d", "e", "f"] });
 });
 
 //-----------------------------------------------------------------------------------------
@@ -476,6 +518,20 @@ test("MongoId array pull", async () => {
   });
 
   expect(obj).toEqual({ title: "Book 1", mongoIds: ["" + id1] });
+});
+
+test("MongoId array add to set", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id1}", "${id2}", "${id3}"]}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  obj = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Updates: { mongoIds_ADDTOSET: ["${id2}", "${id3}", "${idCrap}"] }) {Book{title, mongoIds}}`,
+    result: "updateBook"
+  });
+
+  expect(obj).toEqual({ title: "Book 1", mongoIds: ["" + id1, "" + id2, "" + id3, "" + idCrap] });
 });
 
 //-----------------------------------------------------------------------------------------
