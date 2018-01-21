@@ -58,9 +58,9 @@ test("Modification addToSet works", async () => {
   let updated = await runMutation({
     mutation: `updateBook(_id: "${obj._id}", Updates: {
       authors_UPDATES: [
-        {index: 0, Author: {strings_ADDTOSET: ["a", "b", "c"]}},
-        {index: 1, Author: {strings_ADDTOSET: ["a", "b", "c"]}},
-        {index: 2, Author: {strings_ADDTOSET: ["a", "b", "c"]}}
+        {index: 0, Updates: {strings_ADDTOSET: ["a", "b", "c"]}},
+        {index: 1, Updates: {strings_ADDTOSET: ["a", "b", "c"]}},
+        {index: 2, Updates: {strings_ADDTOSET: ["a", "b", "c"]}}
       ],
     }){Book{
       title, 

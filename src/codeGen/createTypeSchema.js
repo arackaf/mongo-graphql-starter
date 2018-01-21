@@ -92,7 +92,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       ? `
   input ${name}ArrayMutationInput {
   ${TAB}index: Int,
-  ${TAB}${name}: ${name}MutationInput
+  Updates: ${name}MutationInput
   }
   `
       : ""
