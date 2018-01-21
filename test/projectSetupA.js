@@ -19,7 +19,8 @@ const {
 const Author = {
   fields: {
     name: StringType,
-    birthday: DateType
+    birthday: DateType,
+    strings: StringArrayType
   }
 };
 

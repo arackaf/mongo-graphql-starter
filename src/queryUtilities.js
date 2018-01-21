@@ -302,8 +302,9 @@ export function getUpdateObject(args, typeMetadata) {
   let $inc = {};
   let $push = {};
   let $pull = {};
-  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push, $pull);
-  let result = { $set, $inc, $push, $pull };
+  let $addToSet = {};
+  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push, $pull, $addToSet);
+  let result = { $set, $inc, $push, $pull, $addToSet };
   Object.keys(result).forEach(k => {
     if (!Object.keys(result[k]).length) {
       delete result[k];
@@ -312,7 +313,7 @@ export function getUpdateObject(args, typeMetadata) {
   return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, $pull) {
+function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet) {
   Object.keys(args).forEach(k => {
     let field = typeMetadata.fields[k];
 
@@ -342,9 +343,9 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
           $set[prefix + `${fieldName}.${args[k].index}`] = field === MongoIdArrayType ? ObjectId(args[k].value) : args[k].value;
         } else if (field.__isArray) {
-          getUpdateObjectContents(args[k][field.type.typeName], field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push, $pull);
+          getUpdateObjectContents(args[k].Updates, field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push, $pull, $addToSet);
         } else {
-          getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull);
+          getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull, $addToSet);
         }
       } else if (queryOperation === "UPDATES") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
@@ -353,7 +354,7 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
           });
         } else {
           args[k].forEach(update => {
-            getUpdateObjectContents(update[field.type.typeName], field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push, $pull);
+            getUpdateObjectContents(update.Updates, field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push, $pull, $addToSet);
           });
         }
       } else if (queryOperation === "PULL") {
@@ -361,6 +362,10 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
           $pull[prefix + fieldName] = { $in: field === MongoIdArrayType ? args[k].map(val => ObjectId(val)) : args[k] };
         } else {
           $pull[prefix + fieldName] = fillMongoFiltersObject(args[k], field.type);
+        }
+      } else if (queryOperation === "ADDTOSET") {
+        if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
+          $addToSet[prefix + fieldName] = { $each: field === MongoIdArrayType ? args[k].map(val => ObjectId(val)) : args[k] };
         }
       }
     } else {

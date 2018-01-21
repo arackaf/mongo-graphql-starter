@@ -41,3 +41,37 @@ test("Modification mutation works", async () => {
     authors: [{ birthday: "06/02/2004", name: "Bob" }]
   });
 });
+
+test("Modification addToSet works", async () => {
+  let obj = await runMutation({
+    mutation: `createBook(Book: {
+      title: "Book 1", 
+      authors: [
+        { birthday: "1982-03-22",  name: "Adam", strings: ["a", "b"] }, 
+        { birthday: "1982-03-22", name: "Alan", strings: [] }, 
+        { birthday: "2004-06-02",  name: "Bob", strings: ["a"] }
+      ]
+    }){Book{ _id }}`,
+    result: "createBook"
+  });
+
+  let updated = await runMutation({
+    mutation: `updateBook(_id: "${obj._id}", Updates: {
+      authors_UPDATES: [
+        {index: 0, Updates: {strings_ADDTOSET: ["a", "b", "c"]}},
+        {index: 1, Updates: {strings_ADDTOSET: ["a", "b", "c"]}},
+        {index: 2, Updates: {strings_ADDTOSET: ["a", "b", "c"]}}
+      ],
+    }){Book{
+      title, 
+      authors { 
+        strings
+      }
+    }}`,
+    result: "updateBook"
+  });
+  expect(updated).toEqual({
+    title: "Book 1",
+    authors: [{ strings: ["a", "b", "c"] }, { strings: ["a", "b", "c"] }, { strings: ["a", "b", "c"] }]
+  });
+});
