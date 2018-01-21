@@ -212,7 +212,8 @@ function getMutations(k, fields) {
         `${k}_CONCAT: [String]`,
         `${k}_UPDATE: StringArrayUpdate`,
         `${k}_UPDATES: [StringArrayUpdate]`,
-        `${k}_PULL: [String]`
+        `${k}_PULL: [String]`,
+        `${k}_ADDTOSET: [String]`
       ];
     } else if (value === IntArrayType) {
       return [
@@ -221,7 +222,8 @@ function getMutations(k, fields) {
         `${k}_CONCAT: [Int]`,
         `${k}_UPDATE: IntArrayUpdate`,
         `${k}_UPDATES: [IntArrayUpdate]`,
-        `${k}_PULL: [Int]`
+        `${k}_PULL: [Int]`,
+        `${k}_ADDTOSET: [Int]`
       ];
     } else if (value === FloatArrayType) {
       return [
@@ -230,7 +232,8 @@ function getMutations(k, fields) {
         `${k}_CONCAT: [Float]`,
         `${k}_UPDATE: FloatArrayUpdate`,
         `${k}_UPDATES: [FloatArrayUpdate]`,
-        `${k}_PULL: [Float]`
+        `${k}_PULL: [Float]`,
+        `${k}_ADDTOSET: [Float]`
       ];
     } else if (value === MongoIdArrayType) {
       return [
@@ -239,7 +242,8 @@ function getMutations(k, fields) {
         `${k}_CONCAT: [String]`,
         `${k}_UPDATE: StringArrayUpdate`,
         `${k}_UPDATES: [StringArrayUpdate]`,
-        `${k}_PULL: [String]`
+        `${k}_PULL: [String]`,
+        `${k}_ADDTOSET: [String]`
       ];
     }
 

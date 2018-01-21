@@ -88,7 +88,7 @@ export default {
       if (res === false){
         return { ${objName}: null };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
+      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
         await db.collection("${table}").update($match, updates);
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
