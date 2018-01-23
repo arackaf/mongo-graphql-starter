@@ -108,7 +108,7 @@ export default {
       if (res === false) {
         return { success: true };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
+      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
         await db.collection("${table}").update($match, updates, { multi: true });
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
@@ -128,7 +128,7 @@ export default {
       if (res === false) {
         return { success: true };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull) {
+      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
         await db.collection("${table}").update($match, updates, { multi: true });
       }
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
