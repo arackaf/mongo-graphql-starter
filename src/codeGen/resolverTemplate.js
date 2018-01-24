@@ -38,14 +38,14 @@ export default {
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
       let result = {};
 
-      if (queryPacket.$project){
+      if (queryPacket.$project) {
         result.${objName}s = await load${objName}s(db, queryPacket);
       }
 
-      if (queryPacket.metadataRequested.size){
+      if (queryPacket.metadataRequested.size) {
         result.Meta = {};
 
-        if (queryPacket.metadataRequested.get("count")){
+        if (queryPacket.metadataRequested.get("count")) {
           let countResults = (await db
             .collection("${table}")
             .aggregate([{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }])
@@ -65,7 +65,7 @@ export default {
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = getMongoProjection(requestMap, ${objName}, args);
 
-      if (await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast) === false){
+      if (await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast) === false) {
         return { ${objName}: null };
       }
       await db.collection("${table}").insert(newObject);
@@ -77,7 +77,7 @@ export default {
       }
     },
     async update${objName}(root, args, context, ast) {
-      if (!args._id){
+      if (!args._id) {
         throw "No _id sent";
       }
       let db = await root.db;
@@ -85,7 +85,7 @@ export default {
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
       let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false){
+      if (res === false) {
         return { ${objName}: null };
       }
       if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {

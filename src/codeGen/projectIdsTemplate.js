@@ -13,7 +13,7 @@
       ${objNameLower}.${targetObjName} = [];
       if (${objNameLower}.${fkField}) {
         for (let _id of ${objNameLower}.${fkField}) {
-          if (!${targetTypeNameLower}DestinationMap.has("" + _id, )){
+          if (!${targetTypeNameLower}DestinationMap.has("" + _id, )) {
             ${targetTypeNameLower}DestinationMap.set("" + _id, []);
           }
           ${targetTypeNameLower}DestinationMap.get("" + _id).push(${objNameLower}.${targetObjName});
