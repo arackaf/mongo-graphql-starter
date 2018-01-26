@@ -106,9 +106,7 @@ export default {
       if (res === false) {
         return { success: true };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
-        await db.collection("${table}").update($match, updates, { multi: true });
-      }
+      await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
       let result = $project ? await load${objName}s(db, { $match, $project }) : null;
@@ -126,9 +124,7 @@ export default {
       if (res === false) {
         return { success: true };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
-        await db.collection("${table}").update($match, updates, { multi: true });
-      }
+      await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
 
       return { success: true };
