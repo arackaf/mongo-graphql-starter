@@ -88,9 +88,7 @@ export default {
       if (res === false) {
         return { ${objName}: null };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
-        await db.collection("${table}").update($match, updates);
-      }
+      await dbHelpers.runUpdate(db, "${table}", $match, updates);
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
       let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }))[0] : null;
