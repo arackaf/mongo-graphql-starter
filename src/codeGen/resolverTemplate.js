@@ -84,8 +84,7 @@ export default {
       let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}, "${objName}");
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
-      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { ${objName}: null };
       }
       await dbHelpers.runUpdate(db, "${table}", $match, updates);
@@ -102,8 +101,7 @@ export default {
       let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}, "${objName}s");
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
-      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
       }
       await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
@@ -120,8 +118,7 @@ export default {
       let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName});
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
-      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
       }
       await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
@@ -136,8 +133,7 @@ export default {
       let db = await root.db;
       let $match = { _id: ObjectId(args._id) };
       
-      let res = await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast) === false) {
         return false;
       }
       await dbHelpers.runDelete(db, "${table}", $match);
