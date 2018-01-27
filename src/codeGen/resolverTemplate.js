@@ -9,10 +9,7 @@ export async function load${objName}s(db, queryPacket) {
     $limit != null ? { $limit } : null
   ].filter(item => item);
 
-  let ${objName}s = await db
-    .collection("${table}")
-    .aggregate(aggregateItems)
-    .toArray();
+  let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
   ${relationships}
   await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   return ${objName}s;
@@ -46,11 +43,7 @@ export default {
         result.Meta = {};
 
         if (queryPacket.metadataRequested.get("count")) {
-          let countResults = (await db
-            .collection("${table}")
-            .aggregate([{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }])
-            .toArray());
-            
+          let countResults = await dbHelpers.runQuery(db, "${table}", [{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }]);  
           result.Meta.count = countResults.length ? countResults[0].count : 0;
         }
       }
@@ -68,7 +61,7 @@ export default {
       if (await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast) === false) {
         return { ${objName}: null };
       }
-      await db.collection("${table}").insert(newObject);
+      await dbHelpers.runInsert(db, "${table}", newObject);
       await processHook(hooksObj, "${objName}", "afterInsert", newObject, root, args, context, ast);
 
       let result = (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
