@@ -13,3 +13,15 @@ export async function runUpdate(db, table, $match, updates, options) {
     }
   }
 }
+
+export async function runDelete(db, table, $match) {
+  try {
+    await db.collection(table).remove($match);
+  } catch (err) {
+    if (err instanceof MongoError) {
+      throw `The following error was thrown by Mongo when attempting to perform this deletion: ${err.toString()}`;
+    } else {
+      throw err;
+    }
+  }
+}
