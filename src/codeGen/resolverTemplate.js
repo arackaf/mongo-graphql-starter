@@ -140,7 +140,7 @@ export default {
       if (res === false) {
         return false;
       }
-      await db.collection("${table}").remove($match);
+      await dbHelpers.runDelete(db, "${table}", $match);
       await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
       return true;
     }
