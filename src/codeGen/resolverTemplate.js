@@ -9,10 +9,7 @@ export async function load${objName}s(db, queryPacket) {
     $limit != null ? { $limit } : null
   ].filter(item => item);
 
-  let ${objName}s = await db
-    .collection("${table}")
-    .aggregate(aggregateItems)
-    .toArray();
+  let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
   ${relationships}
   await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   return ${objName}s;
@@ -46,11 +43,7 @@ export default {
         result.Meta = {};
 
         if (queryPacket.metadataRequested.get("count")) {
-          let countResults = (await db
-            .collection("${table}")
-            .aggregate([{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }])
-            .toArray());
-            
+          let countResults = await dbHelpers.runQuery(db, "${table}", [{ $match: queryPacket.$match }, { $group: { _id: null, count: { $sum: 1 } } }]);  
           result.Meta.count = countResults.length ? countResults[0].count : 0;
         }
       }
@@ -68,7 +61,7 @@ export default {
       if (await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast) === false) {
         return { ${objName}: null };
       }
-      await db.collection("${table}").insert(newObject);
+      await dbHelpers.runInsert(db, "${table}", newObject);
       await processHook(hooksObj, "${objName}", "afterInsert", newObject, root, args, context, ast);
 
       let result = (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
@@ -84,13 +77,10 @@ export default {
       let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}, "${objName}");
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
-      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { ${objName}: null };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
-        await db.collection("${table}").update($match, updates);
-      }
+      await dbHelpers.runUpdate(db, "${table}", $match, updates);
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
       let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }))[0] : null;
@@ -104,13 +94,10 @@ export default {
       let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}, "${objName}s");
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
-      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
-        await db.collection("${table}").update($match, updates, { multi: true });
-      }
+      await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
       let result = $project ? await load${objName}s(db, { $match, $project }) : null;
@@ -124,13 +111,10 @@ export default {
       let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName});
       let updates = getUpdateObject(args.Updates || {}, ${objName});
 
-      let res = await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
       }
-      if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
-        await db.collection("${table}").update($match, updates, { multi: true });
-      }
+      await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
 
       return { success: true };
@@ -142,11 +126,10 @@ export default {
       let db = await root.db;
       let $match = { _id: ObjectId(args._id) };
       
-      let res = await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast);
-      if (res === false) {
+      if (await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast) === false) {
         return false;
       }
-      await db.collection("${table}").remove($match);
+      await dbHelpers.runDelete(db, "${table}", $match);
       await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
       return true;
     }
