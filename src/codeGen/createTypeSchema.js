@@ -18,17 +18,16 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let relationships = objectToCreate.relationships || {};
   let name = objectToCreate.__name;
   let allQueryFields = [];
-  let allFields = [];
+  let manualQueryArgs = [];
   let allFieldsMutation = [];
   let TAB2 = TAB + TAB;
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
-    allFields.push(`${k}: ${displaySchemaValue(fields[k])}`);
     allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
   });
   if (Array.isArray(objectToCreate.manualQueryArgs)) {
-    allQueryFields.push(...objectToCreate.manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
+    manualQueryArgs.push(...objectToCreate.manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
   }
 
   let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
@@ -143,11 +142,12 @@ export const query = \`
     ${allQueryFields
       .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
       .concat(dateFields.map(f => `${f}_format: String`))
+      .concat(manualQueryArgs)
       .join(`,\n${TAB2}`)}
   ): ${name}QueryResults
   
   get${name}(
-    ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`)).join(`,\n${TAB2}`)}
+    ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)).join(`,\n${TAB2}`)}
   ): ${name}SingleQueryResult
   
 \`;
