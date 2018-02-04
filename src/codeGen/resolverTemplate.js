@@ -56,7 +56,7 @@ export default {
       let db = await root.db;
       let newObject = newObjectFromArgs(args.${objName}, ${objName});
       let requestMap = parseRequestedFields(ast, "${objName}");
-      let $project = getMongoProjection(requestMap, ${objName}, args);
+      let $project = requestMap.size ? getMongoProjection(requestMap, ${objName}, args) : null;
 
       if (await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast) === false) {
         return { ${objName}: null };
@@ -64,7 +64,7 @@ export default {
       await dbHelpers.runInsert(db, "${table}", newObject);
       await processHook(hooksObj, "${objName}", "afterInsert", newObject, root, args, context, ast);
 
-      let result = (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0];
+      let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0] : null;
       return {
         ${objName}: result
       }

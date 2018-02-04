@@ -16,6 +16,10 @@ test("Creation mutation runs", async () => {
   await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}`, result: "createBook" });
 });
 
+test("Creation mutation runs without selection", async () => {
+  await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){success}`, result: "createBook" });
+});
+
 test("Creation mutation runs and returns object", async () => {
   let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 2", pages: 100}){Book{title, pages}}`, result: "createBook" });
   expect(obj).toEqual({ title: "Book 2", pages: 100 });
