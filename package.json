@@ -36,7 +36,7 @@
     "test8": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config8.json"
   },
   "dependencies": {
-    "@std/esm": "0.19.7",
+    "@std/esm": "0.20.0",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
