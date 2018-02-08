@@ -16,7 +16,7 @@ export async function load${objName}s(db, queryPacket) {
 }
 
 export const ${objName} = {
-
+${relationshipResolvers}
 }
 
 export default {
@@ -24,6 +24,7 @@ export default {
     async get${objName}(root, args, context, ast) {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
+      context.__mgqlsdb = db;
       let queryPacket = decontructGraphqlQuery(args, ast, ${objName}Metadata, "${objName}");
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
       let results = await load${objName}s(db, queryPacket);
@@ -35,6 +36,7 @@ export default {
     async all${objName}s(root, args, context, ast) {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
+      context.__mgqlsdb = db;
       let queryPacket = decontructGraphqlQuery(args, ast, ${objName}Metadata, "${objName}s");
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
       let result = {};
