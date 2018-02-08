@@ -11,7 +11,7 @@ export default function createGraphqlResolver(objectToCreate) {
     `import hooksObj from "../hooks";`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
-    `import ${objectToCreate.__name} from "./${objectToCreate.__name}";`,
+    `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
     `import * as dbHelpers from "../dbHelpers";`
   ];
   let typeImports = new Set([]);

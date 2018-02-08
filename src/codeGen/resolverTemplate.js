@@ -15,12 +15,16 @@ export async function load${objName}s(db, queryPacket) {
   return ${objName}s;
 }
 
+export const ${objName} = {
+
+}
+
 export default {
   Query: {
     async get${objName}(root, args, context, ast) {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
-      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}");
+      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}Metadata, "${objName}");
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
       let results = await load${objName}s(db, queryPacket);
 
@@ -31,7 +35,7 @@ export default {
     async all${objName}s(root, args, context, ast) {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
       let db = await root.db;
-      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}, "${objName}s");
+      let queryPacket = decontructGraphqlQuery(args, ast, ${objName}Metadata, "${objName}s");
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
       let result = {};
 
@@ -54,9 +58,9 @@ export default {
   Mutation: {
     async create${objName}(root, args, context, ast) {
       let db = await root.db;
-      let newObject = newObjectFromArgs(args.${objName}, ${objName});
+      let newObject = newObjectFromArgs(args.${objName}, ${objName}Metadata);
       let requestMap = parseRequestedFields(ast, "${objName}");
-      let $project = requestMap.size ? getMongoProjection(requestMap, ${objName}, args) : null;
+      let $project = requestMap.size ? getMongoProjection(requestMap, ${objName}Metadata, args) : null;
 
       if (await processHook(hooksObj, "${objName}", "beforeInsert", newObject, root, args, context, ast) === false) {
         return { ${objName}: null };
@@ -74,8 +78,8 @@ export default {
         throw "No _id sent";
       }
       let db = await root.db;
-      let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}, "${objName}");
-      let updates = getUpdateObject(args.Updates || {}, ${objName});
+      let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}Metadata, "${objName}");
+      let updates = getUpdateObject(args.Updates || {}, ${objName}Metadata);
 
       if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { ${objName}: null };
@@ -91,8 +95,8 @@ export default {
     },
     async update${objName}s(root, args, context, ast) {
       let db = await root.db;
-      let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}, "${objName}s");
-      let updates = getUpdateObject(args.Updates || {}, ${objName});
+      let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}Metadata, "${objName}s");
+      let updates = getUpdateObject(args.Updates || {}, ${objName}Metadata);
 
       if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
@@ -108,8 +112,8 @@ export default {
     },
     async update${objName}sBulk(root, args, context, ast) {
       let db = await root.db;
-      let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName});
-      let updates = getUpdateObject(args.Updates || {}, ${objName});
+      let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName}Metadata);
+      let updates = getUpdateObject(args.Updates || {}, ${objName}Metadata);
 
       if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
