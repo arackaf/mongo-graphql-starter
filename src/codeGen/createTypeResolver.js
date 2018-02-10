@@ -25,6 +25,7 @@ export default function createGraphqlResolver(objectToCreate) {
       if (!typeImports.has(relationship.type.__name)) {
         typeImports.add(relationship.type.__name);
         imports.push(`import { load${relationship.type.__name}s} from "../${relationship.type.__name}/resolver";`);
+        imports.push(`import ${relationship.type.__name}Metadata from "../${relationship.type.__name}/${relationship.type.__name}";`);
       }
 
       if (!typeImports.has("flatMap")) {
