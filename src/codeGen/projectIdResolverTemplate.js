@@ -16,7 +16,6 @@
         for (let result of results) {
           destinationMap.set("" + result._id, result);
         }
-    
         return keys.map(_id => destinationMap.get("" + _id) || null);
       });
     }
