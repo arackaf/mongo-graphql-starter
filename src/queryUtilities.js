@@ -266,7 +266,6 @@ function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
 
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   let $match = getMongoFilters(args, objectMetaData);
-
   let requestMap, metadataRequested, $project, extrasPackets;
 
   if (ast && queryName) {
@@ -386,3 +385,7 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
     }
   });
 }
+
+export const constants = {
+  useCurrentSelectionSet: Symbol("useCurrentSelectionSet")
+};
