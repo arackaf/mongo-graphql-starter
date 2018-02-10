@@ -196,6 +196,9 @@ export function getNestedQueryInfo(ast, queryName) {
 
   if (queryName) {
     for (let path of queryName.split(".")) {
+      if (!fieldNode) {
+        break;
+      }
       fieldNode = fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == path);
     }
   }
