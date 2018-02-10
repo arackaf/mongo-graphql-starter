@@ -16,7 +16,6 @@ export default function createGraphqlResolver(objectToCreate) {
     `import * as dbHelpers from "../dbHelpers";`
   ];
   let typeImports = new Set([]);
-  let relationships = "";
   let relationshipResolvers = "";
 
   if (objectToCreate.relationships) {
@@ -49,15 +48,6 @@ export default function createGraphqlResolver(objectToCreate) {
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name)
           .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`);
-
-        // relationships += projectIdsTemplate
-        //   .replace(/\${table}/g, relationship.type.table)
-        //   .replace(/\${fkField}/g, relationship.fkField)
-        //   .replace(/\${targetObjName}/g, relationshipName)
-        //   .replace(/\${targetTypeName}/g, relationship.type.__name)
-        //   .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
-        //   .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
-        //   .replace(/\${sourceObjName}/g, objectToCreate.__name);
       } else if (relationship.__isObject) {
         relationshipResolvers += projectIdResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
@@ -71,16 +61,12 @@ export default function createGraphqlResolver(objectToCreate) {
       }
 
       if (index < all.length - 1) {
-        relationships += "\n\n";
         relationshipResolvers += ",\n";
       }
     });
-
-    relationships = "\n" + relationships + "\n";
   }
 
   result += template
-    .replace(/\${relationships}/g, relationships)
     .replace(/\${relationshipResolvers}/g, relationshipResolvers)
     .replace(/\${table}/g, objectToCreate.table)
     .replace(/\${objName}/g, objectToCreate.__name)

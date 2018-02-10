@@ -10,7 +10,6 @@ export async function load${objName}s(db, queryPacket) {
   ].filter(item => item);
 
   let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
-  ${relationships}
   await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   return ${objName}s;
 }
