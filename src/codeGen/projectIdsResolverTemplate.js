@@ -16,8 +16,8 @@
         for (let obj of results) {
           destinationMap.set("" + obj._id, obj)
         }
-        return keyArrays.map(keyArray => Array.isArray(keyArray) ? keyArray.map(_id => destinationMap.get("" + _id)) : null);
+        return keyArrays.map(keyArray => keyArray.map(_id => destinationMap.get("" + _id)).filter(o => o));
       });
     }
-    return context.${dataLoaderId}.load(obj.${fkField});
+    return context.${dataLoaderId}.load(obj.${fkField} || []);
   }
