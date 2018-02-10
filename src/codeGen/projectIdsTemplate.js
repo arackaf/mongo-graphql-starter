@@ -1,4 +1,4 @@
-  if (${sourceObjName}s.length && queryPacket.extrasPackets.has("${targetObjName}")) {
+  if (${sourceObjName}s.length && queryPacket.extrasPackets && queryPacket.extrasPackets.has("${targetObjName}")) {
     let $match = { _id: { $in: flatMap(${sourceObjName}s.map(${objNameLower} => ${objNameLower}.${fkField} || []), ids => ids.map(id => ObjectId(id))) } };  
     let $project = {};
 
