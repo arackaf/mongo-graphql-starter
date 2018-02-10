@@ -16,6 +16,11 @@ test("Creation mutation runs", async () => {
   await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}`, result: "createBook" });
 });
 
+test("Creation mutation runs and returns success", async () => {
+  let res = await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){success}`, rawResult: "createBook" });
+  expect(res).toEqual({ success: true });
+});
+
 test("Creation mutation runs without selection", async () => {
   await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){success}`, result: "createBook" });
 });
