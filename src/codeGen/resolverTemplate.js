@@ -66,6 +66,7 @@ export default {
 
       let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0] : null;
       return {
+        success: true,
         ${objName}: result
       }
     },
