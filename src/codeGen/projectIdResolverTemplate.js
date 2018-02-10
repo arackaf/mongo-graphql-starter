@@ -1,7 +1,7 @@
   async ${targetObjName}(obj, args, context, ast) {
-    if (context["${dataLoaderId}"] == null) {
+    if (context.${dataLoaderId} == null) {
       let db = await context.__mgqlsdb;
-      context["${dataLoaderId}"] = new DataLoader(async keys => {
+      context.${dataLoaderId} = new DataLoader(async keys => {
         let $match = { _id: { $in: keys.filter(id => id).map(id => ObjectId(id)) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, constants.useCurrentSelectionSet);
         let { $project, $sort, $limit, $skip } = queryPacket;
@@ -11,16 +11,15 @@
           { $project },
         ];
 
-        let results = await dbHelpers.runQuery(db, ${table}, aggregateItems);
+        let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
         let DestinationMap = new Map([]);
 
-        for (let ${targetTypeNameLower} of results) {
-          DestinationMap.set("" + ${targetTypeNameLower}._id, ${targetTypeNameLower});
+        for (let result of results) {
+          DestinationMap.set("" + result._id, result);
         }
     
-        return keys.map(_id => DestinationMap.get(_id) || null);
+        return keys.map(_id => DestinationMap.get("" + _id) || null);
       });
-
-      context["${dataLoaderId}"].load(obj.${fkField});
     }
+    return context.${dataLoaderId}.load(obj.${fkField});
   }

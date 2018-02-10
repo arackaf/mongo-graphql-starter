@@ -194,7 +194,7 @@ export function parseRequestedFields(ast, queryName) {
 export function getNestedQueryInfo(ast, queryName) {
   let fieldNode = ast.fieldNodes ? ast.fieldNodes.find(fn => fn.kind == "Field") : ast;
 
-  if (queryName) {
+  if (typeof queryName === "string") {
     for (let path of queryName.split(".")) {
       if (!fieldNode) {
         break;
@@ -249,7 +249,7 @@ function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
   if (type.relationships) {
     Object.keys(type.relationships).forEach(name => {
       let relationship = type.relationships[name];
-      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, anchor ? anchor + "." + name : name);
+      let { ast: astNew, requestMap } = getNestedQueryInfo(ast, typeof anchor === "string" ? anchor + "." + name : name);
 
       if (requestMap.size) {
         extrasPackets.set(name, parseRequestedHierarchy(astNew, requestMap, relationship.type));
