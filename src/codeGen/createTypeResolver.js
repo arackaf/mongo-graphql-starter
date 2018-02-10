@@ -4,7 +4,6 @@ import path from "path";
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
   let projectIdsTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsTemplate.js"), { encoding: "utf8" });
-  let projectIdTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdTemplate.js"), { encoding: "utf8" });
   let projectIdResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdResolverTemplate.js"), { encoding: "utf8" });
   let result = "";
   let imports = [
@@ -48,14 +47,14 @@ export default function createGraphqlResolver(objectToCreate) {
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name);
       } else if (relationship.__isObject) {
-        relationships += projectIdTemplate
-          .replace(/\${table}/g, relationship.type.table)
-          .replace(/\${fkField}/g, relationship.fkField)
-          .replace(/\${targetObjName}/g, relationshipName)
-          .replace(/\${targetTypeName}/g, relationship.type.__name)
-          .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
-          .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
-          .replace(/\${sourceObjName}/g, objectToCreate.__name);
+        // relationships += projectIdTemplate
+        //   .replace(/\${table}/g, relationship.type.table)
+        //   .replace(/\${fkField}/g, relationship.fkField)
+        //   .replace(/\${targetObjName}/g, relationshipName)
+        //   .replace(/\${targetTypeName}/g, relationship.type.__name)
+        //   .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
+        //   .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
+        //   .replace(/\${sourceObjName}/g, objectToCreate.__name);
 
         relationshipResolvers += projectIdResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
