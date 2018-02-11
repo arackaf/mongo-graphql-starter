@@ -1,5 +1,4 @@
 .esm-cache/
-.vscode/launch.json
 test/testProject1/project/
 test/testProject1/graphQL/
 node_modules/
