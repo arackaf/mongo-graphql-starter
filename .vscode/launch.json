@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 1",
+      "program": "${workspaceRoot}\\test\\testProject1\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 2",
+      "program": "${workspaceRoot}\\test\\testProject2\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 3",
+      "program": "${workspaceRoot}\\test\\testProject3\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 4",
+      "program": "${workspaceRoot}\\test\\testProject4\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 5",
+      "program": "${workspaceRoot}\\test\\testProject5\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 6",
+      "program": "${workspaceRoot}\\test\\testProject6\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 7",
+      "program": "${workspaceRoot}\\test\\testProject7\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 8",
+      "program": "${workspaceRoot}\\test\\testProject8\\index.js"
+    }
+  ]
+}
