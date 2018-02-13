@@ -7,7 +7,7 @@ const localConn = "mongodb://localhost:27017/mongo-graphql-starter";
 export const nextConnectionString = () => localConn;
 
 export async function runQuery({ schema, db, query, variables, coll, results, meta }) {
-  let allResults = await graphql(schema, query, { db });
+  let allResults = await graphql(schema, query, { db }, {});
 
   if (!allResults.data || allResults.data[coll] === void 0) {
     let msg = "Expected result not found: probable error.";
@@ -25,7 +25,7 @@ export async function runQuery({ schema, db, query, variables, coll, results, me
 }
 
 export async function queryAndMatchArray({ schema, db, query, variables, coll, results, meta, error }) {
-  let allResults = await graphql(schema, query, { db });
+  let allResults = await graphql(schema, query, { db }, {});
 
   if (error) {
     if (!allResults.errors || !allResults.errors.length) {
@@ -68,7 +68,7 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
 }
 
 export async function runMutation({ schema, db, mutation, variables, result, rawResult }) {
-  let mutationResult = await graphql(schema, `mutation{${mutation}}`, { db });
+  let mutationResult = await graphql(schema, `mutation{${mutation}}`, { db }, {});
 
   if (rawResult) {
     return mutationResult.data[rawResult];
