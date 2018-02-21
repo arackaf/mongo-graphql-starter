@@ -45,10 +45,19 @@ const DeleteInfo = {
   }
 };
 
+const TypeWithExtra = {
+  table: "typeWithExtras",
+  fields: {
+    x: IntType,
+    y: IntType
+  }
+};
+
 export default {
   Type1,
   Type2,
   UpdateInfo,
   InsertInfo,
-  DeleteInfo
+  DeleteInfo,
+  TypeWithExtra
 };
