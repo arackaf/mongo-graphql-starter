@@ -8,6 +8,7 @@ import projectSetupF from "./projectSetupF";
 import projectSetupG from "./projectSetupG";
 import projectSetupH from "./projectSetupH";
 
+import mkdirp from "mkdirp";
 import path from "path";
 import fs from "fs";
 
@@ -21,6 +22,13 @@ Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProj
   fs.writeFileSync(
     path.resolve("./test/testProject6/graphQL/hooks.js"),
     fs.readFileSync(path.resolve(__dirname, "./projectSetupF_Hooks.js"), { encoding: "utf8" })
+  );
+  if (!fs.existsSync("./test/testProject6/graphQL-extras")) {
+    mkdirp.sync("./test/testProject6/graphQL-extras");
+  }
+  fs.writeFileSync(
+    path.resolve("./test/testProject6/graphQL-extras/typeWithExtra.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupF_Extras.js"), { encoding: "utf8" })
   );
 });
 
