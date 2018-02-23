@@ -6,6 +6,7 @@ const defaultDateFormat = "%m/%d/%Y";
 export default function createOutputTypeMetadata(objectToCreate) {
   let fields = objectToCreate.fields;
   let relationships = objectToCreate.relationships;
+  let extras = objectToCreate.extras;
 
   let types = new Set([]);
 
@@ -81,6 +82,19 @@ export default function createOutputTypeMetadata(objectToCreate) {
             }
           })
         },
+        extras
+          ? {
+              name: "extras",
+              value: createObject(
+                "{",
+                ["resolverSources", "schemaSources", "overrides"]
+                  .map(prop => (extras[prop] ? { name: prop, value: `[${extras[prop].map(s => `"${s}"`).join(", ")}]`, literal: true } : null))
+                  .filter(o => o),
+                2
+              ),
+              literal: true
+            }
+          : null,
         relationships
           ? {
               name: "relationships",
