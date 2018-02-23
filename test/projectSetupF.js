@@ -45,11 +45,21 @@ const DeleteInfo = {
   }
 };
 
-const TypeWithExtra = {
-  table: "typeWithExtras",
+const Coordinate = {
+  table: "coordinates",
   fields: {
     x: IntType,
     y: IntType
+  },
+  extras: {
+    resolverSources: ["../graphQL-extras/coordinateExtras"],
+    schemaSources: ["../graphQL-extras/coordinateExtras"],
+
+    schemaAdditions: {
+      Query: `
+
+      `
+    }
   }
 };
 
@@ -59,5 +69,5 @@ export default {
   UpdateInfo,
   InsertInfo,
   DeleteInfo,
-  TypeWithExtra
+  Coordinate
 };
