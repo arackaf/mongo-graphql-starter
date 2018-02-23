@@ -21,6 +21,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let manualQueryArgs = [];
   let allFieldsMutation = [];
   let TAB2 = TAB + TAB;
+  let extras = objectToCreate.extras || {};
+  let overrides = new Set(...(extras.overrides || []));
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -113,42 +115,70 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       ? `
 export const mutation = \`
   
-  create${name}(
+  ${
+    !overrides.has(`create${name}`)
+      ? `create${name}(
     ${[`${name}: ${name}Input`].join(`,\n${TAB}`)}
-  ): ${name}MutationResult
+  ): ${name}MutationResult`
+      : ""
+  }
   
-  update${name}(
+  ${
+    !overrides.has(`update${name}`)
+      ? `update${name}(
     ${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}MutationResult
+  ): ${name}MutationResult`
+      : ""
+  }
 
-  update${name}s(
+  ${
+    !overrides.has(`update${name}s`)
+      ? `update${name}s(
     ${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}MutationResultMulti
+  ): ${name}MutationResultMulti`
+      : ""
+  }
 
-  update${name}sBulk(
+  ${
+    !overrides.has(`update${name}sBulk`)
+      ? `update${name}sBulk(
     ${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}BulkMutationResult    
+  ): ${name}BulkMutationResult`
+      : ""
+  }
   
-  delete${name}(
+  ${
+    !overrides.has(`delete${name}`)
+      ? `delete${name}(
     ${[`_id: String`]}
-  ): Boolean
+  ): Boolean`
+      : ""
+  }
   
 \`;
   
   
 export const query = \`
   
-  all${name}s(
+${
+          !overrides.has(`all${name}s`)
+            ? `all${name}s(
     ${allQueryFields
       .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
       .concat(dateFields.map(f => `${f}_format: String`))
       .concat(manualQueryArgs)
       .join(`,\n${TAB2}`)}
-  ): ${name}QueryResults
+  ): ${name}QueryResults`
+            : ""
+        }
   
-  get${name}(
+  ${
+    !overrides.has(`get${name}`)
+      ? `get${name}(
     ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)).join(`,\n${TAB2}`)}
-  ): ${name}SingleQueryResult
+  ): ${name}SingleQueryResult`
+      : ""
+  }
   
 \`;
   

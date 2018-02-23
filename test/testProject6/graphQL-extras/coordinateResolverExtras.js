@@ -1,7 +1,7 @@
 export default {
   Query: {
     getCoordinate() {
-      return { x: -1, y: -2 };
+      return [{ x: -1, y: -2 }, { x: -3, y: -4 }];
     },
     updateCoordinate() {
       return [{ x: 1, y: 2 }, { x: 3, y: 4 }];

@@ -54,12 +54,7 @@ const Coordinate = {
   extras: {
     resolverSources: ["../graphQL-extras/coordinateExtras"],
     schemaSources: ["../graphQL-extras/coordinateExtras"],
-
-    schemaAdditions: {
-      Query: `
-
-      `
-    }
+    overrides: ["getCoordinate", "updateCoordinate"]
   }
 };
 
