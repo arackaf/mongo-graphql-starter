@@ -16,6 +16,7 @@ export async function load${objName}s(db, queryPacket) {
 
 export const ${objName} = {
 ${relationshipResolvers}
+${typeExtras}
 }
 
 export default {

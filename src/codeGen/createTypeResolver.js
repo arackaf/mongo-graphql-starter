@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { TAB, TAB2 } from "./utilities";
 
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
@@ -15,20 +16,27 @@ export default function createGraphqlResolver(objectToCreate) {
   let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.js"), { encoding: "utf8" });
 
   let result = "";
+  let extras = objectToCreate.extras || {};
+  let overrides = new Set(extras.overrides || []);
+  let resolverSources = extras.resolverSources || [];
   let imports = [
     `import { queryUtilities, processHook } from "mongo-graphql-starter";`,
     `import hooksObj from "../hooks";`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject, constants } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
-    `import * as dbHelpers from "../dbHelpers";`
+    `import * as dbHelpers from "../dbHelpers";`,
+    ...resolverSources.map(
+      (src, i) =>
+        `import ResolverExtras${i + 1} from "${src}";\nconst { Query: QueryExtras${i + 1}, Mutation: MutationExtras${i + 1}, ...OtherExtras${i +
+          1} } = ResolverExtras${i + 1};`
+    )
   ];
-  let extras = objectToCreate.extras || {};
-  let overrides = new Set(extras.overrides || []);
 
   let queryItems = [
     !overrides.has(`get${objectToCreate.typeName}`) ? getItemTemplate : "",
-    !overrides.has(`all${objectToCreate.typeName}s`) ? allItemsTemplate : ""
+    !overrides.has(`all${objectToCreate.typeName}s`) ? allItemsTemplate : "",
+    resolverSources.map((src, i) => `${TAB2}...(QueryExtras${i + 1} || {})`).join("\n")
   ]
     .filter(s => s)
     .join(",\n");
@@ -38,7 +46,8 @@ export default function createGraphqlResolver(objectToCreate) {
     !overrides.has(`update${objectToCreate.typeName}`) ? updateItemTemplate : "",
     !overrides.has(`update${objectToCreate.typeName}s`) ? updateItemsTemplate : "",
     !overrides.has(`update${objectToCreate.typeName}sBulk`) ? updateItemsBulkTemplate : "",
-    !overrides.has(`delete${objectToCreate.typeName}`) ? deleteItemTemplate : ""
+    !overrides.has(`delete${objectToCreate.typeName}`) ? deleteItemTemplate : "",
+    resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join("\n")
   ]
     .filter(s => s)
     .join(",\n");
@@ -96,6 +105,7 @@ export default function createGraphqlResolver(objectToCreate) {
 
   result += template
     .replace(/\${queryItems}/g, queryItems)
+    .replace(/\${typeExtras}/g, "")
     .replace(/\${mutationItems}/g, mutationItems)
     .replace(/\${relationshipResolvers}/g, relationshipResolvers)
     .replace(/\${table}/g, objectToCreate.table)
