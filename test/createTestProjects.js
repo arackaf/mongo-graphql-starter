@@ -41,6 +41,18 @@ Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProj
     path.resolve("./test/testProject7/graphQL/hooks.js"),
     fs.readFileSync(path.resolve(__dirname, "./projectSetupG_Hooks.js"), { encoding: "utf8" })
   );
+
+  if (!fs.existsSync("./test/testProject7/graphQL-extras")) {
+    mkdirp.sync("./test/testProject7/graphQL-extras");
+  }
+  fs.writeFileSync(
+    path.resolve("./test/testProject7/graphQL-extras/coordinateSchemaExtras.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupF_SchemaExtras.js"), { encoding: "utf8" })
+  );
+  fs.writeFileSync(
+    path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupF_ResolverExtras.js"), { encoding: "utf8" })
+  );
 });
 
 createGraphqlSchema(projectSetupH, path.resolve("./test/testProject8"));

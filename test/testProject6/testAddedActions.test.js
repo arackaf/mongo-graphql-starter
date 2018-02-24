@@ -11,12 +11,11 @@ afterAll(async () => {
 });
 
 test("Test overridden query", async () => {
-  let results = await runMutation({
-    mutation: `getCoordinate(_id: "5a510abf9491f39a19e2d9ef"){x, y}`,
-    result: `getCoordinate`
+  await queryAndMatchArray({
+    query: `{getCoordinate(_id: "5a510abf9491f39a19e2d9ef"){x, y}}`,
+    coll: "getCoordinate",
+    results: { x: -1, y: -2 }
   });
-
-  expect(results).toEqual({ x: -1, y: -2 });
 });
 
 test("Test overridden mutation", async () => {
@@ -38,10 +37,9 @@ test("Test added mutation", async () => {
 });
 
 test("Test added query", async () => {
-  let results = await runMutation({
-    mutation: `randomQuery{x, y}`,
-    result: `randomQuery`
+  await queryAndMatchArray({
+    query: `{randomQuery{x, y}}`,
+    coll: "randomQuery",
+    results: { x: 7, y: 8 }
   });
-
-  expect(results).toEqual({ x: 7, y: 8 });
 });

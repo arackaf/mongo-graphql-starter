@@ -23,6 +23,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let TAB2 = TAB + TAB;
   let extras = objectToCreate.extras || {};
   let overrides = new Set(extras.overrides || []);
+  let schemaSources = extras.schemaSources || [];
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -34,7 +35,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
 
-  return `export const type = \`
+  let imports = schemaSources.map((src, i) => `import SchemaExtras${i + 1} from "${src}";`);
+
+  return `${imports.length ? imports.join("\n") + "\n\n" : ""}export const type = \`
   
   type ${name} {
   ${Object.keys(fields)
@@ -144,7 +147,9 @@ ${[
             ? `${TAB}delete${name}(
     ${[`_id: String`]}
   ): Boolean`
-            : ""
+            : "",
+
+          schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}').join("\n\n")
         ]
           .filter(s => s)
           .join("\n\n")}
@@ -169,7 +174,9 @@ ${[
             ? `${TAB}get${name}(
     ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)).join(`,\n${TAB2}`)}
   ): ${name}SingleQueryResult`
-            : ""
+            : "",
+
+          schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n")
         ]
           .filter(s => s)
           .join("\n\n")}
