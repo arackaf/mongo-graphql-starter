@@ -22,7 +22,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let allFieldsMutation = [];
   let TAB2 = TAB + TAB;
   let extras = objectToCreate.extras || {};
-  let overrides = new Set(...(extras.overrides || []));
+  let overrides = new Set(extras.overrides || []);
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -114,71 +114,65 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     objectToCreate.table
       ? `
 export const mutation = \`
-  
-  ${
-    !overrides.has(`create${name}`)
-      ? `create${name}(
+
+${[
+          !overrides.has(`create${name}`)
+            ? `${TAB}create${name}(
     ${[`${name}: ${name}Input`].join(`,\n${TAB}`)}
   ): ${name}MutationResult`
-      : ""
-  }
-  
-  ${
-    !overrides.has(`update${name}`)
-      ? `update${name}(
+            : "",
+
+          !overrides.has(`update${name}`)
+            ? `${TAB}update${name}(
     ${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
   ): ${name}MutationResult`
-      : ""
-  }
+            : "",
 
-  ${
-    !overrides.has(`update${name}s`)
-      ? `update${name}s(
+          !overrides.has(`update${name}s`)
+            ? `${TAB}update${name}s(
     ${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
   ): ${name}MutationResultMulti`
-      : ""
-  }
+            : "",
 
-  ${
-    !overrides.has(`update${name}sBulk`)
-      ? `update${name}sBulk(
+          !overrides.has(`update${name}sBulk`)
+            ? `${TAB}update${name}sBulk(
     ${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
   ): ${name}BulkMutationResult`
-      : ""
-  }
-  
-  ${
-    !overrides.has(`delete${name}`)
-      ? `delete${name}(
+            : "",
+
+          !overrides.has(`delete${name}`)
+            ? `${TAB}delete${name}(
     ${[`_id: String`]}
   ): Boolean`
-      : ""
-  }
+            : ""
+        ]
+          .filter(s => s)
+          .join("\n\n")}
   
 \`;
   
   
 export const query = \`
   
-${
+${[
           !overrides.has(`all${name}s`)
-            ? `all${name}s(
+            ? `${TAB}all${name}s(
     ${allQueryFields
       .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
       .concat(dateFields.map(f => `${f}_format: String`))
       .concat(manualQueryArgs)
       .join(`,\n${TAB2}`)}
   ): ${name}QueryResults`
-            : ""
-        }
-  
-  ${
-    !overrides.has(`get${name}`)
-      ? `get${name}(
+            : "",
+
+          !overrides.has(`get${name}`)
+            ? `${TAB}get${name}(
     ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)).join(`,\n${TAB2}`)}
   ): ${name}SingleQueryResult`
-      : ""
-  }
+            : ""
+        ]
+          .filter(s => s)
+          .join("\n\n")}
   
 \`;
   
