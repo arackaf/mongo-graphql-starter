@@ -52,8 +52,8 @@ const Coordinate = {
     y: IntType
   },
   extras: {
-    resolverSources: ["../graphQL-extras/coordinateExtras"],
-    schemaSources: ["../graphQL-extras/coordinateExtras"],
+    resolverSources: ["../../graphQL-extras/coordinateResolverExtras"],
+    schemaSources: ["../../graphQL-extras/coordinateSchemaExtras"],
     overrides: ["getCoordinate", "updateCoordinate"]
   }
 };

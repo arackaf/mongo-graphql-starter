@@ -14,6 +14,8 @@ export default function createGraphqlResolver(objectToCreate) {
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
     `import * as dbHelpers from "../dbHelpers";`
   ];
+  let extras = objectToCreate.extras || {};
+
   let typeImports = new Set([]);
   let relationshipResolvers = "";
 
