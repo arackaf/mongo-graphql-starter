@@ -24,7 +24,7 @@ export async function runQuery({ schema, db, query, variables, coll, results, me
   }
 }
 
-export async function queryAndMatchArray({ schema, db, query, variables, coll, results, meta, error }) {
+export async function queryAndMatchArray({ schema, db, query, variables, coll, results, raw, meta, error }) {
   let allResults = await graphql(schema, query, { db }, {});
 
   if (error) {
@@ -55,7 +55,7 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
   }
 
   if (results != null) {
-    let needsReplacing = /^all/.test(coll) || /^get/.test(coll);
+    let needsReplacing = !raw && (/^all/.test(coll) || /^get/.test(coll));
     let res = needsReplacing ? allResults.data[coll][coll.replace(/^all/, "").replace(/^get/, "")] : allResults.data[coll];
 
     expect(res).toEqual(results);
