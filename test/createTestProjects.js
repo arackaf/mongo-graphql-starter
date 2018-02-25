@@ -5,7 +5,6 @@ import projectSetupC from "./projectSetupC";
 import projectSetupD from "./projectSetupD";
 import projectSetupE from "./projectSetupE";
 import projectSetupF from "./projectSetupF";
-import projectSetupG from "./projectSetupG";
 import projectSetupH from "./projectSetupH";
 
 import mkdirp from "mkdirp";
@@ -36,7 +35,19 @@ Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProj
   );
 });
 
-Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProject7"))).then(() => {
+let projectSetupG = { ...projectSetupF };
+projectSetupG.Coordinate = { ...projectSetupG.Coordinate };
+projectSetupG.Coordinate.extras = {
+  resolverSources: [
+    "../../graphQL-extras/coordinateResolverExtras1",
+    "../../graphQL-extras/coordinateResolverExtras2",
+    "../../graphQL-extras/coordinateResolverExtras3"
+  ],
+  schemaSources: ["../../graphQL-extras/coordinateSchemaExtras1", "../../graphQL-extras/coordinateSchemaExtras2"],
+  overrides: ["getCoordinate", "updateCoordinate"]
+};
+
+Promise.resolve(createGraphqlSchema(projectSetupG, path.resolve("./test/testProject7"))).then(() => {
   fs.writeFileSync(
     path.resolve("./test/testProject7/graphQL/hooks.js"),
     fs.readFileSync(path.resolve(__dirname, "./projectSetupG_Hooks.js"), { encoding: "utf8" })
@@ -46,12 +57,24 @@ Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProj
     mkdirp.sync("./test/testProject7/graphQL-extras");
   }
   fs.writeFileSync(
-    path.resolve("./test/testProject7/graphQL-extras/coordinateSchemaExtras.js"),
-    fs.readFileSync(path.resolve(__dirname, "./projectSetupF_SchemaExtras.js"), { encoding: "utf8" })
+    path.resolve("./test/testProject7/graphQL-extras/coordinateSchemaExtras1.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupG_SchemaExtras1.js"), { encoding: "utf8" })
   );
   fs.writeFileSync(
-    path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras.js"),
-    fs.readFileSync(path.resolve(__dirname, "./projectSetupF_ResolverExtras.js"), { encoding: "utf8" })
+    path.resolve("./test/testProject7/graphQL-extras/coordinateSchemaExtras2.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupG_SchemaExtras2.js"), { encoding: "utf8" })
+  );
+  fs.writeFileSync(
+    path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras1.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupG_ResolverExtras1.js"), { encoding: "utf8" })
+  );
+  fs.writeFileSync(
+    path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras2.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupG_ResolverExtras2.js"), { encoding: "utf8" })
+  );
+  fs.writeFileSync(
+    path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras3.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupG_ResolverExtras3.js"), { encoding: "utf8" })
   );
 });
 
