@@ -24,6 +24,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let extras = objectToCreate.extras || {};
   let overrides = new Set(extras.overrides || []);
   let schemaSources = extras.schemaSources || [];
+  let resolvedFields = objectToCreate.resolvedFields || {};
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -42,6 +43,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   type ${name} {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
+    .join(`\n${TAB}`)}${Object.keys(resolvedFields)
+    .map(k => `${TAB}${k}: ${resolvedFields[k]}`)
     .join(`\n${TAB}`)}${
     Object.keys(relationships).length
       ? `\n${TAB}` +
