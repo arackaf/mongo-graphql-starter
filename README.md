@@ -504,7 +504,7 @@ Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$sk
 
 ## Integrating custom content
 
-This project aims to create as much boilerplate as possible, but of course special use cases will always exist, which require custom code. To accomplish this, you can add metadata to your type definitions indicating where additional schema or resolver code is located, as well as indicate any built-in queries or mutations you'd like to define yourself, instead of using what would otherwise be created by this library.  For example
+This project aims to create as much boilerplate as possible, but of course special use cases will always exist, which require custom code. To accomplish this, you can add metadata to your type definitions indicating where additional schema or resolver code is located; as well as any built-in queries or mutations you'd like to define yourself, instead of using what would otherwise be created by this library.  For example
 
 ```javascript
 const Coordinate = {
@@ -525,13 +525,15 @@ const Coordinate = {
 };
 ``` 
 
-This creates a Coordinate type with an `x` and `y` field. The `resolvedFields` entry allows you to define fields on your type for which you will define your own resolvers (more on that in a moment). These fields will be a part of your type, so you can request them when making queries, but no filters will be made for them, and no slots will be defined for them for the creation or mutation inputs.  The use case here is for separately queried data that you need to handle yourself.
+This creates a Coordinate type with an `x` and `y` field. `resolvedFields` allows you to also define fields on your type for which you will define your own resolvers (more on that in a moment). These fields will be a part of your type, so you can request them from queries, but no filters will be made, and no slots will be defined for them in the creation or mutations that are generated.  The use case here is for separately queried data that you need to handle yourself.
 
-Inside of the `extras` entry, the `overrides` array is for built-in queries and mutations which you want to define yourself. Here, `getCoordinate` and `updateCoordinate` will not be defined; you will be responsible for defining these actions, bother in the schema, and resolvers.
+Inside of the `extras` entry, the `overrides` array is for built-in queries and mutations which you want to define yourself. Here, `getCoordinate` and `updateCoordinate` will not be defined; you will be responsible for defining these actions, both in the schema, and resolver.
 
-`resolverSources` is an array of paths which will be imported from within this type's coordinate file. The default export will be imported. If this export defines a Query entry, that will be spread onto the Queries which are already created. If this export defines a `Mutation` entry, that will be similarly spread onto the Mutations which are already created. Lastly, anything else will be spread onto the type. 
+`resolverSources` is an array of paths which will be imported from within this type's resolver file. For each, the default export will be imported. If this object defines a `Query` entry, that will be spread onto the Queries which are already created. If this export defines a `Mutation` entry, that will be similarly spread onto the Mutations which are created. Lastly, anything else will be spread onto the type. 
 
-`schemaSources` behaves likewise. The default export is fetched, and if a Query or Mutation string is defined on the imported object, then that content will be added to the query and mutation sections already defined.
+`schemaSources` behaves likewise. The default export is imported, and if a Query or Mutation string is defined on the imported object, then that content will be added to the query and mutation sections already defined.
+
+Whatever paths you put in the type metadata will be imported as is from the resolver and schema files, so make sure the paths to your content are relative from **there**.
 
 ### schemaSources example
 
@@ -550,7 +552,7 @@ export default {
 };
 ```
 
-Here we see the `getCoordinate` and `updateCoordinate` query and mutation which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions in any other way you may want. Also defined are a new query, and a new mutation.
+Here we see the `getCoordinate` and `updateCoordinate` query and mutation which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions however you may want. Also defined are a new query, and a new mutation.
 
 ### resolverSources example
 
@@ -583,10 +585,9 @@ export default {
 };
 ```
 
-Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (in real life you can of course make these async methods and actually query real data). The `Query` contains the `getCoordinate` query that was overridden, plus the `randomQuery` defined above in the schema file.  Lastly, of course, is the `Mutation` entry that has the `updateCoordinate` mutation that was overriden, and the new, `randomMutation` from before.
+Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (in real life you can of course make these async methods and actually query real data). The `Query` entry contains the `getCoordinate` query that was overridden, plus the `randomQuery` defined in the schema file above.  Lastly, of course, is the `Mutation` entry that has the `updateCoordinate` mutation that we overrode, and the new, `randomMutation` from before.
 
 You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted. 
-
 
 ## Projecting results from queries
 
