@@ -1,19 +1,59 @@
 import fs from "fs";
 import path from "path";
+import { TAB, TAB2 } from "./utilities";
 
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
   let projectIdResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdResolverTemplate.js"), { encoding: "utf8" });
   let projectIdsResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsResolverTemplate.js"), { encoding: "utf8" });
+
+  let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.js"), { encoding: "utf8" });
+  let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.js"), { encoding: "utf8" });
+  let createItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/createItem.js"), { encoding: "utf8" });
+  let updateItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItem.js"), { encoding: "utf8" });
+  let updateItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItems.js"), { encoding: "utf8" });
+  let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.js"), { encoding: "utf8" });
+  let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.js"), { encoding: "utf8" });
+
   let result = "";
+  let extras = objectToCreate.extras || {};
+  let overrides = new Set(extras.overrides || []);
+  let resolverSources = extras.resolverSources || [];
   let imports = [
     `import { queryUtilities, processHook } from "mongo-graphql-starter";`,
     `import hooksObj from "../hooks";`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject, constants } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
-    `import * as dbHelpers from "../dbHelpers";`
+    `import * as dbHelpers from "../dbHelpers";`,
+    ...resolverSources.map(
+      (src, i) =>
+        `import ResolverExtras${i + 1} from "${src}";\nconst { Query: QueryExtras${i + 1}, Mutation: MutationExtras${i + 1}, ...OtherExtras${i +
+          1} } = ResolverExtras${i + 1};`
+    )
   ];
+
+  let queryItems = [
+    !overrides.has(`get${objectToCreate.__name}`) ? getItemTemplate : "",
+    !overrides.has(`all${objectToCreate.__name}s`) ? allItemsTemplate : "",
+    resolverSources.map((src, i) => `${TAB2}...(QueryExtras${i + 1} || {})`).join(",\n")
+  ]
+    .filter(s => s)
+    .join(",\n");
+
+  let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join(",\n");
+
+  let mutationItems = [
+    !overrides.has(`create${objectToCreate.__name}`) ? createItemTemplate : "",
+    !overrides.has(`update${objectToCreate.__name}`) ? updateItemTemplate : "",
+    !overrides.has(`update${objectToCreate.__name}s`) ? updateItemsTemplate : "",
+    !overrides.has(`update${objectToCreate.__name}sBulk`) ? updateItemsBulkTemplate : "",
+    !overrides.has(`delete${objectToCreate.__name}`) ? deleteItemTemplate : "",
+    resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join(",\n")
+  ]
+    .filter(s => s)
+    .join(",\n");
+
   let typeImports = new Set([]);
   let relationshipResolvers = "";
 
@@ -66,6 +106,9 @@ export default function createGraphqlResolver(objectToCreate) {
   }
 
   result += template
+    .replace(/\${queryItems}/g, queryItems)
+    .replace(/\${typeExtras}/g, typeExtras)
+    .replace(/\${mutationItems}/g, mutationItems)
     .replace(/\${relationshipResolvers}/g, relationshipResolvers)
     .replace(/\${table}/g, objectToCreate.table)
     .replace(/\${objName}/g, objectToCreate.__name)

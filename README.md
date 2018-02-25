@@ -502,6 +502,93 @@ Pass `LIMIT` and `SKIP` to your query, which will map directly to the `$limit` a
 
 Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$skip` for you, and add to the Mongo query.
 
+## Integrating custom content
+
+This project aims to create as much boilerplate as possible, but of course special use cases will always exist, which require custom code. To accomplish this, you can add metadata to your type definitions indicating where additional schema or resolver code is located; as well as any built-in queries or mutations you'd like to define yourself, instead of using what would otherwise be created by this library.  For example
+
+```javascript
+const Coordinate = {
+  table: "coordinates",
+  fields: {
+    x: IntType,
+    y: IntType
+  },
+  resolvedFields: {
+    pointAbove: "Coordinate",
+    allNeighbors: "[Coordinate]"
+  },
+  extras: {
+    resolverSources: ["../../graphQL-extras/coordinateResolverExtras"],
+    schemaSources: ["../../graphQL-extras/coordinateSchemaExtras"],
+    overrides: ["getCoordinate", "updateCoordinate"]
+  }
+};
+``` 
+
+This creates a Coordinate type with an `x` and `y` field. `resolvedFields` allows you to also define fields on your type for which you will define your own resolvers (more on that in a moment). These fields will be a part of your type, so you can request them from queries, but no filters will be made, and no slots will be defined for them in the creation or mutations that are generated.  The use case here is for separately queried data that you need to handle yourself.
+
+Inside of the `extras` entry, the `overrides` array is for built-in queries and mutations which you want to define yourself. Here, `getCoordinate` and `updateCoordinate` will not be defined; you will be responsible for defining these actions, both in the schema, and resolver.
+
+`resolverSources` is an array of paths which will be imported from within this type's resolver file. For each, the default export will be imported. If this object defines a `Query` entry, that will be spread onto the Queries which are already created. If this export defines a `Mutation` entry, that will be similarly spread onto the Mutations which are created. Lastly, anything else will be spread onto the type. 
+
+`schemaSources` behaves likewise. The default export is imported, and if a `Query` or `Mutation` string is defined on the imported object, then that content will be added to the query and mutation sections already defined.
+
+Whatever paths you put in the type metadata will be imported as is from the resolver and schema files, so make sure the paths to your content are relative from **there**.
+
+### schemaSources example
+
+The `coordinateSchemaExtras.js` file from above contains this
+
+```javascript
+export default {
+  Query: `
+    getCoordinate(_id: String): [Coordinate]
+    randomQuery: Coordinate
+  `,
+  Mutation: `
+    updateCoordinate(_id: String, Updates: CoordinateMutationInput): [Coordinate]
+    randomMutation: Coordinate
+  `
+};
+```
+
+Here we see the `getCoordinate` and `updateCoordinate` query and mutation which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions however you may want. Also defined are a new query, and mutation.
+
+### resolverSources example
+
+The `coordinateResolverExtras.js` file from above contains this
+
+```javascript
+export default {
+  pointAbove() {
+    return { x: 10, y: 11 };
+  },
+  allNeighbors() {
+    return [{ x: 12, y: 13 }, { x: 14, y: 15 }];
+  },
+  Query: {
+    getCoordinate() {
+      return [{ x: -1, y: -2 }, { x: -3, y: -4 }];
+    },
+    randomQuery() {
+      return { x: 7, y: 8 };
+    }
+  },
+  Mutation: {
+    updateCoordinate() {
+      return [{ x: 1, y: 2 }, { x: 3, y: 4 }];
+    },
+    randomMutation() {
+      return { x: 5, y: 6 };
+    }
+  }
+};
+```
+
+Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (in real life you can of course make these async methods and actually query real data). The `Query` entry contains the `getCoordinate` query that was overridden, plus the `randomQuery` defined in the schema file above.  Lastly, of course, is the `Mutation` entry that has the `updateCoordinate` mutation that we overrode, and the new, `randomMutation` from before.
+
+You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted. 
+
 ## Projecting results from queries
 
 Use standard GraphQL syntax to select only the fields you want from your query. The incoming ast will be parsed, and the generated query will only

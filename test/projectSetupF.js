@@ -1,5 +1,5 @@
 import { dataTypes } from "mongo-graphql-starter";
-import { MongoIdType } from "../src/dataTypes";
+import { MongoIdType, typeLiteral } from "../src/dataTypes";
 const { StringType, StringArrayType, IntType } = dataTypes;
 
 const fields = {
@@ -45,10 +45,28 @@ const DeleteInfo = {
   }
 };
 
+const Coordinate = {
+  table: "coordinates",
+  fields: {
+    x: IntType,
+    y: IntType
+  },
+  resolvedFields: {
+    pointAbove: "Coordinate",
+    allNeighbors: "[Coordinate]"
+  },
+  extras: {
+    resolverSources: ["../../graphQL-extras/coordinateResolverExtras"],
+    schemaSources: ["../../graphQL-extras/coordinateSchemaExtras"],
+    overrides: ["getCoordinate", "updateCoordinate"]
+  }
+};
+
 export default {
   Type1,
   Type2,
   UpdateInfo,
   InsertInfo,
-  DeleteInfo
+  DeleteInfo,
+  Coordinate
 };
