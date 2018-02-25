@@ -531,7 +531,7 @@ Inside of the `extras` entry, the `overrides` array is for built-in queries and 
 
 `resolverSources` is an array of paths which will be imported from within this type's resolver file. For each, the default export will be imported. If this object defines a `Query` entry, that will be spread onto the Queries which are already created. If this export defines a `Mutation` entry, that will be similarly spread onto the Mutations which are created. Lastly, anything else will be spread onto the type. 
 
-`schemaSources` behaves likewise. The default export is imported, and if a Query or Mutation string is defined on the imported object, then that content will be added to the query and mutation sections already defined.
+`schemaSources` behaves likewise. The default export is imported, and if a `Query` or `Mutation` string is defined on the imported object, then that content will be added to the query and mutation sections already defined.
 
 Whatever paths you put in the type metadata will be imported as is from the resolver and schema files, so make sure the paths to your content are relative from **there**.
 
@@ -552,7 +552,7 @@ export default {
 };
 ```
 
-Here we see the `getCoordinate` and `updateCoordinate` query and mutation which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions however you may want. Also defined are a new query, and a new mutation.
+Here we see the `getCoordinate` and `updateCoordinate` query and mutation which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions however you may want. Also defined are a new query, and mutation.
 
 ### resolverSources example
 
