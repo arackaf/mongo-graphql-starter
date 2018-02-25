@@ -41,6 +41,8 @@ export default function createGraphqlResolver(objectToCreate) {
     .filter(s => s)
     .join(",\n");
 
+  let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join("\n");
+
   let mutationItems = [
     !overrides.has(`create${objectToCreate.typeName}`) ? createItemTemplate : "",
     !overrides.has(`update${objectToCreate.typeName}`) ? updateItemTemplate : "",
@@ -105,7 +107,7 @@ export default function createGraphqlResolver(objectToCreate) {
 
   result += template
     .replace(/\${queryItems}/g, queryItems)
-    .replace(/\${typeExtras}/g, "")
+    .replace(/\${typeExtras}/g, typeExtras)
     .replace(/\${mutationItems}/g, mutationItems)
     .replace(/\${relationshipResolvers}/g, relationshipResolvers)
     .replace(/\${table}/g, objectToCreate.table)

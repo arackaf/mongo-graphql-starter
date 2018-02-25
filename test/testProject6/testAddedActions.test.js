@@ -1,12 +1,18 @@
 import spinUp from "./spinUp";
 
 let db, schema, queryAndMatchArray, runMutation;
+let item = { x: 5, y: 6 };
+
+const pointAbove = { x: 10, y: 11 };
+const allNeighbors = [{ x: 12, y: 13 }, { x: 14, y: 15 }];
 
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  await db.collection("coordinates").insert(item);
 });
 
 afterAll(async () => {
+  await db.collection("coordinates").remove({});
   db.close();
 });
 
@@ -15,7 +21,24 @@ test("Test overridden query", async () => {
     query: `{getCoordinate(_id: "5a510abf9491f39a19e2d9ef"){x, y}}`,
     coll: "getCoordinate",
     results: [{ x: -1, y: -2 }, { x: -3, y: -4 }],
-    raw: true
+    rawResult: true
+  });
+});
+
+test("Test custom field with overridden query", async () => {
+  await queryAndMatchArray({
+    query: `{getCoordinate(_id: "5a510abf9491f39a19e2d9ef"){x, y, pointAbove{x,y}, allNeighbors{x,y}}}`,
+    coll: "getCoordinate",
+    results: [{ x: -1, y: -2, pointAbove, allNeighbors }, { x: -3, y: -4, pointAbove, allNeighbors }],
+    rawResult: true
+  });
+});
+
+test("Test custom field with regular query", async () => {
+  await queryAndMatchArray({
+    query: `{allCoordinates(x: 5){Coordinates{x, y, pointAbove{x,y}, allNeighbors{x,y}}}}`,
+    coll: "allCoordinates",
+    results: [{ x: 5, y: 6, pointAbove, allNeighbors }]
   });
 });
 
