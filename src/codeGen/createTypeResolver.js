@@ -34,22 +34,22 @@ export default function createGraphqlResolver(objectToCreate) {
   ];
 
   let queryItems = [
-    !overrides.has(`get${objectToCreate.typeName}`) ? getItemTemplate : "",
-    !overrides.has(`all${objectToCreate.typeName}s`) ? allItemsTemplate : "",
-    resolverSources.map((src, i) => `${TAB2}...(QueryExtras${i + 1} || {})`).join("\n")
+    !overrides.has(`get${objectToCreate.__name}`) ? getItemTemplate : "",
+    !overrides.has(`all${objectToCreate.__name}s`) ? allItemsTemplate : "",
+    resolverSources.map((src, i) => `${TAB2}...(QueryExtras${i + 1} || {})`).join(",\n")
   ]
     .filter(s => s)
     .join(",\n");
 
-  let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join("\n");
+  let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join(",\n");
 
   let mutationItems = [
-    !overrides.has(`create${objectToCreate.typeName}`) ? createItemTemplate : "",
-    !overrides.has(`update${objectToCreate.typeName}`) ? updateItemTemplate : "",
-    !overrides.has(`update${objectToCreate.typeName}s`) ? updateItemsTemplate : "",
-    !overrides.has(`update${objectToCreate.typeName}sBulk`) ? updateItemsBulkTemplate : "",
-    !overrides.has(`delete${objectToCreate.typeName}`) ? deleteItemTemplate : "",
-    resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join("\n")
+    !overrides.has(`create${objectToCreate.__name}`) ? createItemTemplate : "",
+    !overrides.has(`update${objectToCreate.__name}`) ? updateItemTemplate : "",
+    !overrides.has(`update${objectToCreate.__name}s`) ? updateItemsTemplate : "",
+    !overrides.has(`update${objectToCreate.__name}sBulk`) ? updateItemsBulkTemplate : "",
+    !overrides.has(`delete${objectToCreate.__name}`) ? deleteItemTemplate : "",
+    resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join(",\n")
   ]
     .filter(s => s)
     .join(",\n");
