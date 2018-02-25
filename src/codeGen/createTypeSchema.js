@@ -21,6 +21,10 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let manualQueryArgs = [];
   let allFieldsMutation = [];
   let TAB2 = TAB + TAB;
+  let extras = objectToCreate.extras || {};
+  let overrides = new Set(extras.overrides || []);
+  let schemaSources = extras.schemaSources || [];
+  let resolvedFields = objectToCreate.resolvedFields || {};
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -32,11 +36,15 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
 
-  return `export const type = \`
+  let imports = schemaSources.map((src, i) => `import SchemaExtras${i + 1} from "${src}";`);
+
+  return `${imports.length ? imports.join("\n") + "\n\n" : ""}export const type = \`
   
   type ${name} {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
+    .join(`\n${TAB}`)}${Object.keys(resolvedFields)
+    .map(k => `${TAB}${k}: ${resolvedFields[k]}`)
     .join(`\n${TAB}`)}${
     Object.keys(relationships).length
       ? `\n${TAB}` +
@@ -112,43 +120,69 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     objectToCreate.table
       ? `
 export const mutation = \`
-  
-  create${name}(
+
+${[
+          !overrides.has(`create${name}`)
+            ? `${TAB}create${name}(
     ${[`${name}: ${name}Input`].join(`,\n${TAB}`)}
-  ): ${name}MutationResult
-  
-  update${name}(
+  ): ${name}MutationResult`
+            : "",
+
+          !overrides.has(`update${name}`)
+            ? `${TAB}update${name}(
     ${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}MutationResult
+  ): ${name}MutationResult`
+            : "",
 
-  update${name}s(
+          !overrides.has(`update${name}s`)
+            ? `${TAB}update${name}s(
     ${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}MutationResultMulti
+  ): ${name}MutationResultMulti`
+            : "",
 
-  update${name}sBulk(
+          !overrides.has(`update${name}sBulk`)
+            ? `${TAB}update${name}sBulk(
     ${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}BulkMutationResult    
-  
-  delete${name}(
+  ): ${name}BulkMutationResult`
+            : "",
+
+          !overrides.has(`delete${name}`)
+            ? `${TAB}delete${name}(
     ${[`_id: String`]}
-  ): Boolean
+  ): Boolean`
+            : "",
+
+          schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}').join("\n\n")
+        ]
+          .filter(s => s)
+          .join("\n\n")}
   
 \`;
   
   
 export const query = \`
   
-  all${name}s(
+${[
+          !overrides.has(`all${name}s`)
+            ? `${TAB}all${name}s(
     ${allQueryFields
       .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
       .concat(dateFields.map(f => `${f}_format: String`))
       .concat(manualQueryArgs)
       .join(`,\n${TAB2}`)}
-  ): ${name}QueryResults
-  
-  get${name}(
+  ): ${name}QueryResults`
+            : "",
+
+          !overrides.has(`get${name}`)
+            ? `${TAB}get${name}(
     ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)).join(`,\n${TAB2}`)}
-  ): ${name}SingleQueryResult
+  ): ${name}SingleQueryResult`
+            : "",
+
+          schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n")
+        ]
+          .filter(s => s)
+          .join("\n\n")}
   
 \`;
   
