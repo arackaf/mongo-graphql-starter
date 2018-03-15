@@ -48,3 +48,42 @@ test("Read authors sorted name asc", async () => {
     ]
   });
 });
+
+test("Read authors sorted name desc", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORT: {name: -1}){name}}}}`,
+    coll: "allBooks",
+    results: [
+      {
+        title: "Book 1",
+        authors: [{ name: "Mirelle" }, { name: "Michael" }, { name: "Katie" }, { name: "Eddie" }, { name: "Andre" }, { name: "Adam" }]
+      }
+    ]
+  });
+});
+
+test("Read authors sorted name asc", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{name: 1}]){name}}}}`,
+    coll: "allBooks",
+    results: [
+      {
+        title: "Book 1",
+        authors: [{ name: "Adam" }, { name: "Andre" }, { name: "Eddie" }, { name: "Katie" }, { name: "Michael" }, { name: "Mirelle" }]
+      }
+    ]
+  });
+});
+
+test("Read authors sorted name desc", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{name: -1}]){name}}}}`,
+    coll: "allBooks",
+    results: [
+      {
+        title: "Book 1",
+        authors: [{ name: "Mirelle" }, { name: "Michael" }, { name: "Katie" }, { name: "Eddie" }, { name: "Andre" }, { name: "Adam" }]
+      }
+    ]
+  });
+});
