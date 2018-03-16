@@ -54,6 +54,23 @@ test("Sort test 2", async () => {
   });
 });
 
+test("Sort test 2 a", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(SORTS: [{pages: 1}, {title: 1}]){Books{title}}}",
+    coll: "allBooks",
+    results: [
+      { title: "Book 3" },
+      { title: "Book 1" },
+      { title: "Book 2" },
+      { title: "Book 4" },
+      { title: "Book 5" },
+      { title: "Book 6" },
+      { title: "Book 8" },
+      { title: "Book 7" }
+    ]
+  });
+});
+
 test("Sort test 3", async () => {
   await queryAndMatchArray({
     query: "{allBooks(SORTS: [{pages: 1}, {title: -1}]){Books{title, pages}}}",

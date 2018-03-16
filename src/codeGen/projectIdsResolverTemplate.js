@@ -8,8 +8,8 @@
         
         let aggregateItems = [
           { $match }, 
+          $sort ? { $sort } : null,
           { $project },
-          $sort ? { $sort } : null
         ].filter(item => item);
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
 
