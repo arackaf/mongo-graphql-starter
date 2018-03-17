@@ -49,6 +49,47 @@ test("Read authors sorted name asc", async () => {
   });
 });
 
+test("Read authors sorted name desc", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORT: {name: -1}){name}}}}`,
+    coll: "allBooks",
+    results: [
+      {
+        title: "Book 1",
+        authors: [{ name: "Mirelle" }, { name: "Michael" }, { name: "Katie" }, { name: "Eddie" }, { name: "Andre" }, { name: "Adam" }]
+      }
+    ]
+  });
+});
+
+test("Read authors sorted mult name asc", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{name: 1}]){name}}}}`,
+    coll: "allBooks",
+    results: [
+      {
+        title: "Book 1",
+        authors: [{ name: "Adam" }, { name: "Andre" }, { name: "Eddie" }, { name: "Katie" }, { name: "Michael" }, { name: "Mirelle" }]
+      }
+    ]
+  });
+});
+
+test("Read authors sorted mult name desc", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{name: -1}]){name}}}}`,
+    coll: "allBooks",
+    results: [
+      {
+        title: "Book 1",
+        authors: [{ name: "Mirelle" }, { name: "Michael" }, { name: "Katie" }, { name: "Eddie" }, { name: "Andre" }, { name: "Adam" }]
+      }
+    ]
+  });
+});
+
+//---------------------------------------------------------------------------------------------------------------------------------------
+
 test("Read authors sorted bday asc, name desc", async () => {
   await queryAndMatchArray({
     query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{birthday: 1}, {name: 1}]){name}}}}`,
@@ -75,40 +116,27 @@ test("Read authors sorted bday asc, name desc", async () => {
   });
 });
 
-test("Read authors sorted name desc", async () => {
+test("Read authors sorted bday desc, name desc", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(title_contains: "1"){Books{title, authors(SORT: {name: -1}){name}}}}`,
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{birthday: -1}, {name: 1}]){name}}}}`,
     coll: "allBooks",
     results: [
       {
         title: "Book 1",
-        authors: [{ name: "Mirelle" }, { name: "Michael" }, { name: "Katie" }, { name: "Eddie" }, { name: "Andre" }, { name: "Adam" }]
+        authors: [{ name: "Michael" }, { name: "Andre" }, { name: "Eddie" }, { name: "Mirelle" }, { name: "Katie" }, { name: "Adam" }]
       }
     ]
   });
 });
 
-test("Read authors sorted name asc", async () => {
+test("Read authors sorted bday desc, name desc", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{name: 1}]){name}}}}`,
+    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{birthday: -1}, {name: -1}]){name}}}}`,
     coll: "allBooks",
     results: [
       {
         title: "Book 1",
-        authors: [{ name: "Adam" }, { name: "Andre" }, { name: "Eddie" }, { name: "Katie" }, { name: "Michael" }, { name: "Mirelle" }]
-      }
-    ]
-  });
-});
-
-test("Read authors sorted name desc", async () => {
-  await queryAndMatchArray({
-    query: `{allBooks(title_contains: "1"){Books{title, authors(SORTS: [{name: -1}]){name}}}}`,
-    coll: "allBooks",
-    results: [
-      {
-        title: "Book 1",
-        authors: [{ name: "Mirelle" }, { name: "Michael" }, { name: "Katie" }, { name: "Eddie" }, { name: "Andre" }, { name: "Adam" }]
+        authors: [{ name: "Michael" }, { name: "Andre" }, { name: "Mirelle" }, { name: "Eddie" }, { name: "Katie" }, { name: "Adam" }]
       }
     ]
   });
