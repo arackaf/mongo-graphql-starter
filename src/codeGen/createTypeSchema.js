@@ -49,7 +49,12 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     Object.keys(relationships).length
       ? `\n${TAB}` +
         Object.keys(relationships)
-          .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k])}`)
+          .map(
+            k =>
+              `${TAB}${k}(SORT: ${relationships[k].type.__name}Sort, SORTS: [${relationships[k].type.__name}Sort]): ${displayRelationshipSchemaValue(
+                relationships[k]
+              )}`
+          )
           .join(`\n${TAB}`)
       : ""
   }

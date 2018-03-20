@@ -3,8 +3,8 @@ export async function load${objName}s(db, queryPacket) {
 
   let aggregateItems = [
     { $match }, 
-    { $project },
     $sort ? { $sort } : null, 
+    { $project },
     $skip != null ? { $skip } : null, 
     $limit != null ? { $limit } : null
   ].filter(item => item);

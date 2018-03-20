@@ -8,15 +8,22 @@
         
         let aggregateItems = [
           { $match }, 
+          $sort ? { $sort } : null,
           { $project },
-        ];
+        ].filter(item => item);
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
 
-        let destinationMap = new Map([]);
-        for (let obj of results) {
-          destinationMap.set("" + obj._id, obj)
+        let finalResult = keyArrays.map(keyArr => []);
+        let keySets = keyArrays.map(keyArr => new Set(keyArr.map(_id => "" + _id)));
+
+        for (let result of results){
+          for (let i = 0; i < keyArrays.length; i++){
+            if (keySets[i].has(result._id + "")){
+              finalResult[i].push(result);
+            }
+          }
         }
-        return keyArrays.map(keyArray => keyArray.map(_id => destinationMap.get("" + _id)).filter(o => o));
+        return finalResult;
       });
     }
     return context.${dataLoaderId}.load(obj.${fkField} || []);
