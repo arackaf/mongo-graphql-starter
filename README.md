@@ -740,6 +740,32 @@ Note that for any `Book` query, the books from the current query are read from M
 single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately. In other
 words, the generated code does not suffer from the Select N + 1 problem.
 
+For relationships that return a collection of items, like the authors above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
+
+```javascript
+{
+  allBooks(title_contains: "1"){
+    Books{
+      title, 
+      authors(SORT: {name: 1}){name}
+    }
+  }
+}
+```
+
+or 
+
+```javascript
+{
+  allBooks(title_contains: "1"){
+    Books{
+      title, 
+      authors(SORTS: [{name: 1}, {birthday: -1}]){name}
+    }
+  }
+}
+```
+
 ## Lifecycle hooks
 
 Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap into, to add custom behavior.
