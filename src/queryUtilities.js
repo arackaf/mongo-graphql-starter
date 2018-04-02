@@ -301,13 +301,30 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   return { $match, $project, $sort, $limit, $skip, metadataRequested, extrasPackets };
 }
 
-export function getUpdateObject(args, typeMetadata) {
+export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpers } = {}) {
   let $set = {};
   let $inc = {};
   let $push = {};
   let $pull = {};
   let $addToSet = {};
-  getUpdateObjectContents(args, typeMetadata, "", $set, $inc, $push, $pull, $addToSet);
+
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.__isArray) {
+      if (updatesObject[`${k}_ADD`]) {
+        let newObjects = updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type));
+        newObjects = await dbHelpers.runMultipleInserts(db, relationship.type.table, newObjects);
+
+        if (!updatesObject[`${relationship.fkField}_CONCAT`]) {
+          updatesObject[`${relationship.fkField}_CONCAT`] = [];
+        }
+        updatesObject[`${relationship.fkField}_CONCAT`].push(...newObjects.map(o => "" + o._id));
+      }
+    }
+  }
+
+  getUpdateObjectContents(updatesObject, typeMetadata, "", $set, $inc, $push, $pull, $addToSet);
   let result = { $set, $inc, $push, $pull, $addToSet };
   Object.keys(result).forEach(k => {
     if (!Object.keys(result[k]).length) {
@@ -317,8 +334,8 @@ export function getUpdateObject(args, typeMetadata) {
   return result;
 }
 
-function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet) {
-  Object.keys(args).forEach(k => {
+function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet) {
+  Object.keys(updatesObject).forEach(k => {
     let field = typeMetadata.fields[k];
 
     if (!field) {
@@ -328,59 +345,69 @@ function getUpdateObjectContents(args, typeMetadata, prefix, $set, $inc, $push, 
       field = typeMetadata.fields[fieldName];
 
       if (queryOperation === "INC") {
-        $inc[prefix + fieldName] = args[k];
+        $inc[prefix + fieldName] = updatesObject[k];
       } else if (queryOperation === "DEC") {
-        $inc[prefix + fieldName] = args[k] * -1;
+        $inc[prefix + fieldName] = updatesObject[k] * -1;
       } else if (queryOperation === "PUSH") {
         if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
-          $push[prefix + fieldName] = args[k];
+          $push[prefix + fieldName] = updatesObject[k];
         } else {
-          $push[prefix + fieldName] = newObjectFromArgs(args[k], field.type);
+          $push[prefix + fieldName] = newObjectFromArgs(updatesObject[k], field.type);
         }
       } else if (queryOperation === "CONCAT") {
         if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
-          $push[prefix + fieldName] = { $each: args[k] };
+          $push[prefix + fieldName] = { $each: updatesObject[k] };
         } else {
-          $push[prefix + fieldName] = { $each: args[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+          $push[prefix + fieldName] = { $each: updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
         }
       } else if (queryOperation === "UPDATE") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
-          $set[prefix + `${fieldName}.${args[k].index}`] = field === MongoIdArrayType ? ObjectId(args[k].value) : args[k].value;
+          $set[prefix + `${fieldName}.${updatesObject[k].index}`] =
+            field === MongoIdArrayType ? ObjectId(updatesObject[k].value) : updatesObject[k].value;
         } else if (field.__isArray) {
-          getUpdateObjectContents(args[k].Updates, field.type, prefix + `${fieldName}.${args[k].index}.`, $set, $inc, $push, $pull, $addToSet);
+          getUpdateObjectContents(
+            updatesObject[k].Updates,
+            field.type,
+            prefix + `${fieldName}.${updatesObject[k].index}.`,
+            $set,
+            $inc,
+            $push,
+            $pull,
+            $addToSet
+          );
         } else {
-          getUpdateObjectContents(args[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull, $addToSet);
+          getUpdateObjectContents(updatesObject[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull, $addToSet);
         }
       } else if (queryOperation === "UPDATES") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
-          args[k].forEach(update => {
+          updatesObject[k].forEach(update => {
             $set[prefix + `${fieldName}.${update.index}`] = field === MongoIdArrayType ? ObjectId(update.value) : update.value;
           });
         } else {
-          args[k].forEach(update => {
+          updatesObject[k].forEach(update => {
             getUpdateObjectContents(update.Updates, field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push, $pull, $addToSet);
           });
         }
       } else if (queryOperation === "PULL") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
-          $pull[prefix + fieldName] = { $in: field === MongoIdArrayType ? args[k].map(val => ObjectId(val)) : args[k] };
+          $pull[prefix + fieldName] = { $in: field === MongoIdArrayType ? updatesObject[k].map(val => ObjectId(val)) : updatesObject[k] };
         } else {
-          $pull[prefix + fieldName] = fillMongoFiltersObject(args[k], field.type);
+          $pull[prefix + fieldName] = fillMongoFiltersObject(updatesObject[k], field.type);
         }
       } else if (queryOperation === "ADDTOSET") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
-          $addToSet[prefix + fieldName] = { $each: field === MongoIdArrayType ? args[k].map(val => ObjectId(val)) : args[k] };
+          $addToSet[prefix + fieldName] = { $each: field === MongoIdArrayType ? updatesObject[k].map(val => ObjectId(val)) : updatesObject[k] };
         }
       }
     } else {
       if (field == DateType || (typeof field === "object" && field.__isDate)) {
-        $set[prefix + k] = new Date(args[k]);
+        $set[prefix + k] = new Date(updatesObject[k]);
       } else if (field.__isArray) {
-        $set[prefix + k] = args[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
+        $set[prefix + k] = updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
       } else if (field.__isObject) {
-        $set[prefix + k] = newObjectFromArgs(args[k], field.type);
+        $set[prefix + k] = newObjectFromArgs(updatesObject[k], field.type);
       } else {
-        $set[prefix + k] = args[k];
+        $set[prefix + k] = updatesObject[k];
       }
     }
   });
