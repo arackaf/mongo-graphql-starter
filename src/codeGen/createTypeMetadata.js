@@ -105,7 +105,11 @@ export default function createOutputTypeMetadata(objectToCreate) {
                   name: k,
                   value: createObject(
                     "{",
-                    [{ definition: "get type(){ return " + relationship.type.__name + "; }" }, { definition: `fkField: "${relationship.fkField}"` }],
+                    [
+                      { definition: "get type(){ return " + relationship.type.__name + "; }" },
+                      { definition: `fkField: "${relationship.fkField}"` },
+                      { definition: `__isArray: ${relationship.__isArray || false}` }
+                    ],
                     3
                   ),
                   literal: true
