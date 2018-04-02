@@ -350,15 +350,18 @@ function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc
         $inc[prefix + fieldName] = updatesObject[k] * -1;
       } else if (queryOperation === "PUSH") {
         if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
-          $push[prefix + fieldName] = updatesObject[k];
+          $push[prefix + fieldName] = { $each: [updatesObject[k]] };
         } else {
-          $push[prefix + fieldName] = newObjectFromArgs(updatesObject[k], field.type);
+          $push[prefix + fieldName] = { $each: [newObjectFromArgs(updatesObject[k], field.type)] };
         }
       } else if (queryOperation === "CONCAT") {
+        if (!$push[prefix + fieldName]) {
+          $push[prefix + fieldName] = { $each: [] };
+        }
         if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
-          $push[prefix + fieldName] = { $each: updatesObject[k] };
+          $push[prefix + fieldName].$each.push(...updatesObject[k]);
         } else {
-          $push[prefix + fieldName] = { $each: updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type)) };
+          $push[prefix + fieldName].$each.push(...updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type)));
         }
       } else if (queryOperation === "UPDATE") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
