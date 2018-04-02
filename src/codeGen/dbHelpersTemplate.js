@@ -29,6 +29,20 @@ export async function runDelete(db, table, $match) {
 export async function runInsert(db, table, newObject) {
   try {
     await db.collection(table).insert(newObject);
+    return newObject;
+  } catch (err) {
+    if (err instanceof MongoError) {
+      throw `The following error was thrown by Mongo when attempting to perform this insertion: ${err.toString()}`;
+    } else {
+      throw err;
+    }
+  }
+}
+
+export async function runMultipleInserts(db, table, newObjects) {
+  try {
+    await Promise.all(newObjects.map(obj => db.collection(table).insert(obj)));
+    return newObjects;
   } catch (err) {
     if (err instanceof MongoError) {
       throw `The following error was thrown by Mongo when attempting to perform this insertion: ${err.toString()}`;

@@ -51,9 +51,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
         Object.keys(relationships)
           .map(
             k =>
-              `${TAB}${k}(SORT: ${relationships[k].type.__name}Sort, SORTS: [${relationships[k].type.__name}Sort]): ${displayRelationshipSchemaValue(
-                relationships[k]
-              )}`
+              (relationships[k].__isArray
+                ? `${TAB}${k}(SORT: ${relationships[k].type.__name}Sort, SORTS: [${relationships[k].type.__name}Sort])`
+                : `${TAB}${k}`) + `: ${displayRelationshipSchemaValue(relationships[k])}`
           )
           .join(`\n${TAB}`)
       : ""
@@ -97,7 +97,19 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   ${Object.keys(fields)
     .filter(k => k != "_id")
     .reduce((inputs, k) => (inputs.push(...getMutations(k, fields).map(val => TAB + val)), inputs), [])
-    .join(`\n${TAB}`)}
+    .join(`\n${TAB}`)}${
+    Object.keys(relationships).length
+      ? `\n${TAB}` +
+        Object.keys(relationships)
+          .map(
+            k =>
+              relationships[k].__isArray
+                ? `${TAB}${k}_ADD: ${displayRelationshipSchemaValue(relationships[k], true)}`
+                : `${TAB}${k}_SET: ${displayRelationshipSchemaValue(relationships[k], true)}`
+          )
+          .join(`\n${TAB}`)
+      : ""
+  }
   }
   ${
     objectToCreate.__usedInArray
