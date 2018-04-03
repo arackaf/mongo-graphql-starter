@@ -47,7 +47,7 @@ test("Basic add single new author", async () => {
 
 test("Basic add single new author, and single existing author", async () => {
   await runMutation({
-    mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }, authorIds_PUSH: "${katie._id}"}){Book{title}}`,
+    mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }, authorIds_ADDTOSET: "${katie._id}"}){Book{title}}`,
     result: "updateBook"
   });
 
