@@ -316,10 +316,10 @@ export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpe
         let newObjects = updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type));
         newObjects = await dbHelpers.runMultipleInserts(db, relationship.type.table, newObjects);
 
-        if (!updatesObject[`${relationship.fkField}_CONCAT`]) {
-          updatesObject[`${relationship.fkField}_CONCAT`] = [];
+        if (!updatesObject[`${relationship.fkField}_ADDTOSET`]) {
+          updatesObject[`${relationship.fkField}_ADDTOSET`] = [];
         }
-        updatesObject[`${relationship.fkField}_CONCAT`].push(...newObjects.map(o => "" + o._id));
+        updatesObject[`${relationship.fkField}_ADDTOSET`].push(...newObjects.map(o => "" + o._id));
       }
     }
   }
