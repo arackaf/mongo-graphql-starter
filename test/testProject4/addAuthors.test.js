@@ -32,6 +32,8 @@ afterEach(async () => {
   db = null;
 });
 
+// --------------------------------- Update Single --------------------------------------------
+
 test("UpdateSingle - Basic add single new author", async () => {
   await runMutation({
     mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }}){Book{title}}`,
@@ -55,6 +57,27 @@ test("UpdateSingle - Basic add single new author, and single existing author", a
     query: `{allBooks(title: "Book 1"){Books{title, authors(SORT: { name: 1 }){name}}}}`,
     coll: "allBooks",
     results: [{ title: "Book 1", authors: [{ name: "Adam" }, { name: "Katie" }, { name: "New Author" }] }]
+  });
+});
+
+test("UpdateSingle - Basic add 2 new authors, and single existing author", async () => {
+  await runMutation({
+    mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: [{ name: "New Author1" }, { name: "New Author2" }], authorIds_ADDTOSET: "${
+      katie._id
+    }"}){Book{title}}`,
+    result: "updateBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(title: "Book 1"){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1", authors: [{ name: "Adam" }, { name: "Katie" }, { name: "New Author1" }, { name: "New Author2" }] }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "New Author"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author1" }, { name: "New Author2" }]
   });
 });
 
@@ -106,6 +129,30 @@ test("UpdateMulti - Basic add single new author, and single existing author", as
   });
 });
 
+test("UpdateMultiple - Basic add 2 new authors, and single existing author", async () => {
+  await runMutation({
+    mutation: `updateBooks(_ids: ["${book1._id}", "${
+      book3._id
+    }"], Updates: {authors_ADD: [{ name: "New Author1" }, { name: "New Author2" }], authorIds_ADDTOSET: "${katie._id}"}){Books{title}}`,
+    result: "updateBooks"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${book1._id}", "${book3._id}"]){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam" }, { name: "Katie" }, { name: "New Author1" }, { name: "New Author2" }] },
+      { title: "Book 3", authors: [{ name: "Katie" }, { name: "New Author1" }, { name: "New Author2" }] }
+    ]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "New Author", SORT: {name: 1}){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author1" }, { name: "New Author2" }] //just created once
+  });
+});
+
 //--------------------------- Update Bulk -----------------------------------------------------
 
 test("UpdateBulk - Basic add single new author", async () => {
@@ -151,6 +198,30 @@ test("UpdateBulk - Basic add single new author, and single existing author", asy
     query: `{allAuthors(name: "New Author"){Authors{name}}}`,
     coll: "allAuthors",
     results: [{ name: "New Author" }] //just one
+  });
+});
+
+test("UpdateBulk - Basic add 2 new authors, and single existing author", async () => {
+  await runMutation({
+    mutation: `updateBooksBulk(Match: {_id_in: ["${book1._id}", "${
+      book3._id
+    }"]}, Updates: {authors_ADD: [{ name: "New Author1" }, { name: "New Author2" }], authorIds_ADDTOSET: "${katie._id}"}){success}`,
+    result: "updateBooksBulk"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${book1._id}", "${book3._id}"]){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam" }, { name: "Katie" }, { name: "New Author1" }, { name: "New Author2" }] },
+      { title: "Book 3", authors: [{ name: "Katie" }, { name: "New Author1" }, { name: "New Author2" }] }
+    ]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "New Author", SORT: {name: 1}){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author1" }, { name: "New Author2" }] //just created once
   });
 });
 
