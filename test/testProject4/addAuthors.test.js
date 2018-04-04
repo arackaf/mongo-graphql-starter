@@ -106,6 +106,54 @@ test("UpdateMulti - Basic add single new author, and single existing author", as
   });
 });
 
+//--------------------------- Update Bulk -----------------------------------------------------
+
+test("UpdateBulk - Basic add single new author", async () => {
+  await runMutation({
+    mutation: `updateBooksBulk(Match: { _id_in: ["${book1._id}", "${book3._id}"] }, Updates: {authors_ADD: { name: "New Author" }}){success}`,
+    result: "updateBooksBulk"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${book1._id}", "${book3._id}"], SORT: {title: 1}){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam" }, { name: "New Author" }] },
+      { title: "Book 3", authors: [{ name: "Katie" }, { name: "New Author" }] }
+    ]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name: "New Author"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author" }] //just one
+  });
+});
+
+test("UpdateBulk - Basic add single new author, and single existing author", async () => {
+  await runMutation({
+    mutation: `updateBooksBulk(Match: { _id_in: ["${book1._id}", "${
+      book3._id
+    }"] }, Updates: {authors_ADD: { name: "New Author" }, authorIds_ADDTOSET: "${katie._id}"}){success}`,
+    result: "updateBooksBulk"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${book1._id}", "${book3._id}"], SORT: {title: 1}){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam" }, { name: "Katie" }, { name: "New Author" }] },
+      { title: "Book 3", authors: [{ name: "Katie" }, { name: "New Author" }] }
+    ]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name: "New Author"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author" }] //just one
+  });
+});
+
 //--------------------------------------------------------------------------------------
 
 test("Basic add single new author in array", async () => {
