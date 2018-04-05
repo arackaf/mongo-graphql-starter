@@ -6,6 +6,55 @@ your Mongo db.
 The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed.
 
+<!-- TOC -->
+
+- [Prior art](#prior-art)
+- [How do you use it?](#how-do-you-use-it)
+- [Valid types for your fields](#valid-types-for-your-fields)
+- [Circular dependencies are fine](#circular-dependencies-are-fine)
+- [Queries created](#queries-created)
+- [Custom query arguments](#custom-query-arguments)
+- [All filters available](#all-filters-available)
+    - [String filters](#string-filters)
+    - [String array filters](#string-array-filters)
+    - [Int filters](#int-filters)
+    - [Int array filters](#int-array-filters)
+    - [Float filters](#float-filters)
+    - [Float array filters](#float-array-filters)
+    - [Date filters](#date-filters)
+    - [Formatting dates](#formatting-dates)
+    - [OR Queries](#or-queries)
+    - [Nested object and array filters](#nested-object-and-array-filters)
+    - [Sorting](#sorting)
+    - [Paging](#paging)
+- [Integrating custom content](#integrating-custom-content)
+    - [schemaSources example](#schemasources-example)
+    - [resolverSources example](#resolversources-example)
+- [Projecting results from queries](#projecting-results-from-queries)
+- [Mutations](#mutations)
+    - [Creations](#creations)
+    - [Updates](#updates)
+        - [The Updates argument](#the-updates-argument)
+    - [Deleting](#deleting)
+    - [Mutation examples](#mutation-examples)
+- [Defining relationships between types (wip)](#defining-relationships-between-types-wip)
+    - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
+    - [Defining a single foreign key](#defining-a-single-foreign-key)
+    - [Using relationships](#using-relationships)
+    - [Modifying relationships](#modifying-relationships)
+- [Lifecycle hooks](#lifecycle-hooks)
+    - [All available hooks](#all-available-hooks)
+        - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
+    - [How to use processing hooks](#how-to-use-processing-hooks)
+        - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
+        - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
+- [A closer look at what's generated](#a-closer-look-at-whats-generated)
+- [What does the generated code look like?](#what-does-the-generated-code-look-like)
+    - [All code is extensible.](#all-code-is-extensible)
+- [What's next](#whats-next)
+
+<!-- /TOC -->
+
 ## Prior art
 
 This project is heavily inspired by [Graph.Cool](https://www.graph.cool/). It's an amazing graphQL-as-a-service that got me hooked immediately on the
@@ -765,6 +814,16 @@ or
   }
 }
 ```
+
+### Modifying relationships
+
+For relationships which define an array, like the `authors` above, there is a `<relationshipName>_ADD` property on the `Updates` object, which accepts an array of new objects to be inserted into the relevant table, with the new IDs being associated with the current object's foreign key field.  For example
+
+```javascript
+`updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }}){Book{title}}`
+```
+
+will create an author with that name, and then put the new author's _id into the updating book's `authorIds` field.  Newly created entities will invoke the insert-related lifecycle hooks, just as they would if you were creating them with the `createAuthor` mutation.  These lifecycle hooks are discussed below.
 
 ## Lifecycle hooks
 
