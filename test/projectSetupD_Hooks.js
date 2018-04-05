@@ -12,17 +12,18 @@ export default {
   },
   Author: {
     beforeInsert(obj, root, args, context, ast) {
-      console.log(obj.name, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+      if (/^ABORT/.test(obj.name)) {
+        return false;
+      }
       if (/^BUMP/.test(obj.name)) {
         obj.name += "a";
-        console.log(obj.name, "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
       }
     },
     async afterInsert(obj, root, args, context, ast) {
       if (/^BUMP/.test(obj.name)) {
         let db = await root.db;
         obj.name += "b";
-        db.collection("authors").update({ _id: obj._id }, { $set: { name: obj.name + "b" } });
+        db.collection("authors").update({ _id: obj._id }, { $set: { name: obj.name } });
       }
     }
   }

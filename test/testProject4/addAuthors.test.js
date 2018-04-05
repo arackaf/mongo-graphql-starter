@@ -60,6 +60,25 @@ test("UpdateSingle - Basic add single new author with hook", async () => {
   });
 });
 
+test("UpdateSingle - Basic add single new author with abort hook", async () => {
+  await runMutation({
+    mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: [{ name: "BUMP" }, { name: "ABORT" }]}){Book{title}}`,
+    result: "updateBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(title: "Book 1"){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1", authors: [{ name: "Adam" }, { name: "BUMPab" }] }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "ABORT"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: []
+  });
+});
+
 test("UpdateSingle - Basic add single new author, and single existing author", async () => {
   await runMutation({
     mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }, authorIds_ADDTOSET: "${katie._id}"}){Book{title}}`,
