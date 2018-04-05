@@ -326,6 +326,7 @@ export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpe
           }
         }
         newObjects = await dbHelpers.runMultipleInserts(db, relationship.type.table, newObjects);
+        await Promise.all(newObjects.map(obj => processHook(hooksObj, relationship.type.typeName, "afterInsert", obj, root, args, context, ast)));
 
         if (!updatesObject[`${relationship.fkField}_ADDTOSET`]) {
           updatesObject[`${relationship.fkField}_ADDTOSET`] = [];
