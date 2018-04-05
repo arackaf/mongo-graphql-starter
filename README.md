@@ -41,7 +41,7 @@ or advanced edge cases as needed.
     - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
     - [Defining a single foreign key](#defining-a-single-foreign-key)
     - [Using relationships](#using-relationships)
-    - [Modifying relationships](#modifying-relationships)
+    - [Creating related data](#creating-related-data)
 - [Lifecycle hooks](#lifecycle-hooks)
     - [All available hooks](#all-available-hooks)
         - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
@@ -813,7 +813,7 @@ or
 }
 ```
 
-### Modifying relationships
+### Creating related data
 
 For relationships which define an array, like the `authors` above, there is a `<relationshipName>_ADD` property on the `Updates` object, which accepts an array of new objects to be inserted into the relevant table, with the new IDs being associated with the current object's foreign key field.  For example
 
