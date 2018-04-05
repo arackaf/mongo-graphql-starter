@@ -4,7 +4,7 @@
       }
       let db = await root.db;
       let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}Metadata, "${objName}");
-      let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers });
+      let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
 
       if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { ${objName}: null };
