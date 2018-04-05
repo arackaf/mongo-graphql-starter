@@ -75,7 +75,7 @@ test("UpdateSingle - Basic add 2 new authors, and single existing author", async
   });
 
   await queryAndMatchArray({
-    query: `{allAuthors(name_startsWith: "New Author"){Authors{name}}}`,
+    query: `{allAuthors(name_startsWith: "New Author", SORT: {name: 1}){Authors{name}}}`,
     coll: "allAuthors",
     results: [{ name: "New Author1" }, { name: "New Author2" }]
   });
