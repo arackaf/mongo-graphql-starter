@@ -251,6 +251,21 @@ test("Concat new comments", async () => {
   expect(result).toEqual({ title: "Blog 1", comments: [{ text: "C1" }, { text: "C2" }, { text: "C3" }] });
 });
 
+test("Push and concat new comments", async () => {
+  let obj = await runMutation({
+    mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){Blog{_id}}`,
+    result: "createBlog"
+  });
+
+  let result = await runMutation({
+    mutation: `updateBlog(_id: "${
+      obj._id
+    }", Updates: {title: "Blog 1", comments_PUSH: {text: "C2"}, comments_CONCAT: [{text: "C3"}, {text: "C4"}]}){Blog{title, comments{text}}}`,
+    result: "updateBlog"
+  });
+  expect(result.comments.map(c => c.text).sort()).toEqual(["C1", "C2", "C3", "C4"]);
+});
+
 test("Update comment", async () => {
   let obj = await runMutation({
     mutation: `createBlog(Blog: {title: "Blog 1", comments: [{text: "C1"}]}){Blog{_id}}`,

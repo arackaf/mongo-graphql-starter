@@ -6,6 +6,55 @@ your Mongo db.
 The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed.
 
+<!-- TOC -->
+
+- [Prior art](#prior-art)
+- [How do you use it?](#how-do-you-use-it)
+    - [Valid types for your fields](#valid-types-for-your-fields)
+    - [Circular dependencies are fine](#circular-dependencies-are-fine)
+- [Queries created](#queries-created)
+    - [Projecting results from queries](#projecting-results-from-queries)
+    - [Custom query arguments](#custom-query-arguments)
+- [Filters created](#filters-created)
+    - [String filters](#string-filters)
+    - [String array filters](#string-array-filters)
+    - [Int filters](#int-filters)
+    - [Int array filters](#int-array-filters)
+    - [Float filters](#float-filters)
+    - [Float array filters](#float-array-filters)
+    - [Date filters](#date-filters)
+    - [Formatting dates](#formatting-dates)
+    - [OR Queries](#or-queries)
+    - [Nested object and array filters](#nested-object-and-array-filters)
+    - [Sorting](#sorting)
+    - [Paging](#paging)
+- [Mutations](#mutations)
+    - [Creations](#creations)
+    - [Updates](#updates)
+        - [The Updates argument](#the-updates-argument)
+    - [Deleting](#deleting)
+    - [Mutation examples](#mutation-examples)
+- [Integrating custom content](#integrating-custom-content)
+    - [schemaSources example](#schemasources-example)
+    - [resolverSources example](#resolversources-example)
+- [Defining relationships between types (wip)](#defining-relationships-between-types-wip)
+    - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
+    - [Defining a single foreign key](#defining-a-single-foreign-key)
+    - [Using relationships](#using-relationships)
+    - [Creating related data](#creating-related-data)
+- [Lifecycle hooks](#lifecycle-hooks)
+    - [All available hooks](#all-available-hooks)
+        - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
+    - [How to use processing hooks](#how-to-use-processing-hooks)
+        - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
+        - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
+- [A closer look at what's generated](#a-closer-look-at-whats-generated)
+- [What does the generated code look like?](#what-does-the-generated-code-look-like)
+    - [All code is extensible.](#all-code-is-extensible)
+- [What's next](#whats-next)
+
+<!-- /TOC -->
+
 ## Prior art
 
 This project is heavily inspired by [Graph.Cool](https://www.graph.cool/). It's an amazing graphQL-as-a-service that got me hooked immediately on the
@@ -142,7 +191,7 @@ Now `http://localhost:3000/graphql` should, assuming the database above exists, 
 
 ![Image of graphiQL](docs-img/graphiQL-running.png)
 
-## Valid types for your fields
+### Valid types for your fields
 
 Here are the valid types you can import from `mongo-graphql-starter`
 
@@ -183,7 +232,7 @@ const {
 | `arrayOf`          | Function: Pass it a type you've created to specify an array of that type |
 | `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.         |
 
-## Circular dependencies are fine
+### Circular dependencies are fine
 
 Feel free to have your types reference each other. For example, the following will generate a perfectly valid schema. 
 
@@ -246,7 +295,14 @@ Note, if you don't query `Meta.count` from the results, then the total query wil
 
 The generated resolvers will analyze the AST and only query what you ask for.
 
-## Custom query arguments
+### Projecting results from queries
+
+Use standard GraphQL syntax to select only the fields you want from your query. The incoming ast will be parsed, and the generated query will only
+pull what was requested. This applies to nested fields as well. For example, given [this GraphQL setup](test/projectSetupB.js),
+[this unit test](test/testProject2/richQuerying.test.js#L234), and the others in the suite demonstrate the degree to which you can select nested field
+values.
+
+### Custom query arguments
 
 If you'd like to add custom arguments to these queries, you can do so like this
 
@@ -265,7 +321,7 @@ const Thing = {
 
 Now `ManualArg` can be sent over to the `getThing` and `allThings` queries.  This can be useful if you need to do custom processing in the middleware hooks (covered later)
 
-## All filters available
+## Filters created
 
 **All scalar fields, and scalar array fields (`StringArray`, `IntArray`, etc) will have the following filters created**
 
@@ -500,7 +556,76 @@ Page your data in one of two ways.
 
 Pass `LIMIT` and `SKIP` to your query, which will map directly to the `$limit` and `$skip` Mongo aggregation arguments.
 
-Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$skip` for you, and add to the Mongo query.
+Or send over `PAGE` and `PAGE_SIZE` arguments, which calculate `$limit` and `$skip` for you, and add to the Mongo query. 
+
+## Mutations
+
+Each queryable type will also generate a `create<Type>`, `update<Type>`, `update<Type>s`, `update<Type>sBulk` and `delete<Type>` mutation.
+
+### Creations 
+
+`create<Type>` will create a new object. Pass a single `<Type>` argument with properties for each field on the type, and it will return back the new,
+created object under the `<Type>` key, or at least the pieces thereof which you specify in your mutation.
+
+For example
+
+```javascript
+createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
+```
+
+### Updates
+
+All update mutations take an `Updates` argument, representing the mutations to make.  This argument is described below.
+
+`update<Type>` requires an `_id` argument of the object you want to update. This mutation returns a `success` field indicating that the operation completed, and a `<Type>` value (of the object that was just updated) that can be queried as needed.  If you leave the `<Type>` value off of the selection, no query will be made after the update.
+
+`update<Type>s` requires an `_ids` array argument, representing the _id's of the objects you want to update.  This mutation returns a `success` field indicating that the operation completed, and a `<Type>s` array value (of the objects that were just updated) that can be queried as needed.  If you leave the `<Type>s` value off of the selection, no query will be made after the update.
+
+`update<Type>sBulk` takes a `Match` argument, which can take all of the same filters which you pass to the `all<type>s` query. Pass whatever filters you'd like, and matching records will be updated.  This mutation returns only a `success` property, indicating that the operation was completed, since it's not easy or efficient to keep track of exactly which records were updated.
+
+#### The Updates argument
+
+All update mutations take an `Updates` argument, which indicate the updates to perform. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
+
+For example
+
+```javascript
+updateBlog(_id: "${obj._id}", Updates: {words: 100}){Blog{title, words}}
+```
+
+will set the `words` property to `100` for that blog.
+
+In addition, the following arguments are supported
+
+| Argument              | For types | Description|
+| --------------------- | --------- | --------------------------------------- |
+| `<fieldName>_INC`     | Numeric   | Increments the current value by the amount specified. For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.                                                                                      |
+| `<fieldName>_DEC`     | Numeric   | Decrements the current value by the amount specified. For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.                                                                                                                     |
+| `<fieldName>_PUSH`    | Arrays    | Pushes the specified value onto the array. For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array. Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.                                                                                                                               |
+| `<fieldName>_CONCAT`  | Arrays    | Pushes the specified values onto the array. For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added. |
+| `<fieldName>_UPDATE`  | Arrays    | **For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, called `Updates`. Updates the object at `index` with the changes specified. Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Updates: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type. Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Updates: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}` |
+| `<fieldName>_UPDATES` | Arrays    | Same as UPDATE, but takes an array of these same inputs. For example `tagsSubscribed_UPDATES: [{index: 0, Updates: {name: "t1-update"} }, {index: 1, Updates: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Updates: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.  |
+| `<fieldName>_UPDATE`  | Objects   | Implements the specified changes on the nested object. The provided update object is of the same form specified here. For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2 |
+| `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Updates: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Updates: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"  |
+| `<fieldName>_ADDTOSET`    | Arrays    | Adds the indicated items to the array if they are not already present, based on Mongo's `$addToSet` behavior.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to add. For example, `updateBook(_id: "${obj._id}", Updates: { editions_ADDTOSET: [4, 6] }) {Book{title, editions}}` will add editions 4 and 6 to the array if they're not already there.  |
+
+### Deleting
+
+`delete<Type>` takes a single `_id` argument, and deletes it.
+
+### Mutation examples
+
+[Example of create and delete, together](test/testProject1/deletion.test.js#L14)
+
+[Example of a basic update](test/testProject1/mutations.test.js#L145)
+
+[Full example of nested updates](test/testProject2/richUpdating.test.js#L424)
+
+[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L484)
+
+[Multi updates](test/testProject1/multiUpdate.test.js#L18)
+
+[Bulk updates](test/testProject1/bulkUpdate.test.js#L18)
 
 ## Integrating custom content
 
@@ -587,85 +712,7 @@ export default {
 
 Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (in real life you can of course make these async methods and actually query real data). The `Query` entry contains the `getCoordinate` query that was overridden, plus the `randomQuery` defined in the schema file above.  Lastly, of course, is the `Mutation` entry that has the `updateCoordinate` mutation that we overrode, and the new, `randomMutation` from before.
 
-You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted. 
-
-## Projecting results from queries
-
-Use standard GraphQL syntax to select only the fields you want from your query. The incoming ast will be parsed, and the generated query will only
-pull what was requested. This applies to nested fields as well. For example, given [this GraphQL setup](test/projectSetupB.js),
-[this unit test](test/testProject2/richQuerying.test.js#L234), and the others in the suite demonstrate the degree to which you can select nested field
-values.
-
-## Mutations
-
-Each queryable type will also generate a `create<Type>`, `update<Type>`, `update<Type>s`, `update<Type>sBulk` and `delete<Type>` mutation.
-
-### Creations 
-
-`create<Type>` will create a new object. Pass a single `<Type>` argument with properties for each field on the type, and it will return back the new,
-created object under the `<Type>` key, or at least the pieces thereof which you specify in your mutation.
-
-For example
-
-```javascript
-createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}
-```
-
-### Updates
-
-All update mutations take an `Updates` argument, representing the mutations to make.  This argument is described below.
-
-`update<Type>` requires an `_id` argument of the object you want to update. This mutation returns a `success` field indicating that the operation completed, and a `<Type>` value (of the object that was just updated) that can be queried as needed.  If you leave the `<Type>` value off of the selection, no query will be made after the update.
-
-`update<Type>s` requires an `_ids` array argument, representing the _id's of the objects you want to update.  This mutation returns a `success` field indicating that the operation completed, and a `<Type>s` array value (of the objects that were just updated) that can be queried as needed.  If you leave the `<Type>s` value off of the selection, no query will be made after the update.
-
-`update<Type>sBulk` takes a `Match` argument, which can take all of the same filters which you pass to the `all<type>s` query. Pass whatever filters you'd like, and matching records will be updated.  This mutation returns only a `success` property, indicating that the operation was completed, since it's not easy or efficient to keep track of exactly which records were updated.
-
-#### The Updates argument
-
-All update mutations take an `Updates` argument, which indicate the updates to perform. This argument can receive fields corresponding to each field in your type. Any value you pass will replace the corresponding value in Mongo.
-
-For example
-
-```javascript
-updateBlog(_id: "${obj._id}", Updates: {words: 100}){Blog{title, words}}
-```
-
-will set the `words` property to `100` for that blog.
-
-In addition, the following arguments are supported
-
-| Argument              | For types | Description|
-| --------------------- | --------- | --------------------------------------- |
-| `<fieldName>_INC`     | Numeric   | Increments the current value by the amount specified. For example `Blog: {words_INC: 1}` will increment the current `words` value by 1.                                                                                      |
-| `<fieldName>_DEC`     | Numeric   | Decrements the current value by the amount specified. For example `Blog: {words_DEC: 2}` will decrement the current `words` value by 2.                                                                                                                     |
-| `<fieldName>_PUSH`    | Arrays    | Pushes the specified value onto the array. For example `comments_PUSH: {text: "C2"}` will push that new comment onto the array. Also works for String, Int, and Float arrays - just pass the string, integer, or floating point number, and it'll get added.                                                                                                                               |
-| `<fieldName>_CONCAT`  | Arrays    | Pushes the specified values onto the array. For example `comments_CONCAT: [{text: "C2"}, {text: "C3"}]` will push those new comments onto the array. Also works for String, Int, and Float arrays - just pass the strings, integers, or floating point numbers, as an array, and they'll get added. |
-| `<fieldName>_UPDATE`  | Arrays    | **For arrays of other types, defined with `arrayOf`**<br/><br/>Takes an `index` and an update object, called `Updates`. Updates the object at `index` with the changes specified. Note, this update object is of the same form specified here. If that object has numeric or array fields, you can specify `field_INC`, `field_PUSH`, etc. For example `comments_UPDATE: {index: 0, Updates: { upVotes_INC: 1 } }` will increment the `upVotes` value in the first comment in the array, by 1.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br/><br/>Takes an `index` and a `value`, which will be an `Int`, `Float` or `String` depending on the array type. Updates the object at `index` with the `value` specified.<br/><br/>`updateBook(_id: "5", Updates: { editions_UPDATE: {index: 1, value: 11} }) {Book{title, editions}}` |
-| `<fieldName>_UPDATES` | Arrays    | Same as UPDATE, but takes an array of these same inputs. For example `tagsSubscribed_UPDATES: [{index: 0, Updates: {name: "t1-update"} }, {index: 1, Updates: {name: "t2-update"} }]` will make those renames to the name fields on the first, and second tags in the array.<br/><br/>Or for Int, String, Float arrays, `updateBook(_id: "${obj._id}", Updates: {editions_UPDATES: [{index: 0, value: 7}, {index: 1, value: 11}] }) {Book{title, editions}}` which of course will modify those editions.  |
-| `<fieldName>_UPDATE`  | Objects   | Implements the specified changes on the nested object. The provided update object is of the same form specified here. For example `favoriteTag_UPDATE: {timesUsed_INC: 2}` will increment `timesUsed` on the `favoriteTag` object by 2 |
-| `<fieldName>_PULL`    | Arrays    | Removes the indicated items from the array.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to remove. For example, `updateBook(_id: "${obj._id}", Updates: { editions_PULL: [4, 6] }) {Book{title, editions}}` will remove editions 4 and 6 from the array.<br /><br />**For arrays of other types**<br /><br />Pass in a normal filter object to remove all items which match. For example, `updateBook(_id: "${obj._id}", Updates: { authors_PULL: {name_startsWith: "A"}}){Book{ title }}` will remove all authors with a name starting with "A"  |
-| `<fieldName>_ADDTOSET`    | Arrays    | Adds the indicated items to the array if they are not already present, based on Mongo's `$addToSet` behavior.<br /><br />**For `StringArray`, `IntArray`, `FloatArray`, and `MongoIdArray`**<br /><br />Takes an array of items to add. For example, `updateBook(_id: "${obj._id}", Updates: { editions_ADDTOSET: [4, 6] }) {Book{title, editions}}` will add editions 4 and 6 to the array if they're not already there.  |
-
-### Deleting
-
-`delete<Type>` takes a single `_id` argument, and deletes it.
-
-### Mutation examples
-
-[Example of create and delete, together](test/testProject1/deletion.test.js#L14)
-
-[Example of a basic update](test/testProject1/mutations.test.js#L145)
-
-[Full example of nested updates](test/testProject2/richUpdating.test.js#L424)
-
-[Another example of nested updates, with array CONCAT](test/testProject2/richUpdating.test.js#L484)
-
-[Multi updates](test/testProject1/multiUpdate.test.js#L18)
-
-[Bulk updates](test/testProject1/bulkUpdate.test.js#L18)
-
-
+You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted.
 
 ## Defining relationships between types (wip)
 
@@ -765,6 +812,18 @@ or
   }
 }
 ```
+
+### Creating related data
+
+For relationships which define an array, like `authors` above, there is a `<relationshipName>_ADD` property on the `Updates` object, which accepts an array of new objects to be inserted into the relevant table, with the new IDs being associated with the current object's foreign key field.  For example
+
+```javascript
+`updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }}){Book{title}}`
+```
+
+will create an author with that name, and then put the new author's _id into the updating book's `authorIds` field.  Newly created entities will invoke the insert-related lifecycle hooks, just as they would if you were creating them with the `createAuthor` mutation—any `false` return value from the `beforeInsert` hook will result in that particular object being discarded completely, with the rest of the operation proceeding on.  
+
+These lifecycle hooks are discussed below.
 
 ## Lifecycle hooks
 

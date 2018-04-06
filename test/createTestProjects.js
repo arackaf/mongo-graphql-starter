@@ -14,7 +14,13 @@ import fs from "fs";
 createGraphqlSchema(projectSetupA, path.resolve("./test/testProject1"));
 createGraphqlSchema(projectSetupB, path.resolve("./test/testProject2"));
 createGraphqlSchema(projectSetupC, path.resolve("./test/testProject3"));
-createGraphqlSchema(projectSetupD, path.resolve("./test/testProject4"));
+
+Promise.resolve(createGraphqlSchema(projectSetupD, path.resolve("./test/testProject4"))).then(() => {
+  fs.writeFileSync(
+    path.resolve("./test/testProject4/graphQL/hooks.js"),
+    fs.readFileSync(path.resolve(__dirname, "./projectSetupD_Hooks.js"), { encoding: "utf8" })
+  );
+});
 createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"));
 
 Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"))).then(() => {
