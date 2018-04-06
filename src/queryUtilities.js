@@ -302,7 +302,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
   return { $match, $project, $sort, $limit, $skip, metadataRequested, extrasPackets };
 }
 
-export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpers, hooksObj, root, args, context, ast } = {}) {
+export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpers, ...rest } = {}) {
   let $set = {};
   let $inc = {};
   let $push = {};
@@ -314,19 +314,8 @@ export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpe
     let relationship = relationships[k];
     if (relationship.__isArray) {
       if (updatesObject[`${k}_ADD`]) {
-        let newObjectPackets = updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type)).map(obj => ({
-          obj,
-          preInsertResult: processHook(hooksObj, relationship.type.typeName, "beforeInsert", obj, root, args, context, ast)
-        }));
-
-        let newObjects = [];
-        for (let packet of newObjectPackets) {
-          if ((await packet.preInsertResult) !== false) {
-            newObjects.push(packet.obj);
-          }
-        }
-        newObjects = await dbHelpers.runMultipleInserts(db, relationship.type.table, newObjects);
-        await Promise.all(newObjects.map(obj => processHook(hooksObj, relationship.type.typeName, "afterInsert", obj, root, args, context, ast)));
+        let newObjectCandidates = updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type));
+        let newObjects = await dbHelpers.processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
 
         if (!updatesObject[`${relationship.fkField}_ADDTOSET`]) {
           updatesObject[`${relationship.fkField}_ADDTOSET`] = [];
