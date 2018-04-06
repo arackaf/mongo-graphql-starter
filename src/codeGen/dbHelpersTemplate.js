@@ -27,6 +27,11 @@ export async function runDelete(db, table, $match) {
   }
 }
 
+export async function processInsertion(db, newObjectToCreateMaybe, options) {
+  let results = await processInsertions(db, [newObjectToCreateMaybe], options);
+  return results[0];
+}
+
 export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetadata, hooksObj, root, args, context, ast }) {
   let newObjectPackets = newObjectsToCreateMaybe.map(obj => ({
     obj,
@@ -39,7 +44,7 @@ export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetad
       newObjects.push(packet.obj);
     }
   }
-  if (!newObjects.length) return;
+  if (!newObjects.length) return [];
 
   newObjects = await runMultipleInserts(db, typeMetadata.table, newObjects);
   await Promise.all(newObjects.map(obj => processHook(hooksObj, typeMetadata.typeName, "afterInsert", obj, root, args, context, ast)));
