@@ -815,13 +815,13 @@ or
 
 ### Creating related data
 
-For relationships which define an array, like `authors` above, there is a `<relationshipName>_ADD` property on the `Updates` object, which accepts an array of new objects to be inserted into the relevant table, with the new IDs being associated with the current object's foreign key field.  For example
+For relationships which define an array, like `authors`, there will be a `<relationshipName>_ADD` property on the `Updates` object of all update mutations. This property will accept an array of new objects to be created, with the new IDs being added to the current object's foreign key field.  For example
 
 ```javascript
 `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }}){Book{title}}`
 ```
 
-will create an author with that name, and then put the new author's _id into the updating book's `authorIds` field.  Newly created entities will invoke the insert-related lifecycle hooks, just as they would if you were creating them with the `createAuthor` mutation—any `false` return value from the `beforeInsert` hook will result in that particular object being discarded completely, with the rest of the operation proceeding on.  
+will create an author with that name, and then put the new author's `_id` into the updating book's `authorIds` field.  Newly created entities will invoke the insert-related lifecycle hooks, just as they would if you were creating them with the `createAuthor` mutation: any `false` return values from the `beforeInsert` hook will result in that particular object being discarded completely, with the rest of the operation proceeding on.  
 
 These lifecycle hooks are discussed below.
 
