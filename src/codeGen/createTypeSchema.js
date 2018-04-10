@@ -90,7 +90,14 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   input ${name}Input {
   ${Object.keys(fields)
     .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k], true)}`)
-    .join(`\n${TAB}`)}
+    .join(`\n${TAB}`)}${
+    Object.keys(relationships).length
+      ? `\n${TAB}` +
+        Object.keys(relationships)
+          .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k], true)}`)
+          .join(`\n${TAB}`)
+      : ""
+  }
   }
   
   input ${name}MutationInput {
