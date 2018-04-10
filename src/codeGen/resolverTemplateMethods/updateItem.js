@@ -3,6 +3,7 @@
         throw "No _id sent";
       }
       let db = await root.db;
+      context.__mongodb = db;
       let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}Metadata, "${objName}");
       let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
 
