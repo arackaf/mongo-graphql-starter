@@ -17,9 +17,21 @@ afterEach(async () => {
 
 // --------------------------------- Create Single --------------------------------------------
 
-test("UpdateSingle - Basic add single new author in new book", async () => {
+test("Add single - add single new author in new book", async () => {
   let newBook = await runMutation({
-    mutation: `createBook(Book: {authors: { name: "New Author" }}){Book{title, authors{name}}}`,
+    mutation: `createBook(Book: {title: "New Book", authors: { name: "New Author" }}){Book{_id, title, authors{name}}}`,
     result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${newBook._id}"]){Books{title, authors{name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "New Book", authors: [{ name: "New Author" }] }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name: "New Author"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author" }] //just one
   });
 });

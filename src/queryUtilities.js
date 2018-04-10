@@ -221,17 +221,35 @@ function getSelections(fieldNode) {
   return new Map(fieldNode.selectionSet.selections.map(sel => [sel.name.value, sel.selectionSet == null ? true : getSelections(sel)]));
 }
 
-export function newObjectFromArgs(args, typeMetadata) {
-  return Object.keys(args).reduce((obj, k) => {
+export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingUtils = {}) {
+  let { db, dbHelpers, ...rest } = relationshipLoadingUtils;
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.__isArray) {
+      if (args[`${k}`]) {
+        let newObjectCandidates = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
+        let newObjects = await dbHelpers.processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
+
+        if (!args[`${relationship.fkField}`]) {
+          args[`${relationship.fkField}`] = [];
+        }
+        args[`${relationship.fkField}`].push(...newObjects.map(o => "" + o._id));
+      }
+    }
+  }
+
+  return await Object.keys(args).reduce(async (obj, k) => {
+    obj = await obj;
     let field = typeMetadata.fields[k];
     if (!field) return obj;
 
     if (field == DateType || field.__isDate) {
       obj[k] = new Date(args[k]);
     } else if (field.__isArray) {
-      obj[k] = args[k].map(argItem => newObjectFromArgs(argItem, field.type));
+      obj[k] = await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, relationshipLoadingUtils)));
     } else if (field.__isObject) {
-      obj[k] = newObjectFromArgs(args[k], field.type);
+      obj[k] = await newObjectFromArgs(args[k], field.type, relationshipLoadingUtils);
     } else if (field === MongoIdArrayType) {
       obj[k] = args[k].map(val => ObjectId(val));
     } else if (field === MongoIdType) {
@@ -314,7 +332,7 @@ export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpe
     let relationship = relationships[k];
     if (relationship.__isArray) {
       if (updatesObject[`${k}_ADD`]) {
-        let newObjectCandidates = updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type));
+        let newObjectCandidates = await Promise.all(updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type)));
         let newObjects = await dbHelpers.processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
 
         if (!updatesObject[`${relationship.fkField}_ADDTOSET`]) {
@@ -325,7 +343,7 @@ export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpe
     }
   }
 
-  getUpdateObjectContents(updatesObject, typeMetadata, "", $set, $inc, $push, $pull, $addToSet);
+  await getUpdateObjectContents(updatesObject, typeMetadata, "", $set, $inc, $push, $pull, $addToSet);
   let result = { $set, $inc, $push, $pull, $addToSet };
   Object.keys(result).forEach(k => {
     if (!Object.keys(result[k]).length) {
@@ -335,8 +353,8 @@ export async function getUpdateObject(updatesObject, typeMetadata, { db, dbHelpe
   return result;
 }
 
-function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet) {
-  Object.keys(updatesObject).forEach(k => {
+async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet) {
+  for (let k of Object.keys(updatesObject)) {
     let field = typeMetadata.fields[k];
 
     if (!field) {
@@ -353,7 +371,8 @@ function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc
         if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
           $push[prefix + fieldName] = { $each: [updatesObject[k]] };
         } else {
-          $push[prefix + fieldName] = { $each: [newObjectFromArgs(updatesObject[k], field.type)] };
+          let toAdd = await newObjectFromArgs(updatesObject[k], field.type);
+          $push[prefix + fieldName] = { $each: [toAdd] };
         }
       } else if (queryOperation === "CONCAT") {
         if (!$push[prefix + fieldName]) {
@@ -362,14 +381,15 @@ function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc
         if (field === StringArrayType || field === IntArrayType || field == FloatArrayType) {
           $push[prefix + fieldName].$each.push(...updatesObject[k]);
         } else {
-          $push[prefix + fieldName].$each.push(...updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type)));
+          let toAdd = await Promise.all(updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type)));
+          $push[prefix + fieldName].$each.push(...toAdd);
         }
       } else if (queryOperation === "UPDATE") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
           $set[prefix + `${fieldName}.${updatesObject[k].index}`] =
             field === MongoIdArrayType ? ObjectId(updatesObject[k].value) : updatesObject[k].value;
         } else if (field.__isArray) {
-          getUpdateObjectContents(
+          await getUpdateObjectContents(
             updatesObject[k].Updates,
             field.type,
             prefix + `${fieldName}.${updatesObject[k].index}.`,
@@ -380,7 +400,7 @@ function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc
             $addToSet
           );
         } else {
-          getUpdateObjectContents(updatesObject[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull, $addToSet);
+          await getUpdateObjectContents(updatesObject[k], field.type, prefix + `${fieldName}.`, $set, $inc, $push, $pull, $addToSet);
         }
       } else if (queryOperation === "UPDATES") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
@@ -388,9 +408,9 @@ function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc
             $set[prefix + `${fieldName}.${update.index}`] = field === MongoIdArrayType ? ObjectId(update.value) : update.value;
           });
         } else {
-          updatesObject[k].forEach(update => {
-            getUpdateObjectContents(update.Updates, field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push, $pull, $addToSet);
-          });
+          for (let update of updatesObject[k]) {
+            await getUpdateObjectContents(update.Updates, field.type, prefix + `${fieldName}.${update.index}.`, $set, $inc, $push, $pull, $addToSet);
+          }
         }
       } else if (queryOperation === "PULL") {
         if (field === StringArrayType || field === IntArrayType || field === FloatArrayType || field === MongoIdArrayType) {
@@ -407,14 +427,14 @@ function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc
       if (field == DateType || (typeof field === "object" && field.__isDate)) {
         $set[prefix + k] = new Date(updatesObject[k]);
       } else if (field.__isArray) {
-        $set[prefix + k] = updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type));
+        $set[prefix + k] = await Promise.all(updatesObject[k].map(argsItem => newObjectFromArgs(argsItem, field.type)));
       } else if (field.__isObject) {
-        $set[prefix + k] = newObjectFromArgs(updatesObject[k], field.type);
+        $set[prefix + k] = await newObjectFromArgs(updatesObject[k], field.type);
       } else {
         $set[prefix + k] = updatesObject[k];
       }
     }
-  });
+  }
 }
 
 export const constants = {
