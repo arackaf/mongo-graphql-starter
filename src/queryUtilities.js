@@ -239,7 +239,7 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
     }
   }
 
-  return await Object.keys(args).reduce(async (obj, k) => {
+  return Object.keys(args).reduce(async (obj, k) => {
     obj = await obj;
     let field = typeMetadata.fields[k];
     if (!field) return obj;
