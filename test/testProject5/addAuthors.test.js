@@ -36,7 +36,7 @@ afterEach(async () => {
 
 test("UpdateSingle - Basic add single new author", async () => {
   await runMutation({
-    mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }}){Book{title}}`,
+    mutation: `updateBook(_id: "${book1._id}", Updates: {authors_ADD: { name: "New Author" }}){Book{title authors{name}}}`,
     result: "updateBook"
   });
 
@@ -85,7 +85,7 @@ test("UpdateSingle - Basic add 2 new authors, and single existing author", async
 
 test("UpdateMulti - Basic add single new author", async () => {
   await runMutation({
-    mutation: `updateBooks(_ids: ["${book1._id}", "${book3._id}"], Updates: {authors_ADD: { name: "New Author" }}){Books{title}}`,
+    mutation: `updateBooks(_ids: ["${book1._id}", "${book3._id}"], Updates: {authors_ADD: { name: "New Author" }}){Books{title authors{name}}}`,
     result: "updateBooks"
   });
 
