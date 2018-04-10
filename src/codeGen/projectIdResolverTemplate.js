@@ -1,6 +1,6 @@
   async ${targetObjName}(obj, args, context, ast) {
     if (context.${dataLoaderId} == null) {
-      let db = await context.__mgqlsdb;
+      let db = await context.__mongodb;
       context.${dataLoaderId} = new DataLoader(async keys => {
         let $match = { _id: { $in: keys.filter(id => id).map(id => ObjectId(id)) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, constants.useCurrentSelectionSet);
