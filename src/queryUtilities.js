@@ -239,27 +239,28 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
     }
   }
 
-  return Object.keys(args).reduce(async (obj, k) => {
-    obj = await obj;
-    let field = typeMetadata.fields[k];
-    if (!field) return obj;
+  let keyValuePairs = (await Promise.all(
+    Object.keys(args).map(async k => {
+      let field = typeMetadata.fields[k];
+      if (!field) return null;
 
-    if (field == DateType || field.__isDate) {
-      obj[k] = new Date(args[k]);
-    } else if (field.__isArray) {
-      obj[k] = await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, relationshipLoadingUtils)));
-    } else if (field.__isObject) {
-      obj[k] = await newObjectFromArgs(args[k], field.type, relationshipLoadingUtils);
-    } else if (field === MongoIdArrayType) {
-      obj[k] = args[k].map(val => ObjectId(val));
-    } else if (field === MongoIdType) {
-      obj[k] = ObjectId(args[k]);
-    } else {
-      obj[k] = args[k];
-    }
+      if (field == DateType || field.__isDate) {
+        return [k, new Date(args[k])];
+      } else if (field.__isArray) {
+        return [k, await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, relationshipLoadingUtils)))];
+      } else if (field.__isObject) {
+        return [k, await newObjectFromArgs(args[k], field.type, relationshipLoadingUtils)];
+      } else if (field === MongoIdArrayType) {
+        return [k, args[k].map(val => ObjectId(val))];
+      } else if (field === MongoIdType) {
+        return [k, ObjectId(args[k])];
+      } else {
+        return [k, args[k]];
+      }
+    })
+  )).filter(x => x);
 
-    return obj;
-  }, {});
+  return keyValuePairs.reduce((obj, [k, val]) => ((obj[k] = val), obj), {});
 }
 
 function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
