@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.6.9",
+  "version": "0.6.10",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -38,6 +38,7 @@
   "dependencies": {
     "@std/esm": "0.20.0",
     "dataloader": "1.4.0",
+    "escape-string-regexp": "^1.0.5",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
