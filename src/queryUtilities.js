@@ -42,15 +42,6 @@ function getProjectionObject(requestMap, objectMetaData, args = {}, extrasPacket
     return hash;
   }, {});
 
-  if (extrasPackets && extrasPackets.size && objectMetaData.relationships) {
-    Object.keys(objectMetaData.relationships).forEach(relationshipName => {
-      let relationship = objectMetaData.relationships[relationshipName];
-      if (extrasPackets.get(relationshipName)) {
-        result[relationship.fkField] = 1;
-      }
-    });
-  }
-
   return result;
 }
 
