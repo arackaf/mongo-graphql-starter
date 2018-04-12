@@ -8,9 +8,15 @@ export function getMongoProjection(requestMap, objectMetaData, args, extrasPacke
   return getProjectionObject(requestMap, objectMetaData, args, extrasPackets);
 }
 function getProjectionObject(requestMap, objectMetaData, args = {}, extrasPackets, currentObject = "", increment = 0) {
+  let allRelationships = objectMetaData.relationships || {};
+
   let result = [...requestMap.entries()].reduce((hash, [field, selectionEntry]) => {
     let entry = objectMetaData.fields[field];
     if (!entry) {
+      if (allRelationships[field]) {
+        let fkField = allRelationships[field].fkField;
+        hash[fkField] = currentObject ? currentObject + "." + fkField : "$" + fkField;
+      }
       return hash;
     }
 
