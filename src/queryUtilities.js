@@ -2,6 +2,8 @@ import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, I
 import { ObjectId } from "mongodb";
 import processHook from "./processHook";
 
+import escapeStringRegexp from "escape-string-regexp";
+
 export function getMongoProjection(requestMap, objectMetaData, args, extrasPackets) {
   return getProjectionObject(requestMap, objectMetaData, args, extrasPackets);
 }
@@ -107,11 +109,11 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
             throw "Only one of startsWith, endsWith, contains, and regex can be specified for a given string field. Combine all of these filters into a single regex";
           }
           if (queryOperation === "contains") {
-            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(escapeStringRegexp(args[k]), "i")));
           } else if (queryOperation === "startsWith") {
-            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp("^" + args[k], "i")));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp("^" + escapeStringRegexp(args[k]), "i")));
           } else if (queryOperation === "endsWith") {
-            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k] + "$", "i")));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(escapeStringRegexp(args[k]) + "$", "i")));
           } else if (queryOperation == "regex") {
             ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           }
@@ -128,11 +130,11 @@ function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix = "") {
               hash[fieldName].$in.push(...args[k].map(item => (field === MongoIdArrayType ? ObjectId(item) : item)));
             }
           } else if (queryOperation == "textContains") {
-            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(escapeStringRegexp(args[k]), "i")));
           } else if (queryOperation === "startsWith") {
-            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp("^" + args[k], "i")));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp("^" + escapeStringRegexp(args[k]), "i")));
           } else if (queryOperation === "endsWith") {
-            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k] + "$", "i")));
+            ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(escapeStringRegexp(args[k]) + "$", "i")));
           } else if (queryOperation == "regex") {
             ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(args[k], "i")));
           } else if (numberArrayOperations.has(queryOperation)) {
