@@ -16,8 +16,8 @@ beforeAll(async () => {
 
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
 
-  let book1 = { title: "Book 1", pages: 100, authorIds: ["" + adam._id], cachedAuthors: [adam] };
-  let book2 = { title: "Book 1 a", pages: 150, authorIds: ["" + adam._id], cachedAuthors: [adam] };
+  let book1 = { title: "Book 1", pages: 100, authorIds: ["" + adam._id], cachedMainAuthor: adam, cachedAuthors: [adam] };
+  let book2 = { title: "Book 1 a", pages: 150, authorIds: ["" + adam._id], cachedMainAuthor: adam, cachedAuthors: [adam] };
   let book3 = { title: "Book 2", pages: 200, authorIds: ["" + katie._id] };
 
   await db.collection("books").insert(book1);
@@ -52,6 +52,30 @@ test("Read cached authors' subjects with subjectIds not specified", async () => 
     results: [
       { title: "Book 1", cachedAuthors: [{ name: "Adam", subjects: [{ name: "Subject 1" }] }] },
       { title: "Book 1 a", cachedAuthors: [{ name: "Adam", subjects: [{ name: "Subject 1" }] }] }
+    ]
+  });
+});
+
+//-----------------------------------------------------------------------------------------
+
+test("Read cached authors' subjects with subjectIds manually specified", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_startsWith: "Book 1", SORT: {title: 1}){Books{title, cachedMainAuthor{name, subjectIds, subjects{name}}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", cachedMainAuthor: { name: "Adam", subjectIds: ["" + subject1._id], subjects: [{ name: "Subject 1" }] } },
+      { title: "Book 1 a", cachedMainAuthor: { name: "Adam", subjectIds: ["" + subject1._id], subjects: [{ name: "Subject 1" }] } }
+    ]
+  });
+});
+
+test("Read cached authors' subjects with subjectIds not specified", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_startsWith: "Book 1", SORT: {title: 1}){Books{title, cachedMainAuthor{name, subjects{name}}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", cachedMainAuthor: { name: "Adam", subjects: [{ name: "Subject 1" }] } },
+      { title: "Book 1 a", cachedMainAuthor: { name: "Adam", subjects: [{ name: "Subject 1" }] } }
     ]
   });
 });
