@@ -11,6 +11,10 @@ beforeAll(async () => {
 afterEach(async () => {
   await db.collection("books").remove({});
   await db.collection("authors").remove({});
+  await db.collection("subjects").remove({});
+});
+
+afterAll(async () => {
   db.close();
   db = null;
 });
@@ -33,5 +37,20 @@ test("Add single - add single new author in new book", async () => {
     query: `{allAuthors(name: "New Author"){Authors{name}}}`,
     coll: "allAuthors",
     results: [{ name: "New Author" }] //just one
+  });
+});
+
+// ---------------------------------- Create in cached Author --------------------------------------
+
+test("Add single - add subject to cachedMainAuthor", async () => {
+  let newBook = await runMutation({
+    mutation: `createBook(Book: {title: "New Book", cachedMainAuthor: {name: "New Author", subjects: [{name: "Newly Added A"}]}}){Book{_id}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allSubjects(name: "Newly Added A"){Subjects{name}}}`,
+    coll: "allSubjects",
+    results: [{ name: "Newly Added A" }]
   });
 });
