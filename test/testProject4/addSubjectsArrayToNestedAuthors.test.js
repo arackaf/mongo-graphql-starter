@@ -33,7 +33,8 @@ test("Add single - add subject to cachedMainAuthor creates subject", async () =>
     results: [{ name: "Newly Added A" }]
   });
 });
-test("Add single - add subject to cachedMainAuthor creates subject", async () => {
+
+test("Add single - add subject to cachedMainAuthor creates subject and book", async () => {
   let newBook = await runMutation({
     mutation: `createBook(Book: {title: "New Book", cachedMainAuthor: {name: "New Author", subjects: [{name: "Newly Added A"}]}}){Book{_id}}`,
     result: "createBook"
@@ -117,7 +118,7 @@ test("Add single - add subject to cachedAuthors creates subject B", async () => 
   });
 });
 
-test("Add single - add subject to cachedAuthors updates author appropriated A", async () => {
+test("Add single - add subject to cachedAuthors updates author appropriately A", async () => {
   let newBook = await runMutation({
     mutation: `createBook(Book: {title: "New Book", cachedAuthors: {name: "New Author", subjects: {name: "Newly Added A"}}}){Book{_id}}`,
     result: "createBook"
@@ -135,7 +136,7 @@ test("Add single - add subject to cachedAuthors updates author appropriated A", 
   });
 });
 
-test("Add single - add subject to cachedAuthors updates author appropriated B", async () => {
+test("Add single - add subject to cachedAuthors updates author appropriately B", async () => {
   let newBook = await runMutation({
     mutation: `createBook(Book: {title: "New Book", cachedAuthors: [{name: "New Author", subjects: [{name: "Newly Added A"}]}]}){Book{_id}}`,
     result: "createBook"
@@ -153,7 +154,7 @@ test("Add single - add subject to cachedAuthors updates author appropriated B", 
   });
 });
 
-test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriated A", async () => {
+test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriately A", async () => {
   let priorSubject = await runMutation({
     mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
     result: "createSubject"
@@ -178,7 +179,7 @@ test("Add single - add subject to cachedAuthors plus manual subjectIds push upda
   });
 });
 
-test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriated B", async () => {
+test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriately B", async () => {
   let priorSubject = await runMutation({
     mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
     result: "createSubject"
@@ -203,7 +204,7 @@ test("Add single - add subject to cachedAuthors plus manual subjectIds push upda
   });
 });
 
-test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriated MIXED A", async () => {
+test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriately MIXED A", async () => {
   let priorSubject = await runMutation({
     mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
     result: "createSubject"
@@ -228,7 +229,7 @@ test("Add single - add subject to cachedAuthors plus manual subjectIds push upda
   });
 });
 
-test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriated MIXED B", async () => {
+test("Add single - add subject to cachedAuthors plus manual subjectIds push updates author appropriately MIXED B", async () => {
   let priorSubject = await runMutation({
     mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
     result: "createSubject"
