@@ -21,7 +21,7 @@ Promise.resolve(createGraphqlSchema(projectSetupD, path.resolve("./test/testProj
     fs.readFileSync(path.resolve(__dirname, "./projectSetupD_Hooks.js"), { encoding: "utf8" })
   );
 });
-Promise.resolve(createGraphqlSchema(projectSetupD, path.resolve("./test/testProject5"))).then(() => {
+Promise.resolve(createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"))).then(() => {
   fs.writeFileSync(
     path.resolve("./test/testProject5/graphQL/hooks.js"),
     fs.readFileSync(path.resolve(__dirname, "./projectSetupE_Hooks.js"), { encoding: "utf8" })

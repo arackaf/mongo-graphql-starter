@@ -66,3 +66,42 @@ test("Add single new new author in new book", async () => {
     ]
   });
 });
+
+test("Verify fk created types", async () => {
+  await runMutation({
+    mutation: `
+    createBook(Book: {
+      title: "New Book", 
+      authors: { 
+        name: "New Author 1", 
+        subjects: {name: "New Subject 1"} 
+      }, 
+      mainAuthor: {
+        name: "New Author 2", 
+        mainSubject: {name: "New Subject 2"}
+      }
+    }){Book{_id}}`,
+    result: "createBook"
+  });
+
+  let createdBook = (await db
+    .collection("books")
+    .find({ title: "New Book" })
+    .toArray())[0];
+
+  let createdAuthor1 = (await db
+    .collection("authors")
+    .find({ name: "New Author 1" })
+    .toArray())[0];
+
+  let createdAuthor2 = (await db
+    .collection("authors")
+    .find({ name: "New Author 2" })
+    .toArray())[0];
+
+  expect(typeof createdBook.mainAuthorId).toBe("string");
+  expect(typeof createdBook.authorIds[0]).toBe("string");
+
+  expect(typeof createdAuthor1.subjectIds[0]).toBe("string");
+  expect(typeof createdAuthor2.mainSubjectId).toBe("string");
+});

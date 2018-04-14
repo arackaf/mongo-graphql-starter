@@ -229,22 +229,24 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
       if (args[`${k}`]) {
         let newObjectCandidates = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
         let newObjects = await dbHelpers.processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
+        let fkType = typeMetadata.fields[relationship.fkField];
 
         if (!args[`${relationship.fkField}`]) {
           args[`${relationship.fkField}`] = [];
         }
-        args[`${relationship.fkField}`].push(...newObjects.map(o => "" + o._id));
+        args[`${relationship.fkField}`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o._id : o._id)));
       }
     } else if (relationship.__isObject) {
       if (args[`${k}`]) {
         let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[`${k}`], relationship.type, relationshipLoadingUtils));
         let newObject = await dbHelpers.processInsertion(db, newObjectCandidate, { typeMetadata: relationship.type, ...rest });
+        let fkType = typeMetadata.fields[relationship.fkField];
 
         if (newObject) {
           if (!args[`${relationship.fkField}`]) {
             args[`${relationship.fkField}`] = [];
           }
-          args[`${relationship.fkField}`] = "" + newObject._id;
+          args[`${relationship.fkField}`] = fkType == StringType ? "" + newObject._id : newObject._id;
         }
       }
     }
