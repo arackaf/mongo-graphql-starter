@@ -19,27 +19,6 @@ afterAll(async () => {
   db = null;
 });
 
-// --------------------------------- Create Single --------------------------------------------
-
-test("Add single - add single new author in new book", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book", authors: { name: "New Author" }}){Book{_id, title, authors{name}}}`,
-    result: "createBook"
-  });
-
-  await queryAndMatchArray({
-    query: `{allBooks(_id_in: ["${newBook._id}"]){Books{title, authors{name}}}}`,
-    coll: "allBooks",
-    results: [{ title: "New Book", authors: [{ name: "New Author" }] }]
-  });
-
-  await queryAndMatchArray({
-    query: `{allAuthors(name: "New Author"){Authors{name}}}`,
-    coll: "allAuthors",
-    results: [{ name: "New Author" }] //just one
-  });
-});
-
 // ---------------------------------- Create in cached Main Author --------------------------------------
 
 test("Add single - add subject to cachedMainAuthor creates subject", async () => {
@@ -54,8 +33,20 @@ test("Add single - add subject to cachedMainAuthor creates subject", async () =>
     results: [{ name: "Newly Added A" }]
   });
 });
+test("Add single - add subject to cachedMainAuthor creates subject", async () => {
+  let newBook = await runMutation({
+    mutation: `createBook(Book: {title: "New Book", cachedMainAuthor: {name: "New Author", subjects: [{name: "Newly Added A"}]}}){Book{_id}}`,
+    result: "createBook"
+  });
 
-test("Add single - add subject to cachedMainAuthor updates author appropriated", async () => {
+  await queryAndMatchArray({
+    query: `{allSubjects(name: "Newly Added A"){Subjects{name}}}`,
+    coll: "allSubjects",
+    results: [{ name: "Newly Added A" }]
+  });
+});
+
+test("Add single - add subject to cachedMainAuthor updates author FK appropriately", async () => {
   let newBook = await runMutation({
     mutation: `createBook(Book: {title: "New Book", cachedMainAuthor: {name: "New Author", subjects: [{name: "Newly Added A"}]}}){Book{_id}}`,
     result: "createBook"
