@@ -40,10 +40,16 @@ const Author = {
   fields: {
     name: StringType,
     birthday: DateType,
+    mainSubjectId: StringType,
     subjectIds: StringArrayType,
     firstBookId: StringType
   }
 };
+
+relationshipHelpers.projectId(Author, "mainSubject", {
+  type: Subject,
+  fkField: "mainSubjectId"
+});
 
 relationshipHelpers.projectIds(Author, "subjects", {
   type: Subject,

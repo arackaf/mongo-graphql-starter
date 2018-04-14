@@ -235,6 +235,18 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
         }
         args[`${relationship.fkField}`].push(...newObjects.map(o => "" + o._id));
       }
+    } else if (relationship.__isObject) {
+      if (args[`${k}`]) {
+        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[`${k}`], relationship.type, relationshipLoadingUtils));
+        let newObject = await dbHelpers.processInsertion(db, newObjectCandidate, { typeMetadata: relationship.type, ...rest });
+
+        if (newObject) {
+          if (!args[`${relationship.fkField}`]) {
+            args[`${relationship.fkField}`] = [];
+          }
+          args[`${relationship.fkField}`] = "" + newObject._id;
+        }
+      }
     }
   }
 
