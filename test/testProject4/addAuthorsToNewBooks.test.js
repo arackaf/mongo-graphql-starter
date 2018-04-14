@@ -19,9 +19,7 @@ afterAll(async () => {
   db = null;
 });
 
-// --------------------------------- Create Single --------------------------------------------
-
-test("Add single - add single new author in new book", async () => {
+test("Add single new new author in new book", async () => {
   let newBook = await runMutation({
     mutation: `createBook(Book: {title: "New Book", authors: { name: "New Author" }}){Book{_id, title, authors{name}}}`,
     result: "createBook"
@@ -37,5 +35,44 @@ test("Add single - add single new author in new book", async () => {
     query: `{allAuthors(name: "New Author"){Authors{name}}}`,
     coll: "allAuthors",
     results: [{ name: "New Author" }] //just one
+  });
+});
+
+test("Add two new new authors in new book", async () => {
+  let newBook = await runMutation({
+    mutation: `createBook(Book: {title: "New Book", authors: [{ name: "New Author 1" }, { name: "New Author 2" }]}){Book{_id, title, authors{name}}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${newBook._id}"]){Books{title, authors(SORT: {name: 1}){name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "New Book", authors: [{ name: "New Author 1" }, { name: "New Author 2" }] }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "New Author"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "New Author 1" }, { name: "New Author 2" }] //just one
+  });
+});
+
+test("Add two new new authors in new book", async () => {
+  let existingAuthor = await runMutation({
+    mutation: `createAuthor(Author: {name: "Adam"}){Author{_id}}`,
+    result: "createAuthor"
+  });
+
+  let newBook = await runMutation({
+    mutation: `createBook(Book: {title: "New Book", authorIds: ["${
+      existingAuthor._id
+    }"] authors: [{ name: "New Author 1" }, { name: "New Author 2" }]}){Book{_id, title, authors{name}}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(_id_in: ["${newBook._id}"]){Books{title, authors(SORT: {name: 1}){name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "New Book", authors: [{ name: "Adam" }, { name: "New Author 1" }, { name: "New Author 2" }] }]
   });
 });
