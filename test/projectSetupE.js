@@ -65,6 +65,7 @@ const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: MongoIdType,
+    cachedMainAuthor: objectOf(Author),
     authorIds: MongoIdArrayType,
     cachedAuthors: arrayOf(Author)
   }
