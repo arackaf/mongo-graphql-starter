@@ -100,8 +100,8 @@ test("Verify fk created types", async () => {
     .toArray())[0];
 
   expect(typeof createdBook.mainAuthorId).toBe("object");
-  //expect(typeof createdBook.authorIds[0]).toBe("object");
+  expect(typeof createdBook.authorIds[0]).toBe("object");
 
-  //expect(typeof createdAuthor1.subjectIds[0]).toBe("object");
-  //expect(typeof createdAuthor2.mainSubjectId).toBe("object");
+  expect(typeof createdAuthor1.subjectIds[0]).toBe("object");
+  expect(typeof createdAuthor2.mainSubjectId).toBe("object");
 });
