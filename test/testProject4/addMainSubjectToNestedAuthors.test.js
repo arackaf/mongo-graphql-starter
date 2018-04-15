@@ -221,11 +221,6 @@ test("Add single - add existing subject to cachedAuthors's main subject", async 
     result: "updateBook"
   });
 
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
   await queryAndMatchArray({
     query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubject{name}}}}}`,
     coll: "allBooks",
@@ -277,11 +272,6 @@ test("Add single - add existing subject to cachedAuthors's main subject", async 
     result: "updateBook"
   });
 
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
   await queryAndMatchArray({
     query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubject{name}}}}}`,
     coll: "allBooks",
@@ -332,11 +322,6 @@ test("Add single - add existing subject to cachedAuthors's main subject", async 
     }"}]}){Book{_id}}`,
     result: "updateBook"
   });
-
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
 
   await queryAndMatchArray({
     query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubject{name}}}}}`,
