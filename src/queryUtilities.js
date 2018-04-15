@@ -335,14 +335,26 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
 }
 
 export async function getUpdateObject(updatesObject, typeMetadata, relationshipLoadingUtils = {}) {
-  let { db, dbHelpers, ...rest } = relationshipLoadingUtils;
   let $set = {};
   let $inc = {};
   let $push = {};
   let $pull = {};
   let $addToSet = {};
 
+  await getUpdateObjectContents(updatesObject, typeMetadata, "", $set, $inc, $push, $pull, $addToSet, relationshipLoadingUtils);
+  let result = { $set, $inc, $push, $pull, $addToSet };
+  Object.keys(result).forEach(k => {
+    if (!Object.keys(result[k]).length) {
+      delete result[k];
+    }
+  });
+  return result;
+}
+
+async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet, relationshipLoadingUtils) {
+  let { db, dbHelpers, ...rest } = relationshipLoadingUtils;
   let relationships = typeMetadata.relationships || {};
+
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
     if (relationship.__isArray) {
@@ -357,20 +369,17 @@ export async function getUpdateObject(updatesObject, typeMetadata, relationshipL
         }
         updatesObject[`${relationship.fkField}_ADDTOSET`].push(...newObjects.map(o => "" + o._id));
       }
+    } else if (relationship.__isObject) {
+      if (updatesObject[`${k}_SET`]) {
+        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(updatesObject[`${k}_SET`], relationship.type, relationshipLoadingUtils));
+        if (newObjectCandidate) {
+          let newObject = await dbHelpers.processInsertion(db, newObjectCandidate, { typeMetadata: relationship.type, ...rest });
+          updatesObject[relationship.fkField] = "" + newObject._id;
+        }
+      }
     }
   }
 
-  await getUpdateObjectContents(updatesObject, typeMetadata, "", $set, $inc, $push, $pull, $addToSet, relationshipLoadingUtils);
-  let result = { $set, $inc, $push, $pull, $addToSet };
-  Object.keys(result).forEach(k => {
-    if (!Object.keys(result[k]).length) {
-      delete result[k];
-    }
-  });
-  return result;
-}
-
-async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet, relationshipLoadingUtils) {
   for (let k of Object.keys(updatesObject)) {
     let field = typeMetadata.fields[k];
 

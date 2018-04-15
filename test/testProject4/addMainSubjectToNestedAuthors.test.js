@@ -1,5 +1,6 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
+import flatMap from "lodash.flatmap";
 
 let db, schema, runQuery, queryAndMatchArray, runMutation;
 let adam, katie, laura, mallory, book1, book2, book3;
@@ -53,85 +54,6 @@ test("Add single - add subject to cachedMainAuthor updates author appropriated",
   });
 });
 
-// ---------------------------create in Update ------------------------------
-
-test("Add single - add subject to cachedMainAuthor updates author appropriated - Update single", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBook(_id: "${
-      newBook._id
-    }", Updates: {title: "New Book", cachedMainAuthor: {name: "New Author", mainSubject: {name: "Newly Added A"}}}){Book{_id}}`,
-    result: "updateBook"
-  });
-
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedMainAuthor{mainSubjectId, mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedMainAuthor: { mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } } }]
-  });
-});
-
-test("Add single - add subject to cachedMainAuthor updates author appropriated - Update Multi", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBooks(_ids: ["${
-      newBook._id
-    }"], Updates: {title: "New Book", cachedMainAuthor: {name: "New Author", mainSubject: {name: "Newly Added A"}}}){Books{_id}}`,
-    result: "updateBooks"
-  });
-
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedMainAuthor{mainSubjectId, mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedMainAuthor: { mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } } }]
-  });
-});
-
-test("Add single - add subject to cachedMainAuthor updates author appropriated - Update Bulk", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBooksBulk(Match: { _id_in: ["${
-      newBook._id
-    }"] }, Updates: {title: "New Book", cachedMainAuthor: {name: "New Author", mainSubject: {name: "Newly Added A"}}}){success}`,
-    result: "updateBooksBulk"
-  });
-
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedMainAuthor{mainSubjectId, mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedMainAuthor: { mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } } }]
-  });
-});
-
-// ---------------------------------- Create in cached Authors Collection --------------------------------------
-
 // ----------------------------------- Create up front ---------------------------------------------------------
 
 test("Add single - add subject to cachedAuthors updates author appropriately", async () => {
@@ -177,155 +99,78 @@ test("Add single - add existing subject to cachedAuthors's main subject", async 
 
 // ----------------------------------- Create in update ---------------------------------------------------------
 
-// ----------------------------------- Create whole array -------------------------------------------------------
-test("Add single - add subject to cachedAuthors updates author appropriately", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
+let updates = [
+  { updateName: "updateBook", identify: newBook => `_id: "${newBook._id}"`, result: "{Book{title}}" },
+  { updateName: "updateBooks", identify: newBook => `_ids: ["${newBook._id}"]`, result: "{Books{title}}" },
+  { updateName: "updateBooksBulk", identify: newBook => `Match: { _id_in: ["${newBook._id}"] }`, result: "{success}" }
+];
+
+let configurations = [
+  { authorsName: "cachedMainAuthor", authorsOp: "", createWithArray: false, subjectsOp: "" },
+  { authorsName: "cachedMainAuthor", authorsOp: "_UPDATE", createWithArray: false, subjectsOp: "_SET" },
+  { authorsName: "cachedAuthors", authorsOp: "", createWithArray: false, subjectsOp: "" },
+  { authorsName: "cachedAuthors", authorsOp: "", createWithArray: true, subjectsOp: "" },
+  { authorsName: "cachedAuthors", authorsOp: "_PUSH", createWithArray: false, subjectsOp: "" },
+  { authorsName: "cachedAuthors", authorsOp: "_CONCAT", createWithArray: false, subjectsOp: "" },
+  { authorsName: "cachedAuthors", authorsOp: "_CONCAT", createWithArray: true, subjectsOp: "" }
+];
+
+let allConfigurations = flatMap(updates, update => configurations.map(config => ({ ...config, ...update })));
+
+allConfigurations.forEach(config => {
+  test(`Add single - add subject to ${config.authorsName} updates author ` + JSON.stringify(config), async () => {
+    let newBook = await runMutation({
+      mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
+      result: "createBook"
+    });
+
+    await runMutation({
+      mutation: `${config.updateName}(${config.identify(newBook)}, Updates: {title: "New Book", ${config.authorsName}${config.authorsOp}: ${
+        config.createWithArray ? "[" : ""
+      }{name: "New Author", mainSubject${config.subjectsOp}: {name: "Newly Added A"}}${config.createWithArray ? "]" : ""}})${config.result}`,
+      result: config.updateName
+    });
+
+    let newSubject = (await runQuery({
+      query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
+      coll: "allSubjects"
+    })).Subjects[0];
+
+    await queryAndMatchArray({
+      query: `{allBooks(title: "New Book"){Books{${config.authorsName}{mainSubjectId, mainSubject{name}}}}}`,
+      coll: "allBooks",
+      results:
+        config.authorsName == "cachedAuthors"
+          ? [{ cachedAuthors: [{ mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } }] }]
+          : [{ cachedMainAuthor: { mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } } }]
+    });
   });
 
-  await runMutation({
-    mutation: `updateBook(_id: "${
-      newBook._id
-    }", Updates: {title: "New Book", cachedAuthors: {name: "New Author", mainSubject: {name: "Newly Added A"}}}){Book{_id}}`,
-    result: "updateBook"
-  });
+  test(`Add single - add existing subject to ${config.authorsName}'s main subject ` + JSON.stringify(config), async () => {
+    let priorSubject = await runMutation({
+      mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
+      result: "createSubject"
+    });
 
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
+    let newBook = await runMutation({
+      mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
+      result: "createBook"
+    });
 
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubjectId, mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedAuthors: [{ mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } }] }]
-  });
-});
+    await runMutation({
+      mutation: `${config.updateName}(${config.identify(newBook)}, Updates: {title: "New Book", ${config.authorsName}${config.authorsOp}: ${
+        config.createWithArray ? "[" : ""
+      }{name: "New Author", mainSubjectId: "${priorSubject._id}"}${config.createWithArray ? "]" : ""}})${config.result}`,
+      result: config.updateName
+    });
 
-test("Add single - add existing subject to cachedAuthors's main subject", async () => {
-  let priorSubject = await runMutation({
-    mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
-    result: "createSubject"
-  });
-
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBook(_id: "${newBook._id}", Updates: {title: "New Book", cachedAuthors: {name: "New Author", mainSubjectId: "${
-      priorSubject._id
-    }"}}){Book{_id}}`,
-    result: "updateBook"
-  });
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedAuthors: [{ mainSubject: { name: "Prior Subject" } }] }]
-  });
-});
-
-// ----------------------------------- Create using push -------------------------------------------------------
-test("Add single - add subject to cachedAuthors updates author appropriately", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBook(_id: "${
-      newBook._id
-    }", Updates: {title: "New Book", cachedAuthors_PUSH: {name: "New Author", mainSubject: {name: "Newly Added A"}}}){Book{_id}}`,
-    result: "updateBook"
-  });
-
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubjectId, mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedAuthors: [{ mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } }] }]
-  });
-});
-
-test("Add single - add existing subject to cachedAuthors's main subject", async () => {
-  let priorSubject = await runMutation({
-    mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
-    result: "createSubject"
-  });
-
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBook(_id: "${newBook._id}", Updates: {title: "New Book", cachedAuthors_PUSH: {name: "New Author", mainSubjectId: "${
-      priorSubject._id
-    }"}}){Book{_id}}`,
-    result: "updateBook"
-  });
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedAuthors: [{ mainSubject: { name: "Prior Subject" } }] }]
-  });
-});
-
-// ----------------------------------- Create using concat -------------------------------------------------------
-test("Add single - add subject to cachedAuthors updates author appropriately", async () => {
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBook(_id: "${
-      newBook._id
-    }", Updates: {title: "New Book", cachedAuthors_CONCAT: [{name: "New Author", mainSubject: {name: "Newly Added A"}}]}){Book{_id}}`,
-    result: "updateBook"
-  });
-
-  let newSubject = (await runQuery({
-    query: `{allSubjects(name: "Newly Added A"){Subjects{_id, name}}}`,
-    coll: "allSubjects"
-  })).Subjects[0];
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubjectId, mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedAuthors: [{ mainSubjectId: "" + newSubject._id, mainSubject: { name: "Newly Added A" } }] }]
-  });
-});
-
-test("Add single - add existing subject to cachedAuthors's main subject", async () => {
-  let priorSubject = await runMutation({
-    mutation: `createSubject(Subject: {name: "Prior Subject"}){Subject{_id}}`,
-    result: "createSubject"
-  });
-
-  let newBook = await runMutation({
-    mutation: `createBook(Book: {title: "New Book"}){Book{_id}}`,
-    result: "createBook"
-  });
-
-  await runMutation({
-    mutation: `updateBook(_id: "${newBook._id}", Updates: {title: "New Book", cachedAuthors_CONCAT: [{name: "New Author", mainSubjectId: "${
-      priorSubject._id
-    }"}]}){Book{_id}}`,
-    result: "updateBook"
-  });
-
-  await queryAndMatchArray({
-    query: `{allBooks(title: "New Book"){Books{cachedAuthors{mainSubject{name}}}}}`,
-    coll: "allBooks",
-    results: [{ cachedAuthors: [{ mainSubject: { name: "Prior Subject" } }] }]
+    await queryAndMatchArray({
+      query: `{allBooks(title: "New Book"){Books{${config.authorsName}{mainSubject{name}}}}}`,
+      coll: "allBooks",
+      results:
+        config.authorsName == "cachedAuthors"
+          ? [{ cachedAuthors: [{ mainSubject: { name: "Prior Subject" } }] }]
+          : [{ cachedMainAuthor: { mainSubject: { name: "Prior Subject" } } }]
+    });
   });
 });
