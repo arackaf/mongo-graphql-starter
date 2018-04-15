@@ -105,3 +105,49 @@ test("Verify fk created types", async () => {
   expect(typeof createdAuthor1.subjectIds[0]).toBe("object");
   expect(typeof createdAuthor2.mainSubjectId).toBe("object");
 });
+
+test("Verify fk created types on update", async () => {
+  let book = await runMutation({
+    mutation: `
+    createBook(Book: {
+      title: "New Book"
+    }){Book{_id}}`,
+    result: "createBook"
+  });
+
+  await runMutation({
+    mutation: `
+    updateBook(_id: "${book._id}", Updates: {
+      authors_ADD: { 
+        name: "New Author 1", 
+        subjects: {name: "New Subject 1"} 
+      }, 
+      mainAuthor_SET: {
+        name: "New Author 2", 
+        mainSubject: {name: "New Subject 2"}
+      }
+    }){Book{_id}}`,
+    result: "updateBook"
+  });
+
+  let createdBook = (await db
+    .collection("books")
+    .find({ title: "New Book" })
+    .toArray())[0];
+
+  let createdAuthor1 = (await db
+    .collection("authors")
+    .find({ name: "New Author 1" })
+    .toArray())[0];
+
+  let createdAuthor2 = (await db
+    .collection("authors")
+    .find({ name: "New Author 2" })
+    .toArray())[0];
+
+  expect(typeof createdBook.mainAuthorId).toBe("object");
+  expect(typeof createdBook.authorIds[0]).toBe("object");
+
+  expect(typeof createdAuthor1.subjectIds[0]).toBe("object");
+  expect(typeof createdAuthor2.mainSubjectId).toBe("object");
+});
