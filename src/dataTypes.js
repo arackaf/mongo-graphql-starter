@@ -53,7 +53,7 @@ export const relationshipHelpers = {
       let sourceField = source.fields[fkField];
 
       if (!(sourceField === StringArrayType || sourceField === MongoIdArrayType)) {
-        throw "Invalid type for foreign key " + fkField + " which is a " + +" for type " + type;
+        throw "Invalid type for foreign key " + fkField + " which is type " + type;
       }
     }
 
@@ -74,7 +74,7 @@ export const relationshipHelpers = {
       let sourceField = source.fields[fkField];
 
       if (!(sourceField === StringType || sourceField === MongoIdType)) {
-        throw "Invalid type for foreign key " + fkField + " which is a " + +" for type " + type;
+        throw "Invalid type for foreign key " + fkField + " which is type " + type;
       }
     }
 

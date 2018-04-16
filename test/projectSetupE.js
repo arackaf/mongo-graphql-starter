@@ -41,10 +41,16 @@ const Author = {
   fields: {
     name: StringType,
     birthday: DateType,
+    mainSubjectId: MongoIdType,
     subjectIds: MongoIdArrayType,
     firstBookId: MongoIdType
   }
 };
+
+relationshipHelpers.projectId(Author, "mainSubject", {
+  type: Subject,
+  fkField: "mainSubjectId"
+});
 
 relationshipHelpers.projectIds(Author, "subjects", {
   type: Subject,
@@ -59,6 +65,7 @@ const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: MongoIdType,
+    cachedMainAuthor: objectOf(Author),
     authorIds: MongoIdArrayType,
     cachedAuthors: arrayOf(Author)
   }
