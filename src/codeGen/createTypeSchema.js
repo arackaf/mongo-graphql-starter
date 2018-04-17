@@ -184,37 +184,43 @@ ${[
 \`;
   
   
-export const query = \`
+${createQueryType()}
   
+  `
+      : ""
+  }
+  `;
+
+  function createQueryType() {
+    return `export const query = \`
+
 ${[
-          !overrides.has(`all${name}s`)
-            ? `${TAB}all${name}s(
+      !overrides.has(`all${name}s`)
+        ? `${TAB}all${name}s(
     ${allQueryFields
       .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
       .concat(dateFields.map(f => `${f}_format: String`))
       .concat(manualQueryArgs)
       .join(`,\n${TAB2}`)}
   ): ${name}QueryResults`
-            : "",
+        : "",
 
-          !overrides.has(`get${name}`)
-            ? `${TAB}get${name}(
+      !overrides.has(`get${name}`)
+        ? `${TAB}get${name}(
     ${[`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)).join(`,\n${TAB2}`)}
   ): ${name}SingleQueryResult`
-            : "",
+        : "",
 
-          schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n")
-        ]
-          .filter(s => s)
-          .join("\n\n")}
-  
-\`;
-  
-  `
-      : ""
+      schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n")
+    ]
+      .filter(s => s)
+      .join("\n\n")}
+      
+    \`;`;
   }
-  `;
 }
+
+function createQueryType() {}
 
 function displaySchemaValue(value, useInputs) {
   if (typeof value === "object" && value.__isDate) {
