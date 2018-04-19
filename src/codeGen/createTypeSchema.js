@@ -141,56 +141,21 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
 \`;
   
-  ${
-    objectToCreate.table
-      ? `
-export const mutation = \`
-
-${[
-          !overrides.has(`create${name}`)
-            ? `${TAB}create${name}(
-    ${[`${name}: ${name}Input`].join(`,\n${TAB}`)}
-  ): ${name}MutationResult`
-            : "",
-
-          !overrides.has(`update${name}`)
-            ? `${TAB}update${name}(
-    ${[`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}MutationResult`
-            : "",
-
-          !overrides.has(`update${name}s`)
-            ? `${TAB}update${name}s(
-    ${[`_ids: [String]`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}MutationResultMulti`
-            : "",
-
-          !overrides.has(`update${name}sBulk`)
-            ? `${TAB}update${name}sBulk(
-    ${[`Match: ${name}Filters`, `Updates: ${name}MutationInput`].join(`,\n${TAB}${TAB}`)}
-  ): ${name}BulkMutationResult`
-            : "",
-
-          !overrides.has(`delete${name}`)
-            ? `${TAB}delete${name}(
-    ${[`_id: String`]}
-  ): Boolean`
-            : "",
-
-          schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}').join("\n\n")
-        ]
-          .filter(s => s)
-          .join("\n\n")}
+  ${objectToCreate.table ? `\n${createMutationType()}\n\n\n${createQueryType()}` : ""}
   
-\`;
-  
-  
-${createQueryType()}
-  
-`
-      : ""
+`;
+
+  function createMutationType() {
+    let allMutations = [
+      createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
+      createOperation(`update${name}`, [`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`], `${name}MutationResult`),
+      createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`], `${name}MutationResultMulti`),
+      createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
+      createOperation(`delete${name}`, [`_id: String`], "Boolean"),
+      ...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
+    ];
+    return "export const mutation = `\n\n" + allMutations.filter(s => s).join("\n\n") + "\n\n`;";
   }
-  `;
 
   function createQueryType() {
     let allOp = createOperation(
@@ -210,11 +175,7 @@ ${createQueryType()}
 
     let schemaSourceQueries = schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n");
 
-    return `export const query = \`
-
-${[allOp, getOp, schemaSourceQueries].filter(s => s).join("\n\n")}
-      
-    \`;`;
+    return "export const query = `\n\n" + [allOp, getOp, schemaSourceQueries].filter(s => s).join("\n\n") + "\n\n`;";
   }
 
   function createOperation(name, args, returnType) {
