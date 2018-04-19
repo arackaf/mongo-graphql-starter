@@ -187,30 +187,26 @@ ${[
   
 ${createQueryType()}
   
-  `
+`
       : ""
   }
   `;
 
   function createQueryType() {
-    let allOp = !overrides.has(`all${name}s`)
-      ? createOperation(
-          `all${name}s`,
-          allQueryFields
-            .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
-            .concat(dateFields.map(f => `${f}_format: String`))
-            .concat(manualQueryArgs),
-          `${name}QueryResults`
-        )
-      : "";
+    let allOp = createOperation(
+      `all${name}s`,
+      allQueryFields
+        .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
+        .concat(dateFields.map(f => `${f}_format: String`))
+        .concat(manualQueryArgs),
+      `${name}QueryResults`
+    );
 
-    let getOp = !overrides.has(`get${name}`)
-      ? createOperation(
-          `get${name}`,
-          [`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)),
-          `${name}SingleQueryResult`
-        )
-      : "";
+    let getOp = createOperation(
+      `get${name}`,
+      [`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)),
+      `${name}SingleQueryResult`
+    );
 
     let schemaSourceQueries = schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n");
 
@@ -220,10 +216,11 @@ ${[allOp, getOp, schemaSourceQueries].filter(s => s).join("\n\n")}
       
     \`;`;
   }
-}
 
-function createOperation(name, args, returnType) {
-  return `${TAB}${name} (\n${TAB2}${args.join(`,\n${TAB2}`)}\n${TAB}): ${returnType}`;
+  function createOperation(name, args, returnType) {
+    if (overrides.has(name)) return "";
+    return `${TAB}${name} (\n${TAB2}${args.join(`,\n${TAB2}`)}\n${TAB}): ${returnType}`;
+  }
 }
 
 function createQueryType() {}
