@@ -12,6 +12,7 @@ import {
   BoolType
 } from "../dataTypes";
 import { TAB } from "./utilities";
+import { createOperation as createOperationOriginal } from "./gqlSchemaHelpers";
 
 const TAB2 = TAB + TAB;
 
@@ -26,6 +27,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let overrides = new Set(extras.overrides || []);
   let schemaSources = extras.schemaSources || [];
   let resolvedFields = objectToCreate.resolvedFields || {};
+
+  const createOperation = createOperationOriginal.bind(null, { overrides });
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
@@ -177,14 +180,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
     return "export const query = `\n\n" + [allOp, getOp, schemaSourceQueries].filter(s => s).join("\n\n") + "\n\n`;";
   }
-
-  function createOperation(name, args, returnType) {
-    if (overrides.has(name)) return "";
-    return `${TAB}${name} (\n${TAB2}${args.join(`,\n${TAB2}`)}\n${TAB}): ${returnType}`;
-  }
 }
-
-function createQueryType() {}
 
 function displaySchemaValue(value, useInputs) {
   if (typeof value === "object" && value.__isDate) {
