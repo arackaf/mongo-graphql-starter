@@ -12,7 +12,7 @@ import {
   BoolType
 } from "../dataTypes";
 import { TAB } from "./utilities";
-import { createOperation as createOperationOriginal } from "./gqlSchemaHelpers";
+import { createOperation as createOperationOriginal, createInput } from "./gqlSchemaHelpers";
 
 const TAB2 = TAB + TAB;
 
@@ -122,21 +122,10 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       : ""
   }
   }
-  ${
-    objectToCreate.__usedInArray
-      ? `
-  input ${name}ArrayMutationInput {
-  ${TAB}index: Int,
-  Updates: ${name}MutationInput
-  }
-  `
-      : ""
-  }
-  input ${name}Sort {
-  ${Object.keys(fields)
-    .map(k => `${TAB}${k}: Int`)
-    .join(`\n${TAB}`)}
-  }
+
+${objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, [["index", "Int"], ["Updates", `${name}MutationInput`]]) : ""}
+
+${createInput(`${name}Sort`, Object.keys(fields).map(k => [k, "Int"]))}
       
   input ${name}Filters {
   ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}${TAB}`)}
