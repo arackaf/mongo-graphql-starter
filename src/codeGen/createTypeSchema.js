@@ -123,9 +123,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
   }
 
-${objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, [["index", "Int"], ["Updates", `${name}MutationInput`]]) : ""}
+${objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : ""}
 
-${createInput(`${name}Sort`, Object.keys(fields).map(k => [k, "Int"]))}
+${createInput(`${name}Sort`, Object.keys(fields).map(k => `${k}: Int`))}
       
   input ${name}Filters {
   ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}${TAB}`)}
