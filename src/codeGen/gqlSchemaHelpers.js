@@ -10,6 +10,10 @@ export function createInput(name, fields) {
   return createGenericType("input", name, fields);
 }
 
+export function createType(name, fields) {
+  return createGenericType("type", name, fields);
+}
+
 function createGenericType(typeName, name, fields) {
   return `${TAB}${typeName} ${name} {\n${TAB2}${fields.join(`\n${TAB2}`)}\n${TAB}}`;
 }
