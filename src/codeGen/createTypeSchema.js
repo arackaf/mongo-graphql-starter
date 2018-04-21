@@ -13,6 +13,7 @@ import {
 } from "../dataTypes";
 import { TAB } from "./utilities";
 import { createOperation as createOperationOriginal, createInput } from "./gqlSchemaHelpers";
+import flatMap from "lodash.flatmap";
 
 const TAB2 = TAB + TAB;
 
@@ -91,45 +92,31 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 `
       : ""
   }
-  input ${name}Input {
-  ${Object.keys(fields)
-    .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k], true)}`)
-    .join(`\n${TAB}`)}${
-    Object.keys(relationships).length
-      ? `\n${TAB}` +
-        Object.keys(relationships)
-          .map(k => `${TAB}${k}: ${displayRelationshipSchemaValue(relationships[k], true)}`)
-          .join(`\n${TAB}`)
-      : ""
-  }
-  }
-  
-  input ${name}MutationInput {
-  ${Object.keys(fields)
-    .filter(k => k != "_id")
-    .reduce((inputs, k) => (inputs.push(...getMutations(k, fields).map(val => TAB + val)), inputs), [])
-    .join(`\n${TAB}`)}${
-    Object.keys(relationships).length
-      ? `\n${TAB}` +
-        Object.keys(relationships)
-          .map(
-            k =>
-              relationships[k].__isArray
-                ? `${TAB}${k}_ADD: ${displayRelationshipSchemaValue(relationships[k], true)}`
-                : `${TAB}${k}_SET: ${displayRelationshipSchemaValue(relationships[k], true)}`
-          )
-          .join(`\n${TAB}`)
-      : ""
-  }
-  }
 
-${objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : ""}
-
-${createInput(`${name}Sort`, Object.keys(fields).map(k => `${k}: Int`))}
-      
-  input ${name}Filters {
-  ${TAB}${allQueryFields.concat([`OR: [${name}Filters]`]).join(`\n${TAB}${TAB}`)}
-  }
+${[
+    createInput(
+      `${name}Input`,
+      Object.keys(fields)
+        .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
+        .concat(Object.keys(relationships).map(k => `${k}: ${displayRelationshipSchemaValue(relationships[k], true)}`))
+    ),
+    createInput(
+      `${name}MutationInput`,
+      flatMap(Object.keys(fields).filter(k => k != "_id"), k => getMutations(k, fields)).concat(
+        Object.keys(relationships).map(
+          k =>
+            relationships[k].__isArray
+              ? `${k}_ADD: ${displayRelationshipSchemaValue(relationships[k], true)}`
+              : `${k}_SET: ${displayRelationshipSchemaValue(relationships[k], true)}`
+        )
+      )
+    ),
+    objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
+    createInput(`${name}Sort`, Object.keys(fields).map(k => `${k}: Int`)),
+    createInput(`${name}Filters`, allQueryFields.concat([`OR: [${name}Filters]`]))
+  ]
+    .filter(s => s)
+    .join("\n\n")}
   
 \`;
   
