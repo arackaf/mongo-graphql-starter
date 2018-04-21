@@ -41,7 +41,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 
   let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
-
   let imports = schemaSources.map((src, i) => `import SchemaExtras${i + 1} from "${src}";`);
 
   return `${imports.length ? imports.join("\n") + "\n\n" : ""}export const type = \`
@@ -66,7 +65,7 @@ ${[
       ...Object.keys(relationships).map(k => `${k}: ${relationshipType(relationships[k], true)}`)
     ]),
     createInput(`${name}MutationInput`, [
-      ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => getMutations(k, fields)),
+      ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
       ...Object.keys(relationships).map(
         k =>
           relationships[k].__isArray
@@ -161,7 +160,7 @@ function relationshipType(value, useInputs) {
   }
 }
 
-function getMutations(k, fields) {
+function fieldMutations(k, fields) {
   let value = fields[k];
 
   if (typeof value === "object" && value.__isDate) {
