@@ -12,7 +12,7 @@ import {
   BoolType
 } from "../dataTypes";
 import { TAB } from "./utilities";
-import { createOperation as createOperationOriginal, createInput } from "./gqlSchemaHelpers";
+import { createOperation as createOperationOriginal, createInput, createType } from "./gqlSchemaHelpers";
 import flatMap from "lodash.flatmap";
 
 const TAB2 = TAB + TAB;
@@ -64,36 +64,17 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       : ""
   }
   }
-  ${
-    objectToCreate.table
-      ? `
-  type ${name}QueryResults {
-    ${name}s: [${name}],
-    Meta: QueryResultsMetadata
-  }
-
-  type ${name}SingleQueryResult {
-    ${name}: ${name}
-  }
-
-  type ${name}MutationResult {
-    success: Boolean
-    ${name}: ${name}
-  }
-  
-  type ${name}MutationResultMulti {
-    success: Boolean
-    ${name}s: [${name}]
-  }  
-
-  type ${name}BulkMutationResult {
-    success: Boolean
-  }  
-`
-      : ""
-  }
 
 ${[
+    ...(objectToCreate.table
+      ? [
+          createType(`${name}QueryResults`, [`${name}s: [${name}]`, `Meta: QueryResultsMetadata`]),
+          createType(`${name}SingleQueryResult`, [`${name}: ${name}`]),
+          createType(`${name}MutationResult`, [`success: Boolean`, `${name}: ${name}`]),
+          createType(`${name}MutationResultMulti`, [`success: Boolean`, `${name}s: [${name}]`]),
+          createType(`${name}BulkMutationResult`, [`success: Boolean`])
+        ]
+      : []),
     createInput(
       `${name}Input`,
       Object.keys(fields)
