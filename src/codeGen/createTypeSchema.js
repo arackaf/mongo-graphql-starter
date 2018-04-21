@@ -20,6 +20,7 @@ const TAB2 = TAB + TAB;
 export default function createGraphqlTypeSchema(objectToCreate) {
   let fields = objectToCreate.fields || {};
   let relationships = objectToCreate.relationships || {};
+  let relationshipEntries = Object.keys(relationships).map(k => [k, relationships[k]]);
   let name = objectToCreate.__name;
   let allQueryFields = [];
   let manualQueryArgs = [];
@@ -33,7 +34,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
-    allFieldsMutation.push(`${k}: ${displaySchemaValue(fields[k], true)}`);
+    allFieldsMutation.push(`${k}: ${fieldType(fields[k], true)}`);
   });
   if (Array.isArray(objectToCreate.manualQueryArgs)) {
     manualQueryArgs.push(...objectToCreate.manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
@@ -47,13 +48,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   
 ${[
     createType(name, [
-      ...Object.keys(fields).map(k => `${k}: ${displaySchemaValue(fields[k])}`),
+      ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k])}`),
       ...Object.keys(resolvedFields).map(k => `${k}: ${resolvedFields[k]}`),
-      ...Object.keys(relationships).map(
-        k =>
-          (relationships[k].__isArray ? `${k}(SORT: ${relationships[k].type.__name}Sort, SORTS: [${relationships[k].type.__name}Sort])` : `${k}`) +
-          `: ${displayRelationshipSchemaValue(relationships[k])}`
-      )
+      ...relationshipEntries.map(relationshipResolver)
     ]),
     ...(objectToCreate.table
       ? [
@@ -65,16 +62,16 @@ ${[
         ]
       : []),
     createInput(`${name}Input`, [
-      ...Object.keys(fields).map(k => `${k}: ${displaySchemaValue(fields[k], true)}`),
-      ...Object.keys(relationships).map(k => `${k}: ${displayRelationshipSchemaValue(relationships[k], true)}`)
+      ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+      ...Object.keys(relationships).map(k => `${k}: ${relationshipType(relationships[k], true)}`)
     ]),
     createInput(`${name}MutationInput`, [
       ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => getMutations(k, fields)),
       ...Object.keys(relationships).map(
         k =>
           relationships[k].__isArray
-            ? `${k}_ADD: ${displayRelationshipSchemaValue(relationships[k], true)}`
-            : `${k}_SET: ${displayRelationshipSchemaValue(relationships[k], true)}`
+            ? `${k}_ADD: ${relationshipType(relationships[k], true)}`
+            : `${k}_SET: ${relationshipType(relationships[k], true)}`
       )
     ]),
     objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
@@ -93,7 +90,7 @@ ${[
   function createMutationType() {
     let allMutations = [
       createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
-      createOperation(`update${name}`, [`_id: ${displaySchemaValue(fields._id)}`, `Updates: ${name}MutationInput`], `${name}MutationResult`),
+      createOperation(`update${name}`, [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`], `${name}MutationResult`),
       createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`], `${name}MutationResultMulti`),
       createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
       createOperation(`delete${name}`, [`_id: String`], "Boolean"),
@@ -124,7 +121,7 @@ ${[
   }
 }
 
-function displaySchemaValue(value, useInputs) {
+function fieldType(value, useInputs) {
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
@@ -151,7 +148,12 @@ function displaySchemaValue(value, useInputs) {
   }
 }
 
-function displayRelationshipSchemaValue(value, useInputs) {
+function relationshipResolver([name, entry]) {
+  let resolverArgs = entry.__isArray ? `(SORT: ${entry.type.__name}Sort, SORTS: [${entry.type.__name}Sort])` : "";
+  return name + resolverArgs + `: ${relationshipType(entry)}`;
+}
+
+function relationshipType(value, useInputs) {
   if (value.__isArray) {
     return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
   } else if (value.__isObject) {
