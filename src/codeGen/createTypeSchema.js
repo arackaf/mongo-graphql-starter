@@ -45,27 +45,16 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   return `${imports.length ? imports.join("\n") + "\n\n" : ""}export const type = \`
   
-  type ${name} {
-  ${Object.keys(fields)
-    .map(k => `${TAB}${k}: ${displaySchemaValue(fields[k])}`)
-    .join(`\n${TAB}`)}${Object.keys(resolvedFields)
-    .map(k => `${TAB}${k}: ${resolvedFields[k]}`)
-    .join(`\n${TAB}`)}${
-    Object.keys(relationships).length
-      ? `\n${TAB}` +
-        Object.keys(relationships)
-          .map(
-            k =>
-              (relationships[k].__isArray
-                ? `${TAB}${k}(SORT: ${relationships[k].type.__name}Sort, SORTS: [${relationships[k].type.__name}Sort])`
-                : `${TAB}${k}`) + `: ${displayRelationshipSchemaValue(relationships[k])}`
-          )
-          .join(`\n${TAB}`)
-      : ""
-  }
-  }
-
 ${[
+    createType(name, [
+      ...Object.keys(fields).map(k => `${k}: ${displaySchemaValue(fields[k])}`),
+      ...Object.keys(resolvedFields).map(k => `${k}: ${resolvedFields[k]}`),
+      ...Object.keys(relationships).map(
+        k =>
+          (relationships[k].__isArray ? `${k}(SORT: ${relationships[k].type.__name}Sort, SORTS: [${relationships[k].type.__name}Sort])` : `${k}`) +
+          `: ${displayRelationshipSchemaValue(relationships[k])}`
+      )
+    ]),
     ...(objectToCreate.table
       ? [
           createType(`${name}QueryResults`, [`${name}s: [${name}]`, `Meta: QueryResultsMetadata`]),
@@ -75,23 +64,19 @@ ${[
           createType(`${name}BulkMutationResult`, [`success: Boolean`])
         ]
       : []),
-    createInput(
-      `${name}Input`,
-      Object.keys(fields)
-        .map(k => `${k}: ${displaySchemaValue(fields[k], true)}`)
-        .concat(Object.keys(relationships).map(k => `${k}: ${displayRelationshipSchemaValue(relationships[k], true)}`))
-    ),
-    createInput(
-      `${name}MutationInput`,
-      flatMap(Object.keys(fields).filter(k => k != "_id"), k => getMutations(k, fields)).concat(
-        Object.keys(relationships).map(
-          k =>
-            relationships[k].__isArray
-              ? `${k}_ADD: ${displayRelationshipSchemaValue(relationships[k], true)}`
-              : `${k}_SET: ${displayRelationshipSchemaValue(relationships[k], true)}`
-        )
+    createInput(`${name}Input`, [
+      ...Object.keys(fields).map(k => `${k}: ${displaySchemaValue(fields[k], true)}`),
+      ...Object.keys(relationships).map(k => `${k}: ${displayRelationshipSchemaValue(relationships[k], true)}`)
+    ]),
+    createInput(`${name}MutationInput`, [
+      ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => getMutations(k, fields)),
+      ...Object.keys(relationships).map(
+        k =>
+          relationships[k].__isArray
+            ? `${k}_ADD: ${displayRelationshipSchemaValue(relationships[k], true)}`
+            : `${k}_SET: ${displayRelationshipSchemaValue(relationships[k], true)}`
       )
-    ),
+    ]),
     objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
     createInput(`${name}Sort`, Object.keys(fields).map(k => `${k}: Int`)),
     createInput(`${name}Filters`, allQueryFields.concat([`OR: [${name}Filters]`]))
