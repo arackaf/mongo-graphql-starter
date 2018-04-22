@@ -39,9 +39,3 @@ export default \`
 
 \``;
 }
-
-async function fp() {
-  if (metadataRequested.get("count")) {
-    let totalCount = (await db.collection("${table}").aggregate([{ $match }, { $group: { _id: null, count: { $sum: 1 } } }])).count;
-  }
-}

@@ -258,13 +258,11 @@ function queriesForField(fieldName, realFieldType) {
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${singleType}`));
       result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
       result.push(
-        ...[
-          `${fieldName}: [${singleType}]`,
-          `${fieldName}_in: [[${singleType}]]`,
-          `${fieldName}_contains: ${singleType}`,
-          `${fieldName}_containsAny: [${singleType}]`,
-          `${fieldName}_ne: [${singleType}]`
-        ]
+        `${fieldName}: [${singleType}]`,
+        `${fieldName}_in: [[${singleType}]]`,
+        `${fieldName}_contains: ${singleType}`,
+        `${fieldName}_containsAny: [${singleType}]`,
+        `${fieldName}_ne: [${singleType}]`
       );
       break;
     case StringArrayType:
