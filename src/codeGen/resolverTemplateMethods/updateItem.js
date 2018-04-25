@@ -1,7 +1,4 @@
     async update${objName}(root, args, context, ast) {
-      if (!args._id) {
-        throw "No _id sent";
-      }
       let db = await root.db;
       context.__mongodb = db;
       let { $match, $project } = decontructGraphqlQuery({ _id: args._id }, ast, ${objName}Metadata, "${objName}");
@@ -9,6 +6,9 @@
 
       if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { ${objName}: null };
+      }
+      if (!$match._id) {
+        throw "No _id sent, or inserted in middleware";
       }
       await dbHelpers.runUpdate(db, "${table}", $match, updates);
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
