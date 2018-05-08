@@ -6,6 +6,9 @@ export default {
     queryMiddleware(queryPacket, root, args, context, ast) {
       //Called after query filters are processed, which are passed in queryPacket
     },
+    queryPreAggregate(aggregateItems, root, args, context, ast) {
+      //Called right before a Mongo aggregation is performed
+    },
     beforeInsert(objToBeInserted, root, args, context, ast) {
       //Called before an insertion occurs. Return false to cancel it
     },
