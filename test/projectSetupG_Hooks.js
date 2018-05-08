@@ -8,6 +8,12 @@ class HooksRoot {
     }
     queryPacket.$match.userId = 1;
   }
+  queryPreAggregate(aggregateItems, root, args, context, ast) {
+    let match = aggregateItems.find(item => item.$match);
+    if (match.$match.field2 === "ADJUST" || (args && args._id == "591b74d036f369d06bb7781d")) {
+      match.$match = { field2: "C" };
+    }
+  }
   beforeInsert(obj, root, args, context, ast) {
     if (obj.field1 === "KILL") {
       return false;
@@ -64,6 +70,12 @@ class Type2Hooks {
   }
   queryMiddleware(queryPacket, root, args, context, ast) {
     queryPacket.$match.userId++;
+  }
+  queryPreAggregate(aggregateItems, root, args, context, ast) {
+    let match = aggregateItems.find(item => item.$match);
+    if (match.$match.field2 === "C") {
+      match.$match = { field2: "A" };
+    }
   }
   beforeInsert(obj, root, args, context, ast) {
     if (obj.field1 === "BAD") {
