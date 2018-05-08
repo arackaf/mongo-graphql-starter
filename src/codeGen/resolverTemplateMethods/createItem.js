@@ -8,7 +8,7 @@
       if ((newObject = await dbHelpers.processInsertion(db, newObject, { typeMetadata: ${objName}Metadata, hooksObj, root, args, context, ast })) == null) {
         return { ${objName}: null };
       }
-      let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }))[0] : null;
+      let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }, root, args, context, ast))[0] : null;
       return {
         success: true,
         ${objName}: result
