@@ -53,6 +53,22 @@ test("Test query pre-processor 1b", async () => {
   expect(result).toEqual({ Type1: null });
 });
 
+test("Test query pre-aggregate 1", async () => {
+  await queryAndMatchArray({
+    query: `{getType1(_id: "591b74d036f369d06bb7781d"){Type1{field2}}}`,
+    coll: "getType1",
+    results: { field2: "C" }
+  });
+});
+
+test("Test query pre-aggregate 2", async () => {
+  await queryAndMatchArray({
+    query: `{getType2(_id: "591b74d036f369d06bb7781d"){Type2{field2}}}`,
+    coll: "getType2",
+    results: { field2: "A" }
+  });
+});
+
 test("Test query data-adjust 1", async () => {
   let result = await queryAndMatchArray({
     query: `{getType1(_id: "${type1Objects[0]._id}"){Type1{autoAdjustField}}}`,

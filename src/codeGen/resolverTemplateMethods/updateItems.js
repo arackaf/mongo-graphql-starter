@@ -10,7 +10,7 @@
       await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       
-      let result = $project ? await load${objName}s(db, { $match, $project }) : null;
+      let result = $project ? await load${objName}s(db, { $match, $project }, root, args, context, ast) : null;
       return {
         ${objName}s: result,
         success: true
