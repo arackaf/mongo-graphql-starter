@@ -70,6 +70,22 @@ test("Test query pre-processor 2", async () => {
   });
 });
 
+test("Test query pre-aggregate 1", async () => {
+  await queryAndMatchArray({
+    query: `{allType1s(field2: "ADJUST"){Type1s{field2}}}`,
+    coll: "allType1s",
+    results: [{ field2: "C" }]
+  });
+});
+
+test("Test query pre-aggregate 2", async () => {
+  await queryAndMatchArray({
+    query: `{allType2s(field2: "ADJUST"){Type2s{field2}}}`,
+    coll: "allType2s",
+    results: [{ field2: "A" }]
+  });
+});
+
 test("Test query data-adjust 1", async () => {
   await queryAndMatchArray({
     query: `{allType1s(field2: "C"){Type1s{autoAdjustField}}}`,
