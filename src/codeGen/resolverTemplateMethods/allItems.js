@@ -7,7 +7,7 @@
       let result = {};
 
       if (queryPacket.$project) {
-        result.${objName}s = await load${objName}s(db, queryPacket);
+        result.${objName}s = await load${objName}s(db, queryPacket, root, args, context, ast);
       }
 
       if (queryPacket.metadataRequested.size) {

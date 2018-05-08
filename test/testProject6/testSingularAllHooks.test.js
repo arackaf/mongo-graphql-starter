@@ -61,6 +61,22 @@ test("Test query data-adjust 1", async () => {
   });
 });
 
+test("Test query pre-aggregate 1", async () => {
+  await queryAndMatchArray({
+    query: `{getType1(_id: "591b74d036f369d06bb7781d"){Type1{field2}}}`,
+    coll: "getType1",
+    results: { field2: "C" }
+  });
+});
+
+test("Test query pre-aggregate 2", async () => {
+  await queryAndMatchArray({
+    query: `{getType2(_id: "591b74d036f369d06bb7781d"){Type2{field2}}}`,
+    coll: "getType2",
+    results: { field2: "A" }
+  });
+});
+
 test("Test query data-adjust 2", async () => {
   let result = await queryAndMatchArray({
     query: `{getType2(_id: "${type2Objects[0]._id}"){Type2{autoAdjustField}}}`,

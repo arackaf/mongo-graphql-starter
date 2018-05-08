@@ -4,7 +4,7 @@
       context.__mongodb = db;
       let queryPacket = decontructGraphqlQuery(args, ast, ${objName}Metadata, "${objName}");
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
-      let results = await load${objName}s(db, queryPacket);
+      let results = await load${objName}s(db, queryPacket, root, args, context, ast);
 
       return {
         ${objName}: results[0] || null

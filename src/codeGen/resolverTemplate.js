@@ -1,4 +1,4 @@
-export async function load${objName}s(db, queryPacket) {
+export async function load${objName}s(db, queryPacket, root, args, context, ast) {
   let { $match, $project, $sort, $limit, $skip } = queryPacket;
 
   let aggregateItems = [
@@ -9,6 +9,7 @@ export async function load${objName}s(db, queryPacket) {
     $limit != null ? { $limit } : null
   ].filter(item => item);
 
+  await processHook(hooksObj, "${objName}", "queryPreAggregate", aggregateItems, root, args, context, ast);
   let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
   await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   return ${objName}s;
