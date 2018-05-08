@@ -11,7 +11,7 @@ export default {
     },
     queryPreAggregate(aggregateItems, root, args, context, ast) {
       let match = aggregateItems.find(item => item.$match);
-      if (match.$match.field2 === "ADJUST" || (args && args._id == "591b74d036f369d06bb7781d")) {
+      if (match.$match.field2 === "ADJUST" || args._id == "591b74d036f369d06bb7781d") {
         match.$match = { field2: "C" };
       }
     },
