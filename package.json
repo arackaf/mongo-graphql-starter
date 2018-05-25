@@ -12,20 +12,29 @@
   "bugs": {
     "url": "https://github.com/arackaf/mongo-graphql-starter/issues"
   },
-  "jest": {},
+  "jest": {
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "!exampleGeneratedCode/**/*.js",
+      "src/**/*.js"
+    ],
+    "globalSetup": "<rootDir>/test/masterSetup.js"
+  },
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
     "babel-jest": "21.2.0",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
+    "codecov": "^3.0.2",
     "del": "3.0.0",
     "express": "4.16.1",
     "express-graphql": "0.6.11",
     "graphql": "0.13.2",
     "graphql-tools": "2.23.1",
-    "jest": "21.2.1"
+    "jest": "^23.0.0"
   },
   "scripts": {
-    "test": "node test/masterSetup && jest --runInBand",
+    "test": "jest --runInBand && codecov -t 8143aad3-e095-434f-8596-39889c2fbc4c",
     "test1": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config1.json",
     "test2": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config2.json",
     "test3": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config3.json",
