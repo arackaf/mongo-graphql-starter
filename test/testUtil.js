@@ -4,7 +4,7 @@ import { graphql } from "graphql";
 let connectionUid = 1;
 const localConn = "mongodb://localhost:27017/mongo-graphql-starter";
 
-export const nextConnectionString = () => localConn;
+export const nextConnectionString = () => process.env.MongoAddr || localConn;
 
 export async function runQuery({ schema, db, query, variables, coll, results, meta }) {
   let allResults = await graphql(schema, query, { db }, {});
