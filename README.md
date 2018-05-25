@@ -1,3 +1,5 @@
+[![npm version](https://img.shields.io/npm/v/mongo-graphql-starter.svg?style=flat)](https://www.npmjs.com/package/mongo-graphql-starter) [![Build Status](https://travis-ci.com/arackaf/mongo-graphql-starter.svg?branch=master)](https://travis-ci.com/arackaf/mongo-graphql-starter)
+
 # mongo-graphql-starter
 
 This utility will scaffold GraphQL schema and resolvers, with queries, filters and mutations working out of the box, based on metadata you enter about
