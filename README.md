@@ -1,4 +1,5 @@
-[![npm version](https://img.shields.io/npm/v/mongo-graphql-starter.svg?style=flat)](https://www.npmjs.com/package/mongo-graphql-starter) [![Build Status](https://travis-ci.com/arackaf/mongo-graphql-starter.svg?branch=master)](https://travis-ci.com/arackaf/mongo-graphql-starter)
+[![npm version](https://img.shields.io/npm/v/mongo-graphql-starter.svg?style=flat)](https://www.npmjs.com/package/mongo-graphql-starter) [![Build Status](https://travis-ci.com/arackaf/mongo-graphql-starter.svg?branch=master)](https://travis-ci.com/arackaf/mongo-graphql-starter) [![codecov](https://codecov.io/gh/arackaf/mongo-graphql-starter/branch/master/graph/badge.svg)](https://codecov.io/gh/arackaf/mongo-graphql-starter) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+
 
 # mongo-graphql-starter
 
