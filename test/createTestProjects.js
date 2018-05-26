@@ -11,20 +11,6 @@ import mkdirp from "mkdirp";
 import path from "path";
 import fs from "fs";
 
-Promise.resolve(createGraphqlSchema(projectSetupD, path.resolve("./test/testProject4"))).then(() => {
-  fs.writeFileSync(
-    path.resolve("./test/testProject4/graphQL/hooks.js"),
-    fs.readFileSync(path.resolve(__dirname, "./projectSetupD_Hooks.js"), { encoding: "utf8" })
-  );
-});
-Promise.resolve(createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"))).then(() => {
-  fs.writeFileSync(
-    path.resolve("./test/testProject5/graphQL/hooks.js"),
-    fs.readFileSync(path.resolve(__dirname, "./projectSetupE_Hooks.js"), { encoding: "utf8" })
-  );
-});
-createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"));
-
 Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"))).then(() => {
   fs.writeFileSync(
     path.resolve("./test/testProject6/graphQL/hooks.js"),
