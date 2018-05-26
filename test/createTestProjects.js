@@ -11,9 +11,6 @@ import mkdirp from "mkdirp";
 import path from "path";
 import fs from "fs";
 
-createGraphqlSchema(projectSetupB, path.resolve("./test/testProject2"));
-createGraphqlSchema(projectSetupC, path.resolve("./test/testProject3"));
-
 Promise.resolve(createGraphqlSchema(projectSetupD, path.resolve("./test/testProject4"))).then(() => {
   fs.writeFileSync(
     path.resolve("./test/testProject4/graphQL/hooks.js"),
