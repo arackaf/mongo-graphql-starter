@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { queryAndMatchArray, runMutation, nextConnectionString } from "../testUtil";
+import { queryAndMatchArray, runMutation, runQuery, nextConnectionString } from "../testUtil";
 import { makeExecutableSchema } from "graphql-tools";
 import { createGraphqlSchema } from "../../src/module";
 import path from "path";

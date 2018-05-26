@@ -1,7 +1,6 @@
 const del = require("del");
-require = require("@std/esm")(module, { esm: "js", cjs: true });
 
-module.exports = async function() {
+module.exports = () => {
   try {
     del.sync("test/testProject1/graphQL");
     del.sync("test/testProject2/graphQL");
@@ -12,6 +11,4 @@ module.exports = async function() {
     del.sync("test/testProject7/graphQL");
     del.sync("test/testProject8/graphQL");
   } catch (e) {}
-
-  require("./createTestProjects.js");
 };
