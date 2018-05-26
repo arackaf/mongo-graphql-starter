@@ -36,7 +36,7 @@
     "jest": "^23.0.0"
   },
   "scripts": {
-    "test": "jest --runInBand && codecov -t 8143aad3-e095-434f-8596-39889c2fbc4c",
+    "test": "jest --runInBand && codecov",
     "test1": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config1.json",
     "test2": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config2.json",
     "test3": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config3.json",
