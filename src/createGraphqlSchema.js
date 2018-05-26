@@ -69,11 +69,5 @@ export default function(source, destPath) {
         fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" })
       );
     }
-    if (!fs.existsSync(path.join(rootDir, "dbHelpers.js"))) {
-      fs.writeFileSync(
-        path.join(rootDir, "dbHelpers.js"),
-        fs.readFileSync(path.resolve(__dirname, "./codeGen/dbHelpersTemplate.js"), { encoding: "utf8" })
-      );
-    }
   });
 }

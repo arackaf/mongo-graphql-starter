@@ -3,6 +3,7 @@ import { queryAndMatchArray, runQuery, runMutation, nextConnectionString } from 
 import { makeExecutableSchema } from "graphql-tools";
 import { createGraphqlSchema } from "../../src/module";
 import path from "path";
+import glob from "glob";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
@@ -21,7 +22,7 @@ export async function create() {
     overrides: ["getCoordinate", "updateCoordinate"]
   };
 
-  return Promise.resolve(createGraphqlSchema(projectSetupG, path.resolve("./test/testProject7"))).then(() => {
+  await Promise.resolve(createGraphqlSchema(projectSetupG, path.resolve("./test/testProject7"))).then(() => {
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL/hooks.js"),
       fs.readFileSync(path.resolve(__dirname, "./projectSetup_Hooks.js"), { encoding: "utf8" })
@@ -50,6 +51,13 @@ export async function create() {
       path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras3.js"),
       fs.readFileSync(path.resolve(__dirname, "./projectSetup_ResolverExtras3.js"), { encoding: "utf8" })
     );
+
+    if (true || process.env.InCI) {
+      glob.sync("./test/testProject7/graphQL/**/resolver.js").forEach(f => {
+        let newFile = fs.readFileSync(f, { encoding: "utf8" }).replace(/"mongo-graphql-starter"/, `"../../../../src/module"`);
+        fs.writeFileSync(f, newFile);
+      });
+    }
   });
 }
 

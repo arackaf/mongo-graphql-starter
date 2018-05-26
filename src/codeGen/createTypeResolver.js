@@ -20,12 +20,11 @@ export default function createGraphqlResolver(objectToCreate) {
   let overrides = new Set(extras.overrides || []);
   let resolverSources = extras.resolverSources || [];
   let imports = [
-    `import { queryUtilities, processHook } from "mongo-graphql-starter";`,
+    `import { queryUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
     `import hooksObj from "../hooks";`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject, constants } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
-    `import * as dbHelpers from "../dbHelpers";`,
     ...resolverSources.map(
       (src, i) =>
         `import ResolverExtras${i + 1} from "${src}";\nconst { Query: QueryExtras${i + 1}, Mutation: MutationExtras${i + 1}, ...OtherExtras${i +
