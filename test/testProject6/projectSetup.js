@@ -1,6 +1,4 @@
-import { dataTypes } from "mongo-graphql-starter";
-import { MongoIdType, typeLiteral } from "../src/dataTypes";
-const { StringType, StringArrayType, IntType } = dataTypes;
+import { StringType, StringArrayType, IntType, MongoIdType } from "../../src/dataTypes";
 
 const fields = {
   field1: StringType,

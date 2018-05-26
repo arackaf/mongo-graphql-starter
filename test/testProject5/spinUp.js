@@ -5,13 +5,13 @@ import { createGraphqlSchema } from "../../src/module";
 import path from "path";
 import fs from "fs";
 
-import projectSetupE from "../projectSetupE";
+import projectSetupE from "./projectSetup";
 
 export async function create() {
   return Promise.resolve(createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"))).then(() => {
     fs.writeFileSync(
       path.resolve("./test/testProject5/graphQL/hooks.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupE_Hooks.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_Hooks.js"), { encoding: "utf8" })
     );
   });
 }

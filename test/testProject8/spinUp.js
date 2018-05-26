@@ -4,7 +4,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import { createGraphqlSchema } from "../../src/module";
 import path from "path";
 
-import projectSetupH from "../projectSetupH";
+import projectSetupH from "./projectSetup";
 
 export async function create() {
   return createGraphqlSchema(projectSetupH, path.resolve("./test/testProject8"));

@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import projectSetupF from "../projectSetupF";
+import projectSetupF from "../testProject6/projectSetup";
 
 export async function create() {
   let projectSetupG = { ...projectSetupF };
@@ -24,7 +24,7 @@ export async function create() {
   return Promise.resolve(createGraphqlSchema(projectSetupG, path.resolve("./test/testProject7"))).then(() => {
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL/hooks.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupG_Hooks.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_Hooks.js"), { encoding: "utf8" })
     );
 
     if (!fs.existsSync("./test/testProject7/graphQL-extras")) {
@@ -32,23 +32,23 @@ export async function create() {
     }
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL-extras/coordinateSchemaExtras1.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupG_SchemaExtras1.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_SchemaExtras1.js"), { encoding: "utf8" })
     );
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL-extras/coordinateSchemaExtras2.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupG_SchemaExtras2.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_SchemaExtras2.js"), { encoding: "utf8" })
     );
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras1.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupG_ResolverExtras1.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_ResolverExtras1.js"), { encoding: "utf8" })
     );
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras2.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupG_ResolverExtras2.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_ResolverExtras2.js"), { encoding: "utf8" })
     );
     fs.writeFileSync(
       path.resolve("./test/testProject7/graphQL-extras/coordinateResolverExtras3.js"),
-      fs.readFileSync(path.resolve(__dirname, "../projectSetupG_ResolverExtras3.js"), { encoding: "utf8" })
+      fs.readFileSync(path.resolve(__dirname, "./projectSetup_ResolverExtras3.js"), { encoding: "utf8" })
     );
   });
 }
