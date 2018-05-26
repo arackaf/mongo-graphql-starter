@@ -2,6 +2,11 @@ import { queryUtilities } from "mongo-graphql-starter";
 const { getMongoFilters } = queryUtilities;
 
 import Book from "../testProject1/graphQL/Book/Book";
+import { create } from "../testProject1/spinUp";
+
+beforeAll(async () => {
+  await create();
+});
 
 //---------------------------------------- STRING ---------------------------------------------------
 
