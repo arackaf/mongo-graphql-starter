@@ -1,5 +1,4 @@
 import spinUp from "./spinUp";
-import { preprocessor } from "mongo-graphql-starter";
 import { ObjectId } from "mongodb";
 
 let db, schema, queryAndMatchArray, runMutation;

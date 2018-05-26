@@ -3,11 +3,20 @@ import { queryAndMatchArray, runMutation, nextConnectionString } from "../testUt
 import { makeExecutableSchema } from "graphql-tools";
 import { createGraphqlSchema } from "../../src/module";
 import path from "path";
+import glob from "glob";
+import fs from "fs";
 
 import projectSetupH from "./projectSetup";
 
 export async function create() {
-  return createGraphqlSchema(projectSetupH, path.resolve("./test/testProject8"));
+  await createGraphqlSchema(projectSetupH, path.resolve("./test/testProject8"));
+
+  if (true || process.env.InCI) {
+    glob.sync("./test/testProject8/graphQL/**/resolver.js").forEach(f => {
+      let newFile = fs.readFileSync(f, { encoding: "utf8" }).replace(/"mongo-graphql-starter"/, `"../../../../src/module"`);
+      fs.writeFileSync(f, newFile);
+    });
+  }
 }
 
 export default async function() {
