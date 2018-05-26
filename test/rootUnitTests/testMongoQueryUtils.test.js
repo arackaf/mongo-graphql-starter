@@ -1,7 +1,14 @@
-import { queryUtilities } from "mongo-graphql-starter";
+import { queryUtilities } from "../../src/module";
 const { getMongoFilters } = queryUtilities;
 
-import Book from "../testProject1/graphQL/Book/Book";
+import { create } from "../testProject1/spinUp";
+
+let Book;
+
+beforeAll(async () => {
+  await create();
+  Book = (await import("../testProject1/graphQL/Book/Book")).default;
+});
 
 //---------------------------------------- STRING ---------------------------------------------------
 

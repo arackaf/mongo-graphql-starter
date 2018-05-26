@@ -3,29 +3,28 @@ import path from "path";
 import { TAB, TAB2 } from "./utilities";
 
 export default function createGraphqlResolver(objectToCreate) {
-  let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.js"), { encoding: "utf8" });
-  let projectIdResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdResolverTemplate.js"), { encoding: "utf8" });
-  let projectIdsResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsResolverTemplate.js"), { encoding: "utf8" });
+  let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
+  let projectIdResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdResolverTemplate.txt"), { encoding: "utf8" });
+  let projectIdsResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsResolverTemplate.txt"), { encoding: "utf8" });
 
-  let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.js"), { encoding: "utf8" });
-  let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.js"), { encoding: "utf8" });
-  let createItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/createItem.js"), { encoding: "utf8" });
-  let updateItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItem.js"), { encoding: "utf8" });
-  let updateItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItems.js"), { encoding: "utf8" });
-  let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.js"), { encoding: "utf8" });
-  let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.js"), { encoding: "utf8" });
+  let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.txt"), { encoding: "utf8" });
+  let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.txt"), { encoding: "utf8" });
+  let createItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/createItem.txt"), { encoding: "utf8" });
+  let updateItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItem.txt"), { encoding: "utf8" });
+  let updateItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItems.txt"), { encoding: "utf8" });
+  let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.txt"), { encoding: "utf8" });
+  let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.txt"), { encoding: "utf8" });
 
   let result = "";
   let extras = objectToCreate.extras || {};
   let overrides = new Set(extras.overrides || []);
   let resolverSources = extras.resolverSources || [];
   let imports = [
-    `import { queryUtilities, processHook } from "mongo-graphql-starter";`,
+    `import { queryUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
     `import hooksObj from "../hooks";`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject, constants } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
-    `import * as dbHelpers from "../dbHelpers";`,
     ...resolverSources.map(
       (src, i) =>
         `import ResolverExtras${i + 1} from "${src}";\nconst { Query: QueryExtras${i + 1}, Mutation: MutationExtras${i + 1}, ...OtherExtras${i +
