@@ -1,6 +1,4 @@
-import { dataTypes } from "mongo-graphql-starter";
-import { MongoIdType, IntArrayType, FloatArrayType } from "../src/dataTypes";
-const { StringType, StringArrayType, IntType } = dataTypes;
+import { IntArrayType, FloatArrayType, StringType, StringArrayType } from "../../src/dataTypes";
 
 const Thing = {
   table: "things",
