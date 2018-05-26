@@ -1,9 +1,5 @@
 import { createGraphqlSchema } from "../src/module";
-import projectSetupA from "./projectSetupA";
-import projectSetupB from "./projectSetupB";
-import projectSetupC from "./projectSetupC";
-import projectSetupD from "./projectSetupD";
-import projectSetupE from "./projectSetupE";
+
 import projectSetupF from "./projectSetupF";
 import projectSetupH from "./projectSetupH";
 
