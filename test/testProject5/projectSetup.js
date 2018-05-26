@@ -1,19 +1,4 @@
-import { dataTypes } from "mongo-graphql-starter";
-const {
-  MongoIdType,
-  StringType,
-  StringArrayType,
-  IntType,
-  IntArrayType,
-  FloatType,
-  FloatArrayType,
-  DateType,
-  arrayOf,
-  objectOf,
-  formattedDate,
-  typeLiteral,
-  relationshipHelpers
-} = dataTypes;
+import { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, relationshipHelpers } from "../../src/dataTypes";
 
 const Keyword = {
   table: "keywords",
@@ -26,7 +11,7 @@ const Subject = {
   table: "subjects",
   fields: {
     name: StringType,
-    keywordIds: StringArrayType
+    keywordIds: MongoIdArrayType
   }
 };
 
@@ -40,9 +25,9 @@ const Author = {
   fields: {
     name: StringType,
     birthday: DateType,
-    mainSubjectId: StringType,
-    subjectIds: StringArrayType,
-    firstBookId: StringType
+    mainSubjectId: MongoIdType,
+    subjectIds: MongoIdArrayType,
+    firstBookId: MongoIdType
   }
 };
 
@@ -63,9 +48,9 @@ const Book = {
     title: StringType,
     pages: IntType,
     weight: FloatType,
-    mainAuthorId: StringType,
+    mainAuthorId: MongoIdType,
     cachedMainAuthor: objectOf(Author),
-    authorIds: StringArrayType,
+    authorIds: MongoIdArrayType,
     cachedAuthors: arrayOf(Author)
   }
 };

@@ -1,5 +1,4 @@
-import { dataTypes } from "mongo-graphql-starter";
-const {
+import {
   MongoIdType,
   MongoIdArrayType,
   StringType,
@@ -14,7 +13,7 @@ const {
   objectOf,
   formattedDate,
   typeLiteral
-} = dataTypes;
+} from "../../src/dataTypes";
 
 const Author = {
   fields: {

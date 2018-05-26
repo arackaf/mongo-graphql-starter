@@ -1,5 +1,5 @@
 import { MongoError } from "mongodb";
-import { processHook } from "mongo-graphql-starter";
+import processHook from "./processHook";
 
 export async function runUpdate(db, table, $match, updates, options) {
   if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
