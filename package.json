@@ -24,6 +24,7 @@
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
     "babel-jest": "21.2.0",
+    "babel-plugin-dynamic-import-node": "^1.2.0",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
     "codecov": "^3.0.2",
     "del": "3.0.0",

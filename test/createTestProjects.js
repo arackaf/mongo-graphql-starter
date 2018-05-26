@@ -11,7 +11,6 @@ import mkdirp from "mkdirp";
 import path from "path";
 import fs from "fs";
 
-createGraphqlSchema(projectSetupA, path.resolve("./test/testProject1"));
 createGraphqlSchema(projectSetupB, path.resolve("./test/testProject2"));
 createGraphqlSchema(projectSetupC, path.resolve("./test/testProject3"));
 
