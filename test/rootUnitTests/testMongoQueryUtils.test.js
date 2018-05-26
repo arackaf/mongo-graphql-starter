@@ -1,4 +1,4 @@
-import { queryUtilities } from "mongo-graphql-starter";
+import { queryUtilities } from "../../src/module";
 const { getMongoFilters } = queryUtilities;
 
 import { create } from "../testProject1/spinUp";
