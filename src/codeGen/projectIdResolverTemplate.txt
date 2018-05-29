@@ -19,5 +19,5 @@
         return keys.map(_id => destinationMap.get("" + _id) || null);
       });
     }
-    return context.${dataLoaderId}.load(obj.${fkField});
+    return obj.${fkField} === undefined || obj.${fkField} === null ? null : context.${dataLoaderId}.load(obj.${fkField});
   }
