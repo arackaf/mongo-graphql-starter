@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.6.15",
+  "version": "0.6.16",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -15,10 +15,7 @@
   "jest": {
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
-    "collectCoverageFrom": [
-      "!exampleGeneratedCode/**/*.js",
-      "src/**/*.js"
-    ],
+    "collectCoverageFrom": ["!exampleGeneratedCode/**/*.js", "src/**/*.js"],
     "globalSetup": "<rootDir>/test/masterSetup.js"
   },
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
@@ -36,6 +33,7 @@
     "jest": "^23.0.0"
   },
   "scripts": {
+    "test-local": "jest --runInBand",
     "test": "jest --runInBand --bail && codecov",
     "test1": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config1.json",
     "test2": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config2.json",
