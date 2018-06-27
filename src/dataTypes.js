@@ -10,6 +10,7 @@ export const FloatType = "Float";
 export const FloatArrayType = "FloatArray";
 export const DateType = "Date";
 export const BoolType = "Boolean";
+export const JSONType = "JSON";
 
 export const arrayOf = type => {
   type.__usedInArray = true;
