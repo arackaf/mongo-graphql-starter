@@ -301,6 +301,10 @@ function queriesForField(fieldName, realFieldType) {
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
+      break;
+    case JSONType:
+      result.push(`${fieldName}: ${fieldType}`);
+      result.push(`${fieldName}_ne: ${fieldType}`);
   }
 
   if (realFieldType.__isObject || realFieldType.__isArray) {
