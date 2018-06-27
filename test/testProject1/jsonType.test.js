@@ -24,6 +24,46 @@ test("Creation mutation works with JSON", async () => {
   expect(obj).toEqual({ title: "Book 1", jsonContent: { a: 1, b: "b" } });
 });
 
+test("Query null", async () => {
+  const withJson = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+  expect(withJson.jsonContent).toBeDefined();
+  const withoutJson = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1"}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+  expect(withoutJson.jsonContent).toBe(null);
+  
+
+  await queryAndMatchArray({
+    query: `{allBooks(jsonContent: null){Books{_id}}}`,
+    coll: "allBooks",
+    results: [{ _id: withoutJson._id }]
+  });
+});
+
+test("Query not null", async () => {
+  const withJson = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+  expect(withJson.jsonContent).toBeDefined();
+  const withoutJson = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1"}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+  expect(withoutJson.jsonContent).toBe(null);
+  
+
+  await queryAndMatchArray({
+    query: `{allBooks(jsonContent_ne: null){Books{_id}}}`,
+    coll: "allBooks",
+    results: [{ _id: withJson._id }]
+  });
+});
+
 test("Update JSON", async () => {
   let obj = await runMutation({
     mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
