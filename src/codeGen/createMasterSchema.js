@@ -7,6 +7,7 @@ export default function createMasterSchema(names, namesWithTables, namesWithoutT
   return `${schemaImports}
     
 export default \`
+  scalar JSON
 
   type QueryResultsMetadata {
     count: Int

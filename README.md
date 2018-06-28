@@ -13,50 +13,50 @@ or advanced edge cases as needed.
 
 - [Prior art](#prior-art)
 - [How do you use it?](#how-do-you-use-it)
-    - [Valid types for your fields](#valid-types-for-your-fields)
-    - [Circular dependencies are fine](#circular-dependencies-are-fine)
+  - [Valid types for your fields](#valid-types-for-your-fields)
+  - [Circular dependencies are fine](#circular-dependencies-are-fine)
 - [Queries created](#queries-created)
-    - [Projecting results from queries](#projecting-results-from-queries)
-    - [Custom query arguments](#custom-query-arguments)
+  - [Projecting results from queries](#projecting-results-from-queries)
+  - [Custom query arguments](#custom-query-arguments)
 - [Filters created](#filters-created)
-    - [String filters](#string-filters)
-    - [String array filters](#string-array-filters)
-    - [Int filters](#int-filters)
-    - [Int array filters](#int-array-filters)
-    - [Float filters](#float-filters)
-    - [Float array filters](#float-array-filters)
-    - [Date filters](#date-filters)
-    - [Formatting dates](#formatting-dates)
-    - [OR Queries](#or-queries)
-    - [Nested object and array filters](#nested-object-and-array-filters)
-    - [Sorting](#sorting)
-    - [Paging](#paging)
+  - [String filters](#string-filters)
+  - [String array filters](#string-array-filters)
+  - [Int filters](#int-filters)
+  - [Int array filters](#int-array-filters)
+  - [Float filters](#float-filters)
+  - [Float array filters](#float-array-filters)
+  - [Date filters](#date-filters)
+  - [Formatting dates](#formatting-dates)
+  - [OR Queries](#or-queries)
+  - [Nested object and array filters](#nested-object-and-array-filters)
+  - [Sorting](#sorting)
+  - [Paging](#paging)
 - [Mutations](#mutations)
-    - [Creations](#creations)
-    - [Updates](#updates)
-        - [The Updates argument](#the-updates-argument)
-    - [Deleting](#deleting)
-    - [Mutation examples](#mutation-examples)
+  - [Creations](#creations)
+  - [Updates](#updates)
+    - [The Updates argument](#the-updates-argument)
+  - [Deleting](#deleting)
+  - [Mutation examples](#mutation-examples)
 - [Integrating custom content](#integrating-custom-content)
-    - [schemaSources example](#schemasources-example)
-    - [resolverSources example](#resolversources-example)
+  - [schemaSources example](#schemasources-example)
+  - [resolverSources example](#resolversources-example)
 - [Defining relationships between types (wip)](#defining-relationships-between-types-wip)
-    - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
-    - [Defining a single foreign key](#defining-a-single-foreign-key)
-    - [Using relationships](#using-relationships)
-    - [Creating related data](#creating-related-data)
-        - [In creations](#in-creations)
-        - [In updates](#in-updates)
-        - [Lifecycle hooks](#lifecycle-hooks)
+  - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
+  - [Defining a single foreign key](#defining-a-single-foreign-key)
+  - [Using relationships](#using-relationships)
+  - [Creating related data](#creating-related-data)
+    - [In creations](#in-creations)
+    - [In updates](#in-updates)
+    - [Lifecycle hooks](#lifecycle-hooks)
 - [Lifecycle hooks](#lifecycle-hooks-1)
-    - [All available hooks](#all-available-hooks)
-        - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
-    - [How to use processing hooks](#how-to-use-processing-hooks)
-        - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
-        - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
+  - [All available hooks](#all-available-hooks)
+    - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
+  - [How to use processing hooks](#how-to-use-processing-hooks)
+    - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
+    - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
 - [A closer look at what's generated](#a-closer-look-at-whats-generated)
 - [What does the generated code look like?](#what-does-the-generated-code-look-like)
-    - [All code is extensible.](#all-code-is-extensible)
+  - [All code is extensible.](#all-code-is-extensible)
 - [What's next](#whats-next)
 
 <!-- /TOC -->
@@ -102,6 +102,7 @@ const {
   arrayOf,
   objectOf,
   formattedDate,
+  JSONType,
   typeLiteral
 } = dataTypes;
 
@@ -128,7 +129,8 @@ const Book = {
     primaryAuthor: objectOf(Author),
     strArrs: typeLiteral("[[String]]"),
     createdOn: DateType,
-    createdOnYearOnly: formattedDate({ format: "%Y" })
+    createdOnYearOnly: formattedDate({ format: "%Y" }),
+    jsonContent: JSONType
   }
 };
 
@@ -217,6 +219,7 @@ const {
   arrayOf,
   objectOf,
   formattedDate,
+  JSONType,
   typeLiteral
 } = dataTypes;
 ```
@@ -234,6 +237,7 @@ const {
 | `FloatArrayType`   | An array of floating point numbers |
 | `DateType`         | Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo. Moreoever, querying this date will by default format it as `MM/DD/YYYY`. To override this, use `formattedDate`. |
 | `formattedDate`    | Function: Pass it an object with a format property to create a date field with that (Mongo) format. For example, `createdOnYearOnly: formattedDate({ format: "%Y" })` |
+| `JSONType`         | Store arbitrary json structures in your Mongo collections |
 | `objectOf`         | Function: Pass it a type you've created to specify a single object of that type |
 | `arrayOf`          | Function: Pass it a type you've created to specify an array of that type |
 | `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.         |

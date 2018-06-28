@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.6.16",
+  "version": "0.6.17-beta2",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -15,7 +15,10 @@
   "jest": {
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
-    "collectCoverageFrom": ["!exampleGeneratedCode/**/*.js", "src/**/*.js"],
+    "collectCoverageFrom": [
+      "!exampleGeneratedCode/**/*.js",
+      "src/**/*.js"
+    ],
     "globalSetup": "<rootDir>/test/masterSetup.js"
   },
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
@@ -48,6 +51,7 @@
     "@std/esm": "0.20.0",
     "dataloader": "1.4.0",
     "escape-string-regexp": "^1.0.5",
+    "graphql-type-json": "^0.2.1",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
