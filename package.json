@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.6.17-beta2",
+  "version": "0.6.17",
   "description": "",
   "main": "index.js",
   "repository": {
