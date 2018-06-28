@@ -305,6 +305,7 @@ function queriesForField(fieldName, realFieldType) {
     case JSONType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
+      result.push(`${fieldName}_in: [${fieldType}]`);
   }
 
   if (realFieldType.__isObject || realFieldType.__isArray) {

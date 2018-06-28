@@ -104,6 +104,34 @@ test("Query not value", async () => {
   });
 });
 
+test("Query in value", async () => {
+  const bookA = await runMutation({
+    mutation: `createBook(Book: {title: "Book A", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+
+  const bookB = await runMutation({
+    mutation: `createBook(Book: {title: "Book B", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+
+  const bookC = await runMutation({
+    mutation: `createBook(Book: {title: "Book C"}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+
+  const bookD = await runMutation({
+    mutation: `createBook(Book: {title: "Book C", jsonContent: {a: 99, b: "c"}}){Book{_id, title, jsonContent}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(jsonContent_in: [{a: 1, b: "b"}, {a: 2, b: "b"}], SORT: {title: 1}){Books{_id}}}`,
+    coll: "allBooks",
+    results: [{ _id: bookA._id }, { _id: bookB._id }]
+  });
+});
+
 test("Update JSON", async () => {
   let obj = await runMutation({
     mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
