@@ -9,7 +9,8 @@ import {
   FloatArrayType,
   DateType,
   arrayOf,
-  BoolType
+  BoolType,
+  JSONType
 } from "../dataTypes";
 import { TAB } from "./utilities";
 import { createOperation as createOperationOriginal, createInput, createType } from "./gqlSchemaHelpers";
@@ -74,7 +75,12 @@ ${[
       )
     ]),
     objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
-    createInput(`${name}Sort`, Object.keys(fields).map(k => `${k}: Int`)),
+    createInput(
+      `${name}Sort`,
+      Object.keys(fields)
+        .filter(k => objectToCreate.fields[k] !== JSONType)
+        .map(k => `${k}: Int`)
+    ),
     createInput(`${name}Filters`, allQueryFields.concat([`OR: [${name}Filters]`]))
   ]
     .filter(s => s)
@@ -172,6 +178,8 @@ function fieldMutations(k, fields) {
       return [`${k}: Int`, `${k}_INC: Int`, `${k}_DEC: Int`];
     } else if (value === "Float") {
       return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
+    } else if (value === JSONType) {
+      return [`${k}: JSON`];
     } else if (value === StringArrayType) {
       return [
         `${k}: [String]`,
@@ -290,6 +298,11 @@ function queriesForField(fieldName, realFieldType) {
     case FloatType:
     case DateType:
     case BoolType:
+      result.push(`${fieldName}: ${fieldType}`);
+      result.push(`${fieldName}_ne: ${fieldType}`);
+      result.push(`${fieldName}_in: [${fieldType}]`);
+      break;
+    case JSONType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
