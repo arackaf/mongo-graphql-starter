@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.6.18",
+  "version": "0.6.19",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -47,11 +47,11 @@
     "test8": "node test/masterSetup && jest --runInBand --config=test/jestConfig/jest.config8.json"
   },
   "dependencies": {
-    "@std/esm": "0.20.0",
     "dataloader": "1.4.0",
-    "escape-string-regexp": "^1.0.5",
+    "escape-string-regexp": "1.0.5",
+    "esm": "3.0.55",
     "graphql": "0.13.2",
-    "graphql-type-json": "^0.2.1",
+    "graphql-type-json": "0.2.1",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",
     "mongodb": "2.2.31"
