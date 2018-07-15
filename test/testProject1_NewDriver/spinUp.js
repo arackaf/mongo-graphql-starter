@@ -20,7 +20,9 @@ export async function create() {
 }
 
 export default async function() {
-  await create();
+  if (!fs.existsSync(path.resolve(__dirname, "./graphQL/Book/Book.js"))) {
+    await create();
+  }
 
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
 
@@ -29,7 +31,7 @@ export default async function() {
     nextConnectionString(),
     { useNewUrlParser: true }
   );
-  db = client.db("mongo-graphql-starter");
+  db = client.db();
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
   return {

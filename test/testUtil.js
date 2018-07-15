@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb";
 import { graphql } from "graphql";
 
 let connectionUid = 1;
-const localConn = "mongodb://localhost:27017/mongo-graphql-starter";
+const localConn = "mongodb://127.0.0.1:27017/mongo-graphql-starter";
 
 export const nextConnectionString = () => process.env.MongoAddr || localConn;
 
