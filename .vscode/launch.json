@@ -10,6 +10,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Launch 1 New Driver",
+      "program": "${workspaceRoot}\\test\\testProject1_NewDriver\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Launch 2",
       "program": "${workspaceRoot}\\test\\testProject2\\index.js"
     },
