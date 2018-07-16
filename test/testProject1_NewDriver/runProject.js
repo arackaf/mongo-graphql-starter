@@ -6,10 +6,14 @@ import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
 import spinUp from "./spinUp";
 
-let connPromise = spinUp();
-let dbPromise = connPromise.then(({ db }) => {
-  return db;
-});
+const dbPromise = MongoClient.connect(
+  "mongodb://localhost:27017",
+  { useNewUrlParser: true }
+).then(client => client.db("mongo-graphql-starter"));
+
+const root = {
+  db: dbPromise
+};
 
 Promise.resolve(spinUp()).then(({ db, schema, queryAndMatchArray }) => {
   const app = express();
