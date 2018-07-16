@@ -31,14 +31,14 @@ export default async function() {
     nextConnectionString(),
     { useNewUrlParser: true }
   );
-  db = client.db();
+  db = client.db("mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
   return {
     db,
     schema,
     close: () => client.close(),
-    queryAndMatchArray: options => queryAndMatchArray({ schema, db, ...options }),
-    runMutation: options => runMutation({ schema, db, ...options })
+    queryAndMatchArray: options => queryAndMatchArray({ schema, db: () => db, ...options }),
+    runMutation: options => runMutation({ schema, db: () => db, ...options })
   };
 }
