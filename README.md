@@ -165,7 +165,7 @@ file, which are aggregates over all the types.
 
 ![Image of basic scaffolding](docs-img/initialCreated.png)
 
-Now tell Express about it—and don't forget to add a root object with a `db` property that resolves to a connection to your database.
+Now tell Express about it—and don't forget to add a root object with a `db` property that resolves to a connection to your database. If needed, you can also have `db` be a function which returns a promise resolving to a connection.
 
 Here's what a minimal, complete example might look like.
 
@@ -178,7 +178,12 @@ import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
 
 const app = express();
-const dbPromise = MongoClient.connect("mongodb://localhost:27017/mongo-graphql-starter");
+
+const dbPromise = MongoClient.connect(
+  "mongodb://localhost:27017",
+  { useNewUrlParser: true }
+).then(client => client.db("mongo-graphql-starter"));
+
 const root = {
   db: dbPromise
 };
