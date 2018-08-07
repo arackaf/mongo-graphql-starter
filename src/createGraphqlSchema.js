@@ -28,6 +28,7 @@ export default function(source, destPath) {
     }
     Object.keys(module).forEach(k => {
       module[k].__name = k;
+      if (!module[k].fields) module[k].fields = {};
       if (!module[k].fields._id && module[k].table) {
         //add _id, and as a bonus, make it show up first in the list since the spec iterates object keys in order of insertion
         module[k].fields = { _id: MongoIdType, ...module[k].fields };
