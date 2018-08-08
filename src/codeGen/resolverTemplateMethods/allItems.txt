@@ -1,6 +1,6 @@
     async all${objName}s(root, args, context, ast) {
       await processHook(hooksObj, "${objName}", "queryPreprocess", root, args, context, ast);
-      let db = await root.db;
+      let db = await (typeof root.db === "function" ? root.db() : root.db);
       context.__mongodb = db;
       let queryPacket = decontructGraphqlQuery(args, ast, ${objName}Metadata, "${objName}s");
       await processHook(hooksObj, "${objName}", "queryMiddleware", queryPacket, root, args, context, ast);
