@@ -34,7 +34,7 @@ export default async function() {
     nextConnectionString(),
     { useNewUrlParser: true }
   );
-  db = client.db("mongo-graphql-starter");
+  db = client.db(process.env.databaseName || "mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
   return {
