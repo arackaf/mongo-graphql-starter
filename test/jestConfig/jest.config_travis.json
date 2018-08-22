@@ -1,0 +1,4 @@
+{
+  "rootDir": "../",
+  "testPathIgnorePatterns": ["testProject1/", "testProject1_NewDriver/", "testProject4/"]
+}
