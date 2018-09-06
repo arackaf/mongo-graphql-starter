@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { TAB, TAB2 } from "./utilities";
+import { MongoIdType } from "../dataTypes";
 
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
@@ -80,6 +81,11 @@ export default function createGraphqlResolver(objectToCreate) {
         relationshipResolvers += projectIdsResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
+          .replace(/\${keyField}/g, relationship.keyField || "_id")
+          .replace(
+            /\${idMapping}/g,
+            relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "ids => ids.map(id => ObjectId(id))" : "ids => ids"
+          )
           .replace(/\${targetObjName}/g, relationshipName)
           .replace(/\${targetTypeName}/g, relationship.type.__name)
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
@@ -90,6 +96,8 @@ export default function createGraphqlResolver(objectToCreate) {
         relationshipResolvers += projectIdResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
+          .replace(/\${keyField}/g, relationship.keyField || "_id")
+          .replace(/\${idMapping}/g, relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "id => ObjectId(id)" : "id => id")
           .replace(/\${targetObjName}/g, relationshipName)
           .replace(/\${targetTypeName}/g, relationship.type.__name)
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
