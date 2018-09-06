@@ -71,7 +71,7 @@ export const relationshipHelpers = {
 
     source.relationships[field] = result;
   },
-  projectId: (source, field, { type, fkField }) => {
+  projectId: (source, field, { type, fkField, keyField }) => {
     if (!source.relationships) {
       source.relationships = {};
     }
@@ -79,6 +79,7 @@ export const relationshipHelpers = {
     let result = {
       type,
       fkField,
+      keyField,
       __isObject: true
     };
 

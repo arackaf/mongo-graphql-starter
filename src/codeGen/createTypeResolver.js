@@ -96,6 +96,8 @@ export default function createGraphqlResolver(objectToCreate) {
         relationshipResolvers += projectIdResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
+          .replace(/\${keyField}/g, relationship.keyField || "_id")
+          .replace(/\${idMapping}/g, relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "id => ObjectId(id)" : "id => id")
           .replace(/\${targetObjName}/g, relationshipName)
           .replace(/\${targetTypeName}/g, relationship.type.__name)
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
