@@ -91,7 +91,11 @@ export default function createGraphqlResolver(objectToCreate) {
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name)
-          .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`);
+          .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`)
+          .replace(
+            /\${receivingKeyForce}/g,
+            relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
+          );
       } else if (relationship.__isObject) {
         relationshipResolvers += projectIdResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
@@ -103,7 +107,11 @@ export default function createGraphqlResolver(objectToCreate) {
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name)
-          .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`);
+          .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`)
+          .replace(
+            /\${receivingKeyForce}/g,
+            relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
+          );
       }
 
       if (index < all.length - 1) {

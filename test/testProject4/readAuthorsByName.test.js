@@ -2,13 +2,14 @@ import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
 let db, schema, queryAndMatchArray, runMutation;
+let adam, katie, laura, mallory;
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
 
-  let adam = { name: "Adam", birthday: new Date("1982-03-22") };
-  let katie = { name: "Katie", birthday: new Date("2009-08-05") };
-  let laura = { name: "Laura", birthday: new Date("1974-12-19") };
-  let mallory = { name: "Mallory", birthday: new Date("1956-08-02") };
+  adam = { name: "Adam", birthday: new Date("1982-03-22") };
+  katie = { name: "Katie", birthday: new Date("2009-08-05") };
+  laura = { name: "Laura", birthday: new Date("1974-12-19") };
+  mallory = { name: "Mallory", birthday: new Date("1956-08-02") };
 
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
 
@@ -28,6 +29,18 @@ afterAll(async () => {
   await db.collection("authors").remove({});
   db.close();
   db = null;
+});
+
+test("Read authors - no foreign key requested", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_startsWith: "B"){Books{title, authorsByName{_id}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authorsByName: [{ _id: "" + adam._id }] },
+      { title: "Book 2", authorsByName: [{ _id: "" + adam._id }] },
+      { title: "Book 3", authorsByName: [{ _id: "" + katie._id }] }
+    ]
+  });
 });
 
 test("Read authors", async () => {
