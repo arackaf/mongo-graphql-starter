@@ -49,7 +49,7 @@ export const formattedDate = options => {
 };
 
 export const relationshipHelpers = {
-  projectIds: (source, field, { type, fkField }) => {
+  projectIds: (source, field, { type, keyField, fkField }) => {
     if (!source.relationships) {
       source.relationships = {};
     }
@@ -57,6 +57,7 @@ export const relationshipHelpers = {
     let result = {
       type,
       fkField,
+      keyField,
       __isArray: true
     };
 
