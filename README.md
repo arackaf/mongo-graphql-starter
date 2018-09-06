@@ -777,6 +777,18 @@ relationshipHelpers.projectIds(Book, "authors", {
 This adds a new `authors` array to the Book type, which are read from the authors collection, by `_id`, based on the values in a book's `authorIds`
 array. Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
 
+If you have a foreign key that does **not** point to the target table's `_id`, then you can specify a `keyField` above, to specify what the foreign key matches against.
+
+ie
+
+```javascript
+relationshipHelpers.projectIds(Book, "authorsByName", {
+  type: Author,
+  fkField: "authorNames",
+  keyField: "name"
+});
+```
+
 ### Defining a single foreign key
 
 To declare that the Book type's `mainAuthorId` represents a foreign key to the authors collection, you'd use the `relationshipHelpers.projectId`
@@ -791,6 +803,18 @@ relationshipHelpers.projectId(Book, "mainAuthor", {
 
 This adds a new `mainAuthor` object to the Book type, which is read from the authors collection, by `_id`, based on the value in the book's
 `mainAuthorId` field. Note that `mainAuthorId` must either be a `StringType` or `MongoIdType`.
+
+If you have a foreign key that does **not** point to the target table's `_id`, then you can specify a `keyField` above, to specify what the foreign key matches against.
+
+ie
+
+```javascript
+relationshipHelpers.projectId(Book, "mainAuthorByName", {
+  type: Author,
+  fkField: "mainAuthorName",
+  keyField: "name"
+});
+```
 
 ### Using relationships
 
