@@ -49,8 +49,10 @@ const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: StringType,
+    mainAuthorName: StringType,
     cachedMainAuthor: objectOf(Author),
     authorIds: StringArrayType,
+    authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author)
   }
 };
@@ -60,9 +62,21 @@ relationshipHelpers.projectIds(Book, "authors", {
   fkField: "authorIds"
 });
 
+relationshipHelpers.projectIds(Book, "authorsByName", {
+  type: Author,
+  fkField: "authorNames",
+  keyField: "name"
+});
+
 relationshipHelpers.projectId(Book, "mainAuthor", {
   type: Author,
   fkField: "mainAuthorId"
+});
+
+relationshipHelpers.projectId(Book, "mainAuthorByName", {
+  type: Author,
+  fkField: "mainAuthorName",
+  keyField: "name"
 });
 
 relationshipHelpers.projectId(Author, "firstBook", {

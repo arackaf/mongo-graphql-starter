@@ -2,7 +2,7 @@
     if (context.${dataLoaderId} == null) {
       let db = await context.__mongodb;
       context.${dataLoaderId} = new DataLoader(async keyArrays => {
-        let $match = { _id: { $in: flatMap(keyArrays || [], ids => ids.map(id => ObjectId(id))) } };
+        let $match = { ${keyField}: { $in: flatMap(keyArrays || [], ${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, constants.useCurrentSelectionSet);
         let { $project, $sort, $limit, $skip } = queryPacket;
         
@@ -14,11 +14,11 @@
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
 
         let finalResult = keyArrays.map(keyArr => []);
-        let keySets = keyArrays.map(keyArr => new Set(keyArr.map(_id => "" + _id)));
+        let keySets = keyArrays.map(keyArr => new Set(keyArr.map(${keyField} => "" + ${keyField})));
 
         for (let result of results){
           for (let i = 0; i < keyArrays.length; i++){
-            if (keySets[i].has(result._id + "")){
+            if (keySets[i].has(result.${keyField} + "")){
               finalResult[i].push(result);
             }
           }
