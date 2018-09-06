@@ -187,8 +187,11 @@ function ensureArr(hash, fieldName, cb = () => {}) {
   cb();
 }
 
-export function parseRequestedFields(ast, queryName) {
+export function parseRequestedFields(ast, queryName, force) {
   let { requestMap } = getNestedQueryInfo(ast, queryName);
+  if (force) {
+    force.forEach(field => requestMap.set(field, true));
+  }
   return requestMap;
 }
 export function getNestedQueryInfo(ast, queryName) {
@@ -297,12 +300,12 @@ function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
   };
 }
 
-export function decontructGraphqlQuery(args, ast, objectMetaData, queryName) {
+export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, options = {}) {
   let $match = getMongoFilters(args, objectMetaData);
   let requestMap, metadataRequested, $project, extrasPackets;
 
   if (ast && queryName) {
-    requestMap = parseRequestedFields(ast, queryName);
+    requestMap = parseRequestedFields(ast, queryName, options.force || []);
     metadataRequested = parseRequestedFields(ast, "Meta");
     ({ $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName));
   } else {
