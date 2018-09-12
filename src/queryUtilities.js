@@ -482,7 +482,11 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
       } else if (field.__isObject) {
         $set[prefix + k] = await newObjectFromArgs(updatesObject[k], field.type, relationshipLoadingUtils);
       } else {
-        $set[prefix + k] = updatesObject[k];
+        if (field === MongoIdType) {
+          $set[prefix + k] = ObjectId(updatesObject[k]);
+        } else {
+          $set[prefix + k] = updatesObject[k];
+        }
       }
     }
   }
