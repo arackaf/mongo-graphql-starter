@@ -1,4 +1,15 @@
-import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "../dataTypes";
+import {
+  MongoIdType,
+  StringType,
+  IntType,
+  FloatType,
+  DateType,
+  arrayOf,
+  StringArrayType,
+  MongoIdArrayType,
+  IntArrayType,
+  FloatArrayType
+} from "../dataTypes";
 import { TAB } from "./utilities";
 
 const defaultDateFormat = "%m/%d/%Y";
@@ -6,6 +17,7 @@ const defaultDateFormat = "%m/%d/%Y";
 export default function createOutputTypeMetadata(objectToCreate) {
   let fields = objectToCreate.fields;
   let relationships = objectToCreate.relationships;
+  let relationshipsX = objectToCreate.relationshipsX;
   let extras = objectToCreate.extras;
 
   let types = new Set([]);
@@ -116,6 +128,40 @@ export default function createOutputTypeMetadata(objectToCreate) {
                   ),
                   literal: true
                 };
+              }),
+              literal: true
+            }
+          : null,
+        relationshipsX
+          ? {
+              name: "relationshipsX",
+              value: Object.keys(relationshipsX).map(k => {
+                try {
+                  let relationship = relationshipsX[k];
+                  let fkFieldId = relationship.fkField;
+                  let fkField = fields[fkFieldId];
+                  let keyField = relationship.keyField || "_id";
+                  let __isArray = [StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType].includes(fkField);
+                  let __isObject = !__isArray;
+
+                  return {
+                    name: k,
+                    value: createObject(
+                      "{",
+                      [
+                        { definition: "get type(){ return " + relationship.type.__name + "; }" },
+                        { definition: `fkField: "${fkFieldId}"` },
+                        { definition: `keyField: "${keyField}"` },
+                        { definition: `__isArray: ${__isArray}` },
+                        { definition: `__isObject: ${__isObject}` }
+                      ],
+                      3
+                    ),
+                    literal: true
+                  };
+                } catch (err) {
+                  console.log(err);
+                }
               }),
               literal: true
             }
