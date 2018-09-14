@@ -54,6 +54,14 @@ const Book = {
     authorIds: StringArrayType,
     authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author)
+  },
+  relationshipsX: {
+    authors: {
+      get type() {
+        return Author;
+      },
+      fkField: "authorIds"
+    }
   }
 };
 
