@@ -7,7 +7,7 @@ import glob from "glob";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import projectSetupF from "./projectSetup";
+import * as projectSetupF from "./projectSetup";
 
 export async function create() {
   await Promise.resolve(createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"))).then(() => {

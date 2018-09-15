@@ -11,7 +11,7 @@ import {
   objectOf
 } from "../../src/dataTypes";
 
-const Subject = {
+export const Subject = {
   table: "subjects",
   fields: {
     _id: MongoIdType,
@@ -19,7 +19,7 @@ const Subject = {
   }
 };
 
-const Tag = {
+export const Tag = {
   fields: {
     name: StringType,
     description: StringType,
@@ -27,7 +27,7 @@ const Tag = {
   }
 };
 
-const User = {
+export const User = {
   fields: {
     name: StringType,
     knicknames: StringArrayType,
@@ -39,7 +39,7 @@ const User = {
   }
 };
 
-const Comment = {
+export const Comment = {
   fields: {
     text: StringType,
     upVotes: IntType,
@@ -49,7 +49,7 @@ const Comment = {
   }
 };
 
-const Blog = {
+export const Blog = {
   table: "blogs",
   fields: {
     author: objectOf(User),
@@ -59,11 +59,4 @@ const Blog = {
     content: StringType,
     comments: arrayOf(Comment)
   }
-};
-
-export default {
-  User,
-  Blog,
-  Comment,
-  Tag
 };

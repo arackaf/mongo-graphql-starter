@@ -1,6 +1,6 @@
 import { IntArrayType, FloatArrayType, StringType, StringArrayType } from "../../src/dataTypes";
 
-const Thing = {
+export const Thing = {
   table: "things",
   fields: {
     name: StringType,
@@ -9,8 +9,4 @@ const Thing = {
     floats: FloatArrayType
   },
   manualQueryArgs: [{ name: "ManualArg", type: "String" }]
-};
-
-export default {
-  Thing
 };
