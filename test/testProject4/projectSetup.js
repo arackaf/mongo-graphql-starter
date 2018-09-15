@@ -1,4 +1,4 @@
-import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf, relationshipHelpers } from "../../src/dataTypes";
+import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
 
 const Keyword = {
   table: "keywords",
@@ -12,13 +12,16 @@ const Subject = {
   fields: {
     name: StringType,
     keywordIds: StringArrayType
+  },
+  relationships: {
+    keywords: {
+      get type() {
+        return Keyword;
+      },
+      fkField: "keywordIds"
+    }
   }
 };
-
-relationshipHelpers.projectIds(Subject, "keywords", {
-  type: Keyword,
-  fkField: "keywordIds"
-});
 
 const Author = {
   table: "authors",
@@ -28,18 +31,28 @@ const Author = {
     mainSubjectId: StringType,
     subjectIds: StringArrayType,
     firstBookId: StringType
+  },
+  relationships: {
+    mainSubject: {
+      get type() {
+        return Subject;
+      },
+      fkField: "mainSubjectId"
+    },
+    subjects: {
+      get type() {
+        return Subject;
+      },
+      fkField: "subjectIds"
+    },
+    firstBook: {
+      get type() {
+        return Book;
+      },
+      fkField: "firstBookId"
+    }
   }
 };
-
-relationshipHelpers.projectId(Author, "mainSubject", {
-  type: Subject,
-  fkField: "mainSubjectId"
-});
-
-relationshipHelpers.projectIds(Author, "subjects", {
-  type: Subject,
-  fkField: "subjectIds"
-});
 
 const Book = {
   table: "books",
@@ -55,42 +68,35 @@ const Book = {
     authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author)
   },
-  relationshipsX: {
+  relationships: {
     authors: {
       get type() {
         return Author;
       },
       fkField: "authorIds"
+    },
+    authorsByName: {
+      get type() {
+        return Author;
+      },
+      fkField: "authorNames",
+      keyField: "name"
+    },
+    mainAuthor: {
+      get type() {
+        return Author;
+      },
+      fkField: "mainAuthorId"
+    },
+    mainAuthorByName: {
+      get type() {
+        return Author;
+      },
+      fkField: "mainAuthorName",
+      keyField: "name"
     }
   }
 };
-
-relationshipHelpers.projectIds(Book, "authors", {
-  type: Author,
-  fkField: "authorIds"
-});
-
-relationshipHelpers.projectIds(Book, "authorsByName", {
-  type: Author,
-  fkField: "authorNames",
-  keyField: "name"
-});
-
-relationshipHelpers.projectId(Book, "mainAuthor", {
-  type: Author,
-  fkField: "mainAuthorId"
-});
-
-relationshipHelpers.projectId(Book, "mainAuthorByName", {
-  type: Author,
-  fkField: "mainAuthorName",
-  keyField: "name"
-});
-
-relationshipHelpers.projectId(Author, "firstBook", {
-  type: Book,
-  fkField: "firstBookId"
-});
 
 export default {
   Book,
