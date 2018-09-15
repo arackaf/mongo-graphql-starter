@@ -6,7 +6,7 @@ import path from "path";
 import glob from "glob";
 import fs from "fs";
 
-import projectSetupD from "./projectSetup";
+import * as projectSetupD from "./projectSetup";
 
 export async function create() {
   await Promise.resolve(createGraphqlSchema(projectSetupD, path.resolve("./test/testProject4_NewDriver"))).then(() => {

@@ -6,7 +6,7 @@ import path from "path";
 import glob from "glob";
 import fs from "fs";
 
-import projectSetupB from "./projectSetup";
+import * as projectSetupB from "./projectSetup";
 
 export async function create() {
   await createGraphqlSchema(projectSetupB, path.resolve("./test/testProject2"));

@@ -9,17 +9,17 @@ const fields = {
   userId: IntType
 };
 
-const Type1 = {
+export const Type1 = {
   table: "type1",
   fields
 };
 
-const Type2 = {
+export const Type2 = {
   table: "type2",
   fields
 };
 
-const UpdateInfo = {
+export const UpdateInfo = {
   table: "updateInfo",
   fields: {
     updatedId: MongoIdType,
@@ -27,7 +27,7 @@ const UpdateInfo = {
   }
 };
 
-const InsertInfo = {
+export const InsertInfo = {
   table: "insertInfo",
   fields: {
     insertedId: MongoIdType,
@@ -35,7 +35,7 @@ const InsertInfo = {
   }
 };
 
-const DeleteInfo = {
+export const DeleteInfo = {
   table: "deleteInfo",
   fields: {
     deletedId: MongoIdType,
@@ -43,7 +43,7 @@ const DeleteInfo = {
   }
 };
 
-const Coordinate = {
+export const Coordinate = {
   table: "coordinates",
   fields: {
     x: IntType,
@@ -58,13 +58,4 @@ const Coordinate = {
     schemaSources: ["../../graphQL-extras/coordinateSchemaExtras"],
     overrides: ["getCoordinate", "updateCoordinate"]
   }
-};
-
-export default {
-  Type1,
-  Type2,
-  UpdateInfo,
-  InsertInfo,
-  DeleteInfo,
-  Coordinate
 };

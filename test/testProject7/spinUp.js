@@ -7,7 +7,7 @@ import glob from "glob";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import projectSetupF from "../testProject6/projectSetup";
+import * as projectSetupF from "../testProject6/projectSetup";
 
 export async function create() {
   let projectSetupG = { ...projectSetupF };

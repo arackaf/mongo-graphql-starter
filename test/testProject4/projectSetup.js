@@ -1,13 +1,13 @@
 import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
 
-const Keyword = {
+export const Keyword = {
   table: "keywords",
   fields: {
     keywordName: StringType
   }
 };
 
-const Subject = {
+export const Subject = {
   table: "subjects",
   fields: {
     name: StringType,
@@ -23,7 +23,7 @@ const Subject = {
   }
 };
 
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
@@ -54,7 +54,7 @@ const Author = {
   }
 };
 
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -96,11 +96,4 @@ const Book = {
       keyField: "name"
     }
   }
-};
-
-export default {
-  Book,
-  Author,
-  Subject,
-  Keyword
 };

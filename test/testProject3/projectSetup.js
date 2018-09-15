@@ -1,6 +1,6 @@
 import { MongoIdType, StringType, arrayOf } from "../../src/dataTypes";
 
-const Tag = {
+export const Tag = {
   table: "tags",
   fields: {
     _id: MongoIdType,
@@ -8,7 +8,7 @@ const Tag = {
   }
 };
 
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
@@ -17,8 +17,3 @@ const Author = {
 };
 
 Tag.fields.authors = arrayOf(Author);
-
-export default {
-  Author,
-  Tag
-};
