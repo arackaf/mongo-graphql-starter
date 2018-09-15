@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import { MongoIdType } from "./dataTypes";
+import { MongoIdType, StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType } from "./dataTypes";
 import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
@@ -21,20 +21,34 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
 }
 
 export default function(source, destPath) {
-  return Promise.resolve(source).then(module => {
+  return Promise.resolve(source).then(graphqlMetadata => {
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
       mkdirp.sync(rootDir);
     }
-    Object.keys(module).forEach(k => {
-      module[k].__name = k;
-      if (!module[k].fields) module[k].fields = {};
-      if (!module[k].fields._id && module[k].table) {
+    let typeLookup = new Map([]);
+    Object.keys(graphqlMetadata).forEach(k => {
+      typeLookup.set(k, graphqlMetadata[k]);
+    });
+    Object.keys(graphqlMetadata).forEach(k => {
+      let type = graphqlMetadata[k];
+      type.__name = k;
+      if (!type.fields) graphqlMetadata[k].fields = {};
+      if (!type.fields._id && type.table) {
         //add _id, and as a bonus, make it show up first in the list since the spec iterates object keys in order of insertion
-        module[k].fields = { _id: MongoIdType, ...module[k].fields };
+        type.fields = { _id: MongoIdType, ...type.fields };
+      }
+      if (type.relationships) {
+        Object.keys(type.relationships).forEach(k => {
+          let relationship = type.relationships[k];
+          let fkField = type.fields[relationship.fkField];
+
+          relationship.__isArray = [StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType].includes(fkField);
+          relationship.__isObject = !relationship.__isArray;
+        });
       }
     });
-    let modules = Object.keys(module).map(k => module[k]);
+    let modules = Object.keys(graphqlMetadata).map(k => graphqlMetadata[k]);
 
     let names = [];
     let namesWithTables = [];
