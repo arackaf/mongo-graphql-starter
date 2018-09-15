@@ -93,7 +93,8 @@ export const Book = {
         return Author;
       },
       fkField: "mainAuthorName",
-      keyField: "name"
+      keyField: "name",
+      oneToOne: true
     }
   }
 };
