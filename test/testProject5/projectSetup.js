@@ -1,4 +1,4 @@
-import { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, relationshipHelpers } from "../../src/dataTypes";
+import { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
 
 const Keyword = {
   table: "keywords",
@@ -12,13 +12,14 @@ const Subject = {
   fields: {
     name: StringType,
     keywordIds: MongoIdArrayType
+  },
+  relationships: {
+    keywords: {
+      type: Keyword,
+      fkField: "keywordIds"
+    }
   }
 };
-
-relationshipHelpers.projectIds(Subject, "keywords", {
-  type: Keyword,
-  fkField: "keywordIds"
-});
 
 const Author = {
   table: "authors",
@@ -28,18 +29,24 @@ const Author = {
     mainSubjectId: MongoIdType,
     subjectIds: MongoIdArrayType,
     firstBookId: MongoIdType
+  },
+  relationships: {
+    mainSubject: {
+      type: Subject,
+      fkField: "mainSubjectId"
+    },
+    subjects: {
+      type: Subject,
+      fkField: "subjectIds"
+    },
+    firstBook: {
+      get type() {
+        return Book;
+      },
+      fkField: "firstBookId"
+    }
   }
 };
-
-relationshipHelpers.projectId(Author, "mainSubject", {
-  type: Subject,
-  fkField: "mainSubjectId"
-});
-
-relationshipHelpers.projectIds(Author, "subjects", {
-  type: Subject,
-  fkField: "subjectIds"
-});
 
 const Book = {
   table: "books",
@@ -52,23 +59,18 @@ const Book = {
     cachedMainAuthor: objectOf(Author),
     authorIds: MongoIdArrayType,
     cachedAuthors: arrayOf(Author)
+  },
+  relationships: {
+    authors: {
+      type: Author,
+      fkField: "authorIds"
+    },
+    mainAuthor: {
+      type: Author,
+      fkField: "mainAuthorId"
+    }
   }
 };
-
-relationshipHelpers.projectIds(Book, "authors", {
-  type: Author,
-  fkField: "authorIds"
-});
-
-relationshipHelpers.projectId(Book, "mainAuthor", {
-  type: Author,
-  fkField: "mainAuthorId"
-});
-
-relationshipHelpers.projectId(Author, "firstBook", {
-  type: Book,
-  fkField: "firstBookId"
-});
 
 export default {
   Book,
