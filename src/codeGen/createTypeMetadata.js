@@ -110,30 +110,26 @@ export default function createOutputTypeMetadata(objectToCreate) {
           ? {
               name: "relationships",
               value: Object.keys(relationships).map(k => {
-                try {
-                  let relationship = relationships[k];
-                  let fkFieldId = relationship.fkField;
-                  let fkField = fields[fkFieldId];
-                  let keyField = relationship.keyField || "_id";
+                let relationship = relationships[k];
+                let isOne = relationship.__isObject;
 
-                  return {
-                    name: k,
-                    value: createObject(
-                      "{",
-                      [
-                        { definition: "get type(){ return " + relationship.type.__name + "; }" },
-                        { definition: `fkField: "${fkFieldId}"` },
-                        { definition: `keyField: "${keyField}"` },
-                        { definition: `__isArray: ${relationship.__isArray}` },
-                        { definition: `__isObject: ${relationship.__isObject}` }
-                      ],
-                      3
-                    ),
-                    literal: true
-                  };
-                } catch (err) {
-                  console.log(err);
-                }
+                return {
+                  name: k,
+                  value: createObject(
+                    "{",
+                    [
+                      { definition: "get type(){ return " + relationship.type.__name + "; }" },
+                      { definition: `fkField: "${relationship.fkField}"` },
+                      { definition: `keyField: "${relationship.keyField}"` },
+                      isOne ? { definition: `oneToOne: ${!!relationship.oneToOne}` } : null,
+                      isOne ? { definition: `oneToMany: ${!!relationship.oneToMany}` } : null,
+                      { definition: `__isArray: ${relationship.__isArray}` },
+                      { definition: `__isObject: ${relationship.__isObject}` }
+                    ].filter(o => o),
+                    3
+                  ),
+                  literal: true
+                };
               }),
               literal: true
             }

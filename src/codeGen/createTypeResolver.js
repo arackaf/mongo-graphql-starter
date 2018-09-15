@@ -5,8 +5,8 @@ import { MongoIdType } from "../dataTypes";
 
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
-  let projectIdResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdResolverTemplate.txt"), { encoding: "utf8" });
-  let projectIdsResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsResolverTemplate.txt"), { encoding: "utf8" });
+  let projectOneToOneResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToOneResolverTemplate.txt"), { encoding: "utf8" });
+  let projectManyToManyResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectManyToManyResolverTemplate.txt"), { encoding: "utf8" });
 
   let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.txt"), { encoding: "utf8" });
   let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.txt"), { encoding: "utf8" });
@@ -78,7 +78,7 @@ export default function createGraphqlResolver(objectToCreate) {
       }
 
       if (relationship.__isArray) {
-        relationshipResolvers += projectIdsResolverTemplate
+        relationshipResolvers += projectManyToManyResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
           .replace(/\${keyField}/g, relationship.keyField || "_id")
@@ -97,7 +97,7 @@ export default function createGraphqlResolver(objectToCreate) {
             relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
           );
       } else if (relationship.__isObject) {
-        relationshipResolvers += projectIdResolverTemplate
+        relationshipResolvers += projectOneToOneResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
           .replace(/\${keyField}/g, relationship.keyField || "_id")
