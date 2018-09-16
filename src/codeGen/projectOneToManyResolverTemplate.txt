@@ -5,19 +5,21 @@
         let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, constants.useCurrentSelectionSet${receivingKeyForce});
         let { $project, $sort, $limit, $skip } = queryPacket;
-
-        let aggregateItems = [
-          { $match }, 
-          { $project },
-        ];
+        
+        let aggregateItems = [{ $match }, $sort ? { $sort } : null, { $project }].filter(item => item);
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
+        let finalResult = keys.map(keyArr => []);
 
-        let destinationMap = new Map([]);
-        for (let result of results) {
-          destinationMap.set("" + result.${keyField}, result);
+        for (let result of results){
+          let keyLookup = new Set(result.${keyField}.map(k => k + ""));
+          for (let i = 0; i < keys.length; i++){
+            if (keyLookup.has(keys[i])) {
+              finalResult[i].push(result);
+            }
+          }
         }
-        return keys.map(id => destinationMap.get("" + id) || null);
+        return finalResult;
       });
     }
-    return obj.${fkField} == null ? null : context.${dataLoaderId}.load(obj.${fkField});
+    return context.${dataLoaderId}.load(obj.${fkField} || []);
   }

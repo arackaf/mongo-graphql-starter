@@ -41,29 +41,28 @@ export default function(source, destPath) {
       if (type.relationships) {
         Object.keys(type.relationships).forEach(k => {
           let relationship = type.relationships[k];
-          let fkField = type.fields[relationship.fkField];
-
-          relationship.__isArray = [StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType].includes(fkField);
-          relationship.__isObject = !relationship.__isArray;
           if (!relationship.keyField) {
             relationship.keyField = "_id";
           }
+          let fkFieldId = type.fields[relationship.fkField];
+          let keyField = relationship.keyField;
 
-          let types = ["oneToOne", "oneToMany"];
+          let fkArray = [StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType].includes(fkFieldId);
+          relationship.__isArray = (fkArray || keyField !== "_id") && !relationship.oneToOne;
+          relationship.__isObject = !relationship.__isArray;
 
           if (relationship.oneToOne && relationship.oneToMany) {
             throw "Config props oneToOne and oneToMany cannot both be set";
           }
-
-          if (relationship.oneToOne && relationship.oneToMany) {
-            if (relationship.__isArray) {
+          if (relationship.oneToOne || relationship.oneToMany) {
+            if (fkArray) {
               throw `Foreign key ${relationship.fkField} on ${type.__name} is incompatible with relationship types oneToOne and oneToMany`;
             }
           }
 
-          if (!relationship.__isArray) {
-            if (relationship.oneToOne || relationship.keyField === "_id") {
-              relationship.oneToOne = true;
+          if (relationship.__isArray) {
+            if (fkArray) {
+              relationship.manyToMany = true;
             } else {
               relationship.oneToMany = true;
             }

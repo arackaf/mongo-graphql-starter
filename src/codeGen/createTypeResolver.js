@@ -6,6 +6,7 @@ import { MongoIdType } from "../dataTypes";
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
   let projectOneToOneResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToOneResolverTemplate.txt"), { encoding: "utf8" });
+  let projectOneToManyResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToManyResolverTemplate.txt"), { encoding: "utf8" });
   let projectManyToManyResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectManyToManyResolverTemplate.txt"), { encoding: "utf8" });
 
   let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.txt"), { encoding: "utf8" });
@@ -63,7 +64,7 @@ export default function createGraphqlResolver(objectToCreate) {
 
       if (!typeImports.has(relationship.type.__name)) {
         typeImports.add(relationship.type.__name);
-        imports.push(`import { load${relationship.type.__name}s} from "../${relationship.type.__name}/resolver";`);
+        imports.push(`import { load${relationship.type.__name}s } from "../${relationship.type.__name}/resolver";`);
         imports.push(`import ${relationship.type.__name}Metadata from "../${relationship.type.__name}/${relationship.type.__name}";`);
       }
 
@@ -78,7 +79,8 @@ export default function createGraphqlResolver(objectToCreate) {
       }
 
       if (relationship.__isArray) {
-        relationshipResolvers += projectManyToManyResolverTemplate
+        let template = relationship.manyToMany ? projectManyToManyResolverTemplate : projectOneToManyResolverTemplate;
+        relationshipResolvers += template
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
           .replace(/\${keyField}/g, relationship.keyField || "_id")
