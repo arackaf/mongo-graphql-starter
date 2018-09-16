@@ -6,7 +6,7 @@
 This utility will scaffold GraphQL schema and resolvers, with queries, filters and mutations working out of the box, based on metadata you enter about
 your Mongo db.
 
-The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
+The idea is to auto-generate the mundane, repetitive boilerplate needed for a GraphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed.
 
 <!-- TOC -->
