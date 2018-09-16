@@ -121,8 +121,9 @@ export default function createOutputTypeMetadata(objectToCreate) {
                       { definition: "get type(){ return " + relationship.type.__name + "; }" },
                       { definition: `fkField: "${relationship.fkField}"` },
                       { definition: `keyField: "${relationship.keyField}"` },
-                      isOne ? { definition: `oneToOne: ${!!relationship.oneToOne}` } : null,
-                      isOne ? { definition: `oneToMany: ${!!relationship.oneToMany}` } : null,
+                      relationship.oneToOne ? { definition: `oneToOne: true` } : null,
+                      relationship.oneToMany ? { definition: `oneToMany: true` } : null,
+                      relationship.manyToMany ? { definition: `manyToMany: true` } : null,
                       { definition: `__isArray: ${relationship.__isArray}` },
                       { definition: `__isObject: ${relationship.__isObject}` }
                     ].filter(o => o),
