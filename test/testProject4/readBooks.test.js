@@ -13,7 +13,7 @@ beforeAll(async () => {
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
 
   let book1 = { title: "Book 1", pages: 100, authorIds: ["" + adam._id] };
-  let book2 = { title: "Book 2", pages: 150, authorIds: ["" + adam._id] };
+  let book2 = { title: "Book 2", pages: 150, authorIds: ["" + adam._id, "" + katie._id] };
   let book3 = { title: "Book 3", pages: 200, authorIds: ["" + katie._id] };
 
   await db.collection("books").insert(book1);
@@ -35,5 +35,67 @@ test("Read author's books", async () => {
     query: `{allAuthors(name_startsWith: "Adam"){Authors{name, books(SORT: {title: 1}){title}}}}`,
     coll: "allAuthors",
     results: [{ name: "Adam", books: [{ title: "Book 1" }, { title: "Book 2" }] }]
+  });
+});
+
+test("Read author's books and back", async () => {
+  await queryAndMatchArray({
+    query: `{
+      allAuthors(name_startsWith: "Adam"){
+        Authors{
+          name, 
+          books(SORT: {title: 1}){
+            title, 
+            authors(SORT: {name: 1}){
+              name
+            }
+          }
+        }
+      }
+    }`,
+    coll: "allAuthors",
+    results: [
+      {
+        name: "Adam",
+        books: [{ title: "Book 1", authors: [{ name: "Adam" }] }, { title: "Book 2", authors: [{ name: "Adam" }, { name: "Katie" }] }]
+      }
+    ]
+  });
+});
+
+test("Read author's books and back and back again", async () => {
+  await queryAndMatchArray({
+    query: `{
+      allAuthors(name_startsWith: "Adam"){
+        Authors{
+          name, 
+          books(SORT: {title: 1}){
+            title, 
+            authors(SORT: {name: 1}){
+              name,
+              books(SORT: {title: 1}){
+                title
+              }
+            }
+          }
+        }
+      }
+    }`,
+    coll: "allAuthors",
+    results: [
+      {
+        name: "Adam",
+        books: [
+          { title: "Book 1", authors: [{ name: "Adam", books: [{ title: "Book 1" }, { title: "Book 2" }] }] },
+          {
+            title: "Book 2",
+            authors: [
+              { name: "Adam", books: [{ title: "Book 1" }, { title: "Book 2" }] },
+              { name: "Katie", books: [{ title: "Book 2" }, { title: "Book 3" }] }
+            ]
+          }
+        ]
+      }
+    ]
   });
 });
