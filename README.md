@@ -41,8 +41,6 @@ or advanced edge cases as needed.
   - [schemaSources example](#schemasources-example)
   - [resolverSources example](#resolversources-example)
 - [Defining relationships between types (wip)](#defining-relationships-between-types-wip)
-  - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
-  - [Defining a single foreign key](#defining-a-single-foreign-key)
   - [Using relationships](#using-relationships)
   - [Creating related data](#creating-related-data)
     - [In creations](#in-creations)
@@ -106,14 +104,14 @@ const {
   typeLiteral
 } = dataTypes;
 
-const Author = {
+export const Author = {
   fields: {
     name: StringType,
     birthday: DateType
   }
 };
 
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -134,18 +132,12 @@ const Book = {
   }
 };
 
-const Subject = {
+export const Subject = {
   table: "subjects",
   fields: {
     _id: MongoIdType,
     name: StringType
   }
-};
-
-export default {
-  Book,
-  Subject,
-  Author
 };
 ```
 
@@ -153,7 +145,7 @@ Now tell mongo-graphql-starter to create your schema and resolvers, like this
 
 ```javascript
 import { createGraphqlSchema } from "mongo-graphql-starter";
-import projectSetup from "./projectSetupA";
+import * as projectSetup from "./projectSetupA";
 
 import path from "path";
 
@@ -255,7 +247,7 @@ Feel free to have your types reference each other. For example, the following wi
 import { dataTypes } from "mongo-graphql-starter";
 const { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
 
-const Tag = {
+export const Tag = {
   table: "tags",
   fields: {
     _id: MongoIdType,
@@ -263,7 +255,7 @@ const Tag = {
   }
 };
 
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
@@ -272,11 +264,6 @@ const Author = {
 };
 
 Tag.fields.authors = arrayOf(Author);
-
-export default {
-  Author,
-  Tag
-};
 ```
 
 ## Queries created
@@ -322,7 +309,7 @@ values.
 If you'd like to add custom arguments to these queries, you can do so like this
 
 ```javascript
-const Thing = {
+export const Thing = {
   table: "things",
   fields: {
     name: StringType,
@@ -647,7 +634,7 @@ In addition, the following arguments are supported
 This project aims to create as much boilerplate as possible, but of course special use cases will always exist, which require custom code. To accomplish this, you can add metadata to your type definitions indicating where additional schema or resolver code is located; as well as any built-in queries or mutations you'd like to define yourself, instead of using what would otherwise be created by this library.  For example
 
 ```javascript
-const Coordinate = {
+export const Coordinate = {
   table: "coordinates",
   fields: {
     x: IntType,
@@ -733,23 +720,30 @@ You can add as many of these files as you need.  Needless to say, if no queries 
 
 Relationships can be defined between queryable types. This allows you to normalize your data into separate Mongo collections, related by foreign keys.
 
-This feature is still a work in progress, so expect some things to be missing or incomplete, and of course the API may change.
-
-For the following examples, consider this setup
+To define relationships, you merely add a relationships section, as below.
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
 const { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, relationshipHelpers } = dataTypes;
 
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
     birthday: DateType
-  }
+  },
+  relationships: {
+    books: {
+      get type() {
+        return Book;
+      },
+      fkField: "_id",
+      keyField: "authorIds"
+    }
+  }  
 };
 
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -758,59 +752,37 @@ const Book = {
     weight: FloatType,
     mainAuthorId: MongoIdType,
     authorIds: MongoIdArrayType
+  },
+  relationships: {
+    authors: {
+      get type() {
+        return Author;
+      },
+      fkField: "authorIds"
+    },
+    mainAuthor: {
+      get type() {
+        return Author;
+      },
+      fkField: "mainAuthorId"
+    }
   }
 };
 ```
 
-### Defining an array of foreign keys
+For each relationship, the key will be the name of the object or array in the GraphQL schema. If the foreign key specified is an array, then the resulting property in the GraphQL schema will always be an array. If the foreign key is not an array, then an object will be created if the `keyField` is `_id`, which is the default, otherwise an object will be created. This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
 
-To declare that the Book type's `authorIds` field represents an array of foreign keys to the authors collection, you'd use the
-`relationshipHelpers.projectIds` method, like so
+| Options               | Default   | Description|
+| --------------------- | --------- | --------------------------------------- |
+| `type`                | (none)    | The type for the relationship. Be sure to use a getter to reference types that are specified downstream |
+| `fkField`             | (none)    | The foreign key, which will be used to look up related objects. |
+| `keyField`            | `_id`     | The field that will be used to look up related objects in their collection |
+| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`
+| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, even if the `keyField` is `_id` 
 
-```javascript
-relationshipHelpers.projectIds(Book, "authors", {
-  type: Author,
-  fkField: "authorIds"
-});
-```
+The `type` will of course be the type; be sure to use a getter for reference a type that's declared downstream.
 
-This adds a new `authors` array to the Book type, which are read from the authors collection, by `_id`, based on the values in a book's `authorIds`
-array. Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
 
-If you have a foreign key that does **not** point to the target table's `_id`, then you can specify a `keyField`, for what the foreign key matches against.
-
-```javascript
-relationshipHelpers.projectIds(Book, "authorsByName", {
-  type: Author,
-  fkField: "authorNames",
-  keyField: "name"
-});
-```
-
-### Defining a single foreign key
-
-To declare that the Book type's `mainAuthorId` represents a foreign key to the authors collection, you'd use the `relationshipHelpers.projectId`
-method, like so
-
-```javascript
-relationshipHelpers.projectId(Book, "mainAuthor", {
-  type: Author,
-  fkField: "mainAuthorId"
-});
-```
-
-This adds a new `mainAuthor` object to the Book type, which is read from the authors collection, by `_id`, based on the value in the book's
-`mainAuthorId` field. Note that `mainAuthorId` must either be a `StringType` or `MongoIdType`.
-
-If you have a foreign key that does **not** point to the target table's `_id`, then you can specify a `keyField`, for what the foreign key matches against.
-
-```javascript
-relationshipHelpers.projectId(Book, "mainAuthorByName", {
-  type: Author,
-  fkField: "mainAuthorName",
-  keyField: "name"
-});
-```
 
 ### Using relationships
 
