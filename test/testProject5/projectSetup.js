@@ -44,6 +44,13 @@ export const Author = {
         return Book;
       },
       fkField: "firstBookId"
+    },
+    books: {
+      get type() {
+        return Book;
+      },
+      fkField: "_id",
+      keyField: "authorIds"
     }
   }
 };
