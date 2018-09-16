@@ -12,9 +12,9 @@ beforeAll(async () => {
 
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
 
-  let book1 = { title: "Book 1", pages: 100, authorIds: ["" + adam._id] };
-  let book2 = { title: "Book 2", pages: 150, authorIds: ["" + adam._id, "" + katie._id] };
-  let book3 = { title: "Book 3", pages: 200, authorIds: ["" + katie._id] };
+  let book1 = { title: "Book 1", pages: 100, authorIds: [adam._id] };
+  let book2 = { title: "Book 2", pages: 150, authorIds: [adam._id, katie._id] };
+  let book3 = { title: "Book 3", pages: 200, authorIds: [katie._id] };
 
   await db.collection("books").insert(book1);
   await db.collection("books").insert(book2);
