@@ -6,7 +6,7 @@
 This utility will scaffold GraphQL schema and resolvers, with queries, filters and mutations working out of the box, based on metadata you enter about
 your Mongo db.
 
-The idea is to auto-generate the mundane, repetitive boilerplate needed for a GraphQL endpoint, then get out of your way, leaving you to code your odd
+The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed.
 
 <!-- TOC -->
@@ -770,29 +770,19 @@ export const Book = {
 };
 ```
 
-For each relationship, the key will be the name of the object or array in the GraphQL schema. If the foreign key specified is an array, then the resulting property in the GraphQL schema will always be an array. If the foreign key is not an array, then an object will be created if the `keyField` is `_id`, which is the default, otherwise an object will be created. This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
+For each relationship, the key will be the name of the object or array in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array. If the foreign key is not an array, then an object will be created if the `keyField` is `_id`, which is the default, otherwise an array will be created. This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
 
 | Options               | Default   | Description|
 | --------------------- | --------- | --------------------------------------- |
-| `type`                | (none)    | The type for the relationship. Be sure to use a getter to reference types that are specified downstream |
-| `fkField`             | (none)    | The foreign key, which will be used to look up related objects. |
-| `keyField`            | `_id`     | The field that will be used to look up related objects in their collection |
-| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`
-| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, even if the `keyField` is `_id` 
-
-The `type` will of course be the type; be sure to use a getter for reference a type that's declared downstream.
-
-
+| `type`                | (none)    | The type for the relationship. Be sure to use a getter to reference types that are specified downstream. |
+| `fkField`             | (none)    | The foreign key that will be used to look up related objects. |
+| `keyField`            | `_id`     | The field that will be used to look up related objects in their collection. |
+| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
+| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, even if the `keyField` is `_id`. So the relationship would always produce a single result, but you can force it to be in an array, if you want. |
 
 ### Using relationships
 
-In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested normally in your GraphQL queries.
-
-If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried author fields will fetched, and returned.
-
-Note that for any `Book` query, the books from the current query are read from Mongo first. Then, if `authors` or `mainAuthor` is requested, then a
-single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately. In other
-words, the generated code does not suffer from the Select N + 1 problem.
+Request these relationships right in your GraphQL queries.  If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried fields will fetched, and returned.  The `dataloader` utility is used to batch the requests for these relationships, so you don't need to worry about select n + 1.
 
 For relationships that return a collection of items, like the authors above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
 
