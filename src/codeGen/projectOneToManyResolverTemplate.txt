@@ -13,7 +13,7 @@
         for (let result of results){
           let keyLookup = new Set(result.${keyField}.map(k => k + ""));
           for (let i = 0; i < keys.length; i++){
-            if (keyLookup.has(keys[i])) {
+            if (keyLookup.has("" + keys[i])) {
               finalResult[i].push(result);
             }
           }

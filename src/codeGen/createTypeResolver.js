@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { TAB, TAB2 } from "./utilities";
-import { MongoIdType } from "../dataTypes";
+import { MongoIdType, StringType, StringArrayType, MongoIdArrayType } from "../dataTypes";
 
 export default function createGraphqlResolver(objectToCreate) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
@@ -80,14 +80,30 @@ export default function createGraphqlResolver(objectToCreate) {
 
       if (relationship.__isArray) {
         let template = relationship.manyToMany ? projectManyToManyResolverTemplate : projectOneToManyResolverTemplate;
+        let destinationKeyType = relationship.type.fields[relationship.keyField];
+        let foreignKeyType = objectToCreate.fields[relationship.fkField];
+
+        let mapping = "";
+        if (foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType) {
+          mapping = "ids => ids.map(id => X)";
+        } else if (foreignKeyType == StringType || foreignKeyType == MongoIdType) {
+          mapping = "id => X";
+        }
+        if (mapping) {
+          if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
+            mapping = mapping.replace(/X/i, "ObjectId(id)");
+          } else if (destinationKeyType == StringType || destinationKeyType == StringArrayType) {
+            mapping = mapping.replace(/X/i, `"" + id`);
+          }
+        } else {
+          mapping = "x => x";
+        }
+
         relationshipResolvers += template
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
           .replace(/\${keyField}/g, relationship.keyField || "_id")
-          .replace(
-            /\${idMapping}/g,
-            relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "ids => ids.map(id => ObjectId(id))" : "ids => ids"
-          )
+          .replace(/\${idMapping}/g, mapping)
           .replace(/\${targetObjName}/g, relationshipName)
           .replace(/\${targetTypeName}/g, relationship.type.__name)
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
