@@ -184,3 +184,73 @@ test("Add books entry in new author, and nested objects C", async () => {
     results: [{ keywordName: "k1" }, { keywordName: "k2" }]
   });
 });
+
+test("Add books entry in new author, and nested objects D", async () => {
+  await runMutation({
+    mutation: `createAuthor(Author: {
+      name: "adam", 
+      books: [
+        {
+          title: "New Book 1",
+          authors: [{name: "a1", books: [{title: "Nested Book A1"}]}],
+          mainAuthor: { 
+            name: "ma", 
+            mainSubject: { name: "ms" }, 
+            subjects: [{ name: "s1" }, { name: "s2", keywords: [{keywordName: "k1"}, {keywordName: "k2"}] }],
+            books: [{title: "Nested Book B"}]
+          } 
+        }
+      ] 
+    }){Author{name}}`,
+    result: "createAuthor"
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name: "adam"){Authors{name, books{title, authors(SORT: {name: 1}){name, books(SORT: {title: 1}){title}}, mainAuthor {name, mainSubject{name}, books{title}, subjects(SORT: {name: 1}){name, keywords(SORT: {keywordName: 1}){keywordName}}} }}}}`,
+    coll: "allAuthors",
+    results: [
+      {
+        name: "adam",
+        books: [
+          {
+            title: "New Book 1",
+            authors: [
+              { name: "a1", books: [{ title: "Nested Book A1" }, { title: "New Book 1" }] },
+              { name: "adam", books: [{ title: "New Book 1" }] }
+            ],
+            mainAuthor: {
+              name: "ma",
+              mainSubject: { name: "ms" },
+              books: [{ title: "Nested Book B" }],
+              subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(SORT: {title: 1}){Books{title}}}`,
+    coll: "allBooks",
+    results: [{ title: "Nested Book A1" }, { title: "Nested Book B" }, { title: "New Book 1" }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allSubjects(SORT: {name: 1}){Subjects{name}}}`,
+    coll: "allSubjects",
+    results: [{ name: "ms" }, { name: "s1" }, { name: "s2" }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allKeywords(SORT: {keywordName: 1}){Keywords{keywordName}}}`,
+    coll: "allKeywords",
+    results: [{ keywordName: "k1" }, { keywordName: "k2" }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(SORT: {name: 1}){Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "a1" }, { name: "adam" }, { name: "ma" }]
+  });
+});
