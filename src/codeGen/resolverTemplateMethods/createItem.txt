@@ -8,7 +8,7 @@
       if ((newObject = await dbHelpers.processInsertion(db, newObject, { typeMetadata: ${objName}Metadata, hooksObj, root, args, context, ast })) == null) {
         return { ${objName}: null };
       }
-      await setUpOneToManyRelationships(newObject, args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
+      await setUpOneToManyRelationships(newObject, args.${objName}, ${objName}Metadata, { db, hooksObj, root, args, context, ast });
       let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }, root, args, context, ast))[0] : null;
       return {
         success: true,
