@@ -1,6 +1,7 @@
 import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 import processHook from "./processHook";
+import { processInsertions } from "./dbHelpers";
 
 import escapeStringRegexp from "escape-string-regexp";
 
@@ -228,6 +229,9 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
   let relationships = typeMetadata.relationships || {};
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      continue;
+    }
     if (relationship.__isArray) {
       if (args[`${k}`]) {
         let newObjectCandidates = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
@@ -277,6 +281,34 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
   )).filter(x => x);
 
   return keyValuePairs.reduce((obj, [k, val]) => ((obj[k] = val), obj), {});
+}
+
+export async function setUpOneToManyRelationships(newObject, args, typeMetadata, relationshipLoadingUtils = {}) {
+  let { db, dbHelpers, ...rest } = relationshipLoadingUtils;
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      if (args[`${k}`]) {
+        args[`${k}`].forEach(newObj => {
+          let keyValue = newObject[relationship.fkField];
+          if (typeMetadata.fields[relationship.fkField] == MongoIdType) {
+            keyValue = "" + keyValue;
+          }
+          if (/Array/.test(relationship.type.fields[relationship.keyField])) {
+            if (!newObj[relationship.keyField]) {
+              newObj[relationship.keyField] = [];
+            }
+            newObj[relationship.keyField].push(keyValue);
+          } else {
+            newObj[relationship.keyField] = keyValue;
+          }
+        });
+        let toSave = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
+        processInsertions(db, toSave, { typeMetadata: relationship.type, ...rest });
+      }
+    }
+  }
 }
 
 function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
