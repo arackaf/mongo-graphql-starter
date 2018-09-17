@@ -777,8 +777,8 @@ For each relationship, the key will be the name of the object or array in the Gr
 | `type`                | (none)    | The type for the relationship. Be sure to use a getter to reference types that are specified downstream. |
 | `fkField`             | (none)    | The foreign key that will be used to look up related objects. |
 | `keyField`            | `_id`     | The field that will be used to look up related objects in their collection. |
-| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
-| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, even if the `keyField` is `_id`. So the relationship would always produce a single result, but you can force it to be in an array, if you want. |
+| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. After creating new objects using the `create<Type>` mutation, any specified new members of this relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set from the new relationship object's `keyField`, whatever it is. |
+| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, even if the `keyField` is `_id`. After creating new objects using the `create<Type>` mutation, any specified new members of this relationship will be created **after** the new parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is. |
 
 ### Using relationships
 
