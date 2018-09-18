@@ -288,8 +288,8 @@ export async function setUpOneToManyRelationships(newObject, args, typeMetadata,
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
     if (relationship.oneToMany) {
-      if (args[`${k}`]) {
-        args[`${k}`].forEach(newObj => {
+      if (args[k]) {
+        args[k].forEach(newObj => {
           let keyValue = newObject[relationship.fkField];
           if (typeMetadata.fields[relationship.fkField] == MongoIdType) {
             keyValue = "" + keyValue;
@@ -304,7 +304,31 @@ export async function setUpOneToManyRelationships(newObject, args, typeMetadata,
           }
         });
         let toSave = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, options)));
-        processInsertions(options.db, toSave, { typeMetadata: relationship.type, ...options });
+        await processInsertions(options.db, toSave, { typeMetadata: relationship.type, ...options });
+      }
+    }
+  }
+}
+
+export async function setUpOneToManyRelationshipsForUpdate(_ids, args, typeMetadata, options = {}) {
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      let coll = args[`${k}_ADD`];
+      if (coll) {
+        coll.forEach(newObj => {
+          if (/Array/.test(relationship.type.fields[relationship.keyField])) {
+            if (!newObj[relationship.keyField]) {
+              newObj[relationship.keyField] = [];
+            }
+            newObj[relationship.keyField].push(..._ids);
+          } else {
+            newObj[relationship.keyField] = _ids[0];
+          }
+        });
+        let toSave = await Promise.all(coll.map(o => newObjectFromArgs(o, relationship.type, options)));
+        await Promise.all(toSave.map((o, i) => handleInsertion(o, coll[i], relationship.type, { ...options })));
       }
     }
   }
@@ -392,7 +416,7 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
     let fkType = typeMetadata.fields[relationship.fkField];
-    if (relationship.__isArray) {
+    if (relationship.__isArray && !relationship.oneToMany) {
       if (updatesObject[`${k}_ADD`]) {
         let newObjectCandidates = await Promise.all(
           updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils))
