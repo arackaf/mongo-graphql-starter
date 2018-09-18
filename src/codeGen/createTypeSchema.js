@@ -93,10 +93,22 @@ ${[
 `;
 
   function createMutationType() {
+    let oneToManyForSingle = relationshipEntries
+      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id")
+      .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
+
+    let oneToManyForMulti = relationshipEntries
+      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id" && /Array/.test(rel.type.fields[rel.keyField]))
+      .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
+
     let allMutations = [
       createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
-      createOperation(`update${name}`, [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`], `${name}MutationResult`),
-      createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`], `${name}MutationResultMulti`),
+      createOperation(
+        `update${name}`,
+        [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
+        `${name}MutationResult`
+      ),
+      createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`, ...oneToManyForMulti], `${name}MutationResultMulti`),
       createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
       createOperation(`delete${name}`, [`_id: String`], "Boolean"),
       ...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
