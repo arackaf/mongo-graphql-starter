@@ -61,6 +61,14 @@ ${[
           createType(`${name}BulkMutationResult`, [`success: Boolean`])
         ]
       : []),
+    objectToCreate.hasOneToManyRelationship
+      ? createInput(`${name}InputLocal`, [
+          ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+          ...Object.entries(relationships)
+            .filter(([k, rel]) => !rel.oneToMany)
+            .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
+        ])
+      : null,
     createInput(`${name}Input`, [
       ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
       ...Object.keys(relationships).map(k => `${k}: ${relationshipType(relationships[k], true)}`)
@@ -156,11 +164,11 @@ function fieldType(value, useInputs) {
     }
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
+      return `[${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}]`;
     } else if (value.__isLiteral) {
       return value.type;
     } else if (value.__isObject) {
-      return `${value.type.__name}${useInputs ? "Input" : ""}`;
+      return `${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}`;
     }
   }
 }
