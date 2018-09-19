@@ -67,7 +67,12 @@ export default function(source, destPath) {
               relationship.oneToMany = true;
             }
           }
+          if (relationship.oneToMany) {
+            type.hasOneToManyRelationship = true;
+          }
         });
+      } else {
+        type.relationships = {};
       }
     });
     let modules = Object.keys(graphqlMetadata).map(k => graphqlMetadata[k]);
