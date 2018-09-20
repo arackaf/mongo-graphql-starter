@@ -45,17 +45,17 @@ or advanced edge cases as needed.
   - [Creating related data](#creating-related-data)
     - [In creations](#in-creations)
     - [In updates](#in-updates)
-    - [Lifecycle hooks](#lifecycle-hooks)
-- [Lifecycle hooks](#lifecycle-hooks-1)
+    - [In lifecycle hooks](#in-lifecycle-hooks)
+- [Lifecycle hooks](#lifecycle-hooks)
   - [All available hooks](#all-available-hooks)
     - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
   - [How to use processing hooks](#how-to-use-processing-hooks)
+    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)
     - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
     - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
 - [A closer look at what's generated](#a-closer-look-at-whats-generated)
 - [What does the generated code look like?](#what-does-the-generated-code-look-like)
   - [All code is extensible.](#all-code-is-extensible)
-- [What's next](#whats-next)
 
 <!-- /TOC -->
 
@@ -844,7 +844,7 @@ Similarly, for relationships that define a single object, there will be a `<rela
 `updateBook(_id: "${book1._id}", Updates: {mainAuthor_SET: { name: "ABORT" }}){Book{title}}`
 ```
 
-#### Lifecycle hooks
+#### In lifecycle hooks
 
 Newly created entities will invoke the insert-related lifecycle hooks, just as they would if you were creating them with the `createAuthor` mutation: any `false` return values from the `beforeInsert` hook will result in that particular object being discarded completely, with the rest of the operation proceeding on.  
 
@@ -852,7 +852,7 @@ These lifecycle hooks are discussed below.
 
 ## Lifecycle hooks
 
-Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap into, to add custom behavior.
+Most applications will have some cross-cutting concerns, like authentication. The queries and mutations have various hooks that you can tap into, to add custom behavior.
 
 Most of the hooks receive these arguments (and possibly others) which are defined here, once.
 
@@ -950,6 +950,16 @@ will cause every query to have a PAGE_SIZE set to 50, always—except for `Book`
 
 If a hook is defined both in Root, and for a type, then for operations on that type, the root hook will be called first, followed by the one for the type. So above, PAGE_SIZE will first be set to 50, and then to 100.
 
+#### Customizing the location of your hooks file.
+
+If you'd like your hooks defined elsewhere, place the file where desired, and specify the path to it when creating your GraphQL endpoint, like this
+
+```javascript
+createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
+```
+
+That will cause the normal hooks file, described above, to not be created, with your resolvers instead importing **this** file, and using the hooks defined therein. 
+
 #### Doing asynchronous processing in hooks.
 
 The code which calls these hook methods will do so with `await`.  That means if you need to do asynchronous work in any of these methods, you can just make the hook itself an async method, and `await` any async operation you need.  Or of course you could also return a Promise, which is essentially the same thing.
@@ -990,6 +1000,3 @@ collection, then it will just generate a basic type, as well as an input type us
 isn't yet used for these types). If the type is backed by a Mongo collection, then the schema file will also contain queries, mutations, and filters;
 and a resolver file will also be created defining the queries and mutations.
 
-## What's next
-
-* Expand existing relationships to allow more options and relationship types
