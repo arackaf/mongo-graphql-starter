@@ -561,3 +561,42 @@ async function handleInsertion(obj, args, typeMetadata, options) {
 export const constants = {
   useCurrentSelectionSet: Symbol("useCurrentSelectionSet")
 };
+
+export function cleanUpResults(results, metaData) {
+  let mongoIdFields = Object.entries(metaData.fields)
+    .filter(([k, field]) => field === MongoIdType)
+    .map(([k]) => k);
+
+  let mongoIdArrayFields = Object.entries(metaData.fields)
+    .filter(([k, field]) => field === MongoIdArrayType)
+    .map(([k]) => k);
+
+  let objectFields = Object.entries(metaData.fields).filter(([k, field]) => field.type);
+
+  results.forEach(obj => {
+    if (!obj) {
+      return;
+    }
+    mongoIdFields.forEach(f => {
+      if (obj.hasOwnProperty(f)) {
+        obj[f] = "" + obj[f];
+      }
+    });
+
+    mongoIdArrayFields.forEach(f => {
+      if (obj.hasOwnProperty(f)) {
+        obj[f] = obj[f].map(o => o + "");
+      }
+    });
+
+    objectFields.forEach(([k, field]) => {
+      if (obj.hasOwnProperty(k)) {
+        if (Array.isArray(obj[k])) {
+          cleanUpResults(obj[k], field.type);
+        } else {
+          cleanUpResults([obj[k]], field.type);
+        }
+      }
+    });
+  });
+}
