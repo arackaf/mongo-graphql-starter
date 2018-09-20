@@ -20,7 +20,7 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
   }
 }
 
-export default function(source, destPath) {
+export default function(source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
@@ -98,14 +98,14 @@ export default function(source, destPath) {
 
       createFile(schemaPath, createGraphqlTypeSchema(objectToCreate), true);
       if (objectToCreate.table) {
-        createFile(resolverPath, createTypeResolver(objectToCreate), true);
+        createFile(resolverPath, createTypeResolver(objectToCreate, { ...options, modulePath }), true);
       }
     });
 
     fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
-    if (!fs.existsSync(path.join(rootDir, "hooks.js"))) {
+    if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
       fs.writeFileSync(
         path.join(rootDir, "hooks.js"),
         fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" })

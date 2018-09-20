@@ -3,7 +3,7 @@ import path from "path";
 import { TAB, TAB2 } from "./utilities";
 import { MongoIdType, StringType, StringArrayType, MongoIdArrayType } from "../dataTypes";
 
-export default function createGraphqlResolver(objectToCreate) {
+export default function createGraphqlResolver(objectToCreate, options) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
   let projectOneToOneResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToOneResolverTemplate.txt"), { encoding: "utf8" });
   let projectOneToManyResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToManyResolverTemplate.txt"), { encoding: "utf8" });
@@ -16,6 +16,11 @@ export default function createGraphqlResolver(objectToCreate) {
   let updateItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItems.txt"), { encoding: "utf8" });
   let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.txt"), { encoding: "utf8" });
   let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.txt"), { encoding: "utf8" });
+  let hooksPath = `"../hooks"`;
+
+  if (options.hooks) {
+    hooksPath = `"` + path.relative(options.modulePath, options.hooks).replace(/\\/g, "/") + `"`;
+  }
 
   let result = "";
   let extras = objectToCreate.extras || {};
@@ -23,7 +28,7 @@ export default function createGraphqlResolver(objectToCreate) {
   let resolverSources = extras.resolverSources || [];
   let imports = [
     `import { queryUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
-    `import hooksObj from "../hooks";`,
+    `import hooksObj from ${hooksPath};`,
     `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, setUpOneToManyRelationships, setUpOneToManyRelationshipsForUpdate, getUpdateObject, constants } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
