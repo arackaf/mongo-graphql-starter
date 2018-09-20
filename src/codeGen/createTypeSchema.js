@@ -75,12 +75,9 @@ ${[
     ]),
     createInput(`${name}MutationInput`, [
       ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
-      ...Object.keys(relationships).map(
-        k =>
-          relationships[k].__isArray
-            ? `${k}_ADD: ${relationshipType(relationships[k], true)}`
-            : `${k}_SET: ${relationshipType(relationships[k], true)}`
-      )
+      ...Object.entries(relationships)
+        .filter(([k, rel]) => !rel.oneToMany)
+        .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
     ]),
     objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
     createInput(
