@@ -241,17 +241,20 @@ const {
 
 ### Circular dependencies are fine
 
-Feel free to have your types reference each other. For example, the following will generate a perfectly valid schema. 
+Feel free to have your types reference each other.  Just use a getter to reference types created downstream. For example, the following will generate a perfectly valid schema. 
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+const { MongoIdType, StringType, arrayOf } = dataTypes;
 
 export const Tag = {
   table: "tags",
   fields: {
     _id: MongoIdType,
-    tagName: StringType
+    tagName: StringType,
+    get authors() {
+      return arrayOf(Author);
+    }
   }
 };
 
@@ -262,8 +265,6 @@ export const Author = {
     tags: arrayOf(Tag)
   }
 };
-
-Tag.fields.authors = arrayOf(Author);
 ```
 
 ## Queries created
