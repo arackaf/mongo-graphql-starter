@@ -4,7 +4,10 @@ export const Tag = {
   table: "tags",
   fields: {
     _id: MongoIdType,
-    tagName: StringType
+    tagName: StringType,
+    get authors() {
+      return arrayOf(Author);
+    }
   }
 };
 
@@ -15,5 +18,3 @@ export const Author = {
     tags: arrayOf(Tag)
   }
 };
-
-Tag.fields.authors = arrayOf(Author);
