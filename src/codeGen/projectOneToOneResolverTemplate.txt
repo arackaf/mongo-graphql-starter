@@ -11,6 +11,7 @@
           { $project },
         ];
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
+        cleanUpResults(results, ${targetTypeName}Metadata);
 
         let destinationMap = new Map([]);
         for (let result of results) {

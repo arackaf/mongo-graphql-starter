@@ -1,26 +1,27 @@
-import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf, relationshipHelpers } from "../../src/dataTypes";
+import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
 
-const Keyword = {
+export const Keyword = {
   table: "keywords",
   fields: {
     keywordName: StringType
   }
 };
 
-const Subject = {
+export const Subject = {
   table: "subjects",
   fields: {
     name: StringType,
     keywordIds: StringArrayType
+  },
+  relationships: {
+    keywords: {
+      type: Keyword,
+      fkField: "keywordIds"
+    }
   }
 };
 
-relationshipHelpers.projectIds(Subject, "keywords", {
-  type: Keyword,
-  fkField: "keywordIds"
-});
-
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
@@ -28,20 +29,26 @@ const Author = {
     mainSubjectId: StringType,
     subjectIds: StringArrayType,
     firstBookId: StringType
+  },
+  relationships: {
+    mainSubject: {
+      type: Subject,
+      fkField: "mainSubjectId"
+    },
+    subjects: {
+      type: Subject,
+      fkField: "subjectIds"
+    },
+    firstBook: {
+      get type() {
+        return Book;
+      },
+      fkField: "firstBookId"
+    }
   }
 };
 
-relationshipHelpers.projectId(Author, "mainSubject", {
-  type: Subject,
-  fkField: "mainSubjectId"
-});
-
-relationshipHelpers.projectIds(Author, "subjects", {
-  type: Subject,
-  fkField: "subjectIds"
-});
-
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -52,27 +59,15 @@ const Book = {
     cachedMainAuthor: objectOf(Author),
     authorIds: StringArrayType,
     cachedAuthors: arrayOf(Author)
+  },
+  relationships: {
+    authors: {
+      type: Author,
+      fkField: "authorIds"
+    },
+    mainAuthor: {
+      type: Author,
+      fkField: "mainAuthorId"
+    }
   }
-};
-
-relationshipHelpers.projectIds(Book, "authors", {
-  type: Author,
-  fkField: "authorIds"
-});
-
-relationshipHelpers.projectId(Book, "mainAuthor", {
-  type: Author,
-  fkField: "mainAuthorId"
-});
-
-relationshipHelpers.projectId(Author, "firstBook", {
-  type: Book,
-  fkField: "firstBookId"
-});
-
-export default {
-  Book,
-  Author,
-  Subject,
-  Keyword
 };

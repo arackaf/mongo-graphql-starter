@@ -1,6 +1,7 @@
 import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
 import processHook from "./processHook";
+import { processInsertion, processInsertions } from "./dbHelpers";
 
 import escapeStringRegexp from "escape-string-regexp";
 
@@ -228,21 +229,25 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
   let relationships = typeMetadata.relationships || {};
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      continue;
+    }
     if (relationship.__isArray) {
-      if (args[`${k}`]) {
-        let newObjectCandidates = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
-        let newObjects = await dbHelpers.processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
+      if (args[k]) {
+        let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
+        let newObjects = await Promise.all(newObjectCandidates.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { db, ...rest })));
         let fkType = typeMetadata.fields[relationship.fkField];
+        let keyField = relationship.keyField;
 
         if (!args[`${relationship.fkField}`]) {
           args[`${relationship.fkField}`] = [];
         }
-        args[`${relationship.fkField}`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o._id : o._id)));
+        args[`${relationship.fkField}`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o[keyField] : o[keyField])));
       }
     } else if (relationship.__isObject) {
-      if (args[`${k}`]) {
-        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[`${k}`], relationship.type, relationshipLoadingUtils));
-        let newObject = await dbHelpers.processInsertion(db, newObjectCandidate, { typeMetadata: relationship.type, ...rest });
+      if (args[k]) {
+        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[k], relationship.type, relationshipLoadingUtils));
+        let newObject = await handleInsertion(newObjectCandidate, args[k], relationship.type, { db, ...rest });
         let fkType = typeMetadata.fields[relationship.fkField];
 
         if (newObject) {
@@ -277,6 +282,57 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
   )).filter(x => x);
 
   return keyValuePairs.reduce((obj, [k, val]) => ((obj[k] = val), obj), {});
+}
+
+export async function setUpOneToManyRelationships(newObject, args, typeMetadata, options = {}) {
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      if (args[k]) {
+        args[k].forEach(newObj => {
+          let keyValue = newObject[relationship.fkField];
+          if (typeMetadata.fields[relationship.fkField] == MongoIdType) {
+            keyValue = "" + keyValue;
+          }
+          if (/Array/.test(relationship.type.fields[relationship.keyField])) {
+            if (!newObj[relationship.keyField]) {
+              newObj[relationship.keyField] = [];
+            }
+            newObj[relationship.keyField].push(keyValue);
+          } else {
+            newObj[relationship.keyField] = keyValue;
+          }
+        });
+        let toSave = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, options)));
+        await processInsertions(options.db, toSave, { typeMetadata: relationship.type, ...options });
+      }
+    }
+  }
+}
+
+export async function setUpOneToManyRelationshipsForUpdate(_ids, args, typeMetadata, options = {}) {
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      let coll = args[`${k}_ADD`];
+      if (coll) {
+        coll.forEach(newObj => {
+          if (/Array/.test(relationship.type.fields[relationship.keyField])) {
+            if (!newObj[relationship.keyField]) {
+              newObj[relationship.keyField] = [];
+            }
+            newObj[relationship.keyField].push(..._ids);
+          } else {
+            newObj[relationship.keyField] = _ids[0];
+          }
+        });
+        let toSave = await Promise.all(coll.map(o => newObjectFromArgs(o, relationship.type, options)));
+        await Promise.all(toSave.map((o, i) => handleInsertion(o, coll[i], relationship.type, { ...options })));
+      }
+    }
+  }
 }
 
 function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor) {
@@ -361,7 +417,7 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
     let fkType = typeMetadata.fields[relationship.fkField];
-    if (relationship.__isArray) {
+    if (relationship.__isArray && !relationship.oneToMany) {
       if (updatesObject[`${k}_ADD`]) {
         let newObjectCandidates = await Promise.all(
           updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils))
@@ -494,6 +550,54 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
   }
 }
 
+async function handleInsertion(obj, args, typeMetadata, options) {
+  let { db, ...rest } = options;
+  let newObject = await processInsertion(db, obj, { ...rest, typeMetadata });
+  if (newObject) {
+    await setUpOneToManyRelationships(obj, args, typeMetadata, { db, ...rest });
+  }
+  return newObject;
+}
+
 export const constants = {
   useCurrentSelectionSet: Symbol("useCurrentSelectionSet")
 };
+
+export function cleanUpResults(results, metaData) {
+  let mongoIdFields = Object.entries(metaData.fields)
+    .filter(([k, field]) => field === MongoIdType)
+    .map(([k]) => k);
+
+  let mongoIdArrayFields = Object.entries(metaData.fields)
+    .filter(([k, field]) => field === MongoIdArrayType)
+    .map(([k]) => k);
+
+  let objectFields = Object.entries(metaData.fields).filter(([k, field]) => field.type);
+
+  results.forEach(obj => {
+    if (!obj) {
+      return;
+    }
+    mongoIdFields.forEach(f => {
+      if (obj.hasOwnProperty(f)) {
+        obj[f] = "" + obj[f];
+      }
+    });
+
+    mongoIdArrayFields.forEach(f => {
+      if (obj.hasOwnProperty(f)) {
+        obj[f] = obj[f].map(o => o + "");
+      }
+    });
+
+    objectFields.forEach(([k, field]) => {
+      if (obj.hasOwnProperty(k)) {
+        if (Array.isArray(obj[k])) {
+          cleanUpResults(obj[k], field.type);
+        } else {
+          cleanUpResults([obj[k]], field.type);
+        }
+      }
+    });
+  });
+}

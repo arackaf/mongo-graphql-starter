@@ -7,7 +7,7 @@ import glob from "glob";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import projectSetupF from "../testProject6/projectSetup";
+import * as projectSetupF from "../testProject6/projectSetup";
 
 export async function create() {
   let projectSetupG = { ...projectSetupF };
@@ -22,12 +22,9 @@ export async function create() {
     overrides: ["getCoordinate", "updateCoordinate"]
   };
 
-  await Promise.resolve(createGraphqlSchema(projectSetupG, path.resolve("./test/testProject7"))).then(() => {
-    fs.writeFileSync(
-      path.resolve("./test/testProject7/graphQL/hooks.js"),
-      fs.readFileSync(path.resolve(__dirname, "./projectSetup_Hooks.js"), { encoding: "utf8" })
-    );
-
+  await Promise.resolve(
+    createGraphqlSchema(projectSetupG, path.resolve("./test/testProject7"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
+  ).then(() => {
     if (!fs.existsSync("./test/testProject7/graphQL-extras")) {
       mkdirp.sync("./test/testProject7/graphQL-extras");
     }

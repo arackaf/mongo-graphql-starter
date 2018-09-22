@@ -16,7 +16,7 @@ import {
   typeLiteral
 } from "../../src/dataTypes";
 
-const Author = {
+export const Author = {
   fields: {
     name: StringType,
     birthday: DateType,
@@ -24,7 +24,7 @@ const Author = {
   }
 };
 
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -45,7 +45,7 @@ const Book = {
   }
 };
 
-const Subject = {
+export const Subject = {
   table: "subjects",
   fields: {
     _id: MongoIdType,
@@ -53,18 +53,11 @@ const Subject = {
   }
 };
 
-const Tag = {
+export const Tag = {
   table: "tags",
   fields: {
     _id: StringType,
     name: StringType,
     count: IntType
   }
-};
-
-export default {
-  Book,
-  Subject,
-  Author,
-  Tag
 };

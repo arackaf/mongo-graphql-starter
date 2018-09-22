@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.6.24",
+  "version": "0.7.0-beta1",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -31,8 +31,10 @@
     "express": "4.16.1",
     "express-graphql": "0.6.11",
     "glob": "^7.1.2",
-    "graphql-tools": "2.23.1",
-    "jest": "^23.0.0"
+    "graphql": "14.0.2",
+    "graphql-tools": "4.0.0",
+    "jest": "23.6.0",
+    "mongodb": "2.2.31"
   },
   "scripts": {
     "postinstall": "cd test/testProject1_NewDriver && npm install && cd ../testProject4_NewDriver && npm install",
@@ -52,11 +54,13 @@
   "dependencies": {
     "dataloader": "1.4.0",
     "escape-string-regexp": "1.0.5",
-    "esm": "3.0.55",
-    "graphql": "0.13.2",
+    "esm": "3.0.84",
     "graphql-type-json": "0.2.1",
     "lodash.flatmap": "4.5.0",
-    "mkdirp": "0.5.1",
-    "mongodb": "2.2.31"
+    "mkdirp": "0.5.1"
+  },
+  "peerDependencies": {
+    "mongodb": ">= 2.2.31",
+    "graphql": ">= 0.13.2"
   }
 }

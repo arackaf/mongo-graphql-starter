@@ -10,6 +10,7 @@
       if (!$match._id) {
         throw "No _id sent, or inserted in middleware";
       }
+      await setUpOneToManyRelationshipsForUpdate([args._id], args, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
       await dbHelpers.runUpdate(db, "${table}", $match, updates);
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
       

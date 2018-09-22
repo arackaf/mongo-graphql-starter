@@ -61,18 +61,23 @@ ${[
           createType(`${name}BulkMutationResult`, [`success: Boolean`])
         ]
       : []),
+    objectToCreate.hasOneToManyRelationship
+      ? createInput(`${name}InputLocal`, [
+          ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+          ...Object.entries(relationships)
+            .filter(([k, rel]) => !rel.oneToMany)
+            .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
+        ])
+      : null,
     createInput(`${name}Input`, [
       ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
       ...Object.keys(relationships).map(k => `${k}: ${relationshipType(relationships[k], true)}`)
     ]),
     createInput(`${name}MutationInput`, [
       ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
-      ...Object.keys(relationships).map(
-        k =>
-          relationships[k].__isArray
-            ? `${k}_ADD: ${relationshipType(relationships[k], true)}`
-            : `${k}_SET: ${relationshipType(relationships[k], true)}`
-      )
+      ...Object.entries(relationships)
+        .filter(([k, rel]) => !rel.oneToMany)
+        .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
     ]),
     objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
     createInput(
@@ -93,10 +98,22 @@ ${[
 `;
 
   function createMutationType() {
+    let oneToManyForSingle = relationshipEntries
+      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id")
+      .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
+
+    let oneToManyForMulti = relationshipEntries
+      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id" && /Array/.test(rel.type.fields[rel.keyField]))
+      .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
+
     let allMutations = [
       createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
-      createOperation(`update${name}`, [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`], `${name}MutationResult`),
-      createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`], `${name}MutationResultMulti`),
+      createOperation(
+        `update${name}`,
+        [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
+        `${name}MutationResult`
+      ),
+      createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`, ...oneToManyForMulti], `${name}MutationResultMulti`),
       createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
       createOperation(`delete${name}`, [`_id: String`], "Boolean"),
       ...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
@@ -144,11 +161,11 @@ function fieldType(value, useInputs) {
     }
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
+      return `[${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}]`;
     } else if (value.__isLiteral) {
       return value.type;
     } else if (value.__isObject) {
-      return `${value.type.__name}${useInputs ? "Input" : ""}`;
+      return `${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}`;
     }
   }
 }
