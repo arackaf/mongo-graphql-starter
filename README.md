@@ -6,7 +6,7 @@
 This utility will scaffold GraphQL schema and resolvers, with queries, filters and mutations working out of the box, based on metadata you enter about
 your Mongo db.
 
-The idea is to auto-generate the mundane, repetitive boilerplate needed for a GraphQL endpoint, then get out of your way, leaving you to code your odd
+The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed.
 
 <!-- TOC -->
@@ -40,24 +40,23 @@ or advanced edge cases as needed.
 - [Integrating custom content](#integrating-custom-content)
   - [schemaSources example](#schemasources-example)
   - [resolverSources example](#resolversources-example)
-- [Defining relationships between types (wip)](#defining-relationships-between-types-wip)
-  - [Defining an array of foreign keys](#defining-an-array-of-foreign-keys)
-  - [Defining a single foreign key](#defining-a-single-foreign-key)
+- [Defining relationships between types](#defining-relationships-between-types)
   - [Using relationships](#using-relationships)
   - [Creating related data](#creating-related-data)
     - [In creations](#in-creations)
-    - [In updates](#in-updates)
-    - [Lifecycle hooks](#lifecycle-hooks)
-- [Lifecycle hooks](#lifecycle-hooks-1)
+    - [In updates (not one-to-many)](#in-updates-not-one-to-many)
+    - [In updates (one-to-many)](#in-updates-one-to-many)
+    - [In lifecycle hooks](#in-lifecycle-hooks)
+- [Lifecycle hooks](#lifecycle-hooks)
   - [All available hooks](#all-available-hooks)
     - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
   - [How to use processing hooks](#how-to-use-processing-hooks)
+    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)
     - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
     - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
 - [A closer look at what's generated](#a-closer-look-at-whats-generated)
 - [What does the generated code look like?](#what-does-the-generated-code-look-like)
   - [All code is extensible.](#all-code-is-extensible)
-- [What's next](#whats-next)
 
 <!-- /TOC -->
 
@@ -106,14 +105,14 @@ const {
   typeLiteral
 } = dataTypes;
 
-const Author = {
+export const Author = {
   fields: {
     name: StringType,
     birthday: DateType
   }
 };
 
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -134,18 +133,12 @@ const Book = {
   }
 };
 
-const Subject = {
+export const Subject = {
   table: "subjects",
   fields: {
     _id: MongoIdType,
     name: StringType
   }
-};
-
-export default {
-  Book,
-  Subject,
-  Author
 };
 ```
 
@@ -153,7 +146,7 @@ Now tell mongo-graphql-starter to create your schema and resolvers, like this
 
 ```javascript
 import { createGraphqlSchema } from "mongo-graphql-starter";
-import projectSetup from "./projectSetupA";
+import * as projectSetup from "./projectSetupA";
 
 import path from "path";
 
@@ -249,33 +242,29 @@ const {
 
 ### Circular dependencies are fine
 
-Feel free to have your types reference each other. For example, the following will generate a perfectly valid schema. 
+Feel free to have your types reference each other.  Just use a getter to reference types created downstream. For example, the following will generate a perfectly valid schema. 
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf, objectOf, formattedDate, typeLiteral } = dataTypes;
+const { MongoIdType, StringType, arrayOf } = dataTypes;
 
-const Tag = {
+export const Tag = {
   table: "tags",
   fields: {
     _id: MongoIdType,
-    tagName: StringType
+    tagName: StringType,
+    get authors() {
+      return arrayOf(Author);
+    }
   }
 };
 
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
     tags: arrayOf(Tag)
   }
-};
-
-Tag.fields.authors = arrayOf(Author);
-
-export default {
-  Author,
-  Tag
 };
 ```
 
@@ -322,7 +311,7 @@ values.
 If you'd like to add custom arguments to these queries, you can do so like this
 
 ```javascript
-const Thing = {
+export const Thing = {
   table: "things",
   fields: {
     name: StringType,
@@ -647,7 +636,7 @@ In addition, the following arguments are supported
 This project aims to create as much boilerplate as possible, but of course special use cases will always exist, which require custom code. To accomplish this, you can add metadata to your type definitions indicating where additional schema or resolver code is located; as well as any built-in queries or mutations you'd like to define yourself, instead of using what would otherwise be created by this library.  For example
 
 ```javascript
-const Coordinate = {
+export const Coordinate = {
   table: "coordinates",
   fields: {
     x: IntType,
@@ -729,27 +718,34 @@ Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (
 
 You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted.
 
-## Defining relationships between types (wip)
+## Defining relationships between types
 
 Relationships can be defined between queryable types. This allows you to normalize your data into separate Mongo collections, related by foreign keys.
 
-This feature is still a work in progress, so expect some things to be missing or incomplete, and of course the API may change.
-
-For the following examples, consider this setup
+To define relationships, add a `relationships` section, like this
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, relationshipHelpers } = dataTypes;
+const { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType } = dataTypes;
 
-const Author = {
+export const Author = {
   table: "authors",
   fields: {
     name: StringType,
     birthday: DateType
-  }
+  },
+  relationships: {
+    books: {
+      get type() {
+        return Book;
+      },
+      fkField: "_id",
+      keyField: "authorIds"
+    }
+  }  
 };
 
-const Book = {
+export const Book = {
   table: "books",
   fields: {
     _id: MongoIdType,
@@ -758,71 +754,45 @@ const Book = {
     weight: FloatType,
     mainAuthorId: MongoIdType,
     authorIds: MongoIdArrayType
+  },
+  relationships: {
+    authors: {
+      get type() {
+        return Author;
+      },
+      fkField: "authorIds"
+    },
+    mainAuthor: {
+      get type() {
+        return Author;
+      },
+      fkField: "mainAuthorId"
+    }
   }
 };
 ```
 
-### Defining an array of foreign keys
+For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above) will be the name of the object or array created in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array (we'll refer to these collections as `many-to-many`). If the foreign key is not an array, then an object will be created if the `keyField` is `_id` (which we'll call `one-to-one`), which is the default, otherwise an array will be created (`one-to-many`). This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
 
-To declare that the Book type's `authorIds` field represents an array of foreign keys to the authors collection, you'd use the
-`relationshipHelpers.projectIds` method, like so
+Note that `one-to-one`, `one-to-many`, and `many-to-many` refer to the mapping between foreign keys, and objects, not between objects, like you may be familiar with in entity relationship diagrams. So a `many-to-many` relationship means that an array of foreign keys maps to an array of objects, and so on.
 
-```javascript
-relationshipHelpers.projectIds(Book, "authors", {
-  type: Author,
-  fkField: "authorIds"
-});
-```
+For `one-to-one` and `many-to-many` relationships, when creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set, or added to for arrays, from the new relationship object's `keyField`, whatever it is.
 
-This adds a new `authors` array to the Book type, which are read from the authors collection, by `_id`, based on the values in a book's `authorIds`
-array. Note that `authorIds` must either be a `StringArrayType`, or `MongoIdArrayType`.
+For `one-to-many` relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is.
 
-If you have a foreign key that does **not** point to the target table's `_id`, then you can specify a `keyField`, for what the foreign key matches against.
-
-```javascript
-relationshipHelpers.projectIds(Book, "authorsByName", {
-  type: Author,
-  fkField: "authorNames",
-  keyField: "name"
-});
-```
-
-### Defining a single foreign key
-
-To declare that the Book type's `mainAuthorId` represents a foreign key to the authors collection, you'd use the `relationshipHelpers.projectId`
-method, like so
-
-```javascript
-relationshipHelpers.projectId(Book, "mainAuthor", {
-  type: Author,
-  fkField: "mainAuthorId"
-});
-```
-
-This adds a new `mainAuthor` object to the Book type, which is read from the authors collection, by `_id`, based on the value in the book's
-`mainAuthorId` field. Note that `mainAuthorId` must either be a `StringType` or `MongoIdType`.
-
-If you have a foreign key that does **not** point to the target table's `_id`, then you can specify a `keyField`, for what the foreign key matches against.
-
-```javascript
-relationshipHelpers.projectId(Book, "mainAuthorByName", {
-  type: Author,
-  fkField: "mainAuthorName",
-  keyField: "name"
-});
-```
+| Options               | Default   | Description|
+| --------------------- | --------- | --------------------------------------- |
+| `type`                | (none)    | The type for the relationship. Be sure to use a getter to reference types that are declared downstream. |
+| `fkField`             | (none)    | The foreign key that will be used to look up related objects. |
+| `keyField`            | `_id`     | The field that will be used to look up related objects in their collection. |
+| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
+| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, regardless of `fkField` and `keyField`.  |
 
 ### Using relationships
 
-In either case above, the `mainAuthor` object, or `authors` array is of the normal `Author` type, and is requested normally in your GraphQL queries.
+Request these relationships right in your GraphQL queries.  If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried fields will fetched, and returned.  The `dataloader` utility is used to batch the requests for these relationships, so you don't need to worry about select n + 1.
 
-If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried author fields will fetched, and returned.
-
-Note that for any `Book` query, the books from the current query are read from Mongo first. Then, if `authors` or `mainAuthor` is requested, then a
-single query is issued for each, to get the related authors for those books which were just read, which are then matched up appropriately. In other
-words, the generated code does not suffer from the Select N + 1 problem.
-
-For relationships that return a collection of items, like the authors above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
+For relationships that return a collection of items, like `authors` above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
 
 ```javascript
 {
@@ -866,7 +836,7 @@ For a relationship defining a single object, it would look like this
 `createBook(Book: {title: "New Book", mainAuthor: { name: "New Author" }}){Book{_id, title, mainAuthor{name}}}`
 ```
 
-#### In updates
+#### In updates (not one-to-many)
 
 For relationships which define an array, like `authors`, there will be a `<relationshipName>_ADD` property on the `Updates` object of all update mutations. This property will accept an array of new objects to be created, with the new IDs being added to the current object's foreign key field.  For example
 
@@ -882,7 +852,11 @@ Similarly, for relationships that define a single object, there will be a `<rela
 `updateBook(_id: "${book1._id}", Updates: {mainAuthor_SET: { name: "ABORT" }}){Book{title}}`
 ```
 
-#### Lifecycle hooks
+#### In updates (one-to-many)
+
+There's a number of tricky edge cases here.  As a result, one-to-many collections can only be updated via args that are created in the updateSingle, and updateMulti mutations, but not updateBulk. Moreover, these arguments will only be created if the `fkField` on the relationship is `_id`. The reason for this restriction is that that's the only way to guarentee that the corresponding `keyField` on the newly created objects can be correctly set.
+
+#### In lifecycle hooks
 
 Newly created entities will invoke the insert-related lifecycle hooks, just as they would if you were creating them with the `createAuthor` mutation: any `false` return values from the `beforeInsert` hook will result in that particular object being discarded completely, with the rest of the operation proceeding on.  
 
@@ -890,7 +864,7 @@ These lifecycle hooks are discussed below.
 
 ## Lifecycle hooks
 
-Most applications will have some cross-cutting concerns, like authentication. The queries and mutations generated have various hooks that you can tap into, to add custom behavior.
+Most applications will have some cross-cutting concerns, like authentication. The queries and mutations have various hooks that you can tap into, to add custom behavior.
 
 Most of the hooks receive these arguments (and possibly others) which are defined here, once.
 
@@ -988,6 +962,16 @@ will cause every query to have a PAGE_SIZE set to 50, always—except for `Book`
 
 If a hook is defined both in Root, and for a type, then for operations on that type, the root hook will be called first, followed by the one for the type. So above, PAGE_SIZE will first be set to 50, and then to 100.
 
+#### Customizing the location of your hooks file.
+
+If you'd like your hooks defined elsewhere, place the file where desired, and specify the path to it when creating your GraphQL endpoint, like this
+
+```javascript
+createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
+```
+
+That will cause the normal hooks file, described above, to not be created, with your resolvers instead importing **this** file, and using the hooks defined therein. 
+
 #### Doing asynchronous processing in hooks.
 
 The code which calls these hook methods will do so with `await`.  That means if you need to do asynchronous work in any of these methods, you can just make the hook itself an async method, and `await` any async operation you need.  Or of course you could also return a Promise, which is essentially the same thing.
@@ -1028,6 +1012,3 @@ collection, then it will just generate a basic type, as well as an input type us
 isn't yet used for these types). If the type is backed by a Mongo collection, then the schema file will also contain queries, mutations, and filters;
 and a resolver file will also be created defining the queries and mutations.
 
-## What's next
-
-* Expand existing relationships to allow more options and relationship types

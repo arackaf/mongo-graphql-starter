@@ -1,4 +1,15 @@
-import { MongoIdType, StringType, IntType, FloatType, DateType, arrayOf } from "../dataTypes";
+import {
+  MongoIdType,
+  StringType,
+  IntType,
+  FloatType,
+  DateType,
+  arrayOf,
+  StringArrayType,
+  MongoIdArrayType,
+  IntArrayType,
+  FloatArrayType
+} from "../dataTypes";
 import { TAB } from "./utilities";
 
 const defaultDateFormat = "%m/%d/%Y";
@@ -100,6 +111,7 @@ export default function createOutputTypeMetadata(objectToCreate) {
               name: "relationships",
               value: Object.keys(relationships).map(k => {
                 let relationship = relationships[k];
+                let isOne = relationship.__isObject;
 
                 return {
                   name: k,
@@ -108,10 +120,13 @@ export default function createOutputTypeMetadata(objectToCreate) {
                     [
                       { definition: "get type(){ return " + relationship.type.__name + "; }" },
                       { definition: `fkField: "${relationship.fkField}"` },
-                      { definition: `keyField: "${relationship.keyField || "_id"}"` },
-                      { definition: `__isArray: ${relationship.__isArray || false}` },
-                      { definition: `__isObject: ${relationship.__isObject || false}` }
-                    ],
+                      { definition: `keyField: "${relationship.keyField}"` },
+                      relationship.oneToOne ? { definition: `oneToOne: true` } : null,
+                      relationship.oneToMany ? { definition: `oneToMany: true` } : null,
+                      relationship.manyToMany ? { definition: `manyToMany: true` } : null,
+                      { definition: `__isArray: ${relationship.__isArray}` },
+                      { definition: `__isObject: ${relationship.__isObject}` }
+                    ].filter(o => o),
                     3
                   ),
                   literal: true

@@ -12,6 +12,7 @@
           { $project },
         ].filter(item => item);
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
+        cleanUpResults(results, ${targetTypeName}Metadata);
 
         let finalResult = keyArrays.map(keyArr => []);
         let keySets = keyArrays.map(keyArr => new Set(keyArr.map(${keyField} => "" + ${keyField})));

@@ -1,12 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { TAB, TAB2 } from "./utilities";
-import { MongoIdType } from "../dataTypes";
+import { MongoIdType, StringType, StringArrayType, MongoIdArrayType } from "../dataTypes";
 
-export default function createGraphqlResolver(objectToCreate) {
+export default function createGraphqlResolver(objectToCreate, options) {
   let template = fs.readFileSync(path.resolve(__dirname, "./resolverTemplate.txt"), { encoding: "utf8" });
-  let projectIdResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdResolverTemplate.txt"), { encoding: "utf8" });
-  let projectIdsResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectIdsResolverTemplate.txt"), { encoding: "utf8" });
+  let projectOneToOneResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToOneResolverTemplate.txt"), { encoding: "utf8" });
+  let projectOneToManyResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectOneToManyResolverTemplate.txt"), { encoding: "utf8" });
+  let projectManyToManyResolverTemplate = fs.readFileSync(path.resolve(__dirname, "./projectManyToManyResolverTemplate.txt"), { encoding: "utf8" });
 
   let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.txt"), { encoding: "utf8" });
   let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.txt"), { encoding: "utf8" });
@@ -15,6 +16,11 @@ export default function createGraphqlResolver(objectToCreate) {
   let updateItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItems.txt"), { encoding: "utf8" });
   let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.txt"), { encoding: "utf8" });
   let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.txt"), { encoding: "utf8" });
+  let hooksPath = `"../hooks"`;
+
+  if (options.hooks) {
+    hooksPath = `"` + path.relative(options.modulePath, options.hooks).replace(/\\/g, "/") + `"`;
+  }
 
   let result = "";
   let extras = objectToCreate.extras || {};
@@ -22,8 +28,8 @@ export default function createGraphqlResolver(objectToCreate) {
   let resolverSources = extras.resolverSources || [];
   let imports = [
     `import { queryUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
-    `import hooksObj from "../hooks";`,
-    `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, getUpdateObject, constants } = queryUtilities;`,
+    `import hooksObj from ${hooksPath};`,
+    `const { decontructGraphqlQuery, parseRequestedFields, getMongoProjection, newObjectFromArgs, setUpOneToManyRelationships, setUpOneToManyRelationshipsForUpdate, getUpdateObject, constants, cleanUpResults } = queryUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
     ...resolverSources.map(
@@ -63,7 +69,7 @@ export default function createGraphqlResolver(objectToCreate) {
 
       if (!typeImports.has(relationship.type.__name)) {
         typeImports.add(relationship.type.__name);
-        imports.push(`import { load${relationship.type.__name}s} from "../${relationship.type.__name}/resolver";`);
+        imports.push(`import { load${relationship.type.__name}s } from "../${relationship.type.__name}/resolver";`);
         imports.push(`import ${relationship.type.__name}Metadata from "../${relationship.type.__name}/${relationship.type.__name}";`);
       }
 
@@ -78,26 +84,50 @@ export default function createGraphqlResolver(objectToCreate) {
       }
 
       if (relationship.__isArray) {
-        relationshipResolvers += projectIdsResolverTemplate
+        let template = relationship.manyToMany ? projectManyToManyResolverTemplate : projectOneToManyResolverTemplate;
+        let destinationKeyType = relationship.type.fields[relationship.keyField];
+        let foreignKeyType = objectToCreate.fields[relationship.fkField];
+        let keyType = relationship.type.fields[relationship.keyField];
+
+        let mapping = "";
+        if (foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType) {
+          mapping = "ids => ids.map(id => X)";
+        } else if (foreignKeyType == StringType || foreignKeyType == MongoIdType) {
+          mapping = "id => X";
+        }
+
+        let lookupSetContents = /Array/g.test(keyType)
+          ? `result.${relationship.keyField}.map(k => k + "")`
+          : `[result.${relationship.keyField} + ""]`;
+
+        if (mapping) {
+          if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
+            mapping = mapping.replace(/X/i, "ObjectId(id)");
+          } else if (destinationKeyType == StringType || destinationKeyType == StringArrayType) {
+            mapping = mapping.replace(/X/i, `"" + id`);
+          }
+        } else {
+          mapping = "x => x";
+        }
+
+        relationshipResolvers += template
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
           .replace(/\${keyField}/g, relationship.keyField || "_id")
-          .replace(
-            /\${idMapping}/g,
-            relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "ids => ids.map(id => ObjectId(id))" : "ids => ids"
-          )
+          .replace(/\${idMapping}/g, mapping)
           .replace(/\${targetObjName}/g, relationshipName)
           .replace(/\${targetTypeName}/g, relationship.type.__name)
           .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name)
           .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`)
+          .replace(/\${lookupSetContents}/g, lookupSetContents)
           .replace(
             /\${receivingKeyForce}/g,
             relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
           );
       } else if (relationship.__isObject) {
-        relationshipResolvers += projectIdResolverTemplate
+        relationshipResolvers += projectOneToOneResolverTemplate
           .replace(/\${table}/g, relationship.type.table)
           .replace(/\${fkField}/g, relationship.fkField)
           .replace(/\${keyField}/g, relationship.keyField || "_id")
