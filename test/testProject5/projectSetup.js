@@ -1,4 +1,4 @@
-import { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
+import { MongoIdType, MongoIdArrayType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
 
 export const Keyword = {
   table: "keywords",
@@ -51,6 +51,27 @@ export const Author = {
       },
       fkField: "_id",
       keyField: "authorIds"
+    },
+    mainAuthorBooks: {
+      get type() {
+        return Book;
+      },
+      fkField: "_id",
+      keyField: "mainAuthorId"
+    },
+    mainAuthorNamesBooks: {
+      get type() {
+        return Book;
+      },
+      fkField: "name",
+      keyField: "mainAuthorName"
+    },
+    authorNamesBooks: {
+      get type() {
+        return Book;
+      },
+      fkField: "name",
+      keyField: "authorNames"
     }
   }
 };
@@ -63,8 +84,10 @@ export const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: MongoIdType,
+    mainAuthorName: StringType,
     cachedMainAuthor: objectOf(Author),
     authorIds: MongoIdArrayType,
+    authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author)
   },
   relationships: {
@@ -72,9 +95,24 @@ export const Book = {
       type: Author,
       fkField: "authorIds"
     },
+    authorsByName: {
+      get type() {
+        return Author;
+      },
+      fkField: "authorNames",
+      keyField: "name"
+    },
     mainAuthor: {
       type: Author,
       fkField: "mainAuthorId"
+    },
+    mainAuthorByName: {
+      get type() {
+        return Author;
+      },
+      fkField: "mainAuthorName",
+      keyField: "name",
+      oneToOne: true
     }
   }
 };
