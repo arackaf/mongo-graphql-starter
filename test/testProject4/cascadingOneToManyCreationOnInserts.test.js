@@ -255,6 +255,37 @@ test("Add books entry in new author, and nested objects D", async () => {
   });
 });
 
+test("Add books entry in new author, and nested objects E prelim", async () => {
+  await runMutation({
+    mutation: `createAuthor(Author: {
+      name: "Adam",
+      books: [
+        {
+          title: "New Book 1",
+          authors: [{name: "A1"}],
+        }
+      ]
+    }){Author{name}}`,
+    result: "createAuthor"
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name: "Adam"){Authors{name, books{title authors(SORT: {name: 1}){name}}}}}`,
+    coll: "allAuthors",
+    results: [
+      {
+        name: "Adam",
+        books: [
+          {
+            title: "New Book 1",
+            authors: [{ name: "A1" }, { name: "Adam" }]
+          }
+        ]
+      }
+    ]
+  });
+});
+
 test("Add books entry in new author, and nested objects E", async () => {
   await runMutation({
     mutation: `createAuthor(Author: {

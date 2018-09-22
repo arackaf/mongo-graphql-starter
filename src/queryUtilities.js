@@ -237,11 +237,12 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
         let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
         let newObjects = await Promise.all(newObjectCandidates.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { db, ...rest })));
         let fkType = typeMetadata.fields[relationship.fkField];
+        let keyField = relationship.keyField;
 
         if (!args[`${relationship.fkField}`]) {
           args[`${relationship.fkField}`] = [];
         }
-        args[`${relationship.fkField}`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o._id : o._id)));
+        args[`${relationship.fkField}`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o[keyField] : o[keyField])));
       }
     } else if (relationship.__isObject) {
       if (args[k]) {
