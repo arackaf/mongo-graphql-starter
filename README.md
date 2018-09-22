@@ -772,11 +772,13 @@ export const Book = {
 };
 ```
 
-For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above) will be the name of the object or array in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array (we'll refer to these collections as `many-to-many`). If the foreign key is not an array, then an object will be created if the `keyField` is `_id` (which we'll call `one-to-one`), which is the default, otherwise an array will be created. This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
+For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above) will be the name of the object or array created in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array (we'll refer to these collections as `many-to-many`). If the foreign key is not an array, then an object will be created if the `keyField` is `_id` (which we'll call `one-to-one`), which is the default, otherwise an array will be created (`one-to-many`). This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
 
-For one-to-one relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set from the new relationship object's `keyField`, whatever it is.
+Note that `one-to-one`, `one-to-many`, and `many-to-many` refer to the mapping between foreign keys, and objects, not between objects, like you may be familiar with in entity relationship diagrams. So a `many-to-many` relationship means that an array of foreign keys maps to an array of objects, and so on.
 
-For one-to-many relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the new parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is.
+For `one-to-one` and `many-to-many` relationships, when creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set, or added to for arrays, from the new relationship object's `keyField`, whatever it is.
+
+For `one-to-many` relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is.
 
 | Options               | Default   | Description|
 | --------------------- | --------- | --------------------------------------- |
@@ -790,7 +792,7 @@ For one-to-many relationships, after creating new objects using the `create<Type
 
 Request these relationships right in your GraphQL queries.  If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried fields will fetched, and returned.  The `dataloader` utility is used to batch the requests for these relationships, so you don't need to worry about select n + 1.
 
-For relationships that return a collection of items, like the authors above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
+For relationships that return a collection of items, like `authors` above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
 
 ```javascript
 {
