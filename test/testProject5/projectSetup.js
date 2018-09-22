@@ -28,6 +28,8 @@ export const Author = {
     birthday: DateType,
     mainSubjectId: MongoIdType,
     subjectIds: MongoIdArrayType,
+    junkId: MongoIdType,
+    junkIds: MongoIdArrayType,
     firstBookId: MongoIdType
   },
   relationships: {
@@ -72,6 +74,20 @@ export const Author = {
       },
       fkField: "name",
       keyField: "authorNames"
+    },
+    junkAuthorBooks: {
+      get type() {
+        return Book;
+      },
+      fkField: "junkId",
+      keyField: "authorJunkId"
+    },
+    junkAuthorBooksMany: {
+      get type() {
+        return Book;
+      },
+      fkField: "junkId",
+      keyField: "authorJunkIds"
     }
   }
 };
@@ -87,6 +103,8 @@ export const Book = {
     mainAuthorName: StringType,
     cachedMainAuthor: objectOf(Author),
     authorIds: MongoIdArrayType,
+    authorJunkId: MongoIdType,
+    authorJunkIds: MongoIdArrayType,
     authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author)
   },
