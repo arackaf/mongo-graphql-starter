@@ -40,11 +40,12 @@ or advanced edge cases as needed.
 - [Integrating custom content](#integrating-custom-content)
   - [schemaSources example](#schemasources-example)
   - [resolverSources example](#resolversources-example)
-- [Defining relationships between types (wip)](#defining-relationships-between-types-wip)
+- [Defining relationships between types](#defining-relationships-between-types)
   - [Using relationships](#using-relationships)
   - [Creating related data](#creating-related-data)
     - [In creations](#in-creations)
-    - [In updates](#in-updates)
+    - [In updates (not one-to-many)](#in-updates-not-one-to-many)
+    - [In updates (one-to-many)](#in-updates-one-to-many)
     - [In lifecycle hooks](#in-lifecycle-hooks)
 - [Lifecycle hooks](#lifecycle-hooks)
   - [All available hooks](#all-available-hooks)
@@ -717,15 +718,15 @@ Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (
 
 You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted.
 
-## Defining relationships between types (wip)
+## Defining relationships between types
 
 Relationships can be defined between queryable types. This allows you to normalize your data into separate Mongo collections, related by foreign keys.
 
-To define relationships, you add a relationships section, like this
+To define relationships, add a `relationships` section, like this
 
 ```javascript
 import { dataTypes } from "mongo-graphql-starter";
-const { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType, relationshipHelpers } = dataTypes;
+const { MongoIdType, MongoIdArrayType, StringType, IntType, FloatType, DateType } = dataTypes;
 
 export const Author = {
   table: "authors",
@@ -771,15 +772,19 @@ export const Book = {
 };
 ```
 
-For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above) will be the name of the object or array in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array. If the foreign key is not an array, then an object will be created if the `keyField` is `_id`, which is the default, otherwise an array will be created. This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
+For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above) will be the name of the object or array in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array (we'll refer to these collections as `many-to-many`). If the foreign key is not an array, then an object will be created if the `keyField` is `_id` (which we'll call `one-to-one`), which is the default, otherwise an array will be created. This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
+
+For one-to-one relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set from the new relationship object's `keyField`, whatever it is.
+
+For one-to-many relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the new parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is.
 
 | Options               | Default   | Description|
 | --------------------- | --------- | --------------------------------------- |
 | `type`                | (none)    | The type for the relationship. Be sure to use a getter to reference types that are declared downstream. |
 | `fkField`             | (none)    | The foreign key that will be used to look up related objects. |
 | `keyField`            | `_id`     | The field that will be used to look up related objects in their collection. |
-| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. After creating new objects using the `create<Type>` mutation, any specified new members of this relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set from the new relationship object's `keyField`, whatever it is. |
-| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, even if the `keyField` is `_id`. After creating new objects using the `create<Type>` mutation, any specified new members of this relationship will be created **after** the new parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is. |
+| `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
+| `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, regardless of `fkField` and `keyField`.  |
 
 ### Using relationships
 
@@ -829,7 +834,7 @@ For a relationship defining a single object, it would look like this
 `createBook(Book: {title: "New Book", mainAuthor: { name: "New Author" }}){Book{_id, title, mainAuthor{name}}}`
 ```
 
-#### In updates
+#### In updates (not one-to-many)
 
 For relationships which define an array, like `authors`, there will be a `<relationshipName>_ADD` property on the `Updates` object of all update mutations. This property will accept an array of new objects to be created, with the new IDs being added to the current object's foreign key field.  For example
 
@@ -844,6 +849,10 @@ Similarly, for relationships that define a single object, there will be a `<rela
 ```javascript
 `updateBook(_id: "${book1._id}", Updates: {mainAuthor_SET: { name: "ABORT" }}){Book{title}}`
 ```
+
+#### In updates (one-to-many)
+
+There's a number of tricky edge cases here.  As a result, one-to-many collections can only be updated via args that are created in the updateSingle, and updateMulti mutations, but not updateBulk. Moreover, these arguments will only be created if the `fkField` on the relationship is `_id`. The reason for this restriction is that that's the only way to guarentee that the corresponding `keyField` on the newly created objects can be correctly set.
 
 #### In lifecycle hooks
 

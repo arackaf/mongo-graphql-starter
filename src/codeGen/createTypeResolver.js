@@ -87,6 +87,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
         let template = relationship.manyToMany ? projectManyToManyResolverTemplate : projectOneToManyResolverTemplate;
         let destinationKeyType = relationship.type.fields[relationship.keyField];
         let foreignKeyType = objectToCreate.fields[relationship.fkField];
+        let keyType = relationship.type.fields[relationship.keyField];
 
         let mapping = "";
         if (foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType) {
@@ -94,6 +95,11 @@ export default function createGraphqlResolver(objectToCreate, options) {
         } else if (foreignKeyType == StringType || foreignKeyType == MongoIdType) {
           mapping = "id => X";
         }
+
+        let lookupSetContents = /Array/g.test(keyType)
+          ? `result.${relationship.keyField}.map(k => k + "")`
+          : `[result.${relationship.keyField} + ""]`;
+
         if (mapping) {
           if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
             mapping = mapping.replace(/X/i, "ObjectId(id)");
@@ -115,6 +121,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
           .replace(/\${sourceParam}/g, objectToCreate.__name.toLowerCase())
           .replace(/\${sourceObjName}/g, objectToCreate.__name)
           .replace(/\${dataLoaderId}/g, `__${objectToCreate.__name}_${relationshipName}DataLoader`)
+          .replace(/\${lookupSetContents}/g, lookupSetContents)
           .replace(
             /\${receivingKeyForce}/g,
             relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
