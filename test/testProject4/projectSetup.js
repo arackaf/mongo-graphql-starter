@@ -71,6 +71,13 @@ export const Author = {
       },
       fkField: "name",
       keyField: "mainAuthorName"
+    },
+    authorNamesBooks: {
+      get type() {
+        return Book;
+      },
+      fkField: "name",
+      keyField: "authorNames"
     }
   }
 };
