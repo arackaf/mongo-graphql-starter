@@ -61,3 +61,12 @@ export const Tag = {
     count: IntType
   }
 };
+
+export const ReadonlyTag = {
+  table: "tagsReadonly",
+  readonly: true,
+  fields: {
+    name: StringType,
+    count: IntType
+  }
+};

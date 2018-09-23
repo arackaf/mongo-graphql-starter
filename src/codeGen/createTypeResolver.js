@@ -17,6 +17,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
   let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.txt"), { encoding: "utf8" });
   let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.txt"), { encoding: "utf8" });
   let hooksPath = `"../hooks"`;
+  let readonly = objectToCreate.readonly;
 
   if (options.hooks) {
     hooksPath = `"` + path.relative(options.modulePath, options.hooks).replace(/\\/g, "/") + `"`;
@@ -50,11 +51,15 @@ export default function createGraphqlResolver(objectToCreate, options) {
   let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join(",\n");
 
   let mutationItems = [
-    !overrides.has(`create${objectToCreate.__name}`) ? createItemTemplate : "",
-    !overrides.has(`update${objectToCreate.__name}`) ? updateItemTemplate : "",
-    !overrides.has(`update${objectToCreate.__name}s`) ? updateItemsTemplate : "",
-    !overrides.has(`update${objectToCreate.__name}sBulk`) ? updateItemsBulkTemplate : "",
-    !overrides.has(`delete${objectToCreate.__name}`) ? deleteItemTemplate : "",
+    ...(!readonly
+      ? [
+          !overrides.has(`create${objectToCreate.__name}`) ? createItemTemplate : "",
+          !overrides.has(`update${objectToCreate.__name}`) ? updateItemTemplate : "",
+          !overrides.has(`update${objectToCreate.__name}s`) ? updateItemsTemplate : "",
+          !overrides.has(`update${objectToCreate.__name}sBulk`) ? updateItemsBulkTemplate : "",
+          !overrides.has(`delete${objectToCreate.__name}`) ? deleteItemTemplate : ""
+        ]
+      : []),
     resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join(",\n")
   ]
     .filter(s => s)
