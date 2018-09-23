@@ -30,6 +30,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let overrides = new Set(extras.overrides || []);
   let schemaSources = extras.schemaSources || [];
   let resolvedFields = objectToCreate.resolvedFields || {};
+  let readonly = objectToCreate.readonly;
 
   const createOperation = createOperationOriginal.bind(null, { overrides });
 
@@ -107,17 +108,25 @@ ${[
       .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
 
     let allMutations = [
-      createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
-      createOperation(
-        `update${name}`,
-        [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
-        `${name}MutationResult`
-      ),
-      createOperation(`update${name}s`, [`_ids: [String]`, `Updates: ${name}MutationInput`, ...oneToManyForMulti], `${name}MutationResultMulti`),
-      createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
-      createOperation(`delete${name}`, [`_id: String`], "Boolean"),
+      ...(!readonly
+        ? [
+            createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
+            createOperation(
+              `update${name}`,
+              [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
+              `${name}MutationResult`
+            ),
+            createOperation(
+              `update${name}s`,
+              [`_ids: [String]`, `Updates: ${name}MutationInput`, ...oneToManyForMulti],
+              `${name}MutationResultMulti`
+            ),
+            createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
+            createOperation(`delete${name}`, [`_id: String`], "Boolean")
+          ]
+        : []),
       ...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
-    ];
+    ].filter(x => x);
     return "export const mutation = `\n\n" + allMutations.filter(s => s).join("\n\n") + "\n\n`;";
   }
 
