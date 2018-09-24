@@ -4,7 +4,7 @@ import processHook from "./processHook";
 export async function runUpdate(db, table, $match, updates, options) {
   if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
     try {
-      await db.collection(table).update($match, updates, options);
+      await db.collection(table).updateMany($match, updates, options);
     } catch (err) {
       if (err instanceof MongoError) {
         throw `The following error was thrown by Mongo when attempting to perform this update: ${err.toString()}`;
@@ -17,7 +17,7 @@ export async function runUpdate(db, table, $match, updates, options) {
 
 export async function runDelete(db, table, $match) {
   try {
-    await db.collection(table).remove($match);
+    await db.collection(table).deleteMany($match);
   } catch (err) {
     if (err instanceof MongoError) {
       throw `The following error was thrown by Mongo when attempting to perform this deletion: ${err.toString()}`;
@@ -53,7 +53,7 @@ export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetad
 
 export async function runInsert(db, table, newObject) {
   try {
-    await db.collection(table).insert(newObject);
+    await db.collection(table).insertOne(newObject);
     return newObject;
   } catch (err) {
     if (err instanceof MongoError) {
@@ -66,7 +66,7 @@ export async function runInsert(db, table, newObject) {
 
 export async function runMultipleInserts(db, table, newObjects) {
   try {
-    await Promise.all(newObjects.map(obj => db.collection(table).insert(obj)));
+    await db.collection(table).insertMany(newObjects);
     return newObjects;
   } catch (err) {
     if (err instanceof MongoError) {
