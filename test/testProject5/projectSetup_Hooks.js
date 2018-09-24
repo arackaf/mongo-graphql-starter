@@ -26,5 +26,12 @@ export default {
         db.collection("authors").update({ _id: obj._id }, { $set: { name: obj.name } });
       }
     }
+  },
+  Book: class {
+    beforeInsert(obj, root, args, context, ast) {
+      if (/^ABORT/.test(obj.title)) {
+        return false;
+      }
+    }
   }
 };
