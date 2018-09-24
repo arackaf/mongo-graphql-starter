@@ -14,6 +14,7 @@ or advanced edge cases as needed.
 - [Prior art](#prior-art)
 - [How do you use it?](#how-do-you-use-it)
   - [Valid types for your fields](#valid-types-for-your-fields)
+  - [Readonly types](#readonly-types)
   - [Circular dependencies are fine](#circular-dependencies-are-fine)
 - [Queries created](#queries-created)
   - [Projecting results from queries](#projecting-results-from-queries)
@@ -239,6 +240,10 @@ const {
 | `objectOf`         | Function: Pass it a type you've created to specify a single object of that type |
 | `arrayOf`          | Function: Pass it a type you've created to specify an array of that type |
 | `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though of course you can add your own to the generated code.         |
+
+### Readonly types
+
+Add `readonly: true` to any type if you want only queries, and no mutations (both discussed below) created.  This is useful for any Mongo collections you might have which you want to query via your GraphQL endpoint, but whose data is managed by outside processes. 
 
 ### Circular dependencies are fine
 
