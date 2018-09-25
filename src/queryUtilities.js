@@ -233,8 +233,7 @@ export async function newObjectFromArgs(args, typeMetadata, options) {
     }
     if (relationship.__isArray) {
       if (args[k]) {
-        let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, options)));
-        let newObjects = await insertObjects(newObjectCandidates, args[k], relationship.type, options);
+        let newObjects = await insertObjects(args[k], relationship.type, options);
 
         let fkType = typeMetadata.fields[relationship.fkField];
         let keyField = relationship.keyField;
@@ -246,8 +245,7 @@ export async function newObjectFromArgs(args, typeMetadata, options) {
       }
     } else if (relationship.__isObject) {
       if (args[k]) {
-        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[k], relationship.type, options));
-        let newObject = (await insertObjects([newObjectCandidate], [args[k]], relationship.type, options))[0];
+        let newObject = (await insertObjects([args[k]], relationship.type, options))[0];
 
         let fkType = typeMetadata.fields[relationship.fkField];
 
@@ -305,8 +303,7 @@ export async function setUpOneToManyRelationships(newObject, args, typeMetadata,
             newObj[relationship.keyField] = keyValue;
           }
         });
-        let toSave = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, options)));
-        await insertObjects(toSave, args[k], relationship.type, options);
+        await insertObjects(args[k], relationship.type, options);
       }
     }
   }
@@ -329,8 +326,7 @@ export async function setUpOneToManyRelationshipsForUpdate(_ids, args, typeMetad
             newObj[relationship.keyField] = _ids[0];
           }
         });
-        let toSave = await Promise.all(coll.map(o => newObjectFromArgs(o, relationship.type, options)));
-        await insertObjects(toSave, coll, relationship.type, options);
+        await insertObjects(coll, relationship.type, options);
       }
     }
   }
@@ -551,8 +547,9 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
   }
 }
 
-async function insertObjects(objArray, argsArray, typeMetadata, options) {
+async function insertObjects(argsArray, typeMetadata, options) {
   let { db, ...rest } = options;
+  let objArray = await Promise.all(argsArray.map(o => newObjectFromArgs(o, typeMetadata, options)));
   let argsMap = new Map(objArray.map((o, i) => [o, argsArray[i]]));
   let newObjects = await processInsertions(db, objArray, { ...rest, typeMetadata });
 
