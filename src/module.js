@@ -9,6 +9,9 @@ export { dataTypes };
 import * as queryUtilities from "./queryUtilities";
 export { queryUtilities };
 
+import * as insertUtilities from "./insertUtilities";
+export { insertUtilities };
+
 import processHook from "./processHook";
 export { processHook };
 
