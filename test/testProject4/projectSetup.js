@@ -11,7 +11,8 @@ export const Subject = {
   table: "subjects",
   fields: {
     name: StringType,
-    keywordIds: StringArrayType
+    keywordIds: StringArrayType,
+    bookIds: StringArrayType
   },
   relationships: {
     keywords: {
@@ -123,6 +124,13 @@ export const Book = {
       fkField: "mainAuthorName",
       keyField: "name",
       oneToOne: true
+    },
+    subjects: {
+      get type() {
+        return Subject;
+      },
+      fkField: "_id",
+      keyField: "bookIds"
     }
   }
 };

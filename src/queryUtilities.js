@@ -306,8 +306,8 @@ export async function setUpOneToManyRelationships(newObject, args, typeMetadata,
             newObj[relationship.keyField] = keyValue;
           }
         });
-        let toSave = await Promise.all(args[`${k}`].map(o => newObjectFromArgs(o, relationship.type, options)));
-        await processInsertions(options.db, toSave, { typeMetadata: relationship.type, ...options });
+        let toSave = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, options)));
+        (await Promise.all(toSave.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { ...options })))).filter(o => o);
       }
     }
   }
