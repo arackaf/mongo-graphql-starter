@@ -173,15 +173,10 @@ export async function setUpOneToManyRelationshipsForUpdate(_ids, args, typeMetad
 
 export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, options = {}) {
   let $match = getMongoFilters(args, objectMetaData);
-  let requestMap, metadataRequested, $project, extrasPackets;
+  let requestMap = parseRequestedFields(ast, queryName, options.force || []);
+  let metadataRequested = parseRequestedFields(ast, "Meta");
+  let { $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName);
 
-  if (ast && queryName) {
-    requestMap = parseRequestedFields(ast, queryName, options.force || []);
-    metadataRequested = parseRequestedFields(ast, "Meta");
-    ({ $project, extrasPackets } = parseRequestedHierarchy(ast, requestMap, objectMetaData, args, queryName));
-  } else {
-    extrasPackets = new Map([]);
-  }
   let sort = args.SORT;
   let sorts = args.SORTS;
   let $sort;
