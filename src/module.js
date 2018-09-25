@@ -12,6 +12,9 @@ export { queryUtilities };
 import * as insertUtilities from "./insertUtilities";
 export { insertUtilities };
 
+import * as projectUtilities from "./projectUtilities";
+export { projectUtilities };
+
 import processHook from "./processHook";
 export { processHook };
 
