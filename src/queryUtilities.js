@@ -224,8 +224,7 @@ function getSelections(fieldNode) {
   return new Map(fieldNode.selectionSet.selections.map(sel => [sel.name.value, sel.selectionSet == null ? true : getSelections(sel)]));
 }
 
-export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingUtils = {}) {
-  let { db, dbHelpers, ...rest } = relationshipLoadingUtils;
+export async function newObjectFromArgs(args, typeMetadata, options) {
   let relationships = typeMetadata.relationships || {};
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
@@ -234,8 +233,8 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
     }
     if (relationship.__isArray) {
       if (args[k]) {
-        let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
-        let newObjects = await insertObjects(newObjectCandidates, args[k], relationship.type, { db, ...rest });
+        let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, options)));
+        let newObjects = await insertObjects(newObjectCandidates, args[k], relationship.type, options);
 
         let fkType = typeMetadata.fields[relationship.fkField];
         let keyField = relationship.keyField;
@@ -247,8 +246,9 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
       }
     } else if (relationship.__isObject) {
       if (args[k]) {
-        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[k], relationship.type, relationshipLoadingUtils));
-        let newObject = await handleInsertion(newObjectCandidate, args[k], relationship.type, { db, ...rest });
+        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(args[k], relationship.type, options));
+        let newObject = (await insertObjects([newObjectCandidate], [args[k]], relationship.type, options))[0];
+
         let fkType = typeMetadata.fields[relationship.fkField];
 
         if (newObject) {
@@ -269,9 +269,9 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
       if (field == DateType || field.__isDate) {
         return [k, new Date(args[k])];
       } else if (field.__isArray) {
-        return [k, await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, relationshipLoadingUtils)))];
+        return [k, await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, options)))];
       } else if (field.__isObject) {
-        return [k, await newObjectFromArgs(args[k], field.type, relationshipLoadingUtils)];
+        return [k, await newObjectFromArgs(args[k], field.type, options)];
       } else if (field === MongoIdArrayType) {
         return [k, args[k].map(val => ObjectId(val))];
       } else if (field === MongoIdType) {
@@ -557,17 +557,7 @@ async function insertObjects(objArray, argsArray, typeMetadata, options) {
   let newObjects = await processInsertions(db, objArray, { ...rest, typeMetadata });
 
   await Promise.all(newObjects.map(o => setUpOneToManyRelationships(o, argsMap.get(o), typeMetadata, { db, ...rest })));
-
   return newObjects;
-}
-
-async function handleInsertion(obj, args, typeMetadata, options) {
-  let { db, ...rest } = options;
-  let newObject = await processInsertion(db, obj, { ...rest, typeMetadata });
-  if (newObject) {
-    await setUpOneToManyRelationships(obj, args, typeMetadata, { db, ...rest });
-  }
-  return newObject;
 }
 
 export const constants = {
