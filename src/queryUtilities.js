@@ -1,7 +1,6 @@
 import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
 import { ObjectId } from "mongodb";
-import processHook from "./processHook";
-import { processInsertion, processInsertions } from "./dbHelpers";
+import { processInsertions } from "./dbHelpers";
 
 import escapeStringRegexp from "escape-string-regexp";
 
@@ -245,7 +244,7 @@ export async function newObjectFromArgs(args, typeMetadata, options) {
       }
     } else if (relationship.__isObject) {
       if (args[k]) {
-        let newObject = (await insertObjects([args[k]], relationship.type, options))[0];
+        let newObject = (await insertObjects(args[k], relationship.type, options))[0];
 
         let fkType = typeMetadata.fields[relationship.fkField];
 
@@ -408,7 +407,7 @@ export async function getUpdateObject(updatesObject, typeMetadata, relationshipL
 }
 
 async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set, $inc, $push, $pull, $addToSet, relationshipLoadingUtils) {
-  let { db, dbHelpers, ...rest } = relationshipLoadingUtils;
+  let { db, ...rest } = relationshipLoadingUtils;
   let relationships = typeMetadata.relationships || {};
 
   for (let k of Object.keys(relationships)) {
@@ -419,7 +418,7 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
         let newObjectCandidates = await Promise.all(
           updatesObject[`${k}_ADD`].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils))
         );
-        let newObjects = await dbHelpers.processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
+        let newObjects = await processInsertions(db, newObjectCandidates, { typeMetadata: relationship.type, ...rest });
 
         if (!updatesObject[`${relationship.fkField}_ADDTOSET`]) {
           updatesObject[`${relationship.fkField}_ADDTOSET`] = [];
@@ -428,8 +427,7 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
       }
     } else if (relationship.__isObject) {
       if (updatesObject[`${k}_SET`]) {
-        let newObjectCandidate = await Promise.resolve(newObjectFromArgs(updatesObject[`${k}_SET`], relationship.type, relationshipLoadingUtils));
-        let newObject = await dbHelpers.processInsertion(db, newObjectCandidate, { typeMetadata: relationship.type, ...rest });
+        let newObject = (await insertObjects(updatesObject[`${k}_SET`], relationship.type, relationshipLoadingUtils))[0];
         if (newObject) {
           updatesObject[relationship.fkField] = fkType == StringType ? "" + newObject._id : newObject._id;
         }
@@ -548,6 +546,9 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
 }
 
 async function insertObjects(argsArray, typeMetadata, options) {
+  if (!Array.isArray(argsArray)) {
+    argsArray = [argsArray];
+  }
   let { db, ...rest } = options;
   let objArray = await Promise.all(argsArray.map(o => newObjectFromArgs(o, typeMetadata, options)));
   let argsMap = new Map(objArray.map((o, i) => [o, argsArray[i]]));
