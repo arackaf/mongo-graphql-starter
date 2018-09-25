@@ -235,9 +235,8 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
     if (relationship.__isArray) {
       if (args[k]) {
         let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
-        let newObjects = (await Promise.all(
-          newObjectCandidates.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { db, ...rest }))
-        )).filter(o => o);
+        let newObjects = await insertObjects(newObjectCandidates, args[k], relationship.type, { db, ...rest });
+
         let fkType = typeMetadata.fields[relationship.fkField];
         let keyField = relationship.keyField;
 
@@ -307,7 +306,7 @@ export async function setUpOneToManyRelationships(newObject, args, typeMetadata,
           }
         });
         let toSave = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, options)));
-        (await Promise.all(toSave.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { ...options })))).filter(o => o);
+        await insertObjects(toSave, args[k], relationship.type, options);
       }
     }
   }
@@ -331,7 +330,7 @@ export async function setUpOneToManyRelationshipsForUpdate(_ids, args, typeMetad
           }
         });
         let toSave = await Promise.all(coll.map(o => newObjectFromArgs(o, relationship.type, options)));
-        await Promise.all(toSave.map((o, i) => handleInsertion(o, coll[i], relationship.type, { ...options })));
+        await insertObjects(toSave, coll, relationship.type, options);
       }
     }
   }
@@ -550,6 +549,16 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
       }
     }
   }
+}
+
+async function insertObjects(objArray, argsArray, typeMetadata, options) {
+  let { db, ...rest } = options;
+  let argsMap = new Map(objArray.map((o, i) => [o, argsArray[i]]));
+  let newObjects = await processInsertions(db, objArray, { ...rest, typeMetadata });
+
+  await Promise.all(newObjects.map(o => setUpOneToManyRelationships(o, argsMap.get(o), typeMetadata, { db, ...rest })));
+
+  return newObjects;
 }
 
 async function handleInsertion(obj, args, typeMetadata, options) {
