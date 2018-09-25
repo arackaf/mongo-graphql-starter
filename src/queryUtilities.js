@@ -235,7 +235,9 @@ export async function newObjectFromArgs(args, typeMetadata, relationshipLoadingU
     if (relationship.__isArray) {
       if (args[k]) {
         let newObjectCandidates = await Promise.all(args[k].map(o => newObjectFromArgs(o, relationship.type, relationshipLoadingUtils)));
-        let newObjects = await Promise.all(newObjectCandidates.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { db, ...rest })));
+        let newObjects = (await Promise.all(
+          newObjectCandidates.map((o, i) => handleInsertion(o, args[k][i], relationship.type, { db, ...rest }))
+        )).filter(o => o);
         let fkType = typeMetadata.fields[relationship.fkField];
         let keyField = relationship.keyField;
 

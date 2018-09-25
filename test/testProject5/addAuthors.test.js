@@ -32,6 +32,59 @@ afterEach(async () => {
   db = null;
 });
 
+//---------------------------Create-----------------------------------------------------------
+
+test("Create - Basic add single new author with hook", async () => {
+  await runMutation({
+    mutation: `createBook(Book: {title: "XYZ" authors: [{name: "Adam"}, {name: "BUMP"}, { name: "ABORT" }]}){Book{title}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(title: "XYZ"){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "XYZ", authors: [{ name: "Adam" }, { name: "BUMPab" }] }]
+  });
+});
+
+test("Create - Basic add single new author with abort hook", async () => {
+  await runMutation({
+    mutation: `createBook(Book: {title: "XYZ", authors: [{name: "Adam"}, { name: "BUMP" }, { name: "ABORT" }]}){Book{title}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(title: "XYZ"){Books{title, authors(SORT: { name: 1 }){name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "XYZ", authors: [{ name: "Adam" }, { name: "BUMPab" }] }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "ABORT"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: []
+  });
+});
+
+test("Create - Basic set mainAuthor abort hook", async () => {
+  await runMutation({
+    mutation: `createBook(Book: {title: "XYZ", mainAuthor: { name: "ABORT" }}){Book{title}}`,
+    result: "createBook"
+  });
+
+  await queryAndMatchArray({
+    query: `{allBooks(title: "XYZ"){Books{title, mainAuthor{name}}}}`,
+    coll: "allBooks",
+    results: [{ title: "XYZ", mainAuthor: null }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "ABORT"){Authors{name}}}`,
+    coll: "allAuthors",
+    results: []
+  });
+});
+
 // --------------------------------- Update Single --------------------------------------------
 
 test("UpdateSingle - Basic add single new author", async () => {
@@ -224,8 +277,6 @@ test("UpdateBulk - Basic add 2 new authors, and single existing author", async (
     results: [{ name: "New Author1" }, { name: "New Author2" }] //just created once
   });
 });
-
-//---------------------------Hooks Tests-----------------------------------------------------------
 
 //---------------------------Update Single-----------------------------------------------------------
 
