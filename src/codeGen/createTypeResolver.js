@@ -28,11 +28,12 @@ export default function createGraphqlResolver(objectToCreate, options) {
   let overrides = new Set(extras.overrides || []);
   let resolverSources = extras.resolverSources || [];
   let imports = [
-    `import { insertUtilities, queryUtilities, projectUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
+    `import { insertUtilities, queryUtilities, projectUtilities, updateUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
     `import hooksObj from ${hooksPath};`,
-    `const { decontructGraphqlQuery, setUpOneToManyRelationshipsForUpdate, getUpdateObject, constants, cleanUpResults } = queryUtilities;`,
+    `const { decontructGraphqlQuery, cleanUpResults } = queryUtilities;`,
     `const { setUpOneToManyRelationships, newObjectFromArgs } = insertUtilities;`,
     `const { getMongoProjection, parseRequestedFields } = projectUtilities;`,
+    `const { getUpdateObject, setUpOneToManyRelationshipsForUpdate } = updateUtilities;`,
     `import { ObjectId } from "mongodb";`,
     `import ${objectToCreate.__name}Metadata from "./${objectToCreate.__name}";`,
     ...resolverSources.map(

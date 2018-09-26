@@ -15,6 +15,9 @@ export { insertUtilities };
 import * as projectUtilities from "./projectUtilities";
 export { projectUtilities };
 
+import * as updateUtilities from "./updateUtilities";
+export { updateUtilities };
+
 import processHook from "./processHook";
 export { processHook };
 
