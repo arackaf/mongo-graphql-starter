@@ -66,12 +66,13 @@ export async function newObjectFromArgs(args, typeMetadata, options) {
         let newObject = (await insertObjects(args[k], relationship.type, options))[0];
 
         let fkType = typeMetadata.fields[relationship.fkField];
+        let keyField = relationship.keyField;
 
         if (newObject) {
           if (!args[`${relationship.fkField}`]) {
             args[`${relationship.fkField}`] = [];
           }
-          args[`${relationship.fkField}`] = fkType == StringType ? "" + newObject._id : newObject._id;
+          args[`${relationship.fkField}`] = fkType == StringType ? "" + newObject[keyField] : newObject[keyField];
         }
       }
     }

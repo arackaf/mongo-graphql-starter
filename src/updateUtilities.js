@@ -28,6 +28,7 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
   for (let k of Object.keys(relationships)) {
     let relationship = relationships[k];
     let fkType = typeMetadata.fields[relationship.fkField];
+    let keyField = relationship.keyField;
     if (relationship.__isArray && !relationship.oneToMany) {
       if (updatesObject[`${k}_ADD`]) {
         let newObjects = await insertObjects(updatesObject[`${k}_ADD`], relationship.type, options);
@@ -35,13 +36,13 @@ async function getUpdateObjectContents(updatesObject, typeMetadata, prefix, $set
         if (!updatesObject[`${relationship.fkField}_ADDTOSET`]) {
           updatesObject[`${relationship.fkField}_ADDTOSET`] = [];
         }
-        updatesObject[`${relationship.fkField}_ADDTOSET`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o._id : o._id)));
+        updatesObject[`${relationship.fkField}_ADDTOSET`].push(...newObjects.map(o => (fkType == StringArrayType ? "" + o[keyField] : o[keyField])));
       }
     } else if (relationship.__isObject) {
       if (updatesObject[`${k}_SET`]) {
         let newObject = (await insertObjects(updatesObject[`${k}_SET`], relationship.type, options))[0];
         if (newObject) {
-          updatesObject[relationship.fkField] = fkType == StringType ? "" + newObject._id : newObject._id;
+          updatesObject[relationship.fkField] = fkType == StringType ? "" + newObject[keyField] : newObject[keyField];
         }
       }
     }
