@@ -16,7 +16,6 @@
     "coverageDirectory": "./coverage/",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "!exampleGeneratedCode/**/*.js",
       "src/**/*.js"
     ],
     "globalSetup": "<rootDir>/test/masterSetup.js"

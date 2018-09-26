@@ -56,7 +56,6 @@ or advanced edge cases as needed.
     - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
     - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
 - [A closer look at what's generated](#a-closer-look-at-whats-generated)
-- [What does the generated code look like?](#what-does-the-generated-code-look-like)
   - [All code is extensible.](#all-code-is-extensible)
 
 <!-- /TOC -->
@@ -1002,9 +1001,6 @@ you're running Node 8.5 or better, and you're using John Dalton's [outstanding E
 to do so) then this code should just work. If any of those conditions are false, you'll need to pipe the results through Babel using your favorite
 build tool.
 
-## What does the generated code look like?
-
-The book project referenced at the beginning of these docs generates [this code](exampleGeneratedCode/bookProject)
 
 ### All code is extensible.
 
