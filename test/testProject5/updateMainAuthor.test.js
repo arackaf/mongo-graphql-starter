@@ -1,10 +1,10 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 let adam, katie, laura, mallory, book1, book2, book3;
 
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   adam = { name: "Adam", birthday: new Date("1982-03-22") };
   katie = { name: "Katie", birthday: new Date("2009-08-05") };
@@ -25,7 +25,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await db.collection("books").remove({});
   await db.collection("authors").remove({});
-  db.close();
+  close();
   db = null;
 });
 

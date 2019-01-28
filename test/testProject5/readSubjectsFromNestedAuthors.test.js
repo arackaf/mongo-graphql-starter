@@ -1,10 +1,10 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 let subject1;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   subject1 = { name: "Subject 1" };
   await Promise.all([subject1].map(subject => db.collection("subjects").insert(subject)));
@@ -31,7 +31,7 @@ afterAll(async () => {
   await db.collection("books").remove({});
   await db.collection("authors").remove({});
   await db.collection("subjects").remove({});
-  db.close();
+  close();
   db = null;
 });
 

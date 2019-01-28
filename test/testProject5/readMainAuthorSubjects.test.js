@@ -1,8 +1,8 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   let js = { name: "JavaScript" };
   let af = { name: "Air Force" };
@@ -26,7 +26,7 @@ afterAll(async () => {
   await db.collection("books").remove({});
   await db.collection("authors").remove({});
   await db.collection("subjects").remove({});
-  db.close();
+  close();
   db = null;
 });
 
