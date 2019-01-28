@@ -1,9 +1,9 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 let objA;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   objA = { name: "a", strs: [] };
   await db.collection("things").insert(objA);
@@ -13,7 +13,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await db.collection("things").remove({});
-  db.close();
+  close();
   db = null;
 });
 

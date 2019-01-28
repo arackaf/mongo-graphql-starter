@@ -1,6 +1,6 @@
 import spinUp from "./spinUp";
 
-let db, schema, runQuery, queryAndMatchArray, runMutation;
+let db, schema, runQuery, queryAndMatchArray, runMutation, close;
 
 const types = ["Type1", "Type2"];
 let type1Objects = [
@@ -19,7 +19,7 @@ let type2Objects = [
 ];
 
 beforeAll(async () => {
-  ({ db, schema, runQuery, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, runQuery, queryAndMatchArray, runMutation, close } = await spinUp());
 
   for (let o of type1Objects) {
     await db.collection("type1").insert(o);
@@ -33,7 +33,7 @@ afterAll(async () => {
   for (let type of types) {
     await db.collection(type.toLowerCase()).remove({});
   }
-  db.close();
+  close();
   db = null;
 });
 

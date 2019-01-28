@@ -1,8 +1,8 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   await db.collection("things").insert({ name: "a", strs: [] });
   await db.collection("things").insert({ name: "b", strs: ["adam", "bob", "brian"] });
@@ -11,7 +11,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await db.collection("things").remove({});
-  db.close();
+  close();
   db = null;
 });
 
