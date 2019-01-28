@@ -1,10 +1,10 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 
 const types = ["Type1", "Type2"];
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   let objects = [
     `{ field1: "1 a", field2: "C", autoUpdateField: 1, autoAdjustField: 1, poisonField: 1 }`,
@@ -49,7 +49,7 @@ afterAll(async () => {
   await db.collection("insertInfo").remove({});
   await db.collection("updateInfo").remove({});
   await db.collection("deleteInfo").remove({});
-  db.close();
+  close();
   db = null;
 });
 
