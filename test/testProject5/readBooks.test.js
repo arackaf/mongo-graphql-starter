@@ -1,9 +1,9 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   let adam = { name: "Adam", birthday: new Date("1982-03-22") };
   let katie = { name: "Katie", birthday: new Date("2009-08-05") };
@@ -24,7 +24,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await db.collection("books").remove({});
   await db.collection("authors").remove({});
-  db.close();
+  close();
   db = null;
 });
 

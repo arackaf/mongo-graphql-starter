@@ -2,11 +2,11 @@ import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 import flatMap from "lodash.flatmap";
 
-let db, schema, runQuery, queryAndMatchArray, runMutation;
+let db, schema, runQuery, queryAndMatchArray, runMutation, close;
 let adam, katie, laura, mallory, book1, book2, book3;
 
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runQuery, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runQuery, runMutation, close } = await spinUp());
 });
 
 afterEach(async () => {
@@ -16,7 +16,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  db.close();
+  close();
   db = null;
 });
 

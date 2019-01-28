@@ -1,8 +1,8 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   let dev = { keywordName: "Development" };
   let military = { keywordName: "Air Force" };
@@ -33,7 +33,7 @@ afterAll(async () => {
   await db.collection("authors").remove({});
   await db.collection("subjects").remove({});
   await db.collection("keywords").remove({});
-  db.close();
+  close();
   db = null;
 });
 
