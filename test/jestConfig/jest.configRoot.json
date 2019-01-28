@@ -1,4 +1,4 @@
 {
-  "rootDir": "test/rootUnitTests",
+  "rootDir": "../",
   "testEnvironment": "node"
 }

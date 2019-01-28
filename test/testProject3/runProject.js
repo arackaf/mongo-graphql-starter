@@ -6,28 +6,19 @@ import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
 import conn from "./connection";
 
-const dbPromise = MongoClient.connect(
-  "mongodb://localhost:27017",
-  { useNewUrlParser: true }
-).then(client => client.db("mongo-graphql-starter"));
+Promise.resolve(spinUp()).then(({ db, schema, queryAndMatchArray }) => {
+  const app = express();
+  const root = {
+    db
+  };
 
-const root = {
-  db: dbPromise
-};
-
-const app = express();
-const dbPromise = MongoClient.connect(conn);
-const root = {
-  db
-};
-executableSchema = makeExecutableSchema({ typeDefs: schema, resolvers });
-
-app.use(
-  "/graphql",
-  expressGraphql({
-    schema: executableSchema,
-    graphiql: true,
-    rootValue: root
-  })
-);
-app.listen(3000);
+  app.use(
+    "/graphql",
+    expressGraphql({
+      schema,
+      graphiql: true,
+      rootValue: root
+    })
+  );
+  app.listen(3000);
+});
