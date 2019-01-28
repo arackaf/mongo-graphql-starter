@@ -9,10 +9,10 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  await db.collection("books").remove({});
-  await db.collection("authors").remove({});
-  await db.collection("keywords").remove({});
-  await db.collection("subjects").remove({});
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("keywords").deleteMany({});
+  await db.collection("subjects").deleteMany({});
 });
 
 afterAll(async () => {

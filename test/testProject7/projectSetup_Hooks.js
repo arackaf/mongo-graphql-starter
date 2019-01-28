@@ -24,8 +24,8 @@ class HooksRoot {
     obj.y = 1;
     let db = await root.db;
 
-    await db.collection("insertInfo").remove({});
-    await db.collection("insertInfo").insert({ insertedId: obj._id + "", y: obj.y });
+    await db.collection("insertInfo").deleteMany({});
+    await db.collection("insertInfo").insertOne({ insertedId: obj._id + "", y: obj.y });
   }
   beforeUpdate(match, updates, root, args, context, ast) {
     match.userId = 1;
@@ -40,8 +40,8 @@ class HooksRoot {
   async afterUpdate(match, updates, root, args, context, ast) {
     updates.x = 1;
     let db = await root.db;
-    await db.collection("updateInfo").remove({});
-    await db.collection("updateInfo").insert({ updatedId: match._id, x: updates.x });
+    await db.collection("updateInfo").deleteMany({});
+    await db.collection("updateInfo").insertOne({ updatedId: match._id, x: updates.x });
   }
   beforeDelete(match, root, args, context, ast) {
     if (args._id == "59334468a71fc3de245e2d6d") {
@@ -52,8 +52,8 @@ class HooksRoot {
   async afterDelete(match, root, args, context, ast) {
     match.x = 1;
     let db = await root.db;
-    await db.collection("deleteInfo").remove({});
-    await db.collection("deleteInfo").insert({ deletedId: match._id, x: match.x });
+    await db.collection("deleteInfo").deleteMany({});
+    await db.collection("deleteInfo").insertOne({ deletedId: match._id, x: match.x });
   }
   adjustResults(results) {
     results.forEach(result => {
@@ -87,8 +87,8 @@ class Type2Hooks {
     obj.y++;
     let db = await root.db;
 
-    await db.collection("insertInfo").remove({});
-    await db.collection("insertInfo").insert({ insertedId: obj._id + "", y: obj.y });
+    await db.collection("insertInfo").deleteMany({});
+    await db.collection("insertInfo").insertOne({ insertedId: obj._id + "", y: obj.y });
   }
   beforeUpdate(filters, updates, root, args, context, ast) {
     if (args.Updates && args.Updates.field1 === "XYZ123") {
@@ -100,8 +100,8 @@ class Type2Hooks {
   async afterUpdate(filters, updates, root, args, context, ast) {
     updates.x++;
     let db = await root.db;
-    await db.collection("updateInfo").remove({});
-    await db.collection("updateInfo").insert({ updatedId: filters._id, x: updates.x });
+    await db.collection("updateInfo").deleteMany({});
+    await db.collection("updateInfo").insertOne({ updatedId: filters._id, x: updates.x });
   }
   beforeDelete(match, root, args, context, ast) {
     if (args._id == "591b74d036f369d06bb7781d") {
@@ -112,8 +112,8 @@ class Type2Hooks {
   async afterDelete(match, root, args, context, ast) {
     match.x++;
     let db = await root.db;
-    await db.collection("deleteInfo").remove({});
-    await db.collection("deleteInfo").insert({ deletedId: match._id, x: match.x });
+    await db.collection("deleteInfo").deleteMany({});
+    await db.collection("deleteInfo").insertOne({ deletedId: match._id, x: match.x });
   }
   adjustResults(results) {
     results.forEach(result => {

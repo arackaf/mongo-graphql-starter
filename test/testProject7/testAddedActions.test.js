@@ -8,11 +8,11 @@ const allNeighbors = [{ x: 12, y: 13 }, { x: 14, y: 15 }];
 
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
-  await db.collection("coordinates").insert(item);
+  await db.collection("coordinates").insertOne(item);
 });
 
 afterAll(async () => {
-  await db.collection("coordinates").remove({});
+  await db.collection("coordinates").deleteMany({});
   close();
 });
 
