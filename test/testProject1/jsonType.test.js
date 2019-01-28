@@ -7,7 +7,7 @@ beforeAll(async () => {
 });
 
 afterEach(async () => {
-  await db.collection("books").remove({});
+  await db.collection("books").deleteMany({});
 });
 
 afterAll(async () => {
