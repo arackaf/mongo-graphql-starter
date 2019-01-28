@@ -35,10 +35,7 @@ export default async function() {
   return {
     db,
     schema,
-    close: () => {
-      client.close();
-      db = null;
-    },
+    close: () => client.close(),
     queryAndMatchArray: options => queryAndMatchArray({ schema, db: () => db, ...options }),
     runMutation: options => runMutation({ schema, db: () => db, ...options })
   };

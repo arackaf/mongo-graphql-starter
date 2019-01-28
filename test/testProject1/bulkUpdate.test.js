@@ -10,7 +10,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  await db.collection("books").remove({});
+  await db.collection("books").deleteMany({});
   close();
   db = null;
 });

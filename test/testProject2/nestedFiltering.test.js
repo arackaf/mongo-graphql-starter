@@ -52,21 +52,21 @@ const comment5 = { text: "Comment 5", upVotes: 4, author: cauthorA };
 const comment6 = { text: "Comment 6", upVotes: 4, author: cauthorA };
 const comment7 = { text: "Comment 7", upVotes: 4, author: cauthorC };
 
-let db, schema, queryAndMatchArray;
+let db, schema, queryAndMatchArray, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray } = await spinUp());
+  ({ db, schema, queryAndMatchArray, close } = await spinUp());
   await Promise.all([
-    db.collection("blogs").insert({ title: "Blog 1", author: authorA, comments: [comment1, comment2, comment3] }),
-    db.collection("blogs").insert({ title: "Blog 2", author: authorA, comments: [] }),
-    db.collection("blogs").insert({ title: "Blog 3", author: authorB, comments: [comment4] }),
-    db.collection("blogs").insert({ title: "Blog 4", author: authorC, comments: [comment5, comment6] }),
-    db.collection("blogs").insert({ title: "Blog 5", author: authorC, comments: [comment7] })
+    db.collection("blogs").insertOne({ title: "Blog 1", author: authorA, comments: [comment1, comment2, comment3] }),
+    db.collection("blogs").insertOne({ title: "Blog 2", author: authorA, comments: [] }),
+    db.collection("blogs").insertOne({ title: "Blog 3", author: authorB, comments: [comment4] }),
+    db.collection("blogs").insertOne({ title: "Blog 4", author: authorC, comments: [comment5, comment6] }),
+    db.collection("blogs").insertOne({ title: "Blog 5", author: authorC, comments: [comment7] })
   ]);
 });
 
 afterAll(async () => {
-  await db.collection("blogs").remove({});
-  db.close();
+  await db.collection("blogs").deleteMany({});
+  close();
   db = null;
 });
 

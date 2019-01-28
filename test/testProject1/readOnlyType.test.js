@@ -10,7 +10,7 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  await db.collection("tagsReadonly").remove({});
+  await db.collection("tagsReadonly").deleteMany({});
   close();
   db = null;
 });
