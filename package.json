@@ -33,7 +33,7 @@
     "graphql": "14.0.2",
     "graphql-tools": "4.0.0",
     "jest": "23.6.0",
-    "mongodb": "2.2.31"
+    "mongodb": "^3.1.13"
   },
   "scripts": {
     "postinstall": "cd test/testProject1_NewDriver && npm install && cd ../testProject4_NewDriver && npm install",
