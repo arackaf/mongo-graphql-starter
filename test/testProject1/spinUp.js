@@ -25,13 +25,21 @@ export default async function() {
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
 
   let db, schema;
-  db = await MongoClient.connect(nextConnectionString());
+  let client = await MongoClient.connect(
+    nextConnectionString(),
+    { useNewUrlParser: true }
+  );
+  db = client.db(process.env.databaseName || "mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
   return {
     db,
     schema,
-    queryAndMatchArray: options => queryAndMatchArray({ schema, db, ...options }),
-    runMutation: options => runMutation({ schema, db, ...options })
+    close: () => {
+      client.close();
+      db = null;
+    },
+    queryAndMatchArray: options => queryAndMatchArray({ schema, db: () => db, ...options }),
+    runMutation: options => runMutation({ schema, db: () => db, ...options })
   };
 }
