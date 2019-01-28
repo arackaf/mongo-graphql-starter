@@ -6,13 +6,13 @@ beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   objA = { name: "a", strs: [] };
-  await db.collection("things").insert(objA);
-  await db.collection("things").insert({ name: "b", strs: ["adam", "bob", "brian"] });
-  await db.collection("things").insert({ name: "c", strs: ["mike"] });
+  await db.collection("things").insertOne(objA);
+  await db.collection("things").insertOne({ name: "b", strs: ["adam", "bob", "brian"] });
+  await db.collection("things").insertOne({ name: "c", strs: ["mike"] });
 });
 
 afterAll(async () => {
-  await db.collection("things").remove({});
+  await db.collection("things").deleteMany({});
   close();
   db = null;
 });

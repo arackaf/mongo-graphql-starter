@@ -4,15 +4,15 @@ let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("things").insert({ name: "a", ints: [] });
-  await db.collection("things").insert({ name: "b", ints: [1, 2, 3, 4] });
-  await db.collection("things").insert({ name: "c", ints: [3, 4, 5, 6] });
-  await db.collection("things").insert({ name: "d", ints: [5] });
-  await db.collection("things").insert({ name: "e", ints: [5, 6] });
+  await db.collection("things").insertOne({ name: "a", ints: [] });
+  await db.collection("things").insertOne({ name: "b", ints: [1, 2, 3, 4] });
+  await db.collection("things").insertOne({ name: "c", ints: [3, 4, 5, 6] });
+  await db.collection("things").insertOne({ name: "d", ints: [5] });
+  await db.collection("things").insertOne({ name: "e", ints: [5, 6] });
 });
 
 afterAll(async () => {
-  await db.collection("things").remove({});
+  await db.collection("things").deleteMany({});
   close();
   db = null;
 });

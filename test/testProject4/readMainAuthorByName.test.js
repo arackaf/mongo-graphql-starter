@@ -10,16 +10,16 @@ beforeAll(async () => {
   laura = { name: "Laura", birthday: new Date("1974-12-19") };
   mallory = { name: "Mallory", birthday: new Date("1956-08-02") };
 
-  await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insert(person)));
+  await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insertOne(person)));
 
-  await db.collection("books").insert({ title: "Book 1", pages: 100, mainAuthorName: adam.name });
-  await db.collection("books").insert({ title: "Book 2", pages: 150, mainAuthorName: adam.name });
-  await db.collection("books").insert({ title: "Book 3", pages: 200, mainAuthorName: katie.name });
+  await db.collection("books").insertOne({ title: "Book 1", pages: 100, mainAuthorName: adam.name });
+  await db.collection("books").insertOne({ title: "Book 2", pages: 150, mainAuthorName: adam.name });
+  await db.collection("books").insertOne({ title: "Book 3", pages: 200, mainAuthorName: katie.name });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  await db.collection("authors").remove({});
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
   close();
   db = null;
 });
