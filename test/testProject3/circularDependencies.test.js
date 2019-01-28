@@ -1,16 +1,16 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  await db.collection("authors").remove({});
-  await db.collection("tags").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("tags").deleteMany({});
+  close();
   db = null;
 });
 
