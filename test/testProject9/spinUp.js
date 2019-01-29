@@ -7,6 +7,8 @@ import glob from "glob";
 import fs from "fs";
 
 import * as projectSetupD from "./projectSetup";
+import dotenv from "dotenv";
+dotenv.config();
 
 export async function create() {
   await Promise.resolve(
@@ -28,7 +30,7 @@ export default async function() {
 
   let db, schema;
   let client = await MongoClient.connect(
-    nextConnectionString(),
+    process.env.Mongo4Addr,
     { useNewUrlParser: true }
   );
   db = client.db(process.env.databaseName || "mongo-graphql-starter");

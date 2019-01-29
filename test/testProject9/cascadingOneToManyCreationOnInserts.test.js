@@ -22,7 +22,7 @@ afterAll(async () => {
 
 test("Add books in new author", async () => {
   await runMutation({
-    mutation: `createAuthor(Author: {name: "Adam", books: [{title: "kill"}] }){Author{name}}`,
+    mutation: `createAuthor(Author: {name: "Adam", books: [{title: "Kill"}] }){Author{name}}`,
     result: "createAuthor",
     noValidation: true
   });
@@ -30,7 +30,7 @@ test("Add books in new author", async () => {
   await queryAndMatchArray({
     query: `{allAuthors{Authors{name, books{title}}}}`,
     coll: "allAuthors",
-    results: [{ name: "Adam", books: [] }]
+    results: []
   });
 
   await queryAndMatchArray({
