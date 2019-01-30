@@ -1,4 +1,4 @@
-    async update${objName}(root, args, context, ast) {
+export default ({ objName, table }) => `    async update${objName}(root, args, context, ast) {
       let db = await (typeof root.db === "function" ? root.db() : root.db);
       context.__mongodb = db;
       let { $match, $project } = decontructGraphqlQuery(args._id ? { _id: args._id } : {}, ast, ${objName}Metadata, "${objName}");
@@ -19,4 +19,4 @@
         ${objName}: result,
         success: true
       };
-    }
+    }`;
