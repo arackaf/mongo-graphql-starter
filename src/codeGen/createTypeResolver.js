@@ -4,6 +4,9 @@ import { TAB, TAB2 } from "./utilities";
 import { MongoIdType, StringType, StringArrayType, MongoIdArrayType } from "../dataTypes";
 
 import createItemTemplate from "./resolverTemplateMethods/createItem";
+import updateItemTemplate from "./resolverTemplateMethods/updateItem";
+import updateItemsTemplate from "./resolverTemplateMethods/updateItems";
+import updateItemsBulkTemplate from "./resolverTemplateMethods/updateItemsBulk";
 
 //fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/createItem.txt"), { encoding: "utf8" });
 
@@ -15,14 +18,12 @@ export default function createGraphqlResolver(objectToCreate, options) {
 
   let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.txt"), { encoding: "utf8" });
   let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.txt"), { encoding: "utf8" });
-  let updateItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItem.txt"), { encoding: "utf8" });
-  let updateItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItems.txt"), { encoding: "utf8" });
-  let updateItemsBulkTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/updateItemsBulk.txt"), { encoding: "utf8" });
   let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.txt"), { encoding: "utf8" });
   let hooksPath = `"../hooks"`;
   let readonly = objectToCreate.readonly;
 
   let objName = objectToCreate.__name;
+  let table = objectToCreate.table;
 
   if (options.hooks) {
     hooksPath = `"` + path.relative(options.modulePath, options.hooks).replace(/\\/g, "/") + `"`;
@@ -62,9 +63,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
     ...(!readonly
       ? [
           !overrides.has(`create${objName}`) ? createItemTemplate({ objName }) : "",
-          !overrides.has(`update${objName}`) ? updateItemTemplate : "",
-          !overrides.has(`update${objName}s`) ? updateItemsTemplate : "",
-          !overrides.has(`update${objName}sBulk`) ? updateItemsBulkTemplate : "",
+          !overrides.has(`update${objName}`) ? updateItemTemplate({ objName, table }) : "",
+          !overrides.has(`update${objName}s`) ? updateItemsTemplate({ objName, table }) : "",
+          !overrides.has(`update${objName}sBulk`) ? updateItemsBulkTemplate({ objName, table }) : "",
           !overrides.has(`delete${objName}`) ? deleteItemTemplate : ""
         ]
       : []),

@@ -1,14 +1,19 @@
-    async update${objName}sBulk(root, args, context, ast) {
+export default ({ objName, table }) => `    async update${objName}s(root, args, context, ast) {
       let db = await (typeof root.db === "function" ? root.db() : root.db);
       context.__mongodb = db;
-      let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName}Metadata);
+      let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}Metadata, "${objName}s");
       let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
 
       if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
         return { success: true };
       }
+      await setUpOneToManyRelationshipsForUpdate(args._ids, args, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
       await dbHelpers.runUpdate(db, "${table}", $match, updates, { multi: true });
       await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
-
-      return { success: true };
-    }
+      
+      let result = $project ? await load${objName}s(db, { $match, $project }, root, args, context, ast) : null;
+      return {
+        ${objName}s: result,
+        success: true
+      };
+    }`;
