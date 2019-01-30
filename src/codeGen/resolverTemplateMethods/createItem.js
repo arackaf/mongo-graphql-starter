@@ -1,4 +1,4 @@
-    async create${objName}(root, args, context, ast) {
+export default ({ objName }) => `    async create${objName}(root, args, context, ast) {
       let db = await (typeof root.db === "function" ? root.db() : root.db);
       context.__mongodb = db;
       let newObject = await newObjectFromArgs(args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
@@ -14,4 +14,4 @@
         success: true,
         ${objName}: result
       }
-    }
+    }`;
