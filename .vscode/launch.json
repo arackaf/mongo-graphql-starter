@@ -54,6 +54,13 @@
       "request": "launch",
       "name": "Launch 8",
       "program": "${workspaceRoot}\\test\\testProject8\\index.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 9",
+      "program": "${workspaceRoot}/test/testProject9/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     }
   ]
 }

@@ -36,7 +36,7 @@ test("Add books in new author", async () => {
   await queryAndMatchArray({
     query: `{allBooks{Books{title}}}`,
     coll: "allBooks",
-    results: [] //just one
+    results: []
   });
 });
 

@@ -6,16 +6,16 @@ import path from "path";
 import glob from "glob";
 import fs from "fs";
 
-import * as projectSetupD from "./projectSetup";
+import * as projectSetup9 from "./projectSetup";
 import dotenv from "dotenv";
 dotenv.config();
 
 export async function create() {
   await Promise.resolve(
-    createGraphqlSchema(projectSetupD, path.resolve("./test/testProject4"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
+    createGraphqlSchema(projectSetup9, path.resolve("./test/testProject9"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
   ).then(() => {
     if (true || process.env.InCI) {
-      glob.sync("./test/testProject4/graphQL/**/resolver.js").forEach(f => {
+      glob.sync("./test/testProject9/graphQL/**/resolver.js").forEach(f => {
         let newFile = fs.readFileSync(f, { encoding: "utf8" }).replace(/"mongo-graphql-starter"/, `"../../../../src/module"`);
         fs.writeFileSync(f, newFile);
       });
@@ -24,7 +24,7 @@ export async function create() {
 }
 
 export default async function() {
-  //await create();
+  await create();
 
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
 
