@@ -274,9 +274,6 @@ function queriesForField(fieldName, realFieldType) {
   let result = [];
   let fieldType = realFieldType === DateType || realFieldType === MongoIdType ? "String" : realFieldType;
   switch (realFieldType) {
-    case BoolType:
-      result.push(`${fieldName}: Boolean`);
-      break;
     case StringType:
       result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`, `${fieldName}_regex`].map(p => `${p}: String`));
       break;
