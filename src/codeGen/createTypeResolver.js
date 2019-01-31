@@ -34,7 +34,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
   let overrides = new Set(extras.overrides || []);
   let resolverSources = extras.resolverSources || [];
   let imports = [
-    `import { insertUtilities, queryUtilities, projectUtilities, updateUtilities, processHook, dbHelpers } from "mongo-graphql-starter";`,
+    `import { insertUtilities, queryUtilities, projectUtilities, updateUtilities, processHook, dbHelpers, resolverHelpers } from "mongo-graphql-starter";`,
     `import hooksObj from ${hooksPath};`,
     `const { decontructGraphqlQuery, cleanUpResults } = queryUtilities;`,
     `const { setUpOneToManyRelationships, newObjectFromArgs } = insertUtilities;`,
