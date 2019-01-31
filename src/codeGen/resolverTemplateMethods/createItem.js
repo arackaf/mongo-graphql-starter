@@ -1,6 +1,7 @@
+import { getDbObjects } from "../mutationHelpers";
+
 export default ({ objName }) => `    async create${objName}(root, args, context, ast) {
-      let db = await (typeof root.db === "function" ? root.db() : root.db);
-      context.__mongodb = db;
+      ${getDbObjects()}
       let newObject = await newObjectFromArgs(args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
       let requestMap = parseRequestedFields(ast, "${objName}");
       let $project = requestMap.size ? getMongoProjection(requestMap, ${objName}Metadata, args) : null;
