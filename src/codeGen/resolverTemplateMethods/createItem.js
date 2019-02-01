@@ -4,7 +4,7 @@ export default ({ objName }) =>
   `    async create${objName}(root, args, context, ast) {
       ${getDbObjects({ objName, create: true })}
       try {
-        let newObject = await newObjectFromArgs(args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
+        let newObject = await newObjectFromArgs(args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast, session });
         let requestMap = parseRequestedFields(ast, "${objName}");
         let $project = requestMap.size ? getMongoProjection(requestMap, ${objName}Metadata, args) : null;
 
