@@ -2,7 +2,7 @@ import { getDbObjects, mutationComplete, mutationError, mutationOver, mutationMe
 
 export default ({ objName }) =>
   `    async create${objName}(root, args, context, ast) {
-      ${getDbObjects()}
+      ${getDbObjects({ objName, create: true })}
       try {
         let newObject = await newObjectFromArgs(args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
         let requestMap = parseRequestedFields(ast, "${objName}");
@@ -19,7 +19,7 @@ export default ({ objName }) =>
         return {
           ${objName}: result,
           success: true,
-          ${mutationMeta()}
+          ${mutationMeta(objName)}
         }
       } ${mutationError()} ${mutationOver()}
     }`;

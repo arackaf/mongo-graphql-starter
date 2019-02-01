@@ -1,7 +1,7 @@
 import { getDbObjects } from "../mutationHelpers";
 
 export default ({ objName, table }) => `    async update${objName}s(root, args, context, ast) {
-      ${getDbObjects()}
+      ${getDbObjects({ objName })}
       let { $match, $project } = decontructGraphqlQuery({ _id_in: args._ids }, ast, ${objName}Metadata, "${objName}s");
       let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast });
 
