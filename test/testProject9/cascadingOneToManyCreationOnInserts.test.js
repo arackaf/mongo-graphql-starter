@@ -40,6 +40,21 @@ test("Add books in new author", async () => {
   });
 });
 
+test("Add author - no transaction", async () => {
+  let result = await runMutation({
+    mutation: `createAuthor(Author: {name: "Adam" }){Meta {transaction}}`,
+    rawResult: "createAuthor"
+  });
+
+  expect(result).toEqual({ Meta: { transaction: false } });
+
+  await queryAndMatchArray({
+    query: `{allAuthors{Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam" }]
+  });
+});
+
 // test("Add books entry in new author, and nested objects A", async () => {
 //   await runMutation({
 //     mutation: `createAuthor(Author: {
