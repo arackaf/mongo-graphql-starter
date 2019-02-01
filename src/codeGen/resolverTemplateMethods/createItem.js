@@ -1,4 +1,4 @@
-import { getDbObjects, mutationComplete, mutationError, mutationOver } from "../mutationHelpers";
+import { getDbObjects, mutationComplete, mutationError, mutationOver, mutationMeta } from "../mutationHelpers";
 
 export default ({ objName }) =>
   `    async create${objName}(root, args, context, ast) {
@@ -17,8 +17,9 @@ export default ({ objName }) =>
 
         let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }, root, args, context, ast))[0] : null;
         return {
+          ${objName}: result,
           success: true,
-          ${objName}: result
+          ${mutationMeta()}
         }
       } ${mutationError()} ${mutationOver()}
     }`;
