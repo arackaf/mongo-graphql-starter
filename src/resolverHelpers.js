@@ -9,7 +9,7 @@ export const startDbMutation = async (root, args, context, objName, typeMetadata
     if (create && mutationRequiresTransaction({ typeMetadata, newObjectArgs: args[objName] })) {
       transaction = true;
     }
-    if (update) {
+    if (update && mutationRequiresTransaction({ typeMetadata, updateObjectArgs: args })) {
       transaction = true;
     }
   }
@@ -39,9 +39,11 @@ export const mutationOver = session => {
   }
 };
 
-export const mutationRequiresTransaction = ({ typeMetadata, newObjectArgs }) => {
+export const mutationRequiresTransaction = ({ typeMetadata, newObjectArgs, updateObjectArgs }) => {
   if (newObjectArgs) {
     return newObjectMutationRequiresTransaction(typeMetadata, newObjectArgs);
+  } else if (updateObjectArgs) {
+    return updateObjectMutationRequiresTransaction(typeMetadata, updateObjectArgs);
   }
 };
 
@@ -62,6 +64,19 @@ export const newObjectMutationRequiresTransaction = (typeMetadata, args) => {
         if (args[k]) {
           return true;
         }
+      }
+    }
+  }
+  return false;
+};
+
+export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
+  let relationships = typeMetadata.relationships || {};
+  for (let k of Object.keys(relationships)) {
+    let relationship = relationships[k];
+    if (relationship.oneToMany) {
+      if (args[`${k}_ADD`]) {
+        return true;
       }
     }
   }

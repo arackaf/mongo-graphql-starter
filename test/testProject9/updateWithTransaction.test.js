@@ -45,16 +45,15 @@ test("Add books in author update", async () => {
 });
 
 test("Update author - no transaction", async () => {
+  let author = await runMutation({
+    mutation: `createAuthor(Author: {name: "Adam" }){Author {_id}}`,
+    result: "createAuthor"
+  });
+
   let result = await runMutation({
-    mutation: `createAuthor(Author: {name: "Adam" }){Meta {transaction}}`,
-    rawResult: "createAuthor"
+    mutation: `updateAuthor(_id: "${author._id}", Updates: {name: "New"}){Meta{transaction}}`,
+    rawResult: "updateAuthor"
   });
 
   expect(result).toEqual({ Meta: { transaction: false } });
-
-  await queryAndMatchArray({
-    query: `{allAuthors{Authors{name}}}`,
-    coll: "allAuthors",
-    results: [{ name: "Adam" }]
-  });
 });
