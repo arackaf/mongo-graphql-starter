@@ -15,12 +15,22 @@ export default {
       if (/^KILL/i.test(obj.name)) {
         throw "Don't insert author";
       }
+    },
+    afterUpdate(match, updates, root, args, context, ast) {
+      if (args.Updates && args.Updates.name && /^KILL/i.test(args.Updates.name)) {
+        throw "Kill author update";
+      }
     }
   },
   Book: {
     beforeInsert(obj, root, args, context, ast) {
       if (/^KILL/i.test(obj.title)) {
         throw "Don't insert book";
+      }
+    },
+    afterUpdate(match, updates, root, args, context, ast) {
+      if (args.Updates && args.Updates.title && /^KILL/i.test(args.Updates.title)) {
+        throw "Kill book update";
       }
     }
   }

@@ -2,7 +2,7 @@ import { getDbObjects, mutationComplete, mutationError, mutationOver, mutationMe
 
 export default ({ objName }) =>
   `    async create${objName}(root, args, context, ast) {
-      ${getDbObjects({ objName, create: true })}
+      ${getDbObjects({ objName, op: "create" })}
       try {
         let newObject = await newObjectFromArgs(args.${objName}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast, session });
         let requestMap = parseRequestedFields(ast, "${objName}");
