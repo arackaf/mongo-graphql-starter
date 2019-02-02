@@ -1,4 +1,4 @@
-import { getDbObjects, mutationError, mutationOver } from "../mutationHelpers";
+import { getDbObjects, mutationError, mutationOver, mutationMeta } from "../mutationHelpers";
 
 export default ({ objName, table }) => `    async update${objName}(root, args, context, ast) {
       ${getDbObjects({ objName, op: "update" })}
@@ -19,7 +19,8 @@ export default ({ objName, table }) => `    async update${objName}(root, args, c
         let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }, root, args, context, ast))[0] : null;
         return {
           ${objName}: result,
-          success: true
+          success: true,
+          ${mutationMeta()}
         };
       } ${mutationError()} ${mutationOver()}
     }`;

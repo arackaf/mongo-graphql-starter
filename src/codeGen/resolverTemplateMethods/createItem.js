@@ -19,7 +19,7 @@ export default ({ objName }) =>
         return {
           ${objName}: result,
           success: true,
-          ${mutationMeta(objName)}
+          ${mutationMeta()}
         }
       } ${mutationError()} ${mutationOver()}
     }`;
