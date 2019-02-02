@@ -51,19 +51,6 @@ export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetad
   return newObjects;
 }
 
-export async function runInsert(db, table, newObject) {
-  try {
-    await db.collection(table).insertOne(newObject);
-    return newObject;
-  } catch (err) {
-    if (err instanceof MongoError) {
-      throw `The following error was thrown by Mongo when attempting to perform this insertion: ${err.toString()}`;
-    } else {
-      throw err;
-    }
-  }
-}
-
 export async function runMultipleInserts(db, table, newObjects, session) {
   try {
     let options = {};
