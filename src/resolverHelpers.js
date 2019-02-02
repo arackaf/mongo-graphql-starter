@@ -1,4 +1,4 @@
-export const startDbMutation = async (root, args, context, objName, typeMetadata, { create }) => {
+export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update }) => {
   let [db, client] = await Promise.all([
     typeof root.db === "function" ? await root.db() : root.db,
     typeof root.client === "function" ? await root.client() : root.client
@@ -7,6 +7,9 @@ export const startDbMutation = async (root, args, context, objName, typeMetadata
   let transaction = false;
   if (session && session.startTransaction) {
     if (create && mutationRequiresTransaction({ typeMetadata, newObjectArgs: args[objName] })) {
+      transaction = true;
+    }
+    if (update) {
       transaction = true;
     }
   }
