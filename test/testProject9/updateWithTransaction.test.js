@@ -20,16 +20,21 @@ afterAll(async () => {
   db = null;
 });
 
-test("Add books in new author", async () => {
+test("Add books in author update", async () => {
+  let author = await runMutation({
+    mutation: `createAuthor(Author: {name: "Adam" }){Author{_id name}}`,
+    result: "createAuthor"
+  });
+
   await runMutation({
-    mutation: `createAuthor(Author: {name: "Adam", books: [{title: "Kill"}] }){Author{name}}`,
+    mutation: `updateAuthor(_id: "${author._id}", Updates: {name: "Kill"}, books_ADD: [{title: "Some book"}]){Author{name, books{title}}}`,
     noValidation: true
   });
 
   await queryAndMatchArray({
-    query: `{allAuthors{Authors{name, books{title}}}}`,
+    query: `{allAuthors{Authors{name}}}`,
     coll: "allAuthors",
-    results: []
+    results: [{ name: "Adam" }]
   });
 
   await queryAndMatchArray({
@@ -39,7 +44,7 @@ test("Add books in new author", async () => {
   });
 });
 
-test("Add author - no transaction", async () => {
+test("Update author - no transaction", async () => {
   let result = await runMutation({
     mutation: `createAuthor(Author: {name: "Adam" }){Meta {transaction}}`,
     rawResult: "createAuthor"
@@ -51,24 +56,5 @@ test("Add author - no transaction", async () => {
     query: `{allAuthors{Authors{name}}}`,
     coll: "allAuthors",
     results: [{ name: "Adam" }]
-  });
-});
-
-test("Update author - with transaction", async () => {
-  let result = await runMutation({
-    mutation: `createAuthor(Author: {name: "Kill", subjects: [{name: "subject1"}] }){Author {_id}}`,
-    noValidation: true
-  });
-
-  await queryAndMatchArray({
-    query: `{allAuthors{Authors{name, books{title}}}}`,
-    coll: "allAuthors",
-    results: []
-  });
-
-  await queryAndMatchArray({
-    query: `{allSubjects{Subjects{name}}}`,
-    coll: "allSubjects",
-    results: []
   });
 });
