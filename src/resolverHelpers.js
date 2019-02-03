@@ -78,6 +78,10 @@ export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
       if (args[`${k}_ADD`]) {
         return true;
       }
+    } else if (relationship.__isObject) {
+      if (args.Updates[`${k}_SET`]) {
+        return true;
+      }
     }
   }
   return false;
