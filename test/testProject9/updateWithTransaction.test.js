@@ -68,6 +68,30 @@ test("Add mainSubject in author update", async () => {
   });
 });
 
+test("Add subject in author update", async () => {
+  let author = await runMutation({
+    mutation: `createAuthor(Author: {name: "Adam" }){Author{_id name}}`,
+    result: "createAuthor"
+  });
+
+  await runMutation({
+    mutation: `updateAuthor(_id: "${author._id}", Updates: {name: "Kill", subjects_ADD: {name: "S1"}}){Author{name, books{title}}}`,
+    noValidation: true
+  });
+
+  await queryAndMatchArray({
+    query: `{allAuthors{Authors{name}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam" }]
+  });
+
+  await queryAndMatchArray({
+    query: `{allSubjects{Subjects{name}}}`,
+    coll: "allSubjects",
+    results: []
+  });
+});
+
 test("Update author - no transaction", async () => {
   let author = await runMutation({
     mutation: `createAuthor(Author: {name: "Adam" }){Author {_id}}`,
