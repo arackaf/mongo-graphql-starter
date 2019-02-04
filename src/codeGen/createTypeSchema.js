@@ -57,9 +57,9 @@ ${[
       ? [
           createType(`${name}QueryResults`, [`${name}s: [${name}]`, `Meta: QueryResultsMetadata`]),
           createType(`${name}SingleQueryResult`, [`${name}: ${name}`]),
-          createType(`${name}MutationResult`, [`success: Boolean`, `${name}: ${name}`]),
-          createType(`${name}MutationResultMulti`, [`success: Boolean`, `${name}s: [${name}]`]),
-          createType(`${name}BulkMutationResult`, [`success: Boolean`])
+          createType(`${name}MutationResult`, [`${name}: ${name}`, `success: Boolean`, "Meta: MutationResultInfo"]),
+          createType(`${name}MutationResultMulti`, [`${name}s: [${name}]`, `success: Boolean`, "Meta: MutationResultInfo"]),
+          createType(`${name}BulkMutationResult`, [`success: Boolean`, "Meta: MutationResultInfo"])
         ]
       : []),
     objectToCreate.hasOneToManyRelationship
@@ -274,9 +274,6 @@ function queriesForField(fieldName, realFieldType) {
   let result = [];
   let fieldType = realFieldType === DateType || realFieldType === MongoIdType ? "String" : realFieldType;
   switch (realFieldType) {
-    case BoolType:
-      result.push(`${fieldName}: Boolean`);
-      break;
     case StringType:
       result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`, `${fieldName}_regex`].map(p => `${p}: String`));
       break;
