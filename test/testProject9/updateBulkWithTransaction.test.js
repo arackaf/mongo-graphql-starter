@@ -20,30 +20,6 @@ afterAll(async () => {
   db = null;
 });
 
-test("Add books in author update", async () => {
-  let author = await runMutation({
-    mutation: `createAuthor(Author: {name: "Adam" }){Author{_id name}}`,
-    result: "createAuthor"
-  });
-
-  await runMutation({
-    mutation: `updateAuthors(_ids: ["${author._id}"], Updates: {name: "Kill"}, books_ADD: [{title: "Some book"}]){success}`,
-    noValidation: true
-  });
-
-  await queryAndMatchArray({
-    query: `{allAuthors{Authors{name}}}`,
-    coll: "allAuthors",
-    results: [{ name: "Adam" }]
-  });
-
-  await queryAndMatchArray({
-    query: `{allBooks{Books{title}}}`,
-    coll: "allBooks",
-    results: []
-  });
-});
-
 test("Add mainSubject in author update", async () => {
   let author = await runMutation({
     mutation: `createAuthor(Author: {name: "Adam" }){Author{_id name}}`,
@@ -51,7 +27,7 @@ test("Add mainSubject in author update", async () => {
   });
 
   await runMutation({
-    mutation: `updateAuthors(_ids: ["${author._id}"], Updates: {name: "Kill", mainSubject_SET: {name: "S1"}}){success}`,
+    mutation: `updateAuthorsBulk(Match: {_id: "${author._id}"}, Updates: {name: "Kill", mainSubject_SET: {name: "S1"}}){success}`,
     noValidation: true
   });
 
@@ -75,7 +51,7 @@ test("Add subject in author update", async () => {
   });
 
   await runMutation({
-    mutation: `updateAuthors(_ids: ["${author._id}"], Updates: {name: "Kill", subjects_ADD: {name: "S1"}}){success}`,
+    mutation: `updateAuthorsBulk(Match: { _id: "${author._id}" }, Updates: {name: "Kill", subjects_ADD: {name: "S1"}}){success}`,
     noValidation: true
   });
 
@@ -99,8 +75,8 @@ test("Update author - no transaction", async () => {
   });
 
   let result = await runMutation({
-    mutation: `updateAuthors(_ids: ["${author._id}"], Updates: {name: "New"}){Meta{transaction}}`,
-    rawResult: "updateAuthors"
+    mutation: `updateAuthorsBulk(Match: {_id: "${author._id}"}, Updates: {name: "New"}){Meta{transaction}}`,
+    rawResult: "updateAuthorsBulk"
   });
 
   expect(result).toEqual({ Meta: { transaction: false } });
