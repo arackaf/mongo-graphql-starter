@@ -67,8 +67,16 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
   }
 }
 
-export async function runMutation({ schema, db, mutation, variables, result, rawResult, expectedError }) {
-  let mutationResult = await graphql(schema, `mutation{${mutation}}`, { db }, {});
+export async function runMutation({ schema, db, client, mutation, variables, noValidation, result, rawResult, expectedError }) {
+  if (mutation == null) {
+    throw "NO MUTATION PASSED IN";
+  }
+
+  let mutationResult = await graphql(schema, `mutation{${mutation}}`, { db, client }, {});
+
+  if (noValidation) {
+    return;
+  }
 
   if (rawResult) {
     return mutationResult.data[rawResult];

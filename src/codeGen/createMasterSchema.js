@@ -9,6 +9,11 @@ export default function createMasterSchema(names, namesWithTables, namesWithoutT
 export default \`
   scalar JSON
 
+  type MutationResultInfo {
+    transaction: Boolean,
+    elapsedTime: Int
+  }
+
   type QueryResultsMetadata {
     count: Int
   }
