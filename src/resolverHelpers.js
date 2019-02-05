@@ -1,3 +1,5 @@
+import processHook from "./processHook";
+
 export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update }) => {
   let [db, client] = await Promise.all([
     typeof root.db === "function" ? await root.db() : root.db,
@@ -89,4 +91,22 @@ export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
     }
   }
   return false;
+};
+
+export const cleanUpRelationshipArrayAfterDelete = async (_id, hooksObj, typeName, dbInfo, graphQLPacket) => {
+  let { root, args, context, ast } = graphQLPacket;
+  let { db, dbHelpers, table, keyField, asString, session } = dbInfo;
+  let _ids = Array.isArray(_id) ? _id : [_id];
+
+  if (asString) {
+    _ids = _ids.map(_id => "" + _id);
+  }
+  let $match = { [keyField]: { $in: _ids } };
+  let updates = { $pull: { [keyField]: { $in: _ids } } };
+
+  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, root, args, context, ast)) === false) {
+    return { success: true };
+  }
+  await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
+  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, root, args, context, ast);
 };

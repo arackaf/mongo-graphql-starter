@@ -10,5 +10,6 @@
       }
       await dbHelpers.runDelete(db, "${table}", $match);
       await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
+      ${relationshipCleanup}
       return true;
     }
