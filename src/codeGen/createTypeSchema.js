@@ -72,7 +72,10 @@ ${[
       : null,
     createInput(`${name}Input`, [
       ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
-      ...Object.keys(relationships).map(k => `${k}: ${relationshipType(relationships[k], true)}`)
+      ...Object.keys(relationships).map(k => {
+        if (relationships[k].readonly) return '';
+        else return `${k}: ${relationshipType(relationships[k], true)}`
+      })
     ]),
     createInput(`${name}MutationInput`, [
       ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
