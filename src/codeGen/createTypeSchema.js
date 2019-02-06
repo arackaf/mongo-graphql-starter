@@ -66,16 +66,15 @@ ${[
     ? createInput(`${name}InputLocal`, [
         ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
         ...Object.entries(relationships)
-          .filter(([k, rel]) => !rel.oneToMany)
+          .filter(([k, rel]) => !rel.readonly && !rel.oneToMany)
           .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
       ])
     : null,
   createInput(`${name}Input`, [
     ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
-    ...Object.keys(relationships).map(k => {
-      if (relationships[k].readonly) return "";
-      else return `${k}: ${relationshipType(relationships[k], true)}`;
-    })
+    ...Object.entries(relationships)
+      .filter(([k, rel]) => !rel.readonly)
+      .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
   ]),
   createInput(`${name}MutationInput`, [
     ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
