@@ -48,52 +48,52 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   return `${imports.length ? imports.join("\n") + "\n\n" : ""}export const type = \`
   
 ${[
-    createType(name, [
-      ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k])}`),
-      ...Object.keys(resolvedFields).map(k => `${k}: ${resolvedFields[k]}`),
-      ...relationshipEntries.map(relationshipResolver)
-    ]),
-    ...(objectToCreate.table
-      ? [
-          createType(`${name}QueryResults`, [`${name}s: [${name}]`, `Meta: QueryResultsMetadata`]),
-          createType(`${name}SingleQueryResult`, [`${name}: ${name}`]),
-          createType(`${name}MutationResult`, [`${name}: ${name}`, `success: Boolean`, "Meta: MutationResultInfo"]),
-          createType(`${name}MutationResultMulti`, [`${name}s: [${name}]`, `success: Boolean`, "Meta: MutationResultInfo"]),
-          createType(`${name}BulkMutationResult`, [`success: Boolean`, "Meta: MutationResultInfo"])
-        ]
-      : []),
-    objectToCreate.hasOneToManyRelationship
-      ? createInput(`${name}InputLocal`, [
-          ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
-          ...Object.entries(relationships)
-            .filter(([k, rel]) => !rel.oneToMany)
-            .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
-        ])
-      : null,
-    createInput(`${name}Input`, [
-      ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
-      ...Object.keys(relationships).map(k => {
-        if (relationships[k].readonly) return '';
-        else return `${k}: ${relationshipType(relationships[k], true)}`
-      })
-    ]),
-    createInput(`${name}MutationInput`, [
-      ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
-      ...Object.entries(relationships)
-        .filter(([k, rel]) => !rel.oneToMany)
-        .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
-    ]),
-    objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
-    createInput(
-      `${name}Sort`,
-      Object.keys(fields)
-        .filter(k => objectToCreate.fields[k] !== JSONType)
-        .map(k => `${k}: Int`)
-    ),
-    createInput(`${name}Filters`, allQueryFields.concat([`OR: [${name}Filters]`]))
-  ]
-    .filter(s => s)
-    .join("\n\n")}
+  createType(name, [
+    ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k])}`),
+    ...Object.keys(resolvedFields).map(k => `${k}: ${resolvedFields[k]}`),
+    ...relationshipEntries.map(relationshipResolver)
+  ]),
+  ...(objectToCreate.table
+    ? [
+        createType(`${name}QueryResults`, [`${name}s: [${name}]`, `Meta: QueryResultsMetadata`]),
+        createType(`${name}SingleQueryResult`, [`${name}: ${name}`]),
+        createType(`${name}MutationResult`, [`${name}: ${name}`, `success: Boolean`, "Meta: MutationResultInfo"]),
+        createType(`${name}MutationResultMulti`, [`${name}s: [${name}]`, `success: Boolean`, "Meta: MutationResultInfo"]),
+        createType(`${name}BulkMutationResult`, [`success: Boolean`, "Meta: MutationResultInfo"])
+      ]
+    : []),
+  objectToCreate.hasOneToManyRelationship
+    ? createInput(`${name}InputLocal`, [
+        ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+        ...Object.entries(relationships)
+          .filter(([k, rel]) => !rel.oneToMany)
+          .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
+      ])
+    : null,
+  createInput(`${name}Input`, [
+    ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+    ...Object.keys(relationships).map(k => {
+      if (relationships[k].readonly) return "";
+      else return `${k}: ${relationshipType(relationships[k], true)}`;
+    })
+  ]),
+  createInput(`${name}MutationInput`, [
+    ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
+    ...Object.entries(relationships)
+      .filter(([k, rel]) => !rel.oneToMany)
+      .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
+  ]),
+  objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
+  createInput(
+    `${name}Sort`,
+    Object.keys(fields)
+      .filter(k => objectToCreate.fields[k] !== JSONType)
+      .map(k => `${k}: Int`)
+  ),
+  createInput(`${name}Filters`, allQueryFields.concat([`OR: [${name}Filters]`]))
+]
+  .filter(s => s)
+  .join("\n\n")}
   
 \`;
   
