@@ -1,4 +1,5 @@
 import processHook from "./processHook";
+import { ObjectId } from "mongodb";
 
 export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update }) => {
   let [db, client] = await Promise.all([
@@ -97,10 +98,8 @@ export const cleanUpRelationshipArrayAfterDelete = async (_id, hooksObj, typeNam
   let { root, args, context, ast } = graphQLPacket;
   let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
   let _ids = Array.isArray(_id) ? _id : [_id];
+  _ids = _ids.map(_id => (isString ? "" + _id : ObjectId(_id)));
 
-  if (isString) {
-    _ids = _ids.map(_id => "" + _id);
-  }
   let $match = { [keyField]: { $in: _ids } };
   let updates = { $pull: { [keyField]: { $in: _ids } } };
 
@@ -115,11 +114,10 @@ export const cleanUpRelationshipObjectAfterDelete = async (_id, hooksObj, typeNa
   let { root, args, context, ast } = graphQLPacket;
   let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
 
-  if (isString) {
-    _id = "" + _id;
-  }
+  _id = isString ? "" + _id : ObjectId(_id);
+
   let $match = { [keyField]: _id };
-  let updates = { $set: { [keyField]: null } };
+  let updates = { $unset: { [keyField]: "" } };
 
   if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, root, args, context, ast)) === false) {
     return { success: true };

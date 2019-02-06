@@ -63,7 +63,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
   Object.keys(objectToCreate.relationships).forEach(k => {
     let relationship = objectToCreate.relationships[k];
     let keyType = relationship.type.fields[relationship.keyField];
+
     let keyTypeIsArray = /Array/g.test(keyType);
+    let keyTypeIsString = /String/g.test(keyType);
 
     if (relationship.fkField === "_id") {
       if (keyTypeIsArray) {
@@ -73,7 +75,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
         $match._id,
         hooksObj,
         "${objName}",
-        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${isString}, session: null },
+        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${keyTypeIsString}, session: null },
         { root, args, context, ast }
       );`
         );
@@ -84,7 +86,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
         $match._id,
         hooksObj,
         "${objName}",
-        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${isString}, session: null },
+        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${keyTypeIsString}, session: null },
         { root, args, context, ast }
       );`
         );
