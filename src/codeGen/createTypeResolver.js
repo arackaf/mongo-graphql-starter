@@ -62,17 +62,33 @@ export default function createGraphqlResolver(objectToCreate, options) {
   let deleteCleanups = [];
   Object.keys(objectToCreate.relationships).forEach(k => {
     let relationship = objectToCreate.relationships[k];
-    if (relationship.fkField === "_id" && relationship.__isArray) {
-      let asString = true;
-      deleteCleanups.push(
-        `resolverHelpers.cleanUpRelationshipArrayAfterDelete(
-        $match._id, 
-        hooksObj, 
-        "${objName}", 
-        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", asString: ${asString}, session: null },
+    let keyType = relationship.type.fields[relationship.keyField];
+    let keyTypeIsArray = /Array/g.test(keyType);
+
+    if (relationship.fkField === "_id") {
+      if (keyTypeIsArray) {
+        let isString = true;
+        deleteCleanups.push(
+          `await resolverHelpers.cleanUpRelationshipArrayAfterDelete(
+        $match._id,
+        hooksObj,
+        "${objName}",
+        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${isString}, session: null },
         { root, args, context, ast }
       );`
-      );
+        );
+      } else {
+        let isString = true;
+        deleteCleanups.push(
+          `await resolverHelpers.cleanUpRelationshipObjectAfterDelete(
+        $match._id,
+        hooksObj,
+        "${objName}",
+        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${isString}, session: null },
+        { root, args, context, ast }
+      );`
+        );
+      }
     }
   });
 
@@ -97,6 +113,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
   if (objectToCreate.relationships) {
     Object.keys(objectToCreate.relationships).forEach((relationshipName, index, all) => {
       let relationship = objectToCreate.relationships[relationshipName];
+      let foreignKeyType = objectToCreate.fields[relationship.fkField];
+      let keyType = relationship.type.fields[relationship.keyField];
+      let keyTypeIsArray = /Array/g.test(keyType);
 
       if (!typeImports.has(relationship.type.__name)) {
         typeImports.add(relationship.type.__name);
@@ -117,8 +136,6 @@ export default function createGraphqlResolver(objectToCreate, options) {
       if (relationship.__isArray) {
         let template = relationship.manyToMany ? projectManyToManyResolverTemplate : projectOneToManyResolverTemplate;
         let destinationKeyType = relationship.type.fields[relationship.keyField];
-        let foreignKeyType = objectToCreate.fields[relationship.fkField];
-        let keyType = relationship.type.fields[relationship.keyField];
 
         let mapping = "";
         if (foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType) {
@@ -127,9 +144,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
           mapping = "id => X";
         }
 
-        let lookupSetContents = /Array/g.test(keyType)
-          ? `result.${relationship.keyField}.map(k => k + "")`
-          : `[result.${relationship.keyField} + ""]`;
+        let lookupSetContents = keyTypeIsArray ? `result.${relationship.keyField}.map(k => k + "")` : `[result.${relationship.keyField} + ""]`;
 
         if (mapping) {
           if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
