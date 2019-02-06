@@ -11,15 +11,19 @@ let author1 = { name: "Adam" };
 let author2 = { name: "Laura" };
 let author3 = { name: "Katie" };
 
-beforeEach(async () => {
+beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runQuery, runMutation, close } = await spinUp());
+});
 
+beforeEach(async () => {
   await db.collection("authors").insertMany([author1, author2, author3]);
 
   book1.authorIds = ["" + author3._id];
+  book1.mainAuthorId = "" + author3._id;
   book2.authorIds = ["" + author1._id, "" + author2._id];
   book3.authorIds = ["" + author1._id, "" + author2._id];
   book4.authorIds = ["" + author1._id, "" + author3._id];
+  book4.mainAuthorId = "" + author2._id;
   await db.collection("books").insertMany([book1, book2, book3, book4]);
 });
 
@@ -35,7 +39,7 @@ afterAll(async () => {
   db = null;
 });
 
-test("Add books in new author", async () => {
+test("authors relationship's fk cleaned up on author delete", async () => {
   expect(typeof book1.title).toBe("string");
   await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}")`,
@@ -51,5 +55,18 @@ test("Add books in new author", async () => {
     query: `{getBook(_id: "${book4._id}"){Book{title, authorIds}}}`,
     coll: "getBook",
     results: { title: "book4", authorIds: ["" + author1._id] }
+  });
+});
+
+test("mainAuthor relationship's fk cleaned up on author delete", async () => {
+  await runMutation({
+    mutation: `deleteAuthor(_id: "${author3._id}")`,
+    result: "deleteAuthor"
+  });
+
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book1._id}"){Book{title, mainAuthorId}}}`,
+    coll: "getBook",
+    results: { title: "book1", mainAuthorId: null }
   });
 });
