@@ -791,6 +791,7 @@ For `one-to-many` relationships, after creating new objects using the `create<Ty
 | `keyField`            | `_id`     | The field that will be used to look up related objects in their collection. |
 | `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
 | `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, regardless of `fkField` and `keyField`.  |
+| `readonly`            | (none)    | Specify `true` to set the relationship only in output type.  |
 
 ### Using relationships
 
