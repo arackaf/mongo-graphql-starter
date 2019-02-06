@@ -72,6 +72,11 @@ test("authors relationship's fk cleaned up on author delete", async () => {
     coll: "getBook",
     results: { title: "book4", authorIds: ["" + author1._id] }
   });
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book3._id}"){Book{title, authorIds}}}`,
+    coll: "getBook",
+    results: { title: "book3", authorIds: ["" + author1._id, "" + author2._id] }
+  });
 });
 
 test("mainAuthor relationship's fk cleaned up on author delete", async () => {
@@ -84,5 +89,11 @@ test("mainAuthor relationship's fk cleaned up on author delete", async () => {
     query: `{getBook(_id: "${book1._id}"){Book{title, mainAuthorId}}}`,
     coll: "getBook",
     results: { title: "book1", mainAuthorId: null }
+  });
+
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book4._id}"){Book{title, mainAuthorId}}}`,
+    coll: "getBook",
+    results: { title: "book4", mainAuthorId: "" + author2._id }
   });
 });
