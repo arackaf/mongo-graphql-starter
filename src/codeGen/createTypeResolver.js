@@ -60,39 +60,48 @@ export default function createGraphqlResolver(objectToCreate, options) {
   let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join(",\n");
 
   let deleteCleanups = [];
+  let fkAdjustments = Object.entries(objectToCreate.relationships).filter(([k, rel]) => rel.fkField == "_id").length;
+  let fkAdjMulti = fkAdjustments > 1;
+  let adj = fkAdjMulti ? "    " : "  ";
+
   Object.keys(objectToCreate.relationships).forEach(k => {
-    let relationship = objectToCreate.relationships[k];
-    let keyType = relationship.type.fields[relationship.keyField];
+    let rel = objectToCreate.relationships[k];
+    let keyType = rel.type.fields[rel.keyField];
 
     let keyTypeIsArray = /Array/g.test(keyType);
     let keyTypeIsString = /String/g.test(keyType);
 
-    if (relationship.fkField === "_id") {
+    if (rel.fkField === "_id") {
       if (keyTypeIsArray) {
         let isString = true;
         deleteCleanups.push(
-          `  await resolverHelpers.cleanUpRelationshipArrayAfterDelete(
-        $match._id,
-        hooksObj,
-        "${objName}",
-        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${keyTypeIsString}, session: null },
-        { root, args, context, ast }
-      );`
+          `${fkAdjMulti ? "      " : "await "}resolverHelpers.cleanUpRelationshipArrayAfterDelete(
+        ${adj}$match._id,
+        ${adj}hooksObj,
+        ${adj}"${objName}",
+        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session: null },
+        ${adj}{ root, args, context, ast }
+      ${adj})`
         );
       } else {
         let isString = true;
         deleteCleanups.push(
-          `  await resolverHelpers.cleanUpRelationshipObjectAfterDelete(
-        $match._id,
-        hooksObj,
-        "${objName}",
-        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${keyTypeIsString}, session: null },
-        { root, args, context, ast }
-      );`
+          `${fkAdjMulti ? "      " : "await "}resolverHelpers.cleanUpRelationshipObjectAfterDelete(
+        ${adj}$match._id,
+        ${adj}hooksObj,
+        ${adj}"${objName}",
+        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session: null },
+        ${adj}{ root, args, context, ast }
+      ${adj})`
         );
       }
     }
   });
+
+  const getDeleteCleanups = () => {
+    let cleanups = deleteCleanups.join(`${fkAdjMulti ? "," : ""}\n    `);
+    return `${fkAdjMulti ? "await Promise.all([\n    " : ""}${cleanups}${fkAdjMulti ? "\n        ])" : ""};`;
+  };
 
   let mutationItems = [
     ...(!readonly
@@ -101,7 +110,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
           !overrides.has(`update${objName}`) ? updateItemTemplate({ objName, table }) : "",
           !overrides.has(`update${objName}s`) ? updateItemsTemplate({ objName, table }) : "",
           !overrides.has(`update${objName}sBulk`) ? updateItemsBulkTemplate({ objName, table }) : "",
-          !overrides.has(`delete${objName}`) ? deleteItemTemplate({ objName, table, relationshipCleanup: deleteCleanups.join("\n    ") }) : ""
+          !overrides.has(`delete${objName}`) ? deleteItemTemplate({ objName, table, relationshipCleanup: getDeleteCleanups() }) : ""
         ]
       : []),
     resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join(",\n")
