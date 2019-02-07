@@ -480,7 +480,7 @@ test("Manual mongoId", async () => {
   });
 
   await runMutation({
-    mutation: `deleteBook(_id: "${idCrap}")`,
+    mutation: `deleteBook(_id: "${idCrap}"){success}`,
     result: "deleteBook"
   });
 });
