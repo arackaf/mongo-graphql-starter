@@ -9,56 +9,7 @@ your Mongo db.
 The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed.
 
-<!-- TOC -->
-
-- [Prior art](#prior-art)
-- [How do you use it?](#how-do-you-use-it)
-  - [Valid types for your fields](#valid-types-for-your-fields)
-  - [Readonly types](#readonly-types)
-  - [Circular dependencies are fine](#circular-dependencies-are-fine)
-- [Queries created](#queries-created)
-  - [Projecting results from queries](#projecting-results-from-queries)
-  - [Custom query arguments](#custom-query-arguments)
-- [Filters created](#filters-created)
-  - [String filters](#string-filters)
-  - [String array filters](#string-array-filters)
-  - [Int filters](#int-filters)
-  - [Int array filters](#int-array-filters)
-  - [Float filters](#float-filters)
-  - [Float array filters](#float-array-filters)
-  - [Date filters](#date-filters)
-  - [Formatting dates](#formatting-dates)
-  - [OR Queries](#or-queries)
-  - [Nested object and array filters](#nested-object-and-array-filters)
-  - [Sorting](#sorting)
-  - [Paging](#paging)
-- [Mutations](#mutations)
-  - [Creations](#creations)
-  - [Updates](#updates)
-    - [The Updates argument](#the-updates-argument)
-  - [Deleting](#deleting)
-  - [Mutation examples](#mutation-examples)
-- [Integrating custom content](#integrating-custom-content)
-  - [schemaSources example](#schemasources-example)
-  - [resolverSources example](#resolversources-example)
-- [Defining relationships between types](#defining-relationships-between-types)
-  - [Using relationships](#using-relationships)
-  - [Creating related data](#creating-related-data)
-    - [In creations](#in-creations)
-    - [In updates (not one-to-many)](#in-updates-not-one-to-many)
-    - [In updates (one-to-many)](#in-updates-one-to-many)
-    - [In lifecycle hooks](#in-lifecycle-hooks)
-- [Lifecycle hooks](#lifecycle-hooks)
-  - [All available hooks](#all-available-hooks)
-    - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
-  - [How to use processing hooks](#how-to-use-processing-hooks)
-    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)
-    - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
-    - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
-- [A closer look at what's generated](#a-closer-look-at-whats-generated)
-  - [All code is extensible.](#all-code-is-extensible)
-
-<!-- /TOC -->
+<!-- TOC -->autoauto- [Prior art](#prior-art)auto- [How do you use it?](#how-do-you-use-it)auto  - [Valid types for your fields](#valid-types-for-your-fields)auto  - [Readonly types](#readonly-types)auto  - [Circular dependencies are fine](#circular-dependencies-are-fine)auto- [Queries created](#queries-created)auto  - [Projecting results from queries](#projecting-results-from-queries)auto  - [Custom query arguments](#custom-query-arguments)auto- [Filters created](#filters-created)auto  - [String filters](#string-filters)auto  - [String array filters](#string-array-filters)auto  - [Int filters](#int-filters)auto  - [Int array filters](#int-array-filters)auto  - [Float filters](#float-filters)auto  - [Float array filters](#float-array-filters)auto  - [Date filters](#date-filters)auto  - [Formatting dates](#formatting-dates)auto  - [OR Queries](#or-queries)auto  - [Nested object and array filters](#nested-object-and-array-filters)auto  - [Sorting](#sorting)auto  - [Paging](#paging)auto- [Mutations](#mutations)auto  - [Creations](#creations)auto  - [Updates](#updates)auto    - [The Updates argument](#the-updates-argument)auto  - [Deleting](#deleting)auto  - [Mutation examples](#mutation-examples)auto- [Integrating custom content](#integrating-custom-content)auto  - [schemaSources example](#schemasources-example)auto  - [resolverSources example](#resolversources-example)auto- [Defining relationships between types](#defining-relationships-between-types)auto  - [Using relationships](#using-relationships)auto  - [Creating related data](#creating-related-data)auto    - [In creations](#in-creations)auto    - [In updates (not one-to-many)](#in-updates-not-one-to-many)auto    - [In updates (one-to-many)](#in-updates-one-to-many)auto    - [In lifecycle hooks](#in-lifecycle-hooks)auto- [Lifecycle hooks](#lifecycle-hooks)auto  - [All available hooks](#all-available-hooks)auto    - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)auto  - [How to use processing hooks](#how-to-use-processing-hooks)auto    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)auto    - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)auto    - [Reusing code across types' hooks](#reusing-code-across-types-hooks)auto- [A closer look at what's generated](#a-closer-look-at-whats-generated)auto  - [All code is extensible.](#all-code-is-extensible)autoauto<!-- /TOC -->
 
 ## Prior art
 
@@ -791,6 +742,7 @@ For `one-to-many` relationships, after creating new objects using the `create<Ty
 | `keyField`            | `_id`     | The field that will be used to look up related objects in their collection. |
 | `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
 | `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, regardless of `fkField` and `keyField`.  |
+| `readonly`            | (none)    | If `true` the relationship can only be queried; you won't be able to create relationship instances in the `create` mutation of the containing type.  |
 
 ### Using relationships
 
