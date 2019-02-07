@@ -35,7 +35,7 @@ export async function processInsertion(db, newObjectToCreateMaybe, options) {
 export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetadata, hooksObj, root, args, context, ast, session }) {
   let newObjectPackets = newObjectsToCreateMaybe.map(obj => ({
     obj,
-    preInsertResult: processHook(hooksObj, typeMetadata.typeName, "beforeInsert", obj, root, args, context, ast)
+    preInsertResult: processHook(hooksObj, typeMetadata.typeName, "beforeInsert", obj, { db, root, args, context, ast, session })
   }));
 
   let newObjects = [];
@@ -47,7 +47,9 @@ export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetad
   if (!newObjects.length) return [];
 
   newObjects = await runMultipleInserts(db, typeMetadata.table, newObjects, session);
-  await Promise.all(newObjects.map(obj => processHook(hooksObj, typeMetadata.typeName, "afterInsert", obj, root, args, context, ast)));
+  await Promise.all(
+    newObjects.map(obj => processHook(hooksObj, typeMetadata.typeName, "afterInsert", obj, { db, root, args, context, ast, session }))
+  );
   return newObjects;
 }
 

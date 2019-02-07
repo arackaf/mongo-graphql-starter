@@ -6,7 +6,7 @@ export default ({ objName, table }) => `    async update${objName}(root, args, c
         let { $match, $project } = decontructGraphqlQuery(args._id ? { _id: args._id } : {}, ast, ${objName}Metadata, "${objName}");
         let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast, session });
 
-        if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
+        if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, { db, root, args, context, ast, session }) === false) {
           return { ${objName}: null };
         }
         if (!$match._id) {
@@ -14,7 +14,7 @@ export default ({ objName, table }) => `    async update${objName}(root, args, c
         }
         await setUpOneToManyRelationshipsForUpdate([args._id], args, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast, session });
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session });
-        await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
+        await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, { db, root, args, context, ast, session });
         
         let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }, root, args, context, ast))[0] : null;
         return {

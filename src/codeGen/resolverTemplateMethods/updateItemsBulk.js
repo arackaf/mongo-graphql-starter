@@ -6,11 +6,11 @@ export default ({ objName, table }) => `    async update${objName}sBulk(root, ar
         let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName}Metadata);
         let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast, session });
 
-        if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, root, args, context, ast) === false) {
+        if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, { db, root, args, context, ast, session }) === false) {
           return { success: true };
         }
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session, multi: true });
-        await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, root, args, context, ast);
+        await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, { db, root, args, context, ast, session });
 
         return { 
           success: true,
