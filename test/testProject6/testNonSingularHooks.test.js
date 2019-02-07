@@ -269,7 +269,7 @@ test("Test query before delete hook 1", async () => {
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType1(_id: "${_id}")`,
+    mutation: `deleteType1(_id: "${_id}"){success}`,
     result: "deleteType1"
   });
 
@@ -287,10 +287,10 @@ test("Test query before delete hook 1 A", async () => {
   let _id = newO._id;
 
   let result = await runMutation({
-    mutation: `deleteType1(_id: "${_id}")`,
+    mutation: `deleteType1(_id: "${_id}"){success}`,
     result: "deleteType1"
   });
-  expect(result).toBe(false);
+  expect(result).toEqual({ success: false });
 
   let notDeletedObj = (await db
     .collection("type1")
@@ -309,7 +309,7 @@ test("Test query before delete hook 2", async () => {
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType2(_id: "${_id}")`,
+    mutation: `deleteType2(_id: "${_id}"){success}`,
     result: "deleteType2"
   });
 
@@ -327,10 +327,10 @@ test("Test query before delete hook 2 A", async () => {
   let _id = newO._id;
 
   let result = await runMutation({
-    mutation: `deleteType2(_id: "${_id}")`,
+    mutation: `deleteType2(_id: "${_id}"){success}`,
     result: "deleteType2"
   });
-  expect(result).toBe(false);
+  expect(result).toEqual({ success: false });
 
   let notDeletedObj = (await db
     .collection("type2")
@@ -349,7 +349,7 @@ test("Test query after delete hook 1", async () => {
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType1(_id: "${_id}")`,
+    mutation: `deleteType1(_id: "${_id}"){success}`,
     result: "deleteType1"
   });
 
@@ -368,7 +368,7 @@ test("Test query after delete hook 2", async () => {
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType2(_id: "${_id}")`,
+    mutation: `deleteType2(_id: "${_id}"){success}`,
     result: "deleteType2"
   });
 

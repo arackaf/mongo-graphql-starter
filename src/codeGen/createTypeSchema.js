@@ -124,7 +124,7 @@ ${[
               `${name}MutationResultMulti`
             ),
             createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
-            createOperation(`delete${name}`, [`_id: String`], "Boolean")
+            createOperation(`delete${name}`, [`_id: String`], "DeletionResultInfo")
           ]
         : []),
       ...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')

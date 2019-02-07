@@ -1,5 +1,4 @@
 import spinUp from "./spinUp";
-import { ObjectId } from "mongodb";
 
 let db, schema, runQuery, queryAndMatchArray, runMutation, close;
 let adam, katie, laura, mallory, book1, book2, book3;

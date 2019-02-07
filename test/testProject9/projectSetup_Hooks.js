@@ -20,6 +20,11 @@ export default {
       if (args.Updates && args.Updates.name && /^KILL/i.test(args.Updates.name)) {
         throw "Kill author update";
       }
+    },
+    afterDelete() {
+      if (global.cancelDelete) {
+        throw "Delete cancelled";
+      }
     }
   },
   Book: {
