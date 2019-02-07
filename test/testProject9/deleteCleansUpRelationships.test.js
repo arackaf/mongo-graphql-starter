@@ -11,11 +11,15 @@ let author1 = { name: "Adam" };
 let author2 = { name: "Laura" };
 let author3 = { name: "Katie" };
 
+let subject1 = { name: "S1" };
+
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runQuery, runMutation, close } = await spinUp());
 });
 
 beforeEach(async () => {
+  await db.collection("subjects").insertMany([subject1]);
+
   await db.collection("authors").insertMany([author1, author2, author3]);
 
   book1.authorIds = ["" + author3._id];
@@ -32,6 +36,7 @@ afterEach(async () => {
   await db.collection("authors").deleteMany({});
   await db.collection("subjects").deleteMany({});
   await db.collection("keywords").deleteMany({});
+  delete global.cancelDelete;
 });
 
 afterAll(async () => {
@@ -39,21 +44,40 @@ afterAll(async () => {
   db = null;
 });
 
+test("authors delete uses a transaction", async () => {
+  let result = await runMutation({
+    mutation: `deleteAuthor(_id: "${author3._id}") { Meta { transaction } }`,
+    result: "deleteAuthor"
+  });
+
+  expect(result).toEqual({ Meta: { transaction: true } });
+});
+
+test("subjects delete does not use a transaction", async () => {
+  let result = await runMutation({
+    mutation: `deleteSubject(_id: "${subject1._id}") { Meta { transaction } }`,
+    result: "deleteSubject"
+  });
+
+  expect(result).toEqual({ Meta: { transaction: false } });
+});
+
 test("authors relationship's fk cleaned up on author delete", async () => {
+  global.cancelDelete = true;
   await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
-    result: "deleteAuthor"
+    noValidation: true
   });
 
   await queryAndMatchArray({
     query: `{getBook(_id: "${book1._id}"){Book{title, authorIds}}}`,
     coll: "getBook",
-    results: { title: "book1", authorIds: [] }
+    results: { title: "book1", authorIds: ["" + author3._id] }
   });
   await queryAndMatchArray({
     query: `{getBook(_id: "${book4._id}"){Book{title, authorIds}}}`,
     coll: "getBook",
-    results: { title: "book4", authorIds: ["" + author1._id] }
+    results: { title: "book4", authorIds: ["" + author1._id, "" + author3._id] }
   });
   await queryAndMatchArray({
     query: `{getBook(_id: "${book3._id}"){Book{title, authorIds}}}`,
@@ -63,15 +87,16 @@ test("authors relationship's fk cleaned up on author delete", async () => {
 });
 
 test("mainAuthor relationship's fk cleaned up on author delete", async () => {
-  await runMutation({
-    mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
-    result: "deleteAuthor"
+  global.cancelDelete = true;
+  let result = await runMutation({
+    mutation: `deleteAuthor(_id: "${author3._id}") { Meta { transaction } }`,
+    noValidation: true
   });
 
   await queryAndMatchArray({
     query: `{getBook(_id: "${book1._id}"){Book{title, mainAuthorId}}}`,
     coll: "getBook",
-    results: { title: "book1", mainAuthorId: null }
+    results: { title: "book1", mainAuthorId: "" + author3._id }
   });
 
   await queryAndMatchArray({

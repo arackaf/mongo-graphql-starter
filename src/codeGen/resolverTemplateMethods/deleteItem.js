@@ -16,7 +16,7 @@ export default ({ objName, table, relationshipCleanup }) => `    async delete${o
         ${relationshipCleanup}
         return {
           success: true,
-          ${mutationMeta()}
+          ${mutationMeta()} 
         };
       } ${mutationError()} ${mutationOver()}
     }`;
