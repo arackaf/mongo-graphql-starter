@@ -33,6 +33,11 @@ export default {
         throw "Don't insert book";
       }
     },
+    afterInsert(obj, root, args, context, ast) {
+      if (/^THROW_AFTER/i.test(obj.title)) {
+        throw "Throw after book insert";
+      }
+    },
     afterUpdate(match, updates, root, args, context, ast) {
       if (args.Updates && args.Updates.title && /^KILL/i.test(args.Updates.title)) {
         throw "Kill book update";
