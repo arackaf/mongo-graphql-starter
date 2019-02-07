@@ -12,7 +12,7 @@ export default ({ objName }) =>
         if (newObject == null) {
           return { ${objName}: null };
         }
-        await setUpOneToManyRelationships(newObject, args.${objName}, ${objName}Metadata, { db, hooksObj, root, args, context, ast });
+        await setUpOneToManyRelationships(newObject, args.${objName}, ${objName}Metadata, { db, hooksObj, root, args, context, ast, session });
         ${mutationComplete()}
 
         let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }, root, args, context, ast))[0] : null;
