@@ -42,7 +42,7 @@ afterAll(async () => {
 test("authors relationship's fk cleaned up on author delete", async () => {
   expect(typeof book1.title).toBe("string");
   await runMutation({
-    mutation: `deleteAuthor(_id: "${author3._id}")`,
+    mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
     result: "deleteAuthor"
   });
 
@@ -65,7 +65,7 @@ test("authors relationship's fk cleaned up on author delete", async () => {
 
 test("mainAuthor relationship's fk cleaned up on author delete", async () => {
   await runMutation({
-    mutation: `deleteAuthor(_id: "${author3._id}")`,
+    mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
     result: "deleteAuthor"
   });
 

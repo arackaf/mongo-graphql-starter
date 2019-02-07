@@ -8,6 +8,7 @@ export const mutationComplete = () => `await resolverHelpers.mutationComplete(se
 export const mutationError = () =>
   `catch (err) {
         await resolverHelpers.mutationError(err, session, transaction);
+        return { success: false };
       }`;
 
 export const mutationOver = () => `finally { 
