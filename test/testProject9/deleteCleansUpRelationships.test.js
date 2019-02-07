@@ -37,6 +37,7 @@ afterEach(async () => {
   await db.collection("subjects").deleteMany({});
   await db.collection("keywords").deleteMany({});
   delete global.cancelDelete;
+  delete global.cancelUpdate;
 });
 
 afterAll(async () => {
@@ -88,6 +89,52 @@ test("authors relationship's fk cleaned up on author delete", async () => {
 
 test("mainAuthor relationship's fk cleaned up on author delete", async () => {
   global.cancelDelete = true;
+  let result = await runMutation({
+    mutation: `deleteAuthor(_id: "${author3._id}") { Meta { transaction } }`,
+    noValidation: true
+  });
+
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book1._id}"){Book{title, mainAuthorId}}}`,
+    coll: "getBook",
+    results: { title: "book1", mainAuthorId: "" + author3._id }
+  });
+
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book4._id}"){Book{title, mainAuthorId}}}`,
+    coll: "getBook",
+    results: { title: "book4", mainAuthorId: "" + author2._id }
+  });
+});
+
+// -------------------------------------------------------------------------
+
+test("authors relationship's fk cleaned up on author delete -- exception on fk $pull", async () => {
+  global.cancelUpdate = true;
+  await runMutation({
+    mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
+    noValidation: true
+  });
+
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book1._id}"){Book{title, authorIds}}}`,
+    coll: "getBook",
+    results: { title: "book1", authorIds: ["" + author3._id] }
+  });
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book4._id}"){Book{title, authorIds}}}`,
+    coll: "getBook",
+    results: { title: "book4", authorIds: ["" + author1._id, "" + author3._id] }
+  });
+  await queryAndMatchArray({
+    query: `{getBook(_id: "${book3._id}"){Book{title, authorIds}}}`,
+    coll: "getBook",
+    results: { title: "book3", authorIds: ["" + author1._id, "" + author2._id] }
+  });
+});
+
+test("mainAuthor relationship's fk cleaned up on author delete -- exception on fk $pull", async () => {
+  global.cancelUpdate = true;
   let result = await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}") { Meta { transaction } }`,
     noValidation: true

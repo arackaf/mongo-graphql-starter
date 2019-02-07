@@ -79,7 +79,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
         ${adj}$match._id,
         ${adj}hooksObj,
         ${adj}"${objName}",
-        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session: null },
+        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
         ${adj}{ root, args, context, ast }
       ${adj})`
         );
@@ -90,7 +90,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
         ${adj}$match._id,
         ${adj}hooksObj,
         ${adj}"${objName}",
-        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session: null },
+        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
         ${adj}{ root, args, context, ast }
       ${adj})`
         );
