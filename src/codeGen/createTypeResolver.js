@@ -7,6 +7,7 @@ import createItemTemplate from "./resolverTemplateMethods/createItem";
 import updateItemTemplate from "./resolverTemplateMethods/updateItem";
 import updateItemsTemplate from "./resolverTemplateMethods/updateItems";
 import updateItemsBulkTemplate from "./resolverTemplateMethods/updateItemsBulk";
+import deleteItemTemplate from "./resolverTemplateMethods/deleteItem";
 
 //fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/createItem.txt"), { encoding: "utf8" });
 
@@ -18,7 +19,6 @@ export default function createGraphqlResolver(objectToCreate, options) {
 
   let getItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/getItem.txt"), { encoding: "utf8" });
   let allItemsTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/allItems.txt"), { encoding: "utf8" });
-  let deleteItemTemplate = fs.readFileSync(path.resolve(__dirname, "./resolverTemplateMethods/deleteItem.txt"), { encoding: "utf8" });
   let hooksPath = `"../hooks"`;
   let readonly = objectToCreate.readonly;
 
@@ -59,6 +59,41 @@ export default function createGraphqlResolver(objectToCreate, options) {
 
   let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join(",\n");
 
+  let deleteCleanups = [];
+  Object.keys(objectToCreate.relationships).forEach(k => {
+    let relationship = objectToCreate.relationships[k];
+    let keyType = relationship.type.fields[relationship.keyField];
+
+    let keyTypeIsArray = /Array/g.test(keyType);
+    let keyTypeIsString = /String/g.test(keyType);
+
+    if (relationship.fkField === "_id") {
+      if (keyTypeIsArray) {
+        let isString = true;
+        deleteCleanups.push(
+          `  await resolverHelpers.cleanUpRelationshipArrayAfterDelete(
+        $match._id,
+        hooksObj,
+        "${objName}",
+        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${keyTypeIsString}, session: null },
+        { root, args, context, ast }
+      );`
+        );
+      } else {
+        let isString = true;
+        deleteCleanups.push(
+          `  await resolverHelpers.cleanUpRelationshipObjectAfterDelete(
+        $match._id,
+        hooksObj,
+        "${objName}",
+        { db, dbHelpers, table: "${relationship.type.table}", keyField: "${relationship.keyField}", isString: ${keyTypeIsString}, session: null },
+        { root, args, context, ast }
+      );`
+        );
+      }
+    }
+  });
+
   let mutationItems = [
     ...(!readonly
       ? [
@@ -66,7 +101,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
           !overrides.has(`update${objName}`) ? updateItemTemplate({ objName, table }) : "",
           !overrides.has(`update${objName}s`) ? updateItemsTemplate({ objName, table }) : "",
           !overrides.has(`update${objName}sBulk`) ? updateItemsBulkTemplate({ objName, table }) : "",
-          !overrides.has(`delete${objName}`) ? deleteItemTemplate : ""
+          !overrides.has(`delete${objName}`) ? deleteItemTemplate({ objName, table, relationshipCleanup: deleteCleanups.join("\n    ") }) : ""
         ]
       : []),
     resolverSources.map((src, i) => `${TAB2}...(MutationExtras${i + 1} || {})`).join(",\n")
@@ -80,6 +115,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
   if (objectToCreate.relationships) {
     Object.keys(objectToCreate.relationships).forEach((relationshipName, index, all) => {
       let relationship = objectToCreate.relationships[relationshipName];
+      let foreignKeyType = objectToCreate.fields[relationship.fkField];
+      let keyType = relationship.type.fields[relationship.keyField];
+      let keyTypeIsArray = /Array/g.test(keyType);
 
       if (!typeImports.has(relationship.type.__name)) {
         typeImports.add(relationship.type.__name);
@@ -100,8 +138,6 @@ export default function createGraphqlResolver(objectToCreate, options) {
       if (relationship.__isArray) {
         let template = relationship.manyToMany ? projectManyToManyResolverTemplate : projectOneToManyResolverTemplate;
         let destinationKeyType = relationship.type.fields[relationship.keyField];
-        let foreignKeyType = objectToCreate.fields[relationship.fkField];
-        let keyType = relationship.type.fields[relationship.keyField];
 
         let mapping = "";
         if (foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType) {
@@ -110,9 +146,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
           mapping = "id => X";
         }
 
-        let lookupSetContents = /Array/g.test(keyType)
-          ? `result.${relationship.keyField}.map(k => k + "")`
-          : `[result.${relationship.keyField} + ""]`;
+        let lookupSetContents = keyTypeIsArray ? `result.${relationship.keyField}.map(k => k + "")` : `[result.${relationship.keyField} + ""]`;
 
         if (mapping) {
           if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {

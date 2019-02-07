@@ -1,4 +1,7 @@
-export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update }) => {
+import processHook from "./processHook";
+import { ObjectId } from "mongodb";
+
+export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update, delete: isDelete }) => {
   let [db, client] = await Promise.all([
     typeof root.db === "function" ? await root.db() : root.db,
     typeof root.client === "function" ? await root.client() : root.client
@@ -10,6 +13,9 @@ export const startDbMutation = async (root, args, context, objName, typeMetadata
       transaction = true;
     }
     if (update && mutationRequiresTransaction({ typeMetadata, updateObjectArgs: args })) {
+      transaction = true;
+    }
+    if (isDelete && deletionRequiresTransaction({ typeMetadata })) {
       transaction = true;
     }
   }
@@ -45,6 +51,10 @@ export const mutationRequiresTransaction = ({ typeMetadata, newObjectArgs, updat
   } else if (updateObjectArgs) {
     return updateObjectMutationRequiresTransaction(typeMetadata, updateObjectArgs);
   }
+};
+
+export const deletionRequiresTransaction = ({ typeMetadata }) => {
+  return Object.entries(typeMetadata.relationships).some(([k, rel]) => rel.fkField === "_id");
 };
 
 export const newObjectMutationRequiresTransaction = (typeMetadata, args) => {
@@ -89,4 +99,36 @@ export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
     }
   }
   return false;
+};
+
+export const cleanUpRelationshipArrayAfterDelete = async (_id, hooksObj, typeName, dbInfo, graphQLPacket) => {
+  let { root, args, context, ast } = graphQLPacket;
+  let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
+  let _ids = Array.isArray(_id) ? _id : [_id];
+  _ids = _ids.map(_id => (isString ? "" + _id : ObjectId(_id)));
+
+  let $match = { [keyField]: { $in: _ids } };
+  let updates = { $pull: { [keyField]: { $in: _ids } } };
+
+  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, root, args, context, ast)) === false) {
+    return { success: true };
+  }
+  await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
+  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, root, args, context, ast);
+};
+
+export const cleanUpRelationshipObjectAfterDelete = async (_id, hooksObj, typeName, dbInfo, graphQLPacket) => {
+  let { root, args, context, ast } = graphQLPacket;
+  let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
+
+  _id = isString ? "" + _id : ObjectId(_id);
+
+  let $match = { [keyField]: _id };
+  let updates = { $unset: { [keyField]: "" } };
+
+  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, root, args, context, ast)) === false) {
+    return { success: true };
+  }
+  await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
+  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, root, args, context, ast);
 };
