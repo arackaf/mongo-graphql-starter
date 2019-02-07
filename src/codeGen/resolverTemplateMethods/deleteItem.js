@@ -1,8 +1,10 @@
-    async delete${objName}(root, args, context, ast) {
+import { getDbObjects, mutationError, mutationOver, mutationMeta } from "../mutationHelpers";
+
+export default ({ objName, table, relationshipCleanup }) => `    async delete${objName}(root, args, context, ast) {
       if (!args._id) {
         throw "No _id sent";
       }
-      let db = await (typeof root.db === "function" ? root.db() : root.db);
+      ${getDbObjects({ objName, op: "delete" })}
       let $match = { _id: ObjectId(args._id) };
       
       if (await processHook(hooksObj, "${objName}", "beforeDelete", $match, root, args, context, ast) === false) {
@@ -10,6 +12,6 @@
       }
       await dbHelpers.runDelete(db, "${table}", $match);
       await processHook(hooksObj, "${objName}", "afterDelete", $match, root, args, context, ast);
-      ${relationshipCleanup}
+    ${relationshipCleanup}
       return true;
-    }
+    }`;
