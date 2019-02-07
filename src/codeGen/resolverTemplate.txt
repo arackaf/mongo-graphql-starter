@@ -9,7 +9,7 @@ export async function load${objName}s(db, queryPacket, root, args, context, ast)
     $limit != null ? { $limit } : null
   ].filter(item => item);
 
-  await processHook(hooksObj, "${objName}", "queryPreAggregate", aggregateItems, root, args, context, ast);
+  await processHook(hooksObj, "${objName}", "queryPreAggregate", aggregateItems, { root, args, context, ast });
   let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
   await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   ${objName}s.forEach(o => {

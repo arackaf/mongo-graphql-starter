@@ -110,11 +110,11 @@ export const cleanUpRelationshipArrayAfterDelete = async (_id, hooksObj, typeNam
   let $match = { [keyField]: { $in: _ids } };
   let updates = { $pull: { [keyField]: { $in: _ids } } };
 
-  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, root, args, context, ast)) === false) {
+  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, { db, root, args, context, ast, session })) === false) {
     return { success: true };
   }
   await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
-  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, root, args, context, ast);
+  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, { db, root, args, context, ast, session });
 };
 
 export const cleanUpRelationshipObjectAfterDelete = async (_id, hooksObj, typeName, dbInfo, graphQLPacket) => {
@@ -126,9 +126,9 @@ export const cleanUpRelationshipObjectAfterDelete = async (_id, hooksObj, typeNa
   let $match = { [keyField]: _id };
   let updates = { $unset: { [keyField]: "" } };
 
-  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, root, args, context, ast)) === false) {
+  if ((await processHook(hooksObj, typeName, "beforeUpdate", $match, updates, { db, root, args, context, ast, session })) === false) {
     return { success: true };
   }
   await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
-  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, root, args, context, ast);
+  await processHook(hooksObj, typeName, "afterUpdate", $match, updates, { db, root, args, context, ast, session });
 };
