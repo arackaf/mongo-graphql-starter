@@ -42,6 +42,9 @@ export default {
       if (args.Updates && args.Updates.title && /^KILL/i.test(args.Updates.title)) {
         throw "Kill book update";
       }
+      if (global.cancelUpdate) {
+        throw "Update cancelled after the fact";
+      }
     }
   }
 };

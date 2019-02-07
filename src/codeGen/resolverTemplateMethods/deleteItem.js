@@ -1,4 +1,4 @@
-import { getDbObjects, mutationError, mutationOver, mutationMeta } from "../mutationHelpers";
+import { getDbObjects, mutationError, mutationOver, mutationMeta, mutationComplete } from "../mutationHelpers";
 
 export default ({ objName, table, relationshipCleanup }) => `    async delete${objName}(root, args, context, ast) {
       if (!args._id) {
@@ -14,6 +14,8 @@ export default ({ objName, table, relationshipCleanup }) => `    async delete${o
         await dbHelpers.runDelete(db, "${table}", $match);
         await processHook(hooksObj, "${objName}", "afterDelete", $match, { db, root, args, context, ast, session });
         ${relationshipCleanup}
+
+        ${mutationComplete()}
         return {
           success: true,
           ${mutationMeta()} 
