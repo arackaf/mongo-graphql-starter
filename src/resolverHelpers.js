@@ -1,7 +1,7 @@
 import processHook from "./processHook";
 import { ObjectId } from "mongodb";
 
-export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update }) => {
+export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update, delete: isDelete }) => {
   let [db, client] = await Promise.all([
     typeof root.db === "function" ? await root.db() : root.db,
     typeof root.client === "function" ? await root.client() : root.client
@@ -13,6 +13,9 @@ export const startDbMutation = async (root, args, context, objName, typeMetadata
       transaction = true;
     }
     if (update && mutationRequiresTransaction({ typeMetadata, updateObjectArgs: args })) {
+      transaction = true;
+    }
+    if (isDelete && deletionRequiresTransaction({ typeMetadata })) {
       transaction = true;
     }
   }
@@ -48,6 +51,10 @@ export const mutationRequiresTransaction = ({ typeMetadata, newObjectArgs, updat
   } else if (updateObjectArgs) {
     return updateObjectMutationRequiresTransaction(typeMetadata, updateObjectArgs);
   }
+};
+
+export const deletionRequiresTransaction = ({ typeMetadata }) => {
+  return Object.entries(typeMetadata.relationships).some(([k, rel]) => rel.fkField === "_id");
 };
 
 export const newObjectMutationRequiresTransaction = (typeMetadata, args) => {

@@ -1,7 +1,7 @@
 const tabs = num => Array.from({ length: num }, () => "  ").join("");
 
 export const getDbObjects = ({ objName, op }) =>
-  `let { db, client, session, transaction } = await resolverHelpers.startDbMutation(root, args, context, "${objName}", ${objName}Metadata, { ${op}: true });`;
+  `let { db, session, transaction } = await resolverHelpers.startDbMutation(root, args, context, "${objName}", ${objName}Metadata, { ${op}: true });`;
 
 export const mutationComplete = () => `await resolverHelpers.mutationComplete(session, transaction);`;
 
