@@ -80,10 +80,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
         deleteCleanups.push(
           `await resolverHelpers.pullFkFromArray(
           $match._id,
-          hooksObj,
           "${relType}",
-          { db, dbHelpers, table: "${table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
-          { root, args, context, ast }
+          { db, session, table: "${table}", key: "${rel.keyField}", isString: ${keyTypeIsString} },
+          gqlPacket
         )`
         );
       } else {
@@ -91,10 +90,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
         deleteCleanups.push(
           `await resolverHelpers.clearFk(
           $match._id,
-          hooksObj,
           "${relType}",
-          { db, dbHelpers, table: "${table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
-          { root, args, context, ast }
+          { db, session, table: "${table}", key: "${rel.keyField}", isString: ${keyTypeIsString} },
+          gqlPacket
         )`
         );
       }
