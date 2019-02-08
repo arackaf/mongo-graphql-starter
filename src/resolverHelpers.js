@@ -1,5 +1,6 @@
-import processHook from "./processHook";
 import { ObjectId } from "mongodb";
+import * as dbHelpers from "./dbHelpers";
+import processHook from "./processHook";
 
 export const startDbMutation = async ({ root, args, context }, objName, typeMetadata, { create, update, delete: isDelete }) => {
   let [db, client] = await Promise.all([
@@ -101,14 +102,14 @@ export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
   return false;
 };
 
-export const pullFkFromArray = async (_id, hooksObj, relType, dbInfo, graphQLPacket) => {
-  let { root, args, context, ast } = graphQLPacket;
-  let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
+export const pullFkFromArray = async (_id, relType, dbInfo, graphQLPacket) => {
+  let { root, args, context, ast, hooksObj } = graphQLPacket;
+  let { db, table, key, isString, session } = dbInfo;
   let _ids = Array.isArray(_id) ? _id : [_id];
   _ids = _ids.map(_id => (isString ? "" + _id : ObjectId(_id)));
 
-  let $match = { [keyField]: { $in: _ids } };
-  let updates = { $pull: { [keyField]: { $in: _ids } } };
+  let $match = { [key]: { $in: _ids } };
+  let updates = { $pull: { [key]: { $in: _ids } } };
 
   if ((await processHook(hooksObj, relType, "beforeUpdate", $match, updates, { db, root, args, context, ast, session })) === false) {
     return { success: true };
@@ -117,14 +118,14 @@ export const pullFkFromArray = async (_id, hooksObj, relType, dbInfo, graphQLPac
   await processHook(hooksObj, relType, "afterUpdate", $match, updates, { db, root, args, context, ast, session });
 };
 
-export const clearFk = async (_id, hooksObj, relType, dbInfo, graphQLPacket) => {
-  let { root, args, context, ast } = graphQLPacket;
-  let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
+export const clearFk = async (_id, relType, dbInfo, graphQLPacket) => {
+  let { root, args, context, ast, hooksObj } = graphQLPacket;
+  let { db, table, key, isString, session } = dbInfo;
 
   _id = isString ? "" + _id : ObjectId(_id);
 
-  let $match = { [keyField]: _id };
-  let updates = { $unset: { [keyField]: "" } };
+  let $match = { [key]: _id };
+  let updates = { $unset: { [key]: "" } };
 
   if ((await processHook(hooksObj, relType, "beforeUpdate", $match, updates, { db, root, args, context, ast, session })) === false) {
     return { success: true };
