@@ -2,7 +2,7 @@ import { mutationStart, mutationError, mutationOver, mutationMeta, mutationCompl
 
 export default ({ objName, table }) => `    async update${objName}(root, args, context, ast) {
       ${mutationStart({ objName, op: "update" })}
-      try {
+      return await resolverHelpers.runMutation(session, transaction, async() => {
         let { $match, $project } = decontructGraphqlQuery(args._id ? { _id: args._id } : {}, ast, ${objName}Metadata, "${objName}");
         let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { ...gqlPacket, db, session });
 
@@ -19,5 +19,5 @@ export default ({ objName, table }) => `    async update${objName}(root, args, c
         
         let result = $project ? (await load${objName}s(db, { $match, $project, $limit: 1 }, root, args, context, ast))[0] : null;
         return resolverHelpers.mutationSuccessResult({ ${objName}: result, transaction, elapsedTime: 0 });
-      } ${mutationError()} ${mutationOver()}
+      });
     }`;
