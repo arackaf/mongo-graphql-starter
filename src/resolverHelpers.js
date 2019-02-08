@@ -102,34 +102,40 @@ export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
   return false;
 };
 
-export const pullFkFromArray = async (_id, relType, dbInfo, graphQLPacket) => {
-  let { root, args, context, ast, hooksObj } = graphQLPacket;
-  let { db, table, key, isString, session } = dbInfo;
+export const pullFkFromArray = async (_id, TypeMetadata, key, dbInfo, gqlPacket) => {
+  let { hooksObj } = gqlPacket;
+  let { db, session } = dbInfo;
+  let isString = /String/g.test(TypeMetadata.fields[key]);
+  let table = TypeMetadata.table;
+  let relType = TypeMetadata.typeName;
   let _ids = Array.isArray(_id) ? _id : [_id];
-  _ids = _ids.map(_id => (isString ? "" + _id : ObjectId(_id)));
 
+  _ids = _ids.map(_id => (isString ? "" + _id : ObjectId(_id)));
   let $match = { [key]: { $in: _ids } };
   let updates = { $pull: { [key]: { $in: _ids } } };
 
-  if ((await processHook(hooksObj, relType, "beforeUpdate", $match, updates, { db, root, args, context, ast, session })) === false) {
+  if ((await processHook(hooksObj, relType, "beforeUpdate", $match, updates, { ...gqlPacket, db, session })) === false) {
     return { success: true };
   }
   await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
-  await processHook(hooksObj, relType, "afterUpdate", $match, updates, { db, root, args, context, ast, session });
+  await processHook(hooksObj, relType, "afterUpdate", $match, updates, { ...gqlPacket, db, session });
 };
 
-export const clearFk = async (_id, relType, dbInfo, graphQLPacket) => {
-  let { root, args, context, ast, hooksObj } = graphQLPacket;
-  let { db, table, key, isString, session } = dbInfo;
+export const clearFk = async (_id, TypeMetadata, key, dbInfo, gqlPacket) => {
+  let { hooksObj } = gqlPacket;
+  let { db, session } = dbInfo;
+  let isString = /String/g.test(TypeMetadata.fields[key]);
+  let table = TypeMetadata.table;
+  let relType = TypeMetadata.typeName;
 
   _id = isString ? "" + _id : ObjectId(_id);
 
   let $match = { [key]: _id };
   let updates = { $unset: { [key]: "" } };
 
-  if ((await processHook(hooksObj, relType, "beforeUpdate", $match, updates, { db, root, args, context, ast, session })) === false) {
+  if ((await processHook(hooksObj, relType, "beforeUpdate", $match, updates, { ...gqlPacket, db, session })) === false) {
     return { success: true };
   }
   await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
-  await processHook(hooksObj, relType, "afterUpdate", $match, updates, { db, root, args, context, ast, session });
+  await processHook(hooksObj, relType, "afterUpdate", $match, updates, { ...gqlPacket, db, session });
 };
