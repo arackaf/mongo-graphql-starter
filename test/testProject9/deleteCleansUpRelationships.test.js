@@ -107,7 +107,6 @@ test("mainAuthor relationship's fk cleaned up on author delete", async () => {
 // -------------------------------------------------------------------------
 
 test("authors relationship's fk cleaned up on author delete -- exception on fk $pull", async () => {
-  console.log("FK PULL 1 BEGIN");
   global.cancelUpdate = true;
   await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
@@ -132,7 +131,6 @@ test("authors relationship's fk cleaned up on author delete -- exception on fk $
 });
 
 test("mainAuthor relationship's fk cleaned up on author delete -- exception on fk $pull", async () => {
-  console.log("FK PULL 2 BEGIN");
   global.cancelUpdate = true;
   let result = await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}") { Meta { transaction } }`,
