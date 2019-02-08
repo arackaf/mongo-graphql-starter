@@ -153,3 +153,14 @@ export const clearFk = async (_id, TypeMetadata, key, dbInfo, gqlPacket) => {
   await dbHelpers.runUpdate(db, table, $match, updates, { session, multi: true });
   await processHook(hooksObj, relType, "afterUpdate", $match, updates, { ...gqlPacket, db, session });
 };
+
+export const runMutation = async (session, transaction, run) => {
+  try {
+    return await run();
+  } catch (err) {
+    await mutationError(err, session, transaction);
+    return { success: false };
+  } finally {
+    mutationOver(session);
+  }
+};
