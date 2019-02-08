@@ -70,6 +70,8 @@ export default function createGraphqlResolver(objectToCreate, options) {
 
     let keyTypeIsArray = /Array/g.test(keyType);
     let keyTypeIsString = /String/g.test(keyType);
+    let table = rel.type.table;
+    let relType = rel.type.__name;
 
     if (rel.fkField === "_id") {
       if (keyTypeIsArray) {
@@ -78,8 +80,8 @@ export default function createGraphqlResolver(objectToCreate, options) {
           `await resolverHelpers.cleanUpRelationshipArrayAfterDelete(
           $match._id,
           hooksObj,
-          "${objName}",
-          { db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
+          "${relType}",
+          { db, dbHelpers, table: "${table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
           { root, args, context, ast }
         )`
         );
@@ -89,8 +91,8 @@ export default function createGraphqlResolver(objectToCreate, options) {
           `await resolverHelpers.cleanUpRelationshipObjectAfterDelete(
           $match._id,
           hooksObj,
-          "${objName}",
-          { db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
+          "${relType}",
+          { db, dbHelpers, table: "${table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
           { root, args, context, ast }
         )`
         );
