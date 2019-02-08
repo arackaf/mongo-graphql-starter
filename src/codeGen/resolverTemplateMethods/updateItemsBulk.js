@@ -11,11 +11,7 @@ export default ({ objName, table }) => `    async update${objName}sBulk(root, ar
         }
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session, multi: true });
         await runHook("afterUpdate", $match, updates, { ...gqlPacket, db, session });
-        ${mutationComplete()}
 
-        return { 
-          success: true,
-          ${mutationMeta()}
-        };
+        return await resolverHelpers.finishSuccessfulMutation(session, transaction);
       } ${mutationError()} ${mutationOver()}
     }`;

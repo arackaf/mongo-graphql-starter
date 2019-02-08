@@ -15,10 +15,6 @@ export default ({ objName, table }) => `    async update${objName}s(root, args, 
         ${mutationComplete()}
         
         let result = $project ? await load${objName}s(db, { $match, $project }, root, args, context, ast) : null;
-        return {
-          ${objName}s: result,
-          success: true,
-          ${mutationMeta()}
-        };
+        return resolverHelpers.mutationSuccessResult({ ${objName}s: result, transaction, elapsedTime: 0 });
       } ${mutationError()} ${mutationOver()}
     }`;

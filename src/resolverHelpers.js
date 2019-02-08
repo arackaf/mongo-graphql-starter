@@ -27,6 +27,20 @@ export const startDbMutation = async ({ root, args, context }, objName, typeMeta
   return { db, client, session, transaction };
 };
 
+export const finishSuccessfulMutation = async (session, transaction, results = {}) => {
+  await mutationComplete(session, transaction);
+  return mutationSuccessResult({ transaction, ...results });
+};
+
+export const mutationSuccessResult = ({ transaction, elapsedTime = 0, ...rest }) => ({
+  ...rest,
+  success: true,
+  Meta: {
+    transaction,
+    elapsedTime
+  }
+});
+
 export const mutationComplete = async (session, transaction) => {
   if (transaction) {
     await session.commitTransaction();
