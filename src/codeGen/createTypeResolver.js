@@ -77,7 +77,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
       if (keyTypeIsArray) {
         let isString = true;
         deleteCleanups.push(
-          `await resolverHelpers.cleanUpRelationshipArrayAfterDelete(
+          `await resolverHelpers.pullFkFromArray(
           $match._id,
           hooksObj,
           "${relType}",
@@ -88,7 +88,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
       } else {
         let isString = true;
         deleteCleanups.push(
-          `await resolverHelpers.cleanUpRelationshipObjectAfterDelete(
+          `await resolverHelpers.clearFk(
           $match._id,
           hooksObj,
           "${relType}",
