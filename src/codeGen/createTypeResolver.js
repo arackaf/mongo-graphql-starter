@@ -70,31 +70,16 @@ export default function createGraphqlResolver(objectToCreate, options) {
     let keyType = rel.type.fields[rel.keyField];
 
     let keyTypeIsArray = /Array/g.test(keyType);
-    let keyTypeIsString = /String/g.test(keyType);
     let table = rel.type.table;
     let relType = rel.type.__name;
 
     if (rel.fkField === "_id") {
       if (keyTypeIsArray) {
         let isString = true;
-        deleteCleanups.push(
-          `await resolverHelpers.pullFkFromArray(
-          $match._id,
-          "${relType}",
-          { db, session, table: "${table}", key: "${rel.keyField}", isString: ${keyTypeIsString} },
-          gqlPacket
-        )`
-        );
+        deleteCleanups.push(`await resolverHelpers.pullFkFromArray($match._id, ${relType}Metadata, "${rel.keyField}", { db, session }, gqlPacket)`);
       } else {
         let isString = true;
-        deleteCleanups.push(
-          `await resolverHelpers.clearFk(
-          $match._id,
-          "${relType}",
-          { db, session, table: "${table}", key: "${rel.keyField}", isString: ${keyTypeIsString} },
-          gqlPacket
-        )`
-        );
+        deleteCleanups.push(`await resolverHelpers.clearFk($match._id, ${relType}Metadata, "${rel.keyField}", { db, session }, gqlPacket)`);
       }
     }
   });
