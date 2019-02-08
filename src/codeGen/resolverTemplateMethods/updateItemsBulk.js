@@ -4,13 +4,13 @@ export default ({ objName, table }) => `    async update${objName}sBulk(root, ar
       ${mutationStart({ objName, op: "update" })}
       try {
         let { $match } = decontructGraphqlQuery(args.Match, ast, ${objName}Metadata);
-        let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { ...gqlPacket, db, dbHelpers, hooksObj, session });
+        let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { ...gqlPacket, db, session });
 
-        if (await processHook(hooksObj, "${objName}", "beforeUpdate", $match, updates, { ...gqlPacket, db, session }) === false) {
+        if (await runHook("beforeUpdate", $match, updates, { ...gqlPacket, db, session }) === false) {
           return { success: true };
         }
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session, multi: true });
-        await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, { ...gqlPacket, db, session });
+        await runHook("afterUpdate", $match, updates, { ...gqlPacket, db, session });
         ${mutationComplete()}
 
         return { 

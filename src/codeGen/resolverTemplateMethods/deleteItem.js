@@ -8,11 +8,11 @@ export default ({ objName, table, relationshipCleanup }) => `    async delete${o
       try {
         let $match = { _id: ObjectId(args._id) };
         
-        if (await processHook(hooksObj, "${objName}", "beforeDelete", $match, { ...gqlPacket, db, session }) === false) {
+        if (await runHook("beforeDelete", $match, { ...gqlPacket, db, session }) === false) {
           return { success: false };
         }
         await dbHelpers.runDelete(db, "${table}", $match);
-        await processHook(hooksObj, "${objName}", "afterDelete", $match, { ...gqlPacket, db, session });
+        await runHook("afterDelete", $match, { ...gqlPacket, db, session });
         ${relationshipCleanup}
 
         ${mutationComplete()}
