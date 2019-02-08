@@ -75,32 +75,31 @@ export default function createGraphqlResolver(objectToCreate, options) {
       if (keyTypeIsArray) {
         let isString = true;
         deleteCleanups.push(
-          `${fkAdjMulti ? "      " : "await "}resolverHelpers.cleanUpRelationshipArrayAfterDelete(
-        ${adj}$match._id,
-        ${adj}hooksObj,
-        ${adj}"${objName}",
-        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
-        ${adj}{ root, args, context, ast }
-      ${adj})`
+          `await resolverHelpers.cleanUpRelationshipArrayAfterDelete(
+          $match._id,
+          hooksObj,
+          "${objName}",
+          { db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
+          { root, args, context, ast }
+        )`
         );
       } else {
         let isString = true;
         deleteCleanups.push(
-          `${fkAdjMulti ? "      " : "await "}resolverHelpers.cleanUpRelationshipObjectAfterDelete(
-        ${adj}$match._id,
-        ${adj}hooksObj,
-        ${adj}"${objName}",
-        ${adj}{ db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
-        ${adj}{ root, args, context, ast }
-      ${adj})`
+          `await resolverHelpers.cleanUpRelationshipObjectAfterDelete(
+          $match._id,
+          hooksObj,
+          "${objName}",
+          { db, dbHelpers, table: "${rel.type.table}", keyField: "${rel.keyField}", isString: ${keyTypeIsString}, session },
+          { root, args, context, ast }
+        )`
         );
       }
     }
   });
 
   const getDeleteCleanups = () => {
-    let cleanups = deleteCleanups.join(`${fkAdjMulti ? "," : ""}\n    `);
-    return `${fkAdjMulti ? "await Promise.all([\n    " : ""}${cleanups}${fkAdjMulti ? "\n        ])" : ""};`;
+    return `${deleteCleanups.join(`;\n        `)};`;
   };
 
   let mutationItems = [

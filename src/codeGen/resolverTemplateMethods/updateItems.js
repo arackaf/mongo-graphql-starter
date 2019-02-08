@@ -1,4 +1,4 @@
-import { getDbObjects, mutationError, mutationOver, mutationMeta } from "../mutationHelpers";
+import { getDbObjects, mutationError, mutationOver, mutationMeta, mutationComplete } from "../mutationHelpers";
 
 export default ({ objName, table }) => `    async update${objName}s(root, args, context, ast) {
       ${getDbObjects({ objName, op: "update" })}
@@ -12,6 +12,7 @@ export default ({ objName, table }) => `    async update${objName}s(root, args, 
         await setUpOneToManyRelationshipsForUpdate(args._ids, args, ${objName}Metadata, { db, dbHelpers, hooksObj, root, args, context, ast, session });
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session, multi: true });
         await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, { db, root, args, context, ast, session });
+        ${mutationComplete()}
         
         let result = $project ? await load${objName}s(db, { $match, $project }, root, args, context, ast) : null;
         return {

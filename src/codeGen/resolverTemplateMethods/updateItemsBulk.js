@@ -1,4 +1,4 @@
-import { getDbObjects, mutationError, mutationOver, mutationMeta } from "../mutationHelpers";
+import { getDbObjects, mutationError, mutationOver, mutationMeta, mutationComplete } from "../mutationHelpers";
 
 export default ({ objName, table }) => `    async update${objName}sBulk(root, args, context, ast) {
       ${getDbObjects({ objName, op: "update" })}
@@ -11,6 +11,7 @@ export default ({ objName, table }) => `    async update${objName}sBulk(root, ar
         }
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session, multi: true });
         await processHook(hooksObj, "${objName}", "afterUpdate", $match, updates, { db, root, args, context, ast, session });
+        ${mutationComplete()}
 
         return { 
           success: true,
