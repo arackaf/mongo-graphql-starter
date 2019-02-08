@@ -18,8 +18,14 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await db.collection("subjects").insertMany([subject1]);
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("subjects").deleteMany({});
+  await db.collection("keywords").deleteMany({});
+  delete global.cancelDelete;
+  delete global.cancelUpdate;
 
+  await db.collection("subjects").insertMany([subject1]);
   await db.collection("authors").insertMany([author1, author2, author3]);
 
   book1.authorIds = ["" + author3._id];
@@ -29,15 +35,6 @@ beforeEach(async () => {
   book4.authorIds = ["" + author1._id, "" + author3._id];
   book4.mainAuthorId = "" + author2._id;
   await db.collection("books").insertMany([book1, book2, book3, book4]);
-});
-
-afterEach(async () => {
-  await db.collection("books").deleteMany({});
-  await db.collection("authors").deleteMany({});
-  await db.collection("subjects").deleteMany({});
-  await db.collection("keywords").deleteMany({});
-  delete global.cancelDelete;
-  delete global.cancelUpdate;
 });
 
 afterAll(async () => {
@@ -110,6 +107,7 @@ test("mainAuthor relationship's fk cleaned up on author delete", async () => {
 // -------------------------------------------------------------------------
 
 test("authors relationship's fk cleaned up on author delete -- exception on fk $pull", async () => {
+  console.log("FK PULL 1 BEGIN");
   global.cancelUpdate = true;
   await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}") { success }`,
@@ -134,6 +132,7 @@ test("authors relationship's fk cleaned up on author delete -- exception on fk $
 });
 
 test("mainAuthor relationship's fk cleaned up on author delete -- exception on fk $pull", async () => {
+  console.log("FK PULL 2 BEGIN");
   global.cancelUpdate = true;
   let result = await runMutation({
     mutation: `deleteAuthor(_id: "${author3._id}") { Meta { transaction } }`,
