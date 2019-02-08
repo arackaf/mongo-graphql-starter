@@ -101,7 +101,7 @@ export const updateObjectMutationRequiresTransaction = (typeMetadata, args) => {
   return false;
 };
 
-export const cleanUpRelationshipArrayAfterDelete = async (_id, hooksObj, relType, dbInfo, graphQLPacket) => {
+export const pullFkFromArray = async (_id, hooksObj, relType, dbInfo, graphQLPacket) => {
   let { root, args, context, ast } = graphQLPacket;
   let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
   let _ids = Array.isArray(_id) ? _id : [_id];
@@ -117,7 +117,7 @@ export const cleanUpRelationshipArrayAfterDelete = async (_id, hooksObj, relType
   await processHook(hooksObj, relType, "afterUpdate", $match, updates, { db, root, args, context, ast, session });
 };
 
-export const cleanUpRelationshipObjectAfterDelete = async (_id, hooksObj, relType, dbInfo, graphQLPacket) => {
+export const clearFk = async (_id, hooksObj, relType, dbInfo, graphQLPacket) => {
   let { root, args, context, ast } = graphQLPacket;
   let { db, dbHelpers, table, keyField, isString, session } = dbInfo;
 
