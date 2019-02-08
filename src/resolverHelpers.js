@@ -1,7 +1,7 @@
 import processHook from "./processHook";
 import { ObjectId } from "mongodb";
 
-export const startDbMutation = async (root, args, context, objName, typeMetadata, { create, update, delete: isDelete }) => {
+export const startDbMutation = async ({ root, args, context }, objName, typeMetadata, { create, update, delete: isDelete }) => {
   let [db, client] = await Promise.all([
     typeof root.db === "function" ? await root.db() : root.db,
     typeof root.client === "function" ? await root.client() : root.client
