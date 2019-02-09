@@ -1,9 +1,9 @@
 export default {
   Root: {
-    queryPreprocess(root, args, context, ast) {
+    queryPreprocess({ db, root, args, context, ast }) {
       //Called before query filters are processed
     },
-    queryMiddleware(queryPacket, { root, args, context, ast }) {
+    queryMiddleware(queryPacket, { db, root, args, context, ast }) {
       //Called after query filters are processed, which are passed in queryPacket
     },
     queryPreAggregate(aggregateItems, { root, args, context, ast }) {
