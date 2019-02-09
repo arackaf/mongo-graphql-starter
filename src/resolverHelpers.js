@@ -13,7 +13,7 @@ export const startDbMutation = async ({ root, args, context }, objName, typeMeta
     if (create && mutationRequiresTransaction({ typeMetadata, newObjectArgs: args[objName] })) {
       transaction = true;
     }
-    if (update && mutationRequiresTransaction({ typeMetadata, updateObjectArgs: args })) {
+    if (update && (args._ids || args.Match || mutationRequiresTransaction({ typeMetadata, updateObjectArgs: args }))) {
       transaction = true;
     }
     if (isDelete && deletionRequiresTransaction({ typeMetadata })) {
