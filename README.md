@@ -7,9 +7,59 @@ This utility will scaffold GraphQL schema and resolvers, with queries, filters a
 your Mongo db.
 
 The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
-or advanced edge cases as needed.
+or advanced edge cases as needed. 
 
-<!-- TOC -->autoauto- [Prior art](#prior-art)auto- [How do you use it?](#how-do-you-use-it)auto  - [Valid types for your fields](#valid-types-for-your-fields)auto  - [Readonly types](#readonly-types)auto  - [Circular dependencies are fine](#circular-dependencies-are-fine)auto- [Queries created](#queries-created)auto  - [Projecting results from queries](#projecting-results-from-queries)auto  - [Custom query arguments](#custom-query-arguments)auto- [Filters created](#filters-created)auto  - [String filters](#string-filters)auto  - [String array filters](#string-array-filters)auto  - [Int filters](#int-filters)auto  - [Int array filters](#int-array-filters)auto  - [Float filters](#float-filters)auto  - [Float array filters](#float-array-filters)auto  - [Date filters](#date-filters)auto  - [Formatting dates](#formatting-dates)auto  - [OR Queries](#or-queries)auto  - [Nested object and array filters](#nested-object-and-array-filters)auto  - [Sorting](#sorting)auto  - [Paging](#paging)auto- [Mutations](#mutations)auto  - [Creations](#creations)auto  - [Updates](#updates)auto    - [The Updates argument](#the-updates-argument)auto  - [Deleting](#deleting)auto  - [Mutation examples](#mutation-examples)auto- [Integrating custom content](#integrating-custom-content)auto  - [schemaSources example](#schemasources-example)auto  - [resolverSources example](#resolversources-example)auto- [Defining relationships between types](#defining-relationships-between-types)auto  - [Using relationships](#using-relationships)auto  - [Creating related data](#creating-related-data)auto    - [In creations](#in-creations)auto    - [In updates (not one-to-many)](#in-updates-not-one-to-many)auto    - [In updates (one-to-many)](#in-updates-one-to-many)auto    - [In lifecycle hooks](#in-lifecycle-hooks)auto- [Lifecycle hooks](#lifecycle-hooks)auto  - [All available hooks](#all-available-hooks)auto    - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)auto  - [How to use processing hooks](#how-to-use-processing-hooks)auto    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)auto    - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)auto    - [Reusing code across types' hooks](#reusing-code-across-types-hooks)auto- [A closer look at what's generated](#a-closer-look-at-whats-generated)auto  - [All code is extensible.](#all-code-is-extensible)autoauto<!-- /TOC -->
+<!-- TOC -->
+
+- [Prior art](#prior-art)
+- [How do you use it?](#how-do-you-use-it)
+  - [Valid types for your fields](#valid-types-for-your-fields)
+  - [Readonly types](#readonly-types)
+  - [Circular dependencies are fine](#circular-dependencies-are-fine)
+- [Queries created](#queries-created)
+  - [Projecting results from queries](#projecting-results-from-queries)
+  - [Custom query arguments](#custom-query-arguments)
+- [Filters created](#filters-created)
+  - [String filters](#string-filters)
+  - [String array filters](#string-array-filters)
+  - [Int filters](#int-filters)
+  - [Int array filters](#int-array-filters)
+  - [Float filters](#float-filters)
+  - [Float array filters](#float-array-filters)
+  - [Date filters](#date-filters)
+  - [Formatting dates](#formatting-dates)
+  - [OR Queries](#or-queries)
+  - [Nested object and array filters](#nested-object-and-array-filters)
+  - [Sorting](#sorting)
+  - [Paging](#paging)
+- [Mutations](#mutations)
+  - [Creations](#creations)
+  - [Updates](#updates)
+    - [The Updates argument](#the-updates-argument)
+  - [Deleting](#deleting)
+  - [Mutation examples](#mutation-examples)
+- [Transactions](#transactions)
+- [Integrating custom content](#integrating-custom-content)
+  - [schemaSources example](#schemasources-example)
+  - [resolverSources example](#resolversources-example)
+- [Defining relationships between types](#defining-relationships-between-types)
+  - [Using relationships](#using-relationships)
+  - [Creating related data](#creating-related-data)
+    - [In creations](#in-creations)
+    - [In updates (not one-to-many)](#in-updates-not-one-to-many)
+    - [In updates (one-to-many)](#in-updates-one-to-many)
+    - [In lifecycle hooks](#in-lifecycle-hooks)
+- [Lifecycle hooks](#lifecycle-hooks)
+  - [All available hooks](#all-available-hooks)
+    - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
+  - [How to use processing hooks](#how-to-use-processing-hooks)
+    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)
+    - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
+    - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
+- [A closer look at what's generated](#a-closer-look-at-whats-generated)
+  - [All code is extensible.](#all-code-is-extensible)
+
+<!-- /TOC -->
 
 ## Prior art
 
@@ -109,7 +159,9 @@ file, which are aggregates over all the types.
 
 ![Image of basic scaffolding](docs-img/initialCreated.png)
 
-Now tell Express about it—and don't forget to add a root object with a `db` property that resolves to a connection to your database. If needed, you can also have `db` be a function which returns a promise resolving to a connection.
+Now tell Express about it—and don't forget to add a root object with a `db` property that resolves to a connection to your database. If you're on Mongo 4 or higher, be sure to also add a `client` property that resolves to your Mongo client instance, which will be used to create sessions and transactions, for multi-document operations. 
+
+If needed, `db` and `client` can be functions which returns a promise resolving to those things.
 
 Here's what a minimal, complete example might look like.
 
@@ -123,14 +175,10 @@ import express from "express";
 
 const app = express();
 
-const dbPromise = MongoClient.connect(
-  "mongodb://localhost:27017",
-  { useNewUrlParser: true }
-).then(client => client.db("mongo-graphql-starter"));
+const mongoClientPromise = MongoClient.connect(connString, { useNewUrlParser: true });
+const mongoDbPromise = mongoClientPromise.then(client => client.db(dbName));
 
-const root = {
-  db: dbPromise
-};
+const root = { client: mongoClientPromise, db: mongoDbPromise };
 const executableSchema = makeExecutableSchema({ typeDefs: schema, resolvers });
 
 app.use(
@@ -585,6 +633,15 @@ In addition, the following arguments are supported
 [Multi updates](test/testProject1/multiUpdate.test.js#L18)
 
 [Bulk updates](test/testProject1/bulkUpdate.test.js#L18)
+
+## Transactions
+
+As of version 0.8, this project will use Mongo transactions for any multi-document mutations (creates, updates or deletes), assuming of course your Mongo version supports them (4.0).
+
+If you're on Mongo 4, be sure to provide a `client` object to the root object, as discussed at the very beginning of these docs. If you, any mutations which affect more than one document will use a transaction, and only commit when everything is finished. 
+
+To see whether a transaction was used for your mutation, you can query the `Meta` property, which itself has a boolean `transaction` property. See the generated schema for more info.
+
 
 ## Integrating custom content
 
