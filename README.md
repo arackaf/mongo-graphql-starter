@@ -638,10 +638,9 @@ In addition, the following arguments are supported
 
 As of version 0.8, this project will use Mongo transactions for any multi-document mutations (creates, updates or deletes), assuming of course your Mongo version supports them (4.0).
 
-If you're on Mongo 4, be sure to provide a `client` object to the root object, as discussed at the very beginning of these docs. If you, any mutations which affect more than one document will use a transaction, and only commit when everything is finished. 
+If you're on Mongo 4, be sure to provide a `client` object to the root GraphQL object, as discussed at the beginning of these docs. If you do, any mutations which affect more than one document will use a transaction, and only commit when everything is finished. 
 
 To see whether a transaction was used for your mutation, you can query the `Meta` property, which itself has a boolean `transaction` property. See the generated schema for more info.
-
 
 ## Integrating custom content
 
@@ -788,7 +787,7 @@ For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above
 
 For `one-to-one` and `many-to-many` relationships, when creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set, or added to for arrays, from the new relationship object's `keyField`, whatever it is.
 
-For `one-to-many` relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is.
+For `one-to-many` relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is (though usually `_id`).
 
 | Options               | Default   | Description|
 | --------------------- | --------- | --------------------------------------- |
