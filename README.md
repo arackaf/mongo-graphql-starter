@@ -729,8 +729,6 @@ export const Book = {
 
 For each relationship, the object key (ie `books`, `authors`, `mainAuthor` above) will be the name of the object or array created in the GraphQL schema. If the foreign key is an array, then the resulting property will always be an array (we'll refer to these collections as `many-to-many`). If the foreign key is not an array, then an object will be created if the `keyField` is `_id` (which we'll call `one-to-one`), which is the default, otherwise an array will be created (`one-to-many`). This behavior can be overridden by specifying `oneToOne` or `oneToMany`, described below.
 
-Note that `one-to-one`, `one-to-many`, and `many-to-many` refer to the mapping between foreign keys, and objects, not between objects, like you may be familiar with in entity relationship diagrams. So a `many-to-many` relationship means that an array of foreign keys maps to an array of objects, and so on.
-
 For `one-to-one` and `many-to-many` relationships, when creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **before** the new parent object, with the parent object's `<foreignKey>` field being set, or added to for arrays, from the new relationship object's `keyField`, whatever it is.
 
 For `one-to-many` relationships, after creating new objects using the `create<Type>` mutation, any specified new members of the relationship will be created **after** the parent object, with the related objects' `<keyKey>` field being set, or added to for arrays, from the new relationship object's `<foreignKey>`, whatever it is.
@@ -743,6 +741,8 @@ For `one-to-many` relationships, after creating new objects using the `create<Ty
 | `oneToOne`            | (none)    | Specify `true` to force the relationship to create a single object, even if the `keyField` is not `_id`. |
 | `oneToMany`           | (none)    | Specify `true` to force the relationship to create an array, regardless of `fkField` and `keyField`.  |
 | `readonly`            | (none)    | If `true` the relationship can only be queried; you won't be able to create relationship instances in the `create` mutation of the containing type.  |
+
+For `one-to-many` relationships where the key is `_id`, upon deleting one of the parent objects, all of the "many" objects (who have a foreign key pointing to that `_id` key field) will have those `_id` values removed from the related array, or cleared out if it's a single value.
 
 ### Using relationships
 
@@ -824,26 +824,29 @@ Most applications will have some cross-cutting concerns, like authentication. Th
 
 Most of the hooks receive these arguments (and possibly others) which are defined here, once.
 
-| Argument  | Description                                                                                         |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| `root`    | The root object. This will have your db object, and anything else you chose to add to it            |
-| `args`    | The graphQL arguments object                                                                        |
-| `context` | By default your Express request object                                                              |
-| `ast`     | The entire graphQL query AST with complete info about your query: query name, fields requested, etc |
+| Argument   | Description                                                                                         |
+| ---------- | --------------------------------------------------------------------------------------------------- |
+| `db`       | The MongoDB object currently being used                                                             |
+| `session`  | The MongoDB session object, if a `client` object was provided to root. This will be used to control transactions if available (Mongo 4.0 and above)   |
+| `root`     | The root object. This will have your db object, and anything else you chose to add to it            |
+| `args`     | The graphQL arguments object                                                                        |
+| `context`  | By default your Express request object                                                              |
+| `ast`      | The entire graphQL query AST with complete info about your query: query name, fields requested, etc |
+| `hooksObj` | The entire hooks object currently being used |
 
 ### All available hooks
 
 | Hook                                                     | Description   |
 | -------------------------------------------------------- | --------------|
-| `queryPreprocess(root, args, context, ast)`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually adjust arguments the user has sent over; for example, you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
-| `queryMiddleware(queryPacket, root, args, context, ast)` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. This is your chance to adjust the query that's about to be run, possibly to add filters to ensure the user doesn't access data she's not entitled to. |
-| `queryPreAggregate(aggregateItems, root, args, context, ast)` | Called right before any Mongo query is run, giving you the actual aggregation items that are about to be passed into the pipeline. This is your chance to do any one-off, low-level (likely uncommon) adjustments you need. Not only will this be called for all queries, but also for mutations, when loading the created, or updated object to send back down. |
-| `beforeInsert(obj, root, args, context, ast)`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` to cancel the insertion |
-| `afterInsert(obj, root, args, context, ast)`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
-| `beforeUpdate(match, updates, root, args, context, ast)` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo to find the right object. `updates` is the update object that'll be passed to Mongo to make the requested changes. Return `false` to cancel the update.  |
-| `afterUpdate(match, updates, root, args, context, ast)`  | Called after an object is updated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
-| `beforeDelete(match, root, args, context, ast)`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` to cancel the deletion.  |
-| `afterDelete(match, root, args, context, ast)`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
+| `queryPreprocess({ root, args, context, ast })`              | Run in `all<Type>s` and `get<Type>` queries before any processing is done. This is a good place to manually adjust arguments the user has sent over; for example, you might manually set or limit the value of `args.PAGE_SIZE` to prevent excessive data from being requested. |
+| `queryMiddleware(queryPacket, { root, args, context, ast })` | Called after the args and ast are parsed, and turned into a Mongo query, but before the query is actually run. See below for a full listing of what `queryPacket` contains. This is your chance to adjust the query that's about to be run, possibly to add filters to ensure the user doesn't access data she's not entitled to. |
+| `queryPreAggregate(aggregateItems, { root, args, context, ast })` | Called right before any Mongo query is run, giving you the actual aggregation items that are about to be passed into the pipeline. This is your chance to do any one-off, low-level (likely uncommon) adjustments you need. Not only will this be called for all queries, but also for mutations, when loading the created, or updated object to send back down. |
+| `beforeInsert(obj, { root, args, context, ast })`            | Called before a new object is inserted. `obj` is the object to be inserted. Return `false` to cancel the insertion |
+| `afterInsert(obj, { root, args, context, ast })`            | Called after a new object is inserted. `obj` is the newly inserted object. This could be an opportunity to do any logging on the just-completed insertion.  |
+| `beforeUpdate(match, updates, { root, args, context, ast })` | Called before an object is updated. `match` is the filter object that'll be passed directly to Mongo to find the right object. `updates` is the update object that'll be passed to Mongo to make the requested changes. Return `false` to cancel the update.  |
+| `afterUpdate(match, updates, { root, args, context, ast })`  | Called after an object is updated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
+| `beforeDelete(match, { root, args, context, ast })`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` to cancel the deletion.  |
+| `afterDelete(match, { root, args, context, ast })`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
 | `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`—results will always be an array. The actual objects queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed, ie you can format dates, etc.  |
 
 #### The `queryPacket` argument to the queryMiddleware hook
