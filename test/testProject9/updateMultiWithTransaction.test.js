@@ -92,7 +92,7 @@ test("Add subject in author update", async () => {
   });
 });
 
-test("Update author - no transaction", async () => {
+test("Update author multi - yes transaction", async () => {
   let author = await runMutation({
     mutation: `createAuthor(Author: {name: "Adam" }){Author {_id}}`,
     result: "createAuthor"
@@ -103,5 +103,5 @@ test("Update author - no transaction", async () => {
     rawResult: "updateAuthors"
   });
 
-  expect(result).toEqual({ Meta: { transaction: false } });
+  expect(result).toEqual({ Meta: { transaction: true } });
 });
