@@ -8,6 +8,9 @@ export const startDbMutation = async ({ root, args, context }, objName, typeMeta
     typeof root.client === "function" ? await root.client() : root.client
   ]);
   let session = client ? client.startSession() : null;
+
+  //TODO: check session.clientOptions.replicaSet
+
   let transaction = false;
   if (session && session.startTransaction) {
     if (create && mutationRequiresTransaction({ typeMetadata, newObjectArgs: args[objName] })) {
