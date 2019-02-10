@@ -25,10 +25,7 @@ export default async function() {
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
 
   let db, schema;
-  let client = await MongoClient.connect(
-    nextConnectionString(),
-    { useNewUrlParser: true }
-  );
+  let client = await MongoClient.connect(nextConnectionString(), { useNewUrlParser: true });
   db = client.db(process.env.databaseName || "mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 

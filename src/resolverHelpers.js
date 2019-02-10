@@ -9,7 +9,8 @@ export const startDbMutation = async ({ root, args, context }, objName, typeMeta
   ]);
   let session = client ? client.startSession() : null;
 
-  //TODO: check session.clientOptions.replicaSet
+  //TODO: find some way to check if you're running mongod OR check if on mongos OR on a replica set via session.clientOptions.replicaSet
+  // transactions error if started from mongod
 
   let transaction = false;
   if (session && session.startTransaction) {
