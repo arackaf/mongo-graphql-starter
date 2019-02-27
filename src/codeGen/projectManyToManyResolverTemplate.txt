@@ -6,11 +6,7 @@
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
         let { $project, $sort, $limit, $skip } = queryPacket;
         
-        let aggregateItems = [
-          { $match }, 
-          $sort ? { $sort } : null,
-          { $project },
-        ].filter(item => item);
+        let aggregateItems = [{ $match }, $sort ? { $sort } : null, { $project }].filter(item => item);
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
         cleanUpResults(results, ${targetTypeName}Metadata);
 

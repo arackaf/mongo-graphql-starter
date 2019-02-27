@@ -1,22 +1,22 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray;
+let db, schema, queryAndMatchArray, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray } = await spinUp());
+  ({ db, schema, queryAndMatchArray, close } = await spinUp());
 
-  await db.collection("books").insert({ title: "Book 1", createdOn: new Date("2004-06-02T01:30:00") });
-  await db.collection("books").insert({ title: "Book 2", createdOn: new Date("2004-06-02T01:30:10") });
-  await db.collection("books").insert({ title: "Book 3", createdOn: new Date("2004-06-02T01:45:00") });
-  await db.collection("books").insert({ title: "Book 4", createdOn: new Date("2004-06-02T02:00:00") });
-  await db.collection("books").insert({ title: "Book 5", createdOn: new Date("2004-06-02T02:30:00") });
-  await db.collection("books").insert({ title: "Book 6", createdOn: new Date("2004-06-02T03:00:00") });
-  await db.collection("books").insert({ title: "Book 7", createdOn: new Date("2004-06-02T03:00:10") });
-  await db.collection("books").insert({ title: "Book 8", createdOn: new Date("2004-06-02T03:00:20") });
+  await db.collection("books").insertOne({ title: "Book 1", createdOn: new Date("2004-06-02T01:30:00") });
+  await db.collection("books").insertOne({ title: "Book 2", createdOn: new Date("2004-06-02T01:30:10") });
+  await db.collection("books").insertOne({ title: "Book 3", createdOn: new Date("2004-06-02T01:45:00") });
+  await db.collection("books").insertOne({ title: "Book 4", createdOn: new Date("2004-06-02T02:00:00") });
+  await db.collection("books").insertOne({ title: "Book 5", createdOn: new Date("2004-06-02T02:30:00") });
+  await db.collection("books").insertOne({ title: "Book 6", createdOn: new Date("2004-06-02T03:00:00") });
+  await db.collection("books").insertOne({ title: "Book 7", createdOn: new Date("2004-06-02T03:00:10") });
+  await db.collection("books").insertOne({ title: "Book 8", createdOn: new Date("2004-06-02T03:00:20") });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 

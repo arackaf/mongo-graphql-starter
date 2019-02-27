@@ -2,7 +2,7 @@ import { MongoError } from "mongodb";
 import processHook from "./processHook";
 
 export async function runUpdate(db, table, $match, updates, options) {
-  if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet) {
+  if (updates.$set || updates.$inc || updates.$push || updates.$pull || updates.$addToSet || updates.$unset) {
     try {
       await db.collection(table).updateMany($match, updates, options);
     } catch (err) {
@@ -32,10 +32,10 @@ export async function processInsertion(db, newObjectToCreateMaybe, options) {
   return results[0];
 }
 
-export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetadata, hooksObj, root, args, context, ast }) {
+export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetadata, hooksObj, root, args, context, ast, session }) {
   let newObjectPackets = newObjectsToCreateMaybe.map(obj => ({
     obj,
-    preInsertResult: processHook(hooksObj, typeMetadata.typeName, "beforeInsert", obj, root, args, context, ast)
+    preInsertResult: processHook(hooksObj, typeMetadata.typeName, "beforeInsert", obj, { db, root, args, context, ast, session })
   }));
 
   let newObjects = [];
@@ -46,27 +46,20 @@ export async function processInsertions(db, newObjectsToCreateMaybe, { typeMetad
   }
   if (!newObjects.length) return [];
 
-  newObjects = await runMultipleInserts(db, typeMetadata.table, newObjects);
-  await Promise.all(newObjects.map(obj => processHook(hooksObj, typeMetadata.typeName, "afterInsert", obj, root, args, context, ast)));
+  newObjects = await runMultipleInserts(db, typeMetadata.table, newObjects, session);
+  await Promise.all(
+    newObjects.map(obj => processHook(hooksObj, typeMetadata.typeName, "afterInsert", obj, { db, root, args, context, ast, session }))
+  );
   return newObjects;
 }
 
-export async function runInsert(db, table, newObject) {
+export async function runMultipleInserts(db, table, newObjects, session) {
   try {
-    await db.collection(table).insertOne(newObject);
-    return newObject;
-  } catch (err) {
-    if (err instanceof MongoError) {
-      throw `The following error was thrown by Mongo when attempting to perform this insertion: ${err.toString()}`;
-    } else {
-      throw err;
+    let options = {};
+    if (session) {
+      options.session = session;
     }
-  }
-}
-
-export async function runMultipleInserts(db, table, newObjects) {
-  try {
-    await db.collection(table).insertMany(newObjects);
+    await db.collection(table).insertMany(newObjects, options);
     return newObjects;
   } catch (err) {
     if (err instanceof MongoError) {

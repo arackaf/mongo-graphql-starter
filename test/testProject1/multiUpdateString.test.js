@@ -1,17 +1,17 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeEach(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("tags").insert({ _id: "a", name: "Tag 1", count: 100 });
-  await db.collection("tags").insert({ _id: "b", name: "Tag 2", count: 150 });
-  await db.collection("tags").insert({ _id: "c", name: "Tag 3", count: 200 });
+  await db.collection("tags").insertOne({ _id: "a", name: "Tag 1", count: 100 });
+  await db.collection("tags").insertOne({ _id: "b", name: "Tag 2", count: 150 });
+  await db.collection("tags").insertOne({ _id: "c", name: "Tag 3", count: 200 });
 });
 
 afterEach(async () => {
-  await db.collection("tags").remove({});
-  db.close();
+  await db.collection("tags").deleteMany({});
+  close();
   db = null;
 });
 

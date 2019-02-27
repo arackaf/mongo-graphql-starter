@@ -1,19 +1,19 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("things").insert({ name: "a", floats: [] });
-  await db.collection("things").insert({ name: "b", floats: [1, 2, 3, 4] });
-  await db.collection("things").insert({ name: "c", floats: [3, 4, 5, 6] });
-  await db.collection("things").insert({ name: "d", floats: [5] });
-  await db.collection("things").insert({ name: "e", floats: [5, 6] });
+  await db.collection("things").insertOne({ name: "a", floats: [] });
+  await db.collection("things").insertOne({ name: "b", floats: [1, 2, 3, 4] });
+  await db.collection("things").insertOne({ name: "c", floats: [3, 4, 5, 6] });
+  await db.collection("things").insertOne({ name: "d", floats: [5] });
+  await db.collection("things").insertOne({ name: "e", floats: [5, 6] });
 });
 
 afterAll(async () => {
-  await db.collection("things").remove({});
-  db.close();
+  await db.collection("things").deleteMany({});
+  close();
   db = null;
 });
 

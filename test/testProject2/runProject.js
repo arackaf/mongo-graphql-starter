@@ -6,9 +6,6 @@ import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
 import spinUp from "./spinUp";
 
-let connPromise = spinUp();
-let dbPromise = connPromise.then(({ db }) => db);
-
 Promise.resolve(spinUp()).then(({ db, schema, queryAndMatchArray }) => {
   const app = express();
   const root = {
@@ -48,10 +45,10 @@ async function setup() {
   const comment7 = { text: "Comment 7", upVotes: 4, author: cauthorC };
 
   await Promise.all([
-    db.collection("blogs").insert({ title: "Blog 1", author: authorA, comments: [comment1, comment2, comment3] }),
-    db.collection("blogs").insert({ title: "Blog 2", author: authorA, comments: [] }),
-    db.collection("blogs").insert({ title: "Blog 3", author: authorB, comments: [comment4] }),
-    db.collection("blogs").insert({ title: "Blog 4", author: authorC, comments: [comment5, comment6] }),
-    db.collection("blogs").insert({ title: "Blog 5", author: authorC, comments: [comment7] })
+    db.collection("blogs").insertOne({ title: "Blog 1", author: authorA, comments: [comment1, comment2, comment3] }),
+    db.collection("blogs").insertOne({ title: "Blog 2", author: authorA, comments: [] }),
+    db.collection("blogs").insertOne({ title: "Blog 3", author: authorB, comments: [comment4] }),
+    db.collection("blogs").insertOne({ title: "Blog 4", author: authorC, comments: [comment5, comment6] }),
+    db.collection("blogs").insertOne({ title: "Blog 5", author: authorC, comments: [comment7] })
   ]);
 }

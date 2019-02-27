@@ -1,19 +1,19 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("books").insert({ title: "Book 1", prices: [1.1, 2.2, 3.3] });
-  await db.collection("books").insert({ title: "Book 2", prices: [1.1, 2.2, 3.3] });
-  await db.collection("books").insert({ title: "Book 3", prices: [] });
-  await db.collection("books").insert({ title: "Book 4", prices: [1.1] });
-  await db.collection("books").insert({ title: "Book 5", prices: [9.9] });
+  await db.collection("books").insertOne({ title: "Book 1", prices: [1.1, 2.2, 3.3] });
+  await db.collection("books").insertOne({ title: "Book 2", prices: [1.1, 2.2, 3.3] });
+  await db.collection("books").insertOne({ title: "Book 3", prices: [] });
+  await db.collection("books").insertOne({ title: "Book 4", prices: [1.1] });
+  await db.collection("books").insertOne({ title: "Book 5", prices: [9.9] });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 

@@ -1,21 +1,21 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, runQuery, queryAndMatchArray, runMutation;
+let db, schema, runQuery, queryAndMatchArray, runMutation, close;
 let adam, katie, laura, mallory, book1, book2, book3;
 
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runQuery, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runQuery, runMutation, close } = await spinUp());
 });
 
 afterEach(async () => {
-  await db.collection("books").remove({});
-  await db.collection("authors").remove({});
-  await db.collection("subjects").remove({});
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("subjects").deleteMany({});
 });
 
 afterAll(async () => {
-  db.close();
+  close();
   db = null;
 });
 
