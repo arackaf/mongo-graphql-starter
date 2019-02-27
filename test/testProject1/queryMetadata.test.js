@@ -1,22 +1,22 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("books").insert({ title: "Book 4", pages: 200 });
-  await db.collection("books").insert({ title: "Book 6", pages: 200 });
-  await db.collection("books").insert({ title: "Book 5", pages: 200 });
-  await db.collection("books").insert({ title: "Book 8", pages: 200 });
-  await db.collection("books").insert({ title: "Book 1", pages: 100 });
-  await db.collection("books").insert({ title: "Book 2", pages: 150 });
-  await db.collection("books").insert({ title: "Book 7", pages: 210 });
-  await db.collection("books").insert({ title: "Book 3", pages: 90 });
+  await db.collection("books").insertOne({ title: "Book 4", pages: 200 });
+  await db.collection("books").insertOne({ title: "Book 6", pages: 200 });
+  await db.collection("books").insertOne({ title: "Book 5", pages: 200 });
+  await db.collection("books").insertOne({ title: "Book 8", pages: 200 });
+  await db.collection("books").insertOne({ title: "Book 1", pages: 100 });
+  await db.collection("books").insertOne({ title: "Book 2", pages: 150 });
+  await db.collection("books").insertOne({ title: "Book 7", pages: 210 });
+  await db.collection("books").insertOne({ title: "Book 3", pages: 90 });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 

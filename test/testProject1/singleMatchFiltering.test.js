@@ -1,24 +1,24 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("books").insert({
+  await db.collection("books").insertOne({
     _id: ObjectId("59e3dbdf94dc6983d41deece"),
     title: "Book 1",
     weight: 5.1,
     createdOn: new Date("2004-06-02T01:30:45"),
     createdOnYearOnly: new Date("2004-06-02T01:30:45")
   });
-  await db.collection("books").insert({ _id: ObjectId("59e41fc694dc6983d41deed1"), title: "Book 2", weight: 5.5 });
-  await db.collection("books").insert({ _id: ObjectId("59e41fda94dc6983d41deed2"), title: "Book 3", weight: 5.9 });
+  await db.collection("books").insertOne({ _id: ObjectId("59e41fc694dc6983d41deed1"), title: "Book 2", weight: 5.5 });
+  await db.collection("books").insertOne({ _id: ObjectId("59e41fda94dc6983d41deed2"), title: "Book 3", weight: 5.9 });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 

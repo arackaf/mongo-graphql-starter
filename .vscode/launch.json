@@ -5,55 +5,64 @@
       "type": "node",
       "request": "launch",
       "name": "Launch 1",
-      "program": "${workspaceRoot}\\test\\testProject1\\index.js"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch 1 New Driver",
-      "program": "${workspaceRoot}\\test\\testProject1_NewDriver\\index.js"
+      "program": "${workspaceRoot}/test/testProject1/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 2",
-      "program": "${workspaceRoot}\\test\\testProject2\\index.js"
+      "program": "${workspaceRoot}/test/testProject2/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 3",
-      "program": "${workspaceRoot}\\test\\testProject3\\index.js"
+      "program": "${workspaceRoot}/test/testProject3/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 4",
-      "program": "${workspaceRoot}\\test\\testProject4\\index.js"
+      "program": "${workspaceRoot}/test/testProject4/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 5",
-      "program": "${workspaceRoot}\\test\\testProject5\\index.js"
+      "program": "${workspaceRoot}/test/testProject5/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 6",
-      "program": "${workspaceRoot}\\test\\testProject6\\index.js"
+      "program": "${workspaceRoot}/test/testProject6/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 7",
-      "program": "${workspaceRoot}\\test\\testProject7\\index.js"
+      "program": "${workspaceRoot}/test/testProject7/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "Launch 8",
-      "program": "${workspaceRoot}\\test\\testProject8\\index.js"
+      "program": "${workspaceRoot}/test/testProject8/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 9",
+      "program": "${workspaceRoot}/test/testProject9/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     }
   ]
 }

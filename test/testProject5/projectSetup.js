@@ -55,12 +55,28 @@ export const Author = {
       fkField: "_id",
       keyField: "authorIds"
     },
+    books_readonly: {
+      get type() {
+        return Book;
+      },
+      fkField: "_id",
+      keyField: "authorIds_readonly",
+      readonly: true
+    },
     mainAuthorBooks: {
       get type() {
         return Book;
       },
       fkField: "_id",
       keyField: "mainAuthorId"
+    },
+    mainAuthorBooks_readonly: {
+      get type() {
+        return Book;
+      },
+      fkField: "_id",
+      keyField: "mainAuthorId_readonly",
+      readonly: true
     },
     mainAuthorNamesBooks: {
       get type() {
@@ -101,9 +117,11 @@ export const Book = {
     pages: IntType,
     weight: FloatType,
     mainAuthorId: MongoIdType,
+    mainAuthorId_readonly: MongoIdType,
     mainAuthorName: StringType,
     cachedMainAuthor: objectOf(Author),
     authorIds: MongoIdArrayType,
+    authorIds_readonly: MongoIdArrayType,
     authorJunkId: MongoIdType,
     authorJunkIds: MongoIdArrayType,
     authorNames: StringArrayType,
@@ -113,6 +131,11 @@ export const Book = {
     authors: {
       type: Author,
       fkField: "authorIds"
+    },
+    authors_readonly: {
+      type: Author,
+      fkField: "authorIds_readonly",
+      readonly: true
     },
     authorsByName: {
       get type() {
@@ -124,6 +147,11 @@ export const Book = {
     mainAuthor: {
       type: Author,
       fkField: "mainAuthorId"
+    },
+    mainAuthor_readonly: {
+      type: Author,
+      fkField: "mainAuthorId_readonly",
+      readonly: true
     },
     mainAuthorByName: {
       get type() {

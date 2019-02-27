@@ -23,7 +23,7 @@ export default {
       if (/^BUMP/.test(obj.name)) {
         let db = await root.db;
         obj.name += "b";
-        db.collection("authors").update({ _id: obj._id }, { $set: { name: obj.name } });
+        db.collection("authors").updateOne({ _id: obj._id }, { $set: { name: obj.name } });
       }
     }
   },

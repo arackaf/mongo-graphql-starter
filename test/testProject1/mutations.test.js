@@ -1,14 +1,14 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 
@@ -480,7 +480,7 @@ test("Manual mongoId", async () => {
   });
 
   await runMutation({
-    mutation: `deleteBook(_id: "${idCrap}")`,
+    mutation: `deleteBook(_id: "${idCrap}"){success}`,
     result: "deleteBook"
   });
 });

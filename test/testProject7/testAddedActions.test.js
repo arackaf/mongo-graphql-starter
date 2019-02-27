@@ -1,19 +1,19 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 let item = { x: 5, y: 6, userId: 1 }; //userId to make the rest of the middleware happy :\
 
 const pointAbove = { x: 10, y: 11 };
 const allNeighbors = [{ x: 12, y: 13 }, { x: 14, y: 15 }];
 
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
-  await db.collection("coordinates").insert(item);
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
+  await db.collection("coordinates").insertOne(item);
 });
 
 afterAll(async () => {
-  await db.collection("coordinates").remove({});
-  db.close();
+  await db.collection("coordinates").deleteMany({});
+  close();
 });
 
 test("Test overridden query", async () => {

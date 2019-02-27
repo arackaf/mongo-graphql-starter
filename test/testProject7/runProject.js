@@ -4,21 +4,21 @@ import resolvers from "./graphQL/resolver";
 import schema from "./graphQL/schema";
 import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
-import conn from "./connection";
+import spinUp from "./spinUp";
 
-const app = express(),
-  dbPromise = MongoClient.connect(conn),
-  root = {
-    db: dbPromise
-  },
-  executableSchema = makeExecutableSchema({ typeDefs: schema, resolvers });
+Promise.resolve(spinUp()).then(({ db, schema, queryAndMatchArray }) => {
+  const app = express();
+  const root = {
+    db
+  };
 
-app.use(
-  "/graphql",
-  expressGraphql({
-    schema: executableSchema,
-    graphiql: true,
-    rootValue: root
-  })
-);
-app.listen(3000);
+  app.use(
+    "/graphql",
+    expressGraphql({
+      schema,
+      graphiql: true,
+      rootValue: root
+    })
+  );
+  app.listen(3000);
+});

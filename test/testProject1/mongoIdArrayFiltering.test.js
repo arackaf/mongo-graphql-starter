@@ -6,19 +6,19 @@ const id2 = ObjectId("59ff9b246d61043f186dcfee");
 const id3 = ObjectId("59ff9b246d61043f186dcfef");
 const idCrap = ObjectId("59ff9b246d61043f186dcfe9");
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
-  await db.collection("books").insert({ title: "Book 1", mongoIds: [id1, id2] });
-  await db.collection("books").insert({ title: "Book 2", mongoIds: [id3] });
-  await db.collection("books").insert({ title: "Book 3", mongoIds: [id1, id2, id3] });
-  await db.collection("books").insert({ title: "Book 4", mongoIds: [] });
+  await db.collection("books").insertOne({ title: "Book 1", mongoIds: [id1, id2] });
+  await db.collection("books").insertOne({ title: "Book 2", mongoIds: [id3] });
+  await db.collection("books").insertOne({ title: "Book 3", mongoIds: [id1, id2, id3] });
+  await db.collection("books").insertOne({ title: "Book 4", mongoIds: [] });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 

@@ -1,9 +1,9 @@
 import spinUp from "./spinUp";
 import { ObjectId } from "mongodb";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   let adam = { name: "Adam", birthday: new Date("2000-01-01") };
   let katie = { name: "Katie", birthday: new Date("2000-01-02") };
@@ -17,22 +17,22 @@ beforeAll(async () => {
   let michael = { name: "Michael", birthday: new Date("2016-01-01") };
 
   await Promise.all(
-    [adam, katie, laura, mallory, eddie, mirelle, murphy, mark, andre, michael].map(person => db.collection("authors").insert(person))
+    [adam, katie, laura, mallory, eddie, mirelle, murphy, mark, andre, michael].map(person => db.collection("authors").insertOne(person))
   );
 
   let book1 = { title: "Book 1", pages: 100, authorIds: [adam, katie, eddie, mirelle, andre, michael].map(p => "" + p._id) };
   let book2 = { title: "Book 2", pages: 150, authorIds: [adam, andre, michael].map(p => "" + p._id) };
   let book3 = { title: "Book 3", pages: 200, authorIds: ["" + katie._id] };
 
-  await db.collection("books").insert(book1);
-  await db.collection("books").insert(book2);
-  await db.collection("books").insert(book3);
+  await db.collection("books").insertOne(book1);
+  await db.collection("books").insertOne(book2);
+  await db.collection("books").insertOne(book3);
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  await db.collection("authors").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  close();
   db = null;
 });
 

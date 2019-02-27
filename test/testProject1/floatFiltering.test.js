@@ -1,17 +1,17 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray;
+let db, schema, queryAndMatchArray, close;
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray } = await spinUp());
+  ({ db, schema, queryAndMatchArray, close } = await spinUp());
 
-  await db.collection("books").insert({ title: "Book 5.1", weight: 5.1 });
-  await db.collection("books").insert({ title: "Book 5.5", weight: 5.5 });
-  await db.collection("books").insert({ title: "Book 5.9", weight: 5.9 });
+  await db.collection("books").insertOne({ title: "Book 5.1", weight: 5.1 });
+  await db.collection("books").insertOne({ title: "Book 5.5", weight: 5.5 });
+  await db.collection("books").insertOne({ title: "Book 5.9", weight: 5.9 });
 });
 
 afterAll(async () => {
-  await db.collection("books").remove({});
-  db.close();
+  await db.collection("books").deleteMany({});
+  close();
   db = null;
 });
 

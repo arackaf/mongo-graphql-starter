@@ -1,10 +1,10 @@
 import spinUp from "./spinUp";
 
-let db, schema, queryAndMatchArray, runMutation;
+let db, schema, queryAndMatchArray, runMutation, close;
 
 const types = ["Type1", "Type2"];
 beforeAll(async () => {
-  ({ db, schema, queryAndMatchArray, runMutation } = await spinUp());
+  ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 
   let objects = [
     `{ field1: "1 a", field2: "C", autoUpdateField: 1, autoAdjustField: 1, poisonField: 1 }`,
@@ -37,19 +37,19 @@ beforeAll(async () => {
 
   for (let o of staticObjects) {
     for (let type of types) {
-      await db.collection(type.toLowerCase()).insert(o);
+      await db.collection(type.toLowerCase()).insertOne(o);
     }
   }
 });
 
 afterAll(async () => {
   for (let type of types) {
-    await db.collection(type.toLowerCase()).remove({});
+    await db.collection(type.toLowerCase()).deleteMany({});
   }
-  await db.collection("insertInfo").remove({});
-  await db.collection("updateInfo").remove({});
-  await db.collection("deleteInfo").remove({});
-  db.close();
+  await db.collection("insertInfo").deleteMany({});
+  await db.collection("updateInfo").deleteMany({});
+  await db.collection("deleteInfo").deleteMany({});
+  close();
   db = null;
 });
 
@@ -264,12 +264,12 @@ test("Test query afterUpdate hook 2", async () => {
 
 test("Test query before delete hook 1", async () => {
   let newO = { field1: "X", userId: 0 };
-  await db.collection("type1").insert(newO);
+  await db.collection("type1").insertOne(newO);
 
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType1(_id: "${_id}")`,
+    mutation: `deleteType1(_id: "${_id}"){success}`,
     result: "deleteType1"
   });
 
@@ -283,14 +283,14 @@ test("Test query before delete hook 1", async () => {
 
 test("Test query before delete hook 1 A", async () => {
   let newO = { field1: "XYZ", userId: 1, _id: "59334468a71fc3de245e2d6d" };
-  await db.collection("type1").insert(newO);
+  await db.collection("type1").insertOne(newO);
   let _id = newO._id;
 
   let result = await runMutation({
-    mutation: `deleteType1(_id: "${_id}")`,
+    mutation: `deleteType1(_id: "${_id}"){success}`,
     result: "deleteType1"
   });
-  expect(result).toBe(false);
+  expect(result).toEqual({ success: false });
 
   let notDeletedObj = (await db
     .collection("type1")
@@ -299,17 +299,17 @@ test("Test query before delete hook 1 A", async () => {
 
   expect(typeof notDeletedObj).toBe("object");
 
-  await db.collection("type1").remove({ _id });
+  await db.collection("type1").deleteMany({ _id });
 });
 
 test("Test query before delete hook 2", async () => {
   let newO = { field1: "XXX", userId: 1 };
-  await db.collection("type2").insert(newO);
+  await db.collection("type2").insertOne(newO);
 
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType2(_id: "${_id}")`,
+    mutation: `deleteType2(_id: "${_id}"){success}`,
     result: "deleteType2"
   });
 
@@ -323,14 +323,14 @@ test("Test query before delete hook 2", async () => {
 
 test("Test query before delete hook 2 A", async () => {
   let newO = { field1: "XYZ", userId: 1, _id: "591b74d036f369d06bb7781d" };
-  await db.collection("type2").insert(newO);
+  await db.collection("type2").insertOne(newO);
   let _id = newO._id;
 
   let result = await runMutation({
-    mutation: `deleteType2(_id: "${_id}")`,
+    mutation: `deleteType2(_id: "${_id}"){success}`,
     result: "deleteType2"
   });
-  expect(result).toBe(false);
+  expect(result).toEqual({ success: false });
 
   let notDeletedObj = (await db
     .collection("type2")
@@ -339,17 +339,17 @@ test("Test query before delete hook 2 A", async () => {
 
   expect(typeof notDeletedObj).toBe("object");
 
-  await db.collection("type1").remove({ _id });
+  await db.collection("type1").deleteMany({ _id });
 });
 
 test("Test query after delete hook 1", async () => {
   let newO = { field1: "___" };
-  await db.collection("type1").insert(newO);
+  await db.collection("type1").insertOne(newO);
 
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType1(_id: "${_id}")`,
+    mutation: `deleteType1(_id: "${_id}"){success}`,
     result: "deleteType1"
   });
 
@@ -363,12 +363,12 @@ test("Test query after delete hook 1", async () => {
 
 test("Test query after delete hook 2", async () => {
   let newO = { field1: "___" };
-  await db.collection("type2").insert(newO);
+  await db.collection("type2").insertOne(newO);
 
   let _id = newO._id;
 
   await runMutation({
-    mutation: `deleteType2(_id: "${_id}")`,
+    mutation: `deleteType2(_id: "${_id}"){success}`,
     result: "deleteType2"
   });
 
@@ -411,7 +411,7 @@ test("Test after insert 1", async () => {
 
   expect(updateObj.y).toBe(1);
 
-  await db.collection("insertInfo").remove({});
+  await db.collection("insertInfo").deleteMany({});
 });
 
 test("Test before insert 1 A", async () => {
@@ -472,5 +472,5 @@ test("Test after insert 2", async () => {
 
   expect(updateObj.y).toBe(2);
 
-  await db.collection("insertInfo").remove({});
+  await db.collection("insertInfo").deleteMany({});
 });
