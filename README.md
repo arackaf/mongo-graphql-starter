@@ -642,7 +642,7 @@ If you're on Mongo 4, be sure to provide a `client` object to the root GraphQL o
 
 To see whether a transaction was used for your mutation, you can query the `Meta` property, which itself has a boolean `transaction` property. See the generated schema for more info.
 
-**NOTE** If you're running from mongod, ie during development, be sure to **not** pass the client value, since this will result in a transaction attempting to start for multi-document operations, and then error out, since transactions can only run from mongos, or a replica set. If anyone knows a good way to detect this in code, feel free to send me an issue (or PR).
+**NOTE** If you're running from mongod, ie during development, be sure to **not** pass the client value, since this will result in a transaction attempting to start for multi-document operations, and then error out since transactions can only run from mongos, or a replica set. If anyone knows a good way to detect this in code, feel free to send me an issue (or PR).
 
 ## Integrating custom content
 
@@ -868,7 +868,7 @@ Similarly, for relationships that define a single object, there will be a `<rela
 
 #### In updates (one-to-many)
 
-There's a number of tricky edge cases here.  As a result, one-to-many collections can only be updated via args that are created in the updateSingle, and updateMulti mutations, but not updateBulk. Moreover, these arguments will only be created if the `fkField` on the relationship is `_id`. The reason for this restriction is that that's the only way to guarentee that the corresponding `keyField` on the newly created objects can be correctly set.
+There's a number of tricky edge cases here.  As a result, one-to-many collections can only be updated via args that are created in the updateSingle mutation; updateMulti mutation, if the `keyField` is an array; but not updateBulk. Moreover, these arguments will only be created if the `fkField` on the relationship is `_id`. The reason for this restriction is that that's the only way to guarentee that the corresponding `keyField` on the newly created objects can be correctly set.
 
 #### In lifecycle hooks
 
