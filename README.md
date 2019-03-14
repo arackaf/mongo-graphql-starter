@@ -340,7 +340,7 @@ Exact match
 Not equal
 
 `field_ne: <value>` - will match results that do not have this value. For array types, pass in a whole array of values, and Mongo will do an element
-by element comparison.  
+by element comparison.
 
 `in` match
 
@@ -358,7 +358,7 @@ Count
 
 ### null values
 
-If you pass `null` for an exact match query, matches will be returned if that value is literally `null`, or doesn't exist at all (per Mongo's behavior). If you pass `null` for a not equal (`ne`) query, then matches will come back if any value exists.
+If you pass `null` for an exact match query, matches will be returned if that value is literally `null`, or doesn't exist at all (per Mongo's behavior). If you pass `null` for a not equal (`ne`) query, matches will come back if any value exists.
 
 If you pass `null` for any other filter, it will be ignored.
 
