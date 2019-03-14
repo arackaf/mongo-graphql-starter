@@ -20,6 +20,7 @@ or advanced edge cases as needed.
   - [Projecting results from queries](#projecting-results-from-queries)
   - [Custom query arguments](#custom-query-arguments)
 - [Filters created](#filters-created)
+  - [null values](#null-values)
   - [String filters](#string-filters)
   - [String array filters](#string-array-filters)
   - [Int filters](#int-filters)
@@ -334,12 +335,12 @@ Now `ManualArg` can be sent over to the `getThing` and `allThings` queries.  Thi
 
 Exact match
 
-`field: <value>` - will match results with exactly that value
+`field: <value>` - will match results with exactly that value.
 
 Not equal
 
 `field_ne: <value>` - will match results that do not have this value. For array types, pass in a whole array of values, and Mongo will do an element
-by element comparison.
+by element comparison.  
 
 `in` match
 
@@ -354,6 +355,12 @@ item by item.
 Count
 
 `field_count: <value>` - will match results with that number of entries in the array
+
+### null values
+
+If you pass `null` for an exact match query, matches will be returned if that value is literally `null`, or doesn't exist at all (per Mongo's behavior). If you pass `null` for a not equal (`ne`) query, then matches will come back if any value exists.
+
+If you pass `null` for any other filter, it will be ignored.
 
 ### String filters
 
