@@ -35,6 +35,7 @@ export const Book = {
     editions: IntArrayType,
     prices: FloatArrayType,
     isRead: BoolType,
+    mongoId: MongoIdType,
     mongoIds: MongoIdArrayType,
     authors: arrayOf(Author),
     primaryAuthor: objectOf(Author),
