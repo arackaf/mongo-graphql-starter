@@ -24,17 +24,37 @@ export function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix =
       hash.$or = args.OR.map(packetArgs => fillMongoFiltersObject(packetArgs, objectMetaData, void 0, prefix));
     } else if (fields[k]) {
       if (typeof fields[k] === "object" && fields[k].__isDate) {
-        args[k] = new Date(args[k]);
+        if (args[k] === null) {
+          hash[k] = null;
+        } else {
+          args[k] = new Date(args[k]);
+        }
       } else if (fields[k].__isObject) {
-        fillMongoFiltersObject(args[k], fields[k].type, hash, prefix + k + ".");
+        if (args[k] === null) {
+          hash[prefix + k] = null;
+        } else {
+          fillMongoFiltersObject(args[k], fields[k].type, hash, prefix + k + ".");
+        }
         return;
       } else if (fields[k].__isArray) {
-        hash[prefix + k] = { $elemMatch: fillMongoFiltersObject(args[k], fields[k].type) };
+        if (args[k] === null) {
+          hash[prefix + k] = null;
+        } else {
+          hash[prefix + k] = { $elemMatch: fillMongoFiltersObject(args[k], fields[k].type) };
+        }
         return;
       } else if (fields[k] === MongoIdType) {
-        args[k] = ObjectId(args[k]);
+        if (args[k] === null) {
+          hash[prefix + k] = null;
+        } else {
+          args[k] = ObjectId(args[k]);
+        }
       } else if (fields[k] === MongoIdArrayType) {
-        args[k] = args[k].map(val => ObjectId(val));
+        if (args[k] === null) {
+          hash[prefix + k] = null;
+        } else {
+          args[k] = args[k].map(val => ObjectId(val));
+        }
       }
 
       hash[prefix + k] = args[k];
@@ -45,6 +65,10 @@ export function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix =
       let field = objectMetaData.fields[fieldName];
       fieldName = prefix + fieldName;
       let isDate = typeof field === "object" && field.__isDate;
+
+      if (args[k] == null && queryOperation !== "ne") {
+        return;
+      }
 
       if (queryOperation !== "format" && isDate) {
         args[k] = queryOperation === "in" ? args[k].map(val => new Date(val)) : new Date(args[k]);

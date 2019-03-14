@@ -333,8 +333,10 @@ function queriesForField(fieldName, realFieldType) {
       result.push(`${fieldName}_in: [${fieldType}]`);
   }
 
-  if (realFieldType.__isObject || realFieldType.__isArray) {
+  if (realFieldType.__isArray) {
     result.push(`${fieldName}_count: Int`);
+  }
+  if (realFieldType.__isObject || realFieldType.__isArray) {
     result.push(`${fieldName}: ${realFieldType.type.__name}Filters`);
   }
 
