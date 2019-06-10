@@ -10,6 +10,8 @@ import createMasterSchema from "./codeGen/createMasterSchema";
 import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
 import createMasterResolver from "./codeGen/createMasterResolver";
 
+import prettier from "prettier";
+
 function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
   directoriesToCreate.forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -20,6 +22,8 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
     fs.writeFileSync(path, contents);
   }
 }
+
+const formatGraphQL = code => prettier.format(code, { parser: "graphql" });
 
 export default function(source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
@@ -107,7 +111,7 @@ export default function(source, destPath, options = {}) {
     });
 
     fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
-    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), createMasterGqlSchema(types, rootDir));
+    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), formatGraphQL(createMasterGqlSchema(types, rootDir)));
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {

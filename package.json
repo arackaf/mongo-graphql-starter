@@ -55,7 +55,8 @@
     "esm": "^3.2.25",
     "graphql-type-json": "0.2.1",
     "lodash.flatmap": "4.5.0",
-    "mkdirp": "0.5.1"
+    "mkdirp": "0.5.1",
+    "prettier": "latest"
   },
   "peerDependencies": {
     "mongodb": ">= 2.2.31",
