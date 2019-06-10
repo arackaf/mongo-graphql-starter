@@ -7,6 +7,7 @@ import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
 import createMasterSchema from "./codeGen/createMasterSchema";
+import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
 import createMasterResolver from "./codeGen/createMasterResolver";
 
 function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
@@ -80,6 +81,8 @@ export default function(source, destPath, options = {}) {
     let names = [];
     let namesWithTables = [];
     let namesWithoutTables = [];
+    let types = [];
+
     modules.forEach(objectToCreate => {
       let objName = objectToCreate.__name;
       let modulePath = path.join(rootDir, objName);
@@ -88,6 +91,7 @@ export default function(source, destPath, options = {}) {
       let resolverPath = path.join(modulePath, "resolver.js");
 
       names.push(objName);
+      types.push(objectToCreate);
       if (objectToCreate.table) {
         namesWithTables.push(objName);
       } else {
@@ -103,6 +107,7 @@ export default function(source, destPath, options = {}) {
     });
 
     fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
+    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), createMasterGqlSchema(types));
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {

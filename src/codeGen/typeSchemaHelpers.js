@@ -28,7 +28,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let allFieldsMutation = [];
   let extras = objectToCreate.extras || {};
   let overrides = new Set(extras.overrides || []);
-  let schemaSources = extras.schemaSources || [];
   let resolvedFields = objectToCreate.resolvedFields || {};
   let readonly = objectToCreate.readonly;
 
@@ -43,7 +42,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 
   let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
-  let imports = schemaSources.map((src, i) => `import SchemaExtras${i + 1} from "${src}";`);
 
   const createSchemaTypes = () =>
     `${[
@@ -99,10 +97,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
     createQueryType
   };
 
-  //  ${objectToCreate.table ? `\n${createMutationType()}\n\n\n${createQueryType()}` : ""}
-
-  //`;
-
   function createMutationType() {
     let oneToManyForSingle = relationshipEntries
       .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id")
@@ -129,8 +123,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
             createOperation(`update${name}sBulk`, [`Match: ${name}Filters`, `Updates: ${name}MutationInput`], `${name}BulkMutationResult`),
             createOperation(`delete${name}`, [`_id: String`], "DeletionResultInfo")
           ]
-        : []),
-      ...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
+        : [])
+      //...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
     ].filter(x => x);
     return allMutations.filter(s => s).join("\n\n");
   }
@@ -151,9 +145,10 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       `${name}SingleQueryResult`
     );
 
-    let schemaSourceQueries = schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n");
+    //XXX
+    //let schemaSourceQueries = schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n");
 
-    return [allOp, getOp, schemaSourceQueries].filter(s => s).join("\n\n");
+    return [allOp, getOp].filter(s => s).join("\n\n");
   }
 }
 
