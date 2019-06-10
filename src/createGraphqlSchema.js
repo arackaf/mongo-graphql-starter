@@ -107,7 +107,7 @@ export default function(source, destPath, options = {}) {
     });
 
     fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
-    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), createMasterGqlSchema(types));
+    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), createMasterGqlSchema(types, rootDir));
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
