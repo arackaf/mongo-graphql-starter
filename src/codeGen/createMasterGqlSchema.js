@@ -39,11 +39,11 @@ export default function createMasterSchema(types, rootDir) {
 ${globalSchemaTypes}
 
 type Query {
-${allPackets.map(p => p.query)}
+${allPackets.map(p => p.query).join("\n\n")}
 }
 
 type Mutation {
-${allPackets.map(p => p.mutation)}
+${allPackets.map(p => p.mutation).join("\n\n")}
 }
 
 `.trim();
