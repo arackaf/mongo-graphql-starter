@@ -24,6 +24,7 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
 }
 
 const formatGraphQL = code => prettier.format(code, { parser: "graphql" });
+const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 120 });
 
 export default function(source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
@@ -102,22 +103,22 @@ export default function(source, destPath, options = {}) {
         namesWithoutTables.push(objName);
       }
 
-      createFile(objPath, createOutputTypeMetadata(objectToCreate), true, modulePath);
+      createFile(objPath, formatJs(createOutputTypeMetadata(objectToCreate)), true, modulePath);
 
-      createFile(schemaPath, createGraphqlTypeSchema(objectToCreate), true);
+      createFile(schemaPath, formatJs(createGraphqlTypeSchema(objectToCreate)), true);
       if (objectToCreate.table) {
-        createFile(resolverPath, createTypeResolver(objectToCreate, { ...options, modulePath }), true);
+        createFile(resolverPath, formatJs(createTypeResolver(objectToCreate, { ...options, modulePath })), true);
       }
     });
 
-    fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
+    fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables)));
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), formatGraphQL(createMasterGqlSchema(types, rootDir)));
 
-    fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
+    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
       fs.writeFileSync(
         path.join(rootDir, "hooks.js"),
-        fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" })
+        formatJs(fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" }))
       );
     }
   });
