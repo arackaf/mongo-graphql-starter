@@ -50,6 +50,8 @@
     "test9": "jest --runInBand --config=test/jestConfig/jest.config9.json"
   },
   "dependencies": {
+    "@graphql-codegen/core": "^1.2.1",
+    "@graphql-codegen/typescript": "^1.2.1",
     "dataloader": "1.4.0",
     "escape-string-regexp": "1.0.5",
     "esm": "^3.2.25",

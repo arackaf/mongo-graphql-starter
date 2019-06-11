@@ -9,6 +9,7 @@ import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
 import createMasterSchema from "./codeGen/createMasterSchema";
 import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
 import createMasterResolver from "./codeGen/createMasterResolver";
+import createTypeScriptTypes from "./codeGen/createTypeScriptTypes";
 
 import prettier from "prettier";
 
@@ -111,8 +112,10 @@ export default function(source, destPath, options = {}) {
       }
     });
 
+    const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
     fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables)));
-    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), formatGraphQL(createMasterGqlSchema(types, rootDir)));
+    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
+    createTypeScriptTypes(masterSchema, path.join(rootDir, "allTypes.ts"));
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
