@@ -6,8 +6,17 @@ import createTypeSchemaHelpers from "./typeSchemaHelpers";
 
 export default function createMasterSchema(types, rootDir) {
   const typesWithTables = types.filter(t => t.table);
+  const typesWithoutTables = types.filter(t => !t.table);
 
-  const allPackets = typesWithTables.map(objectToCreate => {
+  const tablelessTypePackets = typesWithoutTables.map(objectToCreate => {
+    let packet = createTypeSchemaHelpers(objectToCreate);
+
+    return {
+      types: packet.createSchemaTypes()
+    };
+  });
+
+  const tableTypePackets = typesWithTables.map(objectToCreate => {
     let packet = createTypeSchemaHelpers(objectToCreate);
     let objName = objectToCreate.__name;
     let modulePath = path.join(rootDir, objName);
@@ -30,6 +39,7 @@ export default function createMasterSchema(types, rootDir) {
     });
 
     return {
+      types: packet.createSchemaTypes(),
       query: packet.createQueryType() + (extraQueries.length ? "\n" + extraQueries.join("\n") : ""),
       mutation: packet.createMutationType() + (extraMutations.length ? "\n" + extraMutations.join("\n") : "")
     };
@@ -38,12 +48,16 @@ export default function createMasterSchema(types, rootDir) {
   return `
 ${globalSchemaTypes}
 
+${tablelessTypePackets.map(p => p.types).join("\n\n")}
+
+${tableTypePackets.map(p => p.types).join("\n\n")}
+
 type Query {
-${allPackets.map(p => p.query).join("\n\n")}
+${tableTypePackets.map(p => p.query).join("\n\n")}
 }
 
 type Mutation {
-${allPackets.map(p => p.mutation).join("\n\n")}
+${tableTypePackets.map(p => p.mutation).join("\n\n")}
 }
 
 `.trim();
