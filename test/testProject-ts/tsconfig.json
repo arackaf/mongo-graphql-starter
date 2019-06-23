@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "module": "esNext",
+    "moduleResolution": "node",
+    "target": "esnext",
+    "strict": false
+  },
+  "include": ["./*.ts"]
+}
