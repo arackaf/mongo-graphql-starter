@@ -117,9 +117,12 @@ export default function(source, destPath, options = {}) {
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
 
     let result;
-    result = createTypeScriptTypes(masterSchema, path.join(rootDir, "allTypes.ts")).catch(er => {
-      console.log("\n\nERROR GENERATING TS TYPES\n\n", er);
-    });
+
+    if (options.typings) {
+      result = createTypeScriptTypes(masterSchema, options.typings).catch(er => {
+        console.log("\n\nERROR GENERATING TS TYPES\n\n", er);
+      });
+    }
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {

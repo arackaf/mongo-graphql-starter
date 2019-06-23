@@ -182,7 +182,7 @@ function relationshipResolver([name, entry]) {
 
 function relationshipType(value, useInputs) {
   if (value.__isArray) {
-    return `[${value.type.__name}${useInputs ? "Input" : ""}]`;
+    return `[${value.type.__name}${useInputs ? "Input" : ""}!]!`;
   } else if (value.__isObject) {
     return `${value.type.__name}${useInputs ? "Input" : ""}`;
   }
