@@ -116,13 +116,10 @@ export default function(source, destPath, options = {}) {
     fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables)));
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
 
-    try {
-      createTypeScriptTypes(masterSchema, path.join(rootDir, "allTypes.ts")).catch(er => {
-        console.log("\n\nERROR GENERATING TS TYPES\n\n");
-      });
-    } catch (error) {
-      console.log("\n\nTOP ERROR GENERATING TS TYPES: ", error);
-    }
+    let result;
+    result = createTypeScriptTypes(masterSchema, path.join(rootDir, "allTypes.ts")).catch(er => {
+      console.log("\n\nERROR GENERATING TS TYPES\n\n");
+    });
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
@@ -131,5 +128,7 @@ export default function(source, destPath, options = {}) {
         formatJs(fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" }))
       );
     }
+
+    return result;
   });
 }

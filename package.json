@@ -47,7 +47,8 @@
     "test6": "jest --runInBand --config=test/jestConfig/jest.config6.json",
     "test7": "jest --runInBand --config=test/jestConfig/jest.config7.json",
     "test8": "jest --runInBand --config=test/jestConfig/jest.config8.json",
-    "test9": "jest --runInBand --config=test/jestConfig/jest.config9.json"
+    "test9": "jest --runInBand --config=test/jestConfig/jest.config9.json",
+    "testts": "jest --runInBand --config=test/jestConfig/jest.config-ts.json"
   },
   "dependencies": {
     "@graphql-codegen/core": "^1.3.0",
