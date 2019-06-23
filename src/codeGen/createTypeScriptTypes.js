@@ -13,7 +13,7 @@ export default async function createTypeScriptTypes(schemaText, outputFile) {
     // used by a plugin internally, although the 'typescript' plugin currently returns the string output, rather than writing to a file
     filename: outputFile,
     schema: parse(printSchema(schema)),
-    plugins: [{ typescript: { skipTypename: true } }, { typescriptOperations: {} }],
+    plugins: [{ typescript: { skipTypename: true, avoidOptionals: true } }, { typescriptOperations: {} }],
     documents: [], //needed, for now
     pluginMap: {
       typescript: {
