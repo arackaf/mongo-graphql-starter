@@ -11,7 +11,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function create() {
-  await createGraphqlSchema(projectSetupTS, path.resolve("./test/testProject-ts"), {});
+  await createGraphqlSchema(projectSetupTS, path.resolve("./test/testProject-ts"), {
+    typings: path.resolve("./test/testProject-ts/graphql-types.ts")
+  });
 }
 
 export default async function() {
