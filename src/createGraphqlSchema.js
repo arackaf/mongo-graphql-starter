@@ -118,7 +118,7 @@ export default function(source, destPath, options = {}) {
 
     let result;
     result = createTypeScriptTypes(masterSchema, path.join(rootDir, "allTypes.ts")).catch(er => {
-      console.log("\n\nERROR GENERATING TS TYPES\n\n");
+      console.log("\n\nERROR GENERATING TS TYPES\n\n", er);
     });
 
     fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
