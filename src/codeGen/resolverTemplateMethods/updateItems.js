@@ -7,7 +7,7 @@ export default ({ objName, table }) => `    async update${objName}s(root, args, 
         let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { ...gqlPacket, db, session });
 
         if (await runHook("beforeUpdate", $match, updates, { ...gqlPacket, db, session }) === false) {
-          return { success: true };
+          return resolverHelpers.mutationCancelled({ transaction });
         }
         await setUpOneToManyRelationshipsForUpdate(args._ids, args, ${objName}Metadata, { ...gqlPacket, db, session });
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session });

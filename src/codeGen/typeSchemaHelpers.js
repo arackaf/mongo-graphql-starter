@@ -52,11 +52,11 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       ]),
       ...(objectToCreate.table
         ? [
-            createType(`${name}QueryResults`, [`${name}s: [${name}]`, `Meta: QueryResultsMetadata`]),
+            createType(`${name}QueryResults`, [`${name}s: [${name}!]!`, `Meta: QueryResultsMetadata!`]),
             createType(`${name}SingleQueryResult`, [`${name}: ${name}`]),
-            createType(`${name}MutationResult`, [`${name}: ${name}`, `success: Boolean`, "Meta: MutationResultInfo"]),
-            createType(`${name}MutationResultMulti`, [`${name}s: [${name}]`, `success: Boolean`, "Meta: MutationResultInfo"]),
-            createType(`${name}BulkMutationResult`, [`success: Boolean`, "Meta: MutationResultInfo"])
+            createType(`${name}MutationResult`, [`${name}: ${name}`, `success: Boolean!`, "Meta: MutationResultInfo!"]),
+            createType(`${name}MutationResultMulti`, [`${name}s: [${name}]`, `success: Boolean!`, "Meta: MutationResultInfo!"]),
+            createType(`${name}BulkMutationResult`, [`success: Boolean!`, "Meta: MutationResultInfo!"])
           ]
         : []),
       objectToCreate.hasOneToManyRelationship
@@ -136,13 +136,13 @@ export default function createGraphqlTypeSchema(objectToCreate) {
         .concat([`OR: [${name}Filters]`, `SORT: ${name}Sort`, `SORTS: [${name}Sort]`, `LIMIT: Int`, `SKIP: Int`, `PAGE: Int`, `PAGE_SIZE: Int`])
         .concat(dateFields.map(f => `${f}_format: String`))
         .concat(manualQueryArgs),
-      `${name}QueryResults`
+      `${name}QueryResults!`
     );
 
     let getOp = createOperation(
       `get${name}`,
       [`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)),
-      `${name}SingleQueryResult`
+      `${name}SingleQueryResult!`
     );
 
     //XXX
