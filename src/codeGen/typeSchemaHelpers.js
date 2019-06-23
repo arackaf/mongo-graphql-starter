@@ -124,7 +124,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
             createOperation(`delete${name}`, [`_id: String`], "DeletionResultInfo")
           ]
         : [])
-      //...schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Mutation || ""}')
     ].filter(x => x);
     return allMutations.filter(s => s).join("\n\n");
   }
@@ -144,9 +143,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       [`_id: String`].concat(dateFields.map(f => `${f}_format: String`).concat(manualQueryArgs)),
       `${name}SingleQueryResult!`
     );
-
-    //XXX
-    //let schemaSourceQueries = schemaSources.map((src, i) => TAB + "${SchemaExtras" + (i + 1) + '.Query || ""}').join("\n\n");
 
     return [allOp, getOp].filter(s => s).join("\n\n");
   }

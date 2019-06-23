@@ -26,7 +26,7 @@ export default async function createTypeScriptTypes(schemaText, outputFile) {
   };
 
   const output = await codegen(config);
-  fs.writeFile(outputFile, output, () => {
-    console.log("TypeScript Types Generated!");
-  });
+  fs.writeFileSync(outputFile, output);
+
+  console.log("TypeScript Types Generated!");
 }
