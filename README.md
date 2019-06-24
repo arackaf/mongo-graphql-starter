@@ -16,6 +16,7 @@ or advanced edge cases as needed.
   - [Valid types for your fields](#valid-types-for-your-fields)
   - [Readonly types](#readonly-types)
   - [Circular dependencies are fine](#circular-dependencies-are-fine)
+- [TypeScript integration](#typescript-integration)
 - [Queries created](#queries-created)
   - [Projecting results from queries](#projecting-results-from-queries)
   - [Custom query arguments](#custom-query-arguments)
@@ -271,6 +272,18 @@ export const Author = {
   }
 };
 ```
+
+## TypeScript integration
+
+At the root of the GraphQL folder that's created with your endpoint code, there's an `entireSchema.gql` file that's created. You can configure your VS Code GraphQL plugin to use it.  TODO: show code.
+
+In order to generate TypeScript typings for the various types, query responses, etc. in your endpoint, just specify a `typings` value in the options (third argument) for `createGraphqlSchema`. 
+
+```javascript
+createGraphqlSchema(projectSetupTS, path.resolve("./my/path"), { typings: path.resolve("./path/to/graphql-types.ts") });
+```
+
+That'll create `graphql-types.ts` in the location you specify. Put it someplace where it'll be convenient to import the types from, in order to integrate with your application code. 
 
 ## Queries created
 
@@ -988,7 +1001,7 @@ If a hook is defined both in Root, and for a type, then for operations on that t
 
 #### Customizing the location of your hooks file.
 
-If you'd like your hooks defined elsewhere, place the file where desired, and specify the path to it when creating your GraphQL endpoint, like this
+If you'd like your hooks defined elsewhere, place the file where desired, and specify the path to it in the `hooks` value of your options when creating your GraphQL endpoint, like this
 
 ```javascript
 createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
