@@ -16,6 +16,7 @@ or advanced edge cases as needed.
   - [Valid types for your fields](#valid-types-for-your-fields)
   - [Readonly types](#readonly-types)
   - [Circular dependencies are fine](#circular-dependencies-are-fine)
+- [VS Code integration](#vs-code-integration)
 - [TypeScript integration](#typescript-integration)
 - [Queries created](#queries-created)
   - [Projecting results from queries](#projecting-results-from-queries)
@@ -273,9 +274,35 @@ export const Author = {
 };
 ```
 
-## TypeScript integration
+## VS Code integration
 
-At the root of the GraphQL folder that's created with your endpoint code, there'll be an `entireSchema.gql` file that's created. You can configure your VS Code GraphQL plugin to use it to validate, and provide auto-complete in your `.graphql` files.  Check the [plugin's docs](https://marketplace.visualstudio.com/items?itemName=kumar-harsh.graphql-for-vscode) for more info.
+At the root of the GraphQL folder that's created with your endpoint code, there should be an `entireSchema.gql` file. You can configure the VS Code GraphQL plugin to use it to validate, and provide auto-complete inside your `.graphql` files.  Check the [plugin's docs](https://marketplace.visualstudio.com/items?itemName=kumar-harsh.graphql-for-vscode) for more info, but a .gqlconfig file might look something like this 
+
+```json
+{
+  "schema": {
+    "files": "node/graphQL/entireSchema.gql"
+  },
+  "query": {
+    "files": [
+      {
+        "match": "react/**/*.graphql",
+        "parser": "QueryParser",
+        "validate": {
+          "extends": "gql-rules-query",
+          "rules": {
+            "LoneAnonymousOperation": "off",
+            "NoUnusedVariables": "off",
+            "NoUnusedTypeDefinition": "off",
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+## TypeScript integration
 
 In order to generate TypeScript typings for the various types, query responses, etc. in your endpoint, just specify a `typings` value in the options (third argument) for `createGraphqlSchema`. 
 
