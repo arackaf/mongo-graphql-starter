@@ -6,7 +6,7 @@
 This utility will scaffold GraphQL schema and resolvers, with queries, filters and mutations working out of the box, based on metadata you enter about
 your Mongo db.
 
-The idea is to auto-generate the mundane, repetative boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
+The idea is to auto-generate the mundane, repetitive boilerplate needed for a graphQL endpoint, then get out of your way, leaving you to code your odd
 or advanced edge cases as needed. 
 
 <!-- TOC -->
@@ -16,6 +16,7 @@ or advanced edge cases as needed.
   - [Valid types for your fields](#valid-types-for-your-fields)
   - [Readonly types](#readonly-types)
   - [Circular dependencies are fine](#circular-dependencies-are-fine)
+- [TypeScript integration](#typescript-integration)
 - [Queries created](#queries-created)
   - [Projecting results from queries](#projecting-results-from-queries)
   - [Custom query arguments](#custom-query-arguments)
@@ -233,7 +234,7 @@ const {
 | `IntArrayType`     | An array of integers   |
 | `FloatType`        | Self explanatory       |
 | `FloatArrayType`   | An array of floating point numbers |
-| `DateType`         | Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo. Moreoever, querying this date will by default format it as `MM/DD/YYYY`. To override this, use `formattedDate`. |
+| `DateType`         | Will create your field as a string, but any filters against this field will convert the string arguments you send into a proper date object, before passing to Mongo. Moreover, querying this date will by default format it as `MM/DD/YYYY`. To override this, use `formattedDate`. |
 | `formattedDate`    | Function: Pass it an object with a format property to create a date field with that (Mongo) format. For example, `createdOnYearOnly: formattedDate({ format: "%Y" })` |
 | `JSONType`         | Store arbitrary json structures in your Mongo collections |
 | `objectOf`         | Function: Pass it a type you've created to specify a single object of that type |
@@ -270,6 +271,66 @@ export const Author = {
     tags: arrayOf(Tag)
   }
 };
+```
+
+## TypeScript integration
+
+At the root of the GraphQL folder that's created with your endpoint code, there'll be an `entireSchema.gql` file that's created. You can configure your VS Code GraphQL plugin to use it to validate, and provide auto-complete in your `.graphql` files.  Check the [plugin's docs](https://marketplace.visualstudio.com/items?itemName=kumar-harsh.graphql-for-vscode) for more info.
+
+In order to generate TypeScript typings for the various types, query responses, etc. in your endpoint, just specify a `typings` value in the options (third argument) for `createGraphqlSchema`. 
+
+```javascript
+createGraphqlSchema(projectSetupTS, path.resolve("./my/path"), { typings: path.resolve("./path/to/graphql-types.ts") });
+```
+
+That'll create `graphql-types.ts` in the location you specify. Put it somewhere it'll be convenient to import the types from, in order to integrate with your application code. 
+
+The typings are created with [GraphQL Code Generator](https://graphql-code-generator.com/). In addition the types in your endpoint, this library also inserts some helpers for typing queries and mutations.
+
+The `QueryOf` type takes one, or two generic types, representing the queries a GraphQL query may have. The simplest use is to just pass a string to it, for the query that was run
+
+```typescript
+let queryResults = useQuery<QueryOf<"allSubjects">>(packet);
+```
+
+That will generate a type with an `allSubjects` key, and a value of whatever was generated for `allSubjects` on the main GraphQL Query type. If you have two different queries in one request, you can do
+
+```typescript
+let queryResults = useQuery<QueryOf<"allSubjects" | "allBooks">>(packet);
+```
+
+If you'd like some autocomplete for your query names, you can use the `Queries` type that's generated, and do 
+
+```typescript
+let queryResults = useQuery<QueryOf<Queries["allSubjects"] | Queries["allBooks"]>>(packet);
+```
+
+The result is the same, but inside `Queries[""]` you should get autocomplete with all the query names.
+
+If you have aliased queries, specify them like this
+
+```typescript
+let queryResults = useQuery<QueryOf<{ bookQuery: "allBooks" }>>(packet);
+```
+
+or of course you can still use the `Queries` type for better DX.
+
+```typescript
+let queryResults = useQuery<QueryOf<{ bookQuery: Queries["allBooks"] }>>(packet);
+```
+
+And if you have both, together, then just add a second generic type for each (order doesn't matter; either can be first).
+
+```typescript
+let queryResults = useQuery<QueryOf<{ bookQuery: Queries["allBooks"] }, Queries["allSubjects"] | Queries["allBooks"]>>(packet);
+```
+
+For mutations, there are `MutationOf` and `Mutations` types, which work identically.
+
+These types (and the rest from your endpoint) are generated from the typings file you specified above
+
+```javascript
+import { QueryOf, Queries, MutationOf, Mutations } from "./path/to/graphql-typings";
 ```
 
 ## Queries created
@@ -875,7 +936,7 @@ Similarly, for relationships that define a single object, there will be a `<rela
 
 #### In updates (one-to-many)
 
-There's a number of tricky edge cases here.  As a result, one-to-many collections can only be updated via args that are created in the updateSingle mutation; updateMulti mutation, if the `keyField` is an array; but not updateBulk. Moreover, these arguments will only be created if the `fkField` on the relationship is `_id`. The reason for this restriction is that that's the only way to guarentee that the corresponding `keyField` on the newly created objects can be correctly set.
+There's a number of tricky edge cases here.  As a result, one-to-many collections can only be updated via args that are created in the updateSingle mutation; updateMulti mutation, if the `keyField` is an array; but not updateBulk. Moreover, these arguments will only be created if the `fkField` on the relationship is `_id`. The reason for this restriction is that that's the only way to guarantee that the corresponding `keyField` on the newly created objects can be correctly set.
 
 #### In lifecycle hooks
 
@@ -982,13 +1043,13 @@ export default {
 };
 ```
 
-will cause every query to have a PAGE_SIZE set to 50, always—except for `Book` queries, which wich will have it set to 100.
+will cause every query to have a PAGE_SIZE set to 50, always—except for `Book` queries, which will have it set to 100.
 
 If a hook is defined both in Root, and for a type, then for operations on that type, the root hook will be called first, followed by the one for the type. So above, PAGE_SIZE will first be set to 50, and then to 100.
 
 #### Customizing the location of your hooks file.
 
-If you'd like your hooks defined elsewhere, place the file where desired, and specify the path to it when creating your GraphQL endpoint, like this
+If you'd like your hooks defined elsewhere, place the file where desired, and specify the path to it in the `hooks` value of your options when creating your GraphQL endpoint, like this
 
 ```javascript
 createGraphqlSchema(projectSetupE, path.resolve("./test/testProject5"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })

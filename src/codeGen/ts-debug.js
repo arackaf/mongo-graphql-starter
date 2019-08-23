@@ -1,3 +1,3 @@
 require = require("esm")(module, { mode: "auto", cjs: true });
 
-module.exports = require("./runProject.js");
+module.exports = require("./createTypeScriptTypes.js");

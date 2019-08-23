@@ -7,7 +7,7 @@ export default ({ objName, table }) => `    async update${objName}sBulk(root, ar
         let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { ...gqlPacket, db, session });
 
         if (await runHook("beforeUpdate", $match, updates, { ...gqlPacket, db, session }) === false) {
-          return { success: true };
+          return resolverHelpers.mutationCancelled({ transaction });
         }
         await dbHelpers.runUpdate(db, "${table}", $match, updates, { session });
         await runHook("afterUpdate", $match, updates, { ...gqlPacket, db, session });
