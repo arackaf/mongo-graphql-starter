@@ -22,9 +22,9 @@
   },
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
-    "babel-jest": "21.2.0",
-    "babel-plugin-dynamic-import-node": "^1.2.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
+    "babel-jest": "^24.9.0",
+    "babel-plugin-dynamic-import-node": "^2.3.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "codecov": "^3.5.0",
     "del": "3.0.0",
     "dotenv": "^6.2.0",
@@ -33,7 +33,7 @@
     "glob": "^7.1.2",
     "graphql": "^14.1.1",
     "graphql-tools": "^4.0.4",
-    "jest": "^24.1.0",
+    "jest": "^24.9.0",
     "mongodb": "^3.1.13"
   },
   "scripts": {
