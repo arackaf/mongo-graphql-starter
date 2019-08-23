@@ -15,7 +15,7 @@ ${TAB}),
 ${TAB}Mutation: Object.assign({},
 ${TAB2}${namesWithTables.map(n => `${n}Mutation`).join(`,\n${TAB2}`)}
 ${TAB}),
-${namesWithTables.length ? TAB : ""}${namesWithTables.map(n => `${n}: {\n${TAB2}...${n}Rest\n${TAB}}`).join(`,\n${TAB}`)}
+${namesWithTables.length ? TAB : ""}${namesWithTables.map(n => `${n}: { ...${n}Rest }`).join(`,\n  `)}
 };
 
 `;

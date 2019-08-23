@@ -31,6 +31,14 @@ export const startDbMutation = async ({ root, args, context }, objName, typeMeta
   return { db, client, session, transaction };
 };
 
+export const mutationCancelled = ({ transaction, elapsedTime = 0 }) => ({
+  success: false,
+  Meta: {
+    transaction,
+    elapsedTime
+  }
+});
+
 export const finishSuccessfulMutation = async (session, transaction, results = {}) => {
   await mutationComplete(session, transaction);
   return mutationSuccessResult({ transaction, ...results });

@@ -13,7 +13,7 @@ export async function load${objName}s(db, queryPacket, root, args, context, ast)
   let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
   await processHook(hooksObj, "${objName}", "adjustResults", ${objName}s);
   ${objName}s.forEach(o => {
-    if (o._id){
+    if (o._id) {
       o._id = "" + o._id;
     }
   });

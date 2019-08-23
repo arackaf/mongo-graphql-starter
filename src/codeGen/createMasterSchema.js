@@ -1,3 +1,5 @@
+import globalSchemaTypes from "./globalSchemaTypes";
+
 export default function createMasterSchema(names, namesWithTables, namesWithoutTables) {
   let schemaImports = namesWithTables
     .map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`)
@@ -7,36 +9,7 @@ export default function createMasterSchema(names, namesWithTables, namesWithoutT
   return `${schemaImports}
     
 export default \`
-  scalar JSON
-
-  type DeletionResultInfo {
-    success: Boolean,
-    Meta: MutationResultInfo
-  }
-
-  type MutationResultInfo {
-    transaction: Boolean,
-    elapsedTime: Int
-  }
-
-  type QueryResultsMetadata {
-    count: Int
-  }
-
-  input StringArrayUpdate {
-    index: Int,
-    value: String
-  }
-
-  input IntArrayUpdate {
-    index: Int,
-    value: Int
-  }
-
-  input FloatArrayUpdate {
-    index: Int,
-    value: Float
-  }
+${globalSchemaTypes}
 
   ${names.map(n => "${" + n + "Type}").join("\n\n  ")}
 

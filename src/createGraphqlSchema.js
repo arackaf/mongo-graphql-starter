@@ -7,7 +7,11 @@ import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
 import createMasterSchema from "./codeGen/createMasterSchema";
+import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
 import createMasterResolver from "./codeGen/createMasterResolver";
+import createTypeScriptTypes from "./codeGen/createTypeScriptTypes";
+
+import prettier from "prettier";
 
 function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
   directoriesToCreate.forEach(dir => {
@@ -19,6 +23,9 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
     fs.writeFileSync(path, contents);
   }
 }
+
+const formatGraphQL = code => prettier.format(code, { parser: "graphql" });
+const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 120 });
 
 export default function(source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
@@ -80,6 +87,8 @@ export default function(source, destPath, options = {}) {
     let names = [];
     let namesWithTables = [];
     let namesWithoutTables = [];
+    let types = [];
+
     modules.forEach(objectToCreate => {
       let objName = objectToCreate.__name;
       let modulePath = path.join(rootDir, objName);
@@ -88,28 +97,41 @@ export default function(source, destPath, options = {}) {
       let resolverPath = path.join(modulePath, "resolver.js");
 
       names.push(objName);
+      types.push(objectToCreate);
       if (objectToCreate.table) {
         namesWithTables.push(objName);
       } else {
         namesWithoutTables.push(objName);
       }
 
-      createFile(objPath, createOutputTypeMetadata(objectToCreate), true, modulePath);
+      createFile(objPath, formatJs(createOutputTypeMetadata(objectToCreate)), true, modulePath);
 
-      createFile(schemaPath, createGraphqlTypeSchema(objectToCreate), true);
+      createFile(schemaPath, formatJs(createGraphqlTypeSchema(objectToCreate)), true);
       if (objectToCreate.table) {
-        createFile(resolverPath, createTypeResolver(objectToCreate, { ...options, modulePath }), true);
+        createFile(resolverPath, formatJs(createTypeResolver(objectToCreate, { ...options, modulePath })), true);
       }
     });
 
-    fs.writeFileSync(path.join(rootDir, "schema.js"), createMasterSchema(names, namesWithTables, namesWithoutTables));
+    const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
+    fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables)));
+    fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
 
-    fs.writeFileSync(path.join(rootDir, "resolver.js"), createMasterResolver(namesWithTables));
+    let result;
+
+    if (options.typings) {
+      result = createTypeScriptTypes(masterSchema, options.typings).catch(er => {
+        console.log("\n\nERROR GENERATING TS TYPES\n\n", er);
+      });
+    }
+
+    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
       fs.writeFileSync(
         path.join(rootDir, "hooks.js"),
-        fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" })
+        formatJs(fs.readFileSync(path.resolve(__dirname, "./codeGen/processingHooksTemplate.js"), { encoding: "utf8" }))
       );
     }
+
+    return result;
   });
 }

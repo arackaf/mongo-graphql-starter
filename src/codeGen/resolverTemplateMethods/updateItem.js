@@ -2,12 +2,12 @@ import { mutationStart, mutationError, mutationOver, mutationMeta, mutationCompl
 
 export default ({ objName, table }) => `    async update${objName}(root, args, context, ast) {
       ${mutationStart({ objName, op: "update" })}
-      return await resolverHelpers.runMutation(session, transaction, async() => {
+      return await resolverHelpers.runMutation(session, transaction, async () => {
         let { $match, $project } = decontructGraphqlQuery(args._id ? { _id: args._id } : {}, ast, ${objName}Metadata, "${objName}");
         let updates = await getUpdateObject(args.Updates || {}, ${objName}Metadata, { ...gqlPacket, db, session });
 
         if (await runHook("beforeUpdate", $match, updates, { ...gqlPacket, db, session }) === false) {
-          return { ${objName}: null };
+          return resolverHelpers.mutationCancelled({ transaction });
         }
         if (!$match._id) {
           throw "No _id sent, or inserted in middleware";

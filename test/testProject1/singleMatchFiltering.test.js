@@ -27,7 +27,7 @@ test("Match single", async () => {
 });
 
 test("Match single - not found", async () => {
-  await queryAndMatchArray({ query: `{getBook(_id: "XXX"){Book{title}}}`, coll: "getBook", results: null });
+  await queryAndMatchArray({ query: `{getBook(_id: "5c266ff0967e9b904df20eb8"){Book{title}}}`, coll: "getBook", results: null });
 });
 
 test("Match single 2", async () => {

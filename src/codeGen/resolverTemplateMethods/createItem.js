@@ -10,7 +10,7 @@ export default ({ objName }) =>
 
         newObject = await dbHelpers.processInsertion(db, newObject, { ...gqlPacket, typeMetadata: ${objName}Metadata, session });
         if (newObject == null) {
-          return { ${objName}: null };
+          return { ${objName}: null, success: false };
         }
         await setUpOneToManyRelationships(newObject, args.${objName}, ${objName}Metadata, { ...gqlPacket, db, session });
         ${mutationComplete()}
