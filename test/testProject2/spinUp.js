@@ -27,7 +27,7 @@ export default async function() {
   let db, schema;
   let client = await MongoClient.connect(
     nextConnectionString(),
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useUnifiedTopology: true }
   );
   db = client.db(process.env.databaseName || "mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
