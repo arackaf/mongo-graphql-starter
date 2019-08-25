@@ -25,7 +25,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   let name = objectToCreate.__name;
   let allQueryFields = [];
   let manualQueryArgs = [];
-  let allFieldsMutation = [];
   let extras = objectToCreate.extras || {};
   let overrides = new Set(extras.overrides || []);
   let resolvedFields = objectToCreate.resolvedFields || {};
@@ -35,7 +34,6 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   Object.keys(fields).forEach(k => {
     allQueryFields.push(...queriesForField(k, fields[k]));
-    allFieldsMutation.push(`${k}: ${fieldType(fields[k], true)}`);
   });
   if (Array.isArray(objectToCreate.manualQueryArgs)) {
     manualQueryArgs.push(...objectToCreate.manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
@@ -59,7 +57,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
             createType(`${name}BulkMutationResult`, [`success: Boolean!`, "Meta: MutationResultInfo!"])
           ]
         : []),
-      objectToCreate.hasOneToManyRelationship
+      objectToCreate.hasMutableOneToManyRelationship
         ? createInput(`${name}InputLocal`, [
             ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
             ...Object.entries(relationships)
@@ -76,7 +74,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       createInput(`${name}MutationInput`, [
         ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
         ...Object.entries(relationships)
-          .filter(([k, rel]) => !rel.oneToMany)
+          .filter(([k, rel]) => !rel.oneToMany && !rel.readonly)
           .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
       ]),
       objectToCreate.__usedInArray ? createInput(`${name}ArrayMutationInput`, ["index: Int", `Updates: ${name}MutationInput`]) : null,
@@ -99,11 +97,11 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 
   function createMutationType() {
     let oneToManyForSingle = relationshipEntries
-      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id")
+      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id" && !rel.readonly)
       .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
 
     let oneToManyForMulti = relationshipEntries
-      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id" && /Array/.test(rel.type.fields[rel.keyField]))
+      .filter(([k, rel]) => rel.oneToMany && rel.fkField == "_id" && /Array/.test(rel.type.fields[rel.keyField]) && !rel.readonly)
       .map(([k, rel]) => `${k}_ADD: [${rel.type.__name}Input]`);
 
     let allMutations = [

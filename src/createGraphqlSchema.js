@@ -77,6 +77,10 @@ export default function(source, destPath, options = {}) {
           if (relationship.oneToMany) {
             type.hasOneToManyRelationship = true;
           }
+          if (relationship.oneToMany && !relationship.readonly) {
+            type.hasMutableOneToManyRelationship = true;
+          }
+
         });
       } else {
         type.relationships = {};
