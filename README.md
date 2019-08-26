@@ -434,6 +434,10 @@ by element comparison.
 
 `field_in: [<value1>, <value2>]` - will match results which match any of those exact values.
 
+`not in` match
+
+`field_nin: [<value1>, <value2>]` - will match results which do not match any of those exact values.
+
 For Date fields, the strings you send over will be converted to Date objects before being passed to Mongo. Similarly, for MongoIds, the Mongo
 `ObjectId` method will be applied before running the filter. For the array types, the value will be an entire array, which will be matched by Mongo
 item by item.

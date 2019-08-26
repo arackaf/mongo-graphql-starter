@@ -37,6 +37,14 @@ test("Float in", async () => {
   });
 });
 
+test("Float not in", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(weight_nin: [5.4, 5.5, 5.6], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 5.1" }, { title: "Book 5.9" }]
+  });
+});
+
 test("Float lt", async () => {
   await queryAndMatchArray({ query: "{allBooks(weight_lt: 5.5){Books{title}}}", coll: "allBooks", results: [{ title: "Book 5.1" }] });
 });

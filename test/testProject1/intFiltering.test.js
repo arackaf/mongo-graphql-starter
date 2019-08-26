@@ -31,6 +31,10 @@ test("Int in", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages_in: [99, 100, 101]){Books{title}}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });
 
+test("Int not in", async () => {
+  await queryAndMatchArray({ query: "{allBooks(pages_nin: [99, 100, 200]){Books{title}}}", coll: "allBooks", results: [{ title: "Book 150" }] });
+});
+
 test("Int lt", async () => {
   await queryAndMatchArray({ query: "{allBooks(pages_lt: 101){Books{title}}}", coll: "allBooks", results: [{ title: "Book 100" }] });
 });

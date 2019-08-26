@@ -34,3 +34,19 @@ test("Bool match in", async () => {
     results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 3" }]
   });
 });
+
+test("Bool match not in 1", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(isRead_nin: [true, false], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: []
+  });
+});
+
+test("Bool match not in 2", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(isRead_nin: [true], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 2" }]
+  });
+});

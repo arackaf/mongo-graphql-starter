@@ -286,6 +286,7 @@ function queriesForField(fieldName, realFieldType) {
       result.push(
         `${fieldName}: [${singleType}]`,
         `${fieldName}_in: [[${singleType}]]`,
+        `${fieldName}_nin: [[${singleType}]]`,
         `${fieldName}_contains: ${singleType}`,
         `${fieldName}_containsAny: [${singleType}]`,
         `${fieldName}_ne: [${singleType}]`
@@ -301,6 +302,7 @@ function queriesForField(fieldName, realFieldType) {
         ...[
           `${fieldName}: [String]`,
           `${fieldName}_in: [[String]]`,
+          `${fieldName}_nin: [[String]]`,
           `${fieldName}_contains: String`,
           `${fieldName}_containsAny: [String]`,
           `${fieldName}_ne: [String]`
@@ -319,11 +321,13 @@ function queriesForField(fieldName, realFieldType) {
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
+      result.push(`${fieldName}_nin: [${fieldType}]`);
       break;
     case JSONType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
+      result.push(`${fieldName}_nin: [${fieldType}]`);
   }
 
   if (realFieldType.__isArray) {

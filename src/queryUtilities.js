@@ -71,18 +71,26 @@ export function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix =
       }
 
       if (queryOperation !== "format" && isDate) {
-        args[k] = queryOperation === "in" ? args[k].map(val => new Date(val)) : new Date(args[k]);
+        args[k] = queryOperation === "in" || queryOperation == "nin" ? args[k].map(val => new Date(val)) : new Date(args[k]);
       }
 
       if (queryOperation == "count") {
         ensure(hash, fieldName, () => (hash[fieldName].$size = args[k]));
       } else if (queryOperation === "in") {
         if (field === MongoIdArrayType) {
-          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(arr => arr.map(val => ObjectId(val)))));
+          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(arr => arr.map(val => (val === null ? null : ObjectId(val))))));
         } else if (field == MongoIdType) {
-          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(val => ObjectId(val))));
+          ensure(hash, fieldName, () => (hash[fieldName].$in = args[k].map(val => (val === null ? null : ObjectId(val)))));
         } else {
           ensure(hash, fieldName, () => (hash[fieldName].$in = args[k]));
+        }
+      } else if (queryOperation === "nin") {
+        if (field === MongoIdArrayType) {
+          ensure(hash, fieldName, () => (hash[fieldName].$nin = args[k].map(arr => arr.map(val => (val === null ? null : ObjectId(val))))));
+        } else if (field == MongoIdType) {
+          ensure(hash, fieldName, () => (hash[fieldName].$nin = args[k].map(val => (val === null ? null : ObjectId(val)))));
+        } else {
+          ensure(hash, fieldName, () => (hash[fieldName].$nin = args[k]));
         }
       } else if (queryOperation == "ne") {
         ensure(hash, fieldName, () => (hash[fieldName].$ne = args[k]));

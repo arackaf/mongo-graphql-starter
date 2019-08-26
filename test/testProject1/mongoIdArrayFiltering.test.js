@@ -54,6 +54,14 @@ test("MongoId Array match in 2", async () => {
   });
 });
 
+test("MongoId Array match not in", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(mongoIds_nin: [[], ["${id3}"]], SORT: {title: 1}){Books{title}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 3" }]
+  });
+});
+
 test("MongoId Array match - order matters", async () => {
   await queryAndMatchArray({
     query: `{allBooks(mongoIds: ["${id3}", "${id2}", "${id1}"]){Books{title}}}`,

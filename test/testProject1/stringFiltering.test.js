@@ -37,6 +37,16 @@ test("String in", async () => {
   });
 });
 
+test("String not in", async () => {
+  await queryAndMatchArray({
+    schema,
+    db,
+    query: '{allBooks(title_nin: ["X", "Book 1", "Y"], SORT: { title: 1 }){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Second Book" }, { title: "Title x 1" }]
+  });
+});
+
 test("String in and ne", async () => {
   await queryAndMatchArray({
     schema,
