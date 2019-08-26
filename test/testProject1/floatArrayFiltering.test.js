@@ -49,6 +49,14 @@ test("Array match in", async () => {
   });
 });
 
+test("Array match not in", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(prices_nin: [[], [1.1], [1.1, 2.2, 3.3]], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 5" }]
+  });
+});
+
 test("Array match - order matters", async () => {
   await queryAndMatchArray({
     query: "{allBooks(prices: [3.3, 2.2, 1.1]){Books{title}}}",

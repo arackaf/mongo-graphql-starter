@@ -44,6 +44,14 @@ test("String array match in", async () => {
   });
 });
 
+test("String array match not in", async () => {
+  await queryAndMatchArray({
+    query: '{allBooks(keywords_nin: [["functional-programming"], ["c#", "development"]], SORT: {title: 1}){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }]
+  });
+});
+
 test("String array match - order matters", async () => {
   await queryAndMatchArray({
     query: '{allBooks(keywords: ["development", "c#"]){Books{title}}}',

@@ -44,6 +44,14 @@ test("Basic date ne match dateFilteringTest", async () => {
   });
 });
 
+test("Date not in dateFilteringTest", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(createdOn_nin: ["2004-06-02T03:00:09", "2004-06-02T03:00:00", "2004-06-02T03:00:20", "2004-06-02T03:00:11"], SORT: { title: 1 }){Books{title}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 3" }, { title: "Book 4" }, { title: "Book 5" }, { title: "Book 7" }]
+  });
+});
+
 test("Date in dateFilteringTest", async () => {
   await queryAndMatchArray({
     query: `{allBooks(createdOn_in: ["2004-06-02T03:00:09", "2004-06-02T03:00:10", "2004-06-02T03:00:11"]){Books{title}}}`,

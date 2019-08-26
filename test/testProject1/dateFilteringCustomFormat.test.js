@@ -28,11 +28,19 @@ test("Basic date match", async () => {
   });
 });
 
-test("Date in", async () => {
+test("Date not in", async () => {
   await queryAndMatchArray({
-    query: `{allBooks(createdOnYearOnly_in: ["2004-06-02T03:00:09", "2004-06-02T03:00:10", "2004-06-02T03:00:11"]){Books{title}}}`,
+    query: `{allBooks(createdOnYearOnly_nin: ["2004-06-02T03:00:09", "2004-06-02T03:00:10", "2004-06-02T03:00:11"]){Books{title}}}`,
     coll: "allBooks",
-    results: [{ title: "Book 7" }]
+    results: [
+      { title: "Book 1" },
+      { title: "Book 2" },
+      { title: "Book 3" },
+      { title: "Book 4" },
+      { title: "Book 5" },
+      { title: "Book 6" },
+      { title: "Book 8" }
+    ]
   });
 });
 
