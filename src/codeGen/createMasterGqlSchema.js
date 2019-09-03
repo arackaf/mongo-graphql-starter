@@ -4,7 +4,7 @@ const globalSchemaTypes = _globalSchemaTypes.replace(/^  /gm, "");
 
 import createTypeSchemaHelpers from "./typeSchemaHelpers";
 
-export default function createMasterSchema(types, rootDir) {
+export default function createMasterGqlSchema(types, rootDir) {
   const typesWithTables = types.filter(t => t.table);
   const typesWithoutTables = types.filter(t => !t.table);
 
@@ -39,6 +39,7 @@ export default function createMasterSchema(types, rootDir) {
     });
 
     return {
+      readonly: objectToCreate.readonly,
       types: packet.createSchemaTypes(),
       query: packet.createQueryType() + (extraQueries.length ? "\n" + extraQueries.join("\n") : ""),
       mutation: packet.createMutationType() + (extraMutations.length ? "\n" + extraMutations.join("\n") : "")
@@ -56,8 +57,15 @@ type Query {
 ${tableTypePackets.map(p => p.query).join("\n\n")}
 }
 
-type Mutation {
-${tableTypePackets.map(p => p.mutation).join("\n\n")}
+${
+  tableTypePackets.find(t => !t.readonly)
+    ? `type Mutation {
+${tableTypePackets
+  .filter(t => !t.readonly)
+  .map(p => p.mutation)
+  .join("\n\n")}
+}`
+    : ""
 }
 
 `.trim();

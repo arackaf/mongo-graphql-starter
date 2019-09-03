@@ -1,0 +1,5 @@
+{
+  "rootDir": "../testProject10",
+  "globalSetup": "<rootDir>/../masterSetup.js",
+  "testEnvironment": "node"
+}

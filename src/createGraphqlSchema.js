@@ -80,7 +80,6 @@ export default function(source, destPath, options = {}) {
           if (relationship.oneToMany && !relationship.readonly) {
             type.hasMutableOneToManyRelationship = true;
           }
-
         });
       } else {
         type.relationships = {};
@@ -91,6 +90,7 @@ export default function(source, destPath, options = {}) {
     let names = [];
     let namesWithTables = [];
     let namesWithoutTables = [];
+    let namesWriteable = [];
     let types = [];
 
     modules.forEach(objectToCreate => {
@@ -104,6 +104,9 @@ export default function(source, destPath, options = {}) {
       types.push(objectToCreate);
       if (objectToCreate.table) {
         namesWithTables.push(objName);
+        if (!objectToCreate.readonly) {
+          namesWriteable.push(objName);
+        }
       } else {
         namesWithoutTables.push(objName);
       }
@@ -117,7 +120,7 @@ export default function(source, destPath, options = {}) {
     });
 
     const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
-    fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables)));
+    fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable)));
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
 
     let result;
@@ -128,7 +131,7 @@ export default function(source, destPath, options = {}) {
       });
     }
 
-    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables)));
+    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables, namesWriteable)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
       fs.writeFileSync(
         path.join(rootDir, "hooks.js"),
