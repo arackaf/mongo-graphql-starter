@@ -1,6 +1,7 @@
 {
   "version": "0.2.0",
   "configurations": [
+
     {
       "type": "node",
       "request": "launch",
@@ -62,6 +63,13 @@
       "request": "launch",
       "name": "Launch 9",
       "program": "${workspaceRoot}/test/testProject9/index.js",
+      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch 10",
+      "program": "${workspaceRoot}/test/testProject10/index.js",
       "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v8.14.1/bin/node"
     }
   ]
