@@ -58,7 +58,7 @@ ${tableTypePackets.map(p => p.query).join("\n\n")}
 }
 
 ${
-  tableTypePackets.find(t => !t.readonly)
+  !tableTypePackets.find(t => t.readonly)
     ? `type Mutation {
 ${tableTypePackets
   .filter(t => !t.readonly)
