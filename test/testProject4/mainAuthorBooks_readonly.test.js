@@ -31,6 +31,18 @@ afterAll(async () => {
   db = null;
 });
 
+test("Read author's readonly books via books results", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(SORT: {title: 1}){Books{title, mainAuthor_readonly { name, mainAuthorBooks_readonly(SORT: {title: 1}){title}}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", mainAuthor_readonly: { name: "Adam", mainAuthorBooks_readonly: [{ title: "Book 1" }] } },
+      { title: "Book 2", mainAuthor_readonly: { name: "Katie", mainAuthorBooks_readonly: [{ title: "Book 2" }, { title: "Book 3" }] } },
+      { title: "Book 3", mainAuthor_readonly: { name: "Katie", mainAuthorBooks_readonly: [{ title: "Book 2" }, { title: "Book 3" }] } }
+    ]
+  });
+});
+
 test("Read author's readonly books", async () => {
   await queryAndMatchArray({
     query: `{allAuthors(name_startsWith: "Adam"){Authors{name, mainAuthorBooks_readonly(SORT: {title: 1}){title}}}}`,
