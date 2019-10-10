@@ -210,7 +210,7 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
   }
 
-  return { $match, $project, $sort, $limit, $skip, metadataRequested, extrasPackets };
+  return { $match, $sort, $skip, $limit, $project, metadataRequested, extrasPackets };
 }
 
 export function cleanUpResults(results, metaData) {
@@ -249,5 +249,68 @@ export function cleanUpResults(results, metaData) {
         }
       }
     });
+  });
+}
+
+export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
+  Object.keys(TypeMetadata.relationships).forEach((relationshipName, index, all) => {
+    let relationship = TypeMetadata.relationships[relationshipName];
+    let foreignKeyType = TypeMetadata.fields[relationship.fkField];
+    let fkField = relationship.fkField;
+    let keyField = relationship.keyField;
+
+    let keyType = relationship.type.fields[relationship.keyField];
+    let keyTypeIsArray = /Array/g.test(keyType);
+    let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
+
+    if (relationship.__isArray) {
+      let destinationKeyType = relationship.type.fields[relationship.keyField];
+      let receivingKeyIsArray = /Array$/.test(destinationKeyType);
+
+      if (foreignKeyIsArray) {
+        return;
+      }
+
+      //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
+
+      let addedFields = new Set([]);
+
+      if (relationshipName == "mainAuthorBooks") {
+        let fkNameToUse = fkField.replace(/^_/, "x_");
+
+        if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
+          fkNameToUse += "___as___string";
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
+        }
+
+        aggregationPipeline.push({
+          $lookup: {
+            from: relationship.type.table,
+            let: { fkField: "$" + fkNameToUse },
+            pipeline: [{ $match: { $expr: { [keyTypeIsArray ? "$in" : "$eq"]: ["$$fkField", "$" + keyField] } } }],
+            as: relationshipName
+          }
+        });
+      }
+
+      // let template = relationship.manyToMany
+      //   ? projectManyToManyResolverTemplate
+      //   : receivingKeyIsArray
+      //   ? projectOneToManyResolverTemplate_ArrayReceivingKey
+      //   : projectOneToManyResolverTemplate_SingleReceivingKey;
+
+      // let lookupSetContents = keyTypeIsArray ? `result.${relationship.keyField}.map(k => k + "")` : `[result.${relationship.keyField} + ""]`;
+
+      // if (mapping) {
+      //   if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
+      //     mapping = mapping.replace(/X/i, "ObjectId(id)");
+      //   } else if (destinationKeyType == StringType || destinationKeyType == StringArrayType) {
+      //     mapping = mapping.replace(/X/i, `"" + id`);
+      //   }
+      // } else {
+      //   mapping = "x => x";
+      // }
+    } else if (relationship.__isObject) {
+    }
   });
 }
