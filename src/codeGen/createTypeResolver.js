@@ -48,7 +48,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
     `import { insertUtilities, queryUtilities, projectUtilities, updateUtilities, processHook, dbHelpers, resolverHelpers } from "mongo-graphql-starter";`,
     `import hooksObj from ${hooksPath};`,
     `const runHook = processHook.bind(this, hooksObj, "${objName}");`,
-    `const { decontructGraphqlQuery, cleanUpResults } = queryUtilities;`,
+    `const { decontructGraphqlQuery, cleanUpResults, addRelationshipLookups } = queryUtilities;`,
     `const { setUpOneToManyRelationships, newObjectFromArgs } = insertUtilities;`,
     `const { getMongoProjection, parseRequestedFields } = projectUtilities;`,
     `const { getUpdateObject, setUpOneToManyRelationshipsForUpdate } = updateUtilities;`,
@@ -123,10 +123,10 @@ export default function createGraphqlResolver(objectToCreate, options) {
       let foreignKeyType = objectToCreate.fields[relationship.fkField];
       let keyType = relationship.type.fields[relationship.keyField];
       let keyTypeIsArray = /Array/g.test(keyType);
+      let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
 
       if (!typeImports.has(relationship.type.__name)) {
         typeImports.add(relationship.type.__name);
-        imports.push(`import { load${relationship.type.__name}s } from "../${relationship.type.__name}/resolver";`);
         imports.push(`import ${relationship.type.__name}Metadata from "../${relationship.type.__name}/${relationship.type.__name}";`);
       }
 
@@ -141,10 +141,13 @@ export default function createGraphqlResolver(objectToCreate, options) {
       }
 
       if (relationship.__isArray) {
+        if (!foreignKeyIsArray) {
+          return;
+        }
+
         let destinationKeyType = relationship.type.fields[relationship.keyField];
 
         let mapping = "";
-        let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
         let receivingKeyIsArray = /Array$/.test(destinationKeyType);
 
         if (foreignKeyIsArray) {

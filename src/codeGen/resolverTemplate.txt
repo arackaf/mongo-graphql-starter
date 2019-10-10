@@ -1,4 +1,4 @@
-export async function load${objName}s(db, queryPacket, root, args, context, ast) {
+async function load${objName}s(db, queryPacket, root, args, context, ast) {
   let { $match, $project, $sort, $limit, $skip } = queryPacket;
 
   let aggregateItems = [
@@ -8,6 +8,8 @@ export async function load${objName}s(db, queryPacket, root, args, context, ast)
     $skip != null ? { $skip } : null, 
     $limit != null ? { $limit } : null
   ].filter(item => item);
+
+  addRelationshipLookups(aggregateItems, ast, ${objName}Metadata);
 
   await processHook(hooksObj, "${objName}", "queryPreAggregate", aggregateItems, { db, root, args, context, ast });
   let ${objName}s = await dbHelpers.runQuery(db, "${table}", aggregateItems);
