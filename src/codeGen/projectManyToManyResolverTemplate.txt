@@ -4,10 +4,9 @@
       context.${dataLoaderId} = new DataLoader(async keyArrays => {
         let $match = { ${keyField}: { $in: flatMap(keyArrays || [], ${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
-        let { $project, $sort, $limit, $skip } = queryPacket;
+        let { aggregationPipeline } = queryPacket;
         
-        let aggregateItems = [{ $match }, $sort ? { $sort } : null, { $project }].filter(item => item);
-        let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
+        let results = await dbHelpers.runQuery(db, "${table}", aggregationPipeline);
         cleanUpResults(results, ${targetTypeName}Metadata);
 
         let finalResult = keyArrays.map(keyArr => []);

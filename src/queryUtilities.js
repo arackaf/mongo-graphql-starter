@@ -189,28 +189,30 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
 
   let sort = args.SORT;
   let sorts = args.SORTS;
-  let $sort;
-  let $limit;
-  let $skip;
+
+  let aggregationPipeline = [];
+  if ($project) {
+    aggregationPipeline.push({ $project });
+  }
+  aggregationPipeline.push({ $match });
 
   if (sort) {
-    $sort = sort;
+    aggregationPipeline.push({ $sort: sort });
   } else if (sorts) {
-    $sort = {};
+    let $sort = {};
     sorts.forEach(packet => {
       Object.assign($sort, packet);
     });
+    aggregationPipeline.push({ $sort: sort });
   }
 
   if (args.LIMIT != null || args.SKIP != null) {
-    $limit = args.LIMIT;
-    $skip = args.SKIP;
+    aggregationPipeline.push({ $skip: args.SKIP }, { $limit: args.LIMIT });
   } else if (args.PAGE != null && args.PAGE_SIZE != null) {
-    $limit = args.PAGE_SIZE;
-    $skip = (args.PAGE - 1) * args.PAGE_SIZE;
+    aggregationPipeline.push({ $skip: (args.PAGE - 1) * args.PAGE_SIZE }, { $limit: args.PAGE_SIZE });
   }
 
-  return { $match, $sort, $skip, $limit, $project, metadataRequested, extrasPackets };
+  return { aggregationPipeline, metadataRequested, extrasPackets };
 }
 
 export function cleanUpResults(results, metaData) {
