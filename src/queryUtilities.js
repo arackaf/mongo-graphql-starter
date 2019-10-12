@@ -4,7 +4,7 @@ import { processInsertions } from "./dbHelpers";
 
 import escapeStringRegexp from "escape-string-regexp";
 import { newObjectFromArgs, insertObjects } from "./insertUtilities";
-import { parseRequestedFields, parseRequestedHierarchy } from "./projectUtilities";
+import { parseRequestedFields, parseRequestedHierarchy, processRelationship, getNestedQueryInfo } from "./projectUtilities";
 
 export function getMongoFilters(args, objectMetaData) {
   return fillMongoFiltersObject(args, objectMetaData);
@@ -189,6 +189,9 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
 
   let sort = args.SORT;
   let sorts = args.SORTS;
+  let $sort = null;
+  let $skip = null;
+  let $limit = null;
 
   let aggregationPipeline = [];
   if ($project) {
@@ -197,22 +200,27 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
   aggregationPipeline.push({ $match });
 
   if (sort) {
-    aggregationPipeline.push({ $sort: sort });
+    $sort = sort;
+    aggregationPipeline.push({ $sort });
   } else if (sorts) {
-    let $sort = {};
+    $sort = {};
     sorts.forEach(packet => {
       Object.assign($sort, packet);
     });
-    aggregationPipeline.push({ $sort: sort });
+    aggregationPipeline.push({ $sort });
   }
 
   if (args.LIMIT != null || args.SKIP != null) {
-    aggregationPipeline.push({ $skip: args.SKIP }, { $limit: args.LIMIT });
+    $skip = args.SKIP;
+    $limit = args.LIMIT;
+    aggregationPipeline.push({ $skip }, { $limit });
   } else if (args.PAGE != null && args.PAGE_SIZE != null) {
-    aggregationPipeline.push({ $skip: (args.PAGE - 1) * args.PAGE_SIZE }, { $limit: args.PAGE_SIZE });
+    $skip = (args.PAGE - 1) * args.PAGE_SIZE;
+    $limit = args.PAGE_SIZE;
+    aggregationPipeline.push({ $skip }, { $limit });
   }
 
-  return { aggregationPipeline, metadataRequested, extrasPackets };
+  return { $match, $sort, $skip, $limit, $project, aggregationPipeline, metadataRequested, extrasPackets };
 }
 
 export function cleanUpResults(results, metaData) {
@@ -255,6 +263,8 @@ export function cleanUpResults(results, metaData) {
 }
 
 export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
+  let { ast: currentAst } = getNestedQueryInfo(ast, "Authors");
+
   Object.keys(TypeMetadata.relationships).forEach((relationshipName, index, all) => {
     let relationship = TypeMetadata.relationships[relationshipName];
     let foreignKeyType = TypeMetadata.fields[relationship.fkField];
@@ -277,23 +287,24 @@ export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
 
       let addedFields = new Set([]);
 
-      if (relationshipName == "mainAuthorBooks") {
-        let fkNameToUse = fkField.replace(/^_/, "x_");
+      let { load, $project } = processRelationship(currentAst, relationshipName, relationship.type);
+      if (!load) return;
 
-        if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
-          fkNameToUse += "___as___string";
-          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
-        }
+      let fkNameToUse = fkField.replace(/^_/, "x_");
 
-        aggregationPipeline.push({
-          $lookup: {
-            from: relationship.type.table,
-            let: { fkField: "$" + fkNameToUse },
-            pipeline: [{ $match: { $expr: { [keyTypeIsArray ? "$in" : "$eq"]: ["$$fkField", "$" + keyField] } } }],
-            as: relationshipName
-          }
-        });
+      if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
+        fkNameToUse += "___as___string";
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
       }
+
+      aggregationPipeline.push({
+        $lookup: {
+          from: relationship.type.table,
+          let: { fkField: "$" + fkNameToUse },
+          pipeline: [{ $match: { $expr: { [keyTypeIsArray ? "$in" : "$eq"]: ["$$fkField", "$" + keyField] } } }],
+          as: relationshipName
+        }
+      });
 
       // let template = relationship.manyToMany
       //   ? projectManyToManyResolverTemplate

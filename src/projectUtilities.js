@@ -68,7 +68,7 @@ export function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor
   };
 }
 
-function getNestedQueryInfo(ast, queryName) {
+export function getNestedQueryInfo(ast, queryName) {
   let fieldNode = ast.fieldNodes ? ast.fieldNodes.find(fn => fn.kind == "Field") : ast;
 
   if (queryName) {
@@ -95,4 +95,14 @@ function getNestedQueryInfo(ast, queryName) {
 
 function getSelections(fieldNode) {
   return new Map(fieldNode.selectionSet.selections.map(sel => [sel.name.value, sel.selectionSet == null ? true : getSelections(sel)]));
+}
+
+export function processRelationship(astOriginal, relationshipName, TypeMetaData) {
+  let { ast, requestMap } = getNestedQueryInfo(astOriginal, relationshipName);
+  if (!ast) {
+    return { load: false };
+  } else {
+    let $project = getMongoProjection(requestMap, TypeMetaData, {}); //TODO:
+    return { load: true, $project, ast };
+  }
 }
