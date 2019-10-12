@@ -1,9 +1,11 @@
-import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf } from "../../src/dataTypes";
+import { MongoIdType, StringType, StringArrayType, IntType, FloatType, DateType, arrayOf, objectOf, MongoIdArrayType } from "../../src/dataTypes";
 
 export const Keyword = {
   table: "keywords",
   fields: {
-    keywordName: StringType
+    keywordName: StringType,
+    randomMongoId: MongoIdType,
+    randomMongoIds: MongoIdArrayType
   }
 };
 
@@ -12,7 +14,9 @@ export const Subject = {
   fields: {
     name: StringType,
     keywordIds: StringArrayType,
-    bookIds: StringArrayType
+    bookIds: StringArrayType,
+    randomMongoId: MongoIdType,
+    randomMongoIds: MongoIdArrayType
   },
   relationships: {
     keywords: {
@@ -31,7 +35,9 @@ export const Author = {
     birthday: DateType,
     mainSubjectId: StringType,
     subjectIds: StringArrayType,
-    firstBookId: StringType
+    firstBookId: StringType,
+    randomMongoId: MongoIdType,
+    randomMongoIds: MongoIdArrayType
   },
   relationships: {
     mainSubject: {
@@ -113,7 +119,9 @@ export const Book = {
     authorIds: StringArrayType,
     authorIds_readonly: StringArrayType,
     authorNames: StringArrayType,
-    cachedAuthors: arrayOf(Author)
+    cachedAuthors: arrayOf(Author),
+    randomMongoId: MongoIdType,
+    randomMongoIds: MongoIdArrayType
   },
   relationships: {
     authors: {
