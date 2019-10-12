@@ -12,6 +12,8 @@ Promise.resolve(spinUp()).then(({ db, schema, queryAndMatchArray }) => {
     db
   };
 
+  global.__schema = schema;
+
   app.use(
     "/graphql",
     expressGraphql({
