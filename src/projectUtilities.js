@@ -93,16 +93,17 @@ export function getNestedQueryInfo(ast, queryName) {
   }
 }
 
+export function getAllNestedQueryInfoAsts(ast, queryName) {
+  let fieldNode = ast.fieldNodes ? ast.fieldNodes.find(fn => fn.kind == "Field") : ast;
+
+  return fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == queryName);
+}
+
 function getSelections(fieldNode) {
   return new Map(fieldNode.selectionSet.selections.map(sel => [sel.name.value, sel.selectionSet == null ? true : getSelections(sel)]));
 }
 
-export function processRelationship(astOriginal, relationshipName, TypeMetaData) {
-  let { ast, requestMap } = getNestedQueryInfo(astOriginal, relationshipName);
-  if (!ast) {
-    return { load: false };
-  } else {
-    let $project = getMongoProjection(requestMap, TypeMetaData, {}); //TODO:
-    return { load: true, $project, ast };
-  }
+//leave a simple forward call for now, in case sub-field GraphQL aliasing becomes a thing, per https://github.com/graphql/graphql-js/issues/297
+export function getRelationshipAst(astOriginal, relationshipName) {
+  return getAllNestedQueryInfoAsts(astOriginal, relationshipName);
 }

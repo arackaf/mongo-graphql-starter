@@ -4,7 +4,9 @@ import { processInsertions } from "./dbHelpers";
 
 import escapeStringRegexp from "escape-string-regexp";
 import { newObjectFromArgs, insertObjects } from "./insertUtilities";
-import { parseRequestedFields, parseRequestedHierarchy, processRelationship, getNestedQueryInfo } from "./projectUtilities";
+import { parseRequestedFields, parseRequestedHierarchy, getNestedQueryInfo, getRelationshipAst } from "./projectUtilities";
+
+import { typeFromAST, TypeInfo } from "graphql/utilities";
 
 export function getMongoFilters(args, objectMetaData) {
   return fillMongoFiltersObject(args, objectMetaData);
@@ -194,9 +196,6 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
   let $limit = null;
 
   let aggregationPipeline = [];
-  if ($project) {
-    aggregationPipeline.push({ $project });
-  }
   aggregationPipeline.push({ $match });
 
   if (sort) {
@@ -218,6 +217,9 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
     $limit = args.PAGE_SIZE;
     aggregationPipeline.push({ $skip }, { $limit });
+  }
+  if ($project) {
+    aggregationPipeline.push({ $project });
   }
 
   return { $match, $sort, $skip, $limit, $project, aggregationPipeline, metadataRequested, extrasPackets };
@@ -262,8 +264,24 @@ export function cleanUpResults(results, metaData) {
   });
 }
 
+function parseGraphqlArguments(args) {
+  return args.reduce((hash, entry) => ((hash[entry.name.value] = parseGraphqlArg(entry.value)), hash), {});
+}
+
+function parseGraphqlArg(arg) {
+  switch (arg.kind) {
+    case "ObjectValue":
+      return arg.fields.reduce((obj, field) => ((obj[field.name.value] = parseGraphqlArg(field.value)), obj), {});
+    case "IntValue":
+      return +arg.value;
+    default:
+      return arg.value;
+  }
+}
+
 export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
   let { ast: currentAst } = getNestedQueryInfo(ast, "Authors");
+  let originalAst = ast;
 
   Object.keys(TypeMetadata.relationships).forEach((relationshipName, index, all) => {
     let relationship = TypeMetadata.relationships[relationshipName];
@@ -274,34 +292,41 @@ export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
     let keyType = relationship.type.fields[relationship.keyField];
     let keyTypeIsArray = /Array/g.test(keyType);
     let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
+    //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
 
     if (relationship.__isArray) {
       let destinationKeyType = relationship.type.fields[relationship.keyField];
       let receivingKeyIsArray = /Array$/.test(destinationKeyType);
 
+      // blocked on https://jira.mongodb.org/browse/SERVER-43943?filter=-2
       if (foreignKeyIsArray) {
         return;
       }
 
-      //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
-
       let addedFields = new Set([]);
 
-      let { load, $project } = processRelationship(currentAst, relationshipName, relationship.type);
-      if (!load) return;
+      let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
+      if (!ast) return;
 
+      let relationshipArgs = parseGraphqlArguments(ast.arguments);
+      let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
       let fkNameToUse = fkField.replace(/^_/, "x_");
 
       if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
         fkNameToUse += "___as___string";
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
+        if (!addedFields.has(fkNameToUse)) {
+          addedFields.add(fkNameToUse);
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
+        }
       }
+
+      Object.assign($match, { $expr: { [keyTypeIsArray ? "$in" : "$eq"]: ["$$fkField", "$" + keyField] } });
 
       aggregationPipeline.push({
         $lookup: {
           from: relationship.type.table,
           let: { fkField: "$" + fkNameToUse },
-          pipeline: [{ $match: { $expr: { [keyTypeIsArray ? "$in" : "$eq"]: ["$$fkField", "$" + keyField] } } }],
+          pipeline: pipelineValues,
           as: relationshipName
         }
       });
