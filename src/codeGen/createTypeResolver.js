@@ -48,7 +48,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
     `import { insertUtilities, queryUtilities, projectUtilities, updateUtilities, processHook, dbHelpers, resolverHelpers } from "mongo-graphql-starter";`,
     `import hooksObj from ${hooksPath};`,
     `const runHook = processHook.bind(this, hooksObj, "${objName}");`,
-    `const { decontructGraphqlQuery, cleanUpResults, addRelationshipLookups } = queryUtilities;`,
+    `const { decontructGraphqlQuery, cleanUpResults } = queryUtilities;`,
     `const { setUpOneToManyRelationships, newObjectFromArgs } = insertUtilities;`,
     `const { getMongoProjection, parseRequestedFields } = projectUtilities;`,
     `const { getUpdateObject, setUpOneToManyRelationshipsForUpdate } = updateUtilities;`,
@@ -141,10 +141,6 @@ export default function createGraphqlResolver(objectToCreate, options) {
       }
 
       if (relationship.__isArray) {
-        if (!foreignKeyIsArray) {
-          return;
-        }
-
         let destinationKeyType = relationship.type.fields[relationship.keyField];
 
         let mapping = "";
