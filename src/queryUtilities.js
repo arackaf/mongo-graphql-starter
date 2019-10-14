@@ -218,11 +218,12 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
     $limit = args.PAGE_SIZE;
     aggregationPipeline.push({ $skip }, { $limit });
   }
+
+  addRelationshipLookups(aggregationPipeline, ast, queryName, objectMetaData, $project);
+
   if ($project) {
     aggregationPipeline.push({ $project });
   }
-
-  addRelationshipLookups(aggregationPipeline, ast, queryName, objectMetaData);
 
   return { $match, $sort, $skip, $limit, $project, aggregationPipeline, metadataRequested, extrasPackets };
 }
@@ -281,7 +282,7 @@ function parseGraphqlArg(arg) {
   }
 }
 
-function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadata) {
+function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadata, $project) {
   let { ast: currentAst } = getNestedQueryInfo(ast, rootQuery);
   let originalAst = ast;
 
@@ -321,7 +322,12 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
         }
       }
 
-      Object.assign($match, { $expr: { [keyTypeIsArray ? "$in" : "$eq"]: ["$$fkField", "$" + keyField] } });
+      if (keyTypeIsArray) {
+        Object.assign($match, { $expr: { $in: ["$$fkField", { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } }] } });
+      } else {
+        Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
+      }
+      $project = $project || {};
 
       aggregationPipeline.push({
         $lookup: {
@@ -331,6 +337,8 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
           as: relationshipName
         }
       });
+
+      $project[relationshipName] = "$" + relationshipName;
 
       // let template = relationship.manyToMany
       //   ? projectManyToManyResolverTemplate
