@@ -222,6 +222,8 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
     aggregationPipeline.push({ $project });
   }
 
+  addRelationshipLookups(aggregationPipeline, ast, queryName, objectMetaData);
+
   return { $match, $sort, $skip, $limit, $project, aggregationPipeline, metadataRequested, extrasPackets };
 }
 
@@ -279,8 +281,8 @@ function parseGraphqlArg(arg) {
   }
 }
 
-export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
-  let { ast: currentAst } = getNestedQueryInfo(ast, "Authors");
+function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadata) {
+  let { ast: currentAst } = getNestedQueryInfo(ast, rootQuery);
   let originalAst = ast;
 
   Object.keys(TypeMetadata.relationships).forEach((relationshipName, index, all) => {
@@ -304,7 +306,6 @@ export function addRelationshipLookups(aggregationPipeline, ast, TypeMetadata) {
       }
 
       let addedFields = new Set([]);
-
       let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
       if (!ast) return;
 

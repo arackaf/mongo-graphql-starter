@@ -3,11 +3,9 @@
       let db = await context.__mongodb;
       context.${dataLoaderId} = new DataLoader(async keys => {
         let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
-        let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
-        let { $project, $sort, $limit, $skip } = queryPacket;
+        let { aggregationPipeline } = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
 
-        let aggregateItems = [{ $match }, { $project }];
-        let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
+        let results = await dbHelpers.runQuery(db, "${table}", aggregationPipeline);
         cleanUpResults(results, ${targetTypeName}Metadata);
 
         let destinationMap = new Map([]);
