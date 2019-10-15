@@ -15,7 +15,7 @@ export default ({ objName }) =>
         await setUpOneToManyRelationships(newObject, args.${objName}, ${objName}Metadata, { ...gqlPacket, db, session });
         ${mutationComplete()}
 
-        let result = $project ? (await load${objName}s(db, { $match: { _id: newObject._id }, $project, $limit: 1 }, root, args, context, ast))[0] : null;
+        let result = $project ? (await load${objName}s(db, [{ $match: { _id: newObject._id } }, { $project }, { $limit: 1 }], root, args, context, ast))[0] : null;
         return resolverHelpers.mutationSuccessResult({ ${objName}: result, transaction, elapsedTime: 0 });
       });
     }`;
