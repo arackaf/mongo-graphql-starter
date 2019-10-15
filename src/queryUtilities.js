@@ -316,12 +316,14 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
       let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
       let fkNameToUse = fkField.replace(/^_/, "x_");
 
+      let asString = false;
       if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
         fkNameToUse += "___as___string";
-        if (!addedFields.has(fkNameToUse)) {
-          addedFields.add(fkNameToUse);
-          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
-        }
+        asString = true;
+      }
+      if (!addedFields.has(fkNameToUse)) {
+        addedFields.add(fkNameToUse);
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: asString ? { $toString: "$" + fkField } : "$" + fkField } });
       }
 
       if (keyTypeIsArray) {
@@ -329,6 +331,7 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
       } else {
         Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
       }
+
       $project = $project || {};
 
       aggregationPipeline.push({
