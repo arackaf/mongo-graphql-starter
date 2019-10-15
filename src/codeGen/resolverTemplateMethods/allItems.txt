@@ -16,7 +16,7 @@
 
         if (queryPacket.metadataRequested.get("count")) {
           let $match = aggregationPipeline.find(item => item.$match);
-          let countResults = await dbHelpers.runQuery(db, "${table}", [{ $match }, { $group: { _id: null, count: { $sum: 1 } } }]);  
+          let countResults = await dbHelpers.runQuery(db, "${table}", [$match, { $group: { _id: null, count: { $sum: 1 } } }]);  
           result.Meta.count = countResults.length ? countResults[0].count : 0;
         }
       }
