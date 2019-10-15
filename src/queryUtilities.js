@@ -212,12 +212,12 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
   if (args.LIMIT != null || args.SKIP != null) {
     $skip = args.SKIP;
     $limit = args.LIMIT;
-    aggregationPipeline.push({ $skip }, { $limit });
   } else if (args.PAGE != null && args.PAGE_SIZE != null) {
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
     $limit = args.PAGE_SIZE;
-    aggregationPipeline.push({ $skip }, { $limit });
   }
+  $skip && aggregationPipeline.push({ $skip });
+  $limit && aggregationPipeline.push({ $limit });
 
   addRelationshipLookups(aggregationPipeline, ast, queryName, objectMetaData, $project);
 
@@ -273,6 +273,8 @@ function parseGraphqlArguments(args) {
 
 function parseGraphqlArg(arg) {
   switch (arg.kind) {
+    case "ListValue":
+      return arg.values.map(listVal => parseGraphqlArg(listVal));
     case "ObjectValue":
       return arg.fields.reduce((obj, field) => ((obj[field.name.value] = parseGraphqlArg(field.value)), obj), {});
     case "IntValue":
