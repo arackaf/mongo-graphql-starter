@@ -1,3 +1,3 @@
   ${targetObjName}(obj, args, context, ast) {
-    return obj.${targetObjName};
+    return cleanUpResults(obj.${targetObjName}, ${targetTypeName}Metadata);
   }

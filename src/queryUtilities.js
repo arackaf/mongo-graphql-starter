@@ -265,6 +265,8 @@ export function cleanUpResults(results, metaData) {
       }
     });
   });
+
+  return results;
 }
 
 function parseGraphqlArguments(args) {
