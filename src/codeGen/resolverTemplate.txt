@@ -7,8 +7,7 @@ async function load${objName}s(db, aggregationPipeline, root, args, context, ast
       o._id = "" + o._id;
     }
   });
-  cleanUpResults(${objName}s, ${objName}Metadata);
-  return ${objName}s;
+  return cleanUpResults(${objName}s, ${objName}Metadata);
 }
 
 export const ${objName} = {
