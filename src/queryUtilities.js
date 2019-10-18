@@ -288,6 +288,9 @@ function parseGraphqlArg(arg) {
 
 function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadata, $project) {
   let { ast: currentAst } = getNestedQueryInfo(ast, rootQuery);
+  if (!currentAst){
+    return;
+  }
   let originalAst = ast;
 
   Object.keys(TypeMetadata.relationships).forEach((relationshipName, index, all) => {
