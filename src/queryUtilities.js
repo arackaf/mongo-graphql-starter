@@ -288,7 +288,7 @@ function parseGraphqlArg(arg) {
 
 function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadata, $project) {
   let { ast: currentAst } = getNestedQueryInfo(ast, rootQuery);
-  if (!currentAst){
+  if (!currentAst) {
     return;
   }
   let originalAst = ast;
@@ -304,70 +304,82 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
     //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
 
-    if (relationship.__isArray) {
-      let destinationKeyType = relationship.type.fields[relationship.keyField];
-      let receivingKeyIsArray = /Array$/.test(destinationKeyType);
+    let destinationKeyType = relationship.type.fields[relationship.keyField];
+    let receivingKeyIsArray = /Array$/.test(destinationKeyType);
 
-      // blocked on https://jira.mongodb.org/browse/SERVER-43943?filter=-2
-      if (foreignKeyIsArray) {
-        return;
-      }
-
-      let addedFields = new Set([]);
-      let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
-      if (!ast) return;
-
-      let relationshipArgs = parseGraphqlArguments(ast.arguments);
-      let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
-      let fkNameToUse = fkField.replace(/^_/, "x_");
-
-      let asString = false;
-      if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
-        fkNameToUse += "___as___string";
-        asString = true;
-      }
-      if (!addedFields.has(fkNameToUse)) {
-        addedFields.add(fkNameToUse);
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: asString ? { $toString: "$" + fkField } : "$" + fkField } });
-      }
-
-      if (keyTypeIsArray) {
-        Object.assign($match, { $expr: { $in: ["$$fkField", { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } }] } });
-      } else {
-        Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
-      }
-
-      $project = $project || {};
-
-      aggregationPipeline.push({
-        $lookup: {
-          from: relationship.type.table,
-          let: { fkField: "$" + fkNameToUse },
-          pipeline: pipelineValues,
-          as: relationshipName
-        }
-      });
-
-      $project[relationshipName] = "$" + relationshipName;
-
-      // let template = relationship.manyToMany
-      //   ? projectManyToManyResolverTemplate
-      //   : receivingKeyIsArray
-      //   ? projectOneToManyResolverTemplate_ArrayReceivingKey
-      //   : projectOneToManyResolverTemplate_SingleReceivingKey;
-
-      // let lookupSetContents = keyTypeIsArray ? `result.${relationship.keyField}.map(k => k + "")` : `[result.${relationship.keyField} + ""]`;
-
-      // if (mapping) {
-      //   if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
-      //     mapping = mapping.replace(/X/i, "ObjectId(id)");
-      //   } else if (destinationKeyType == StringType || destinationKeyType == StringArrayType) {
-      //     mapping = mapping.replace(/X/i, `"" + id`);
-      //   }
-      // } else {
-      //   mapping = "x => x";
-      // }
-    } else if (relationship.__isObject) {
+    // blocked on https://jira.mongodb.org/browse/SERVER-43943?filter=-2
+    if (foreignKeyIsArray) {
+      return;
     }
+
+    let addedFields = new Set([]);
+    let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
+    if (!ast) return;
+
+    let relationshipArgs = parseGraphqlArguments(ast.arguments);
+    let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
+    let fkNameToUse = fkField.replace(/^_/, "x_");
+
+    let asString = false;
+    let asObjectId = false;
+    if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
+      fkNameToUse += "___as___string";
+      asString = true;
+    } else if (foreignKeyType == StringType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+      fkNameToUse += "___as___objectId";
+      asObjectId = true;
+    }
+    if (!addedFields.has(fkNameToUse)) {
+      addedFields.add(fkNameToUse);
+      if (asString) {
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
+      } else if (asObjectId) {
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toObjectId: "$" + fkField } } });
+      } else {
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: "$" + fkField } });
+      }
+    }
+
+    if (keyTypeIsArray) {
+      Object.assign($match, { $expr: { $in: ["$$fkField", { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } }] } });
+    } else {
+      Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
+    }
+
+    $project = $project || {};
+
+    aggregationPipeline.push({
+      $lookup: {
+        from: relationship.type.table,
+        let: { fkField: "$" + fkNameToUse },
+        pipeline: pipelineValues,
+        as: relationshipName
+      }
+    });
+
+    if (relationship.__isObject) {
+      pipelineValues.push({ $limit: 1 });
+      aggregationPipeline.push({ $unwind: { path: "$" + relationshipName, preserveNullAndEmptyArrays: true } });
+    }
+
+    $project[relationshipName] = "$" + relationshipName;
+
+    // let template = relationship.manyToMany
+    //   ? projectManyToManyResolverTemplate
+    //   : receivingKeyIsArray
+    //   ? projectOneToManyResolverTemplate_ArrayReceivingKey
+    //   : projectOneToManyResolverTemplate_SingleReceivingKey;
+
+    // let lookupSetContents = keyTypeIsArray ? `result.${relationship.keyField}.map(k => k + "")` : `[result.${relationship.keyField} + ""]`;
+
+    // if (mapping) {
+    //   if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
+    //     mapping = mapping.replace(/X/i, "ObjectId(id)");
+    //   } else if (destinationKeyType == StringType || destinationKeyType == StringArrayType) {
+    //     mapping = mapping.replace(/X/i, `"" + id`);
+    //   }
+    // } else {
+    //   mapping = "x => x";
+    // }
   });
 }

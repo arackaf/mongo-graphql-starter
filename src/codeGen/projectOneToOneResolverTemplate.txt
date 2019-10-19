@@ -1,19 +1,4 @@
   async ${targetObjName}(obj, args, context, ast) {
-    if (context.${dataLoaderId} == null) {
-      let db = await context.__mongodb;
-      context.${dataLoaderId} = new DataLoader(async keys => {
-        let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
-        let { aggregationPipeline } = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
-
-        let results = await dbHelpers.runQuery(db, "${table}", aggregationPipeline);
-        cleanUpResults(results, ${targetTypeName}Metadata);
-
-        let destinationMap = new Map([]);
-        for (let result of results) {
-          destinationMap.set("" + result.${keyField}, result);
-        }
-        return keys.map(id => destinationMap.get("" + id) || null);
-      });
-    }
-    return obj.${fkField} == null ? null : context.${dataLoaderId}.load(obj.${fkField});
+    cleanUpResults([obj.${targetObjName}], ${targetTypeName}Metadata)
+    return obj.${targetObjName};
   }
