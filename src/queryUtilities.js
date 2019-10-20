@@ -383,3 +383,16 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     // }
   });
 }
+
+export function dataLoaderId(ast) {
+  let result = "";
+  let current = ast.path;
+
+  while (current) {
+    if (typeof current.key != "number") {
+      result += "_" + current.key;
+    }
+    current = current.prev;
+  }
+  return result;
+}
