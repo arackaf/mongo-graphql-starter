@@ -251,3 +251,14 @@ export function cleanUpResults(results, metaData) {
     });
   });
 }
+
+export function dataLoaderId(ast) {
+  let result = "";
+  let current = ast.path;
+
+  while (current) {
+    result += "_" + current.key;
+    current = current.prev;
+  }
+  return result;
+}
