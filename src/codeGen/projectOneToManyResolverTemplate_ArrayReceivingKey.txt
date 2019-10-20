@@ -1,3 +1,31 @@
-  ${targetObjName}(obj, args, context, ast) {
-    return cleanUpResults(obj.${targetObjName}, ${targetTypeName}Metadata);
+  async ${targetObjName}(obj, args, context, ast) {
+    if (obj.${targetObjName}) {
+      return cleanUpResults(obj.${targetObjName}, ${targetTypeName}Metadata);
+    }
+
+    let dataLoaderName = dataLoaderId(ast);
+    if (context[dataLoaderName] == null) {
+      let db = await context.__mongodb;
+      context[dataLoaderName] = new DataLoader(async keys => {
+        let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
+        let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
+        let { $project, $sort, $limit, $skip } = queryPacket;
+        
+        let aggregateItems = [{ $match }, $sort ? { $sort } : null, { $project }].filter(item => item);
+        let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
+        cleanUpResults(results, ${targetTypeName}Metadata);
+        let finalResult = keys.map(keyArr => []);
+
+        for (let result of results){
+          let keyLookup = new Set(${lookupSetContents});
+          for (let i = 0; i < keys.length; i++){
+            if (keyLookup.has("" + keys[i])) {
+              finalResult[i].push(result);
+            }
+          }
+        }
+        return finalResult;
+      });
+    }
+    return context[dataLoaderName].load(obj.${fkField} || []);
   }
