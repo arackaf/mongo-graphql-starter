@@ -1,6 +1,7 @@
   async ${targetObjName}(obj, args, context, ast) {
-    if (context.${dataLoaderId} == null) {
-      context.${dataLoaderId} = new DataLoader(async keys => {
+    let dataLoaderName = dataLoaderId(ast);
+    if (context[dataLoaderName] == null) {
+      context[dataLoaderName] = new DataLoader(async keys => {
         let db = await context.__mongodb;
         let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
@@ -22,5 +23,5 @@
         return finalResult;
       });
     }
-    return context.${dataLoaderId}.load(obj.${fkField} || []);
+    return context[dataLoaderName].load(obj.${fkField} || []);
   }
