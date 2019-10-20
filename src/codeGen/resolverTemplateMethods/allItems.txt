@@ -7,13 +7,15 @@
       await runHook("queryMiddleware", queryPacket, { db, root, args, context, ast });
       let result = {};
 
+      result.Meta = {};
       if (aggregationPipeline.find(item => item.$project)) {
-        result.${objName}s = await load${objName}s(db, aggregationPipeline, root, args, context, ast, "${objName}s");
+        let start = process.hrtime();
+        result.${objName}s = await load${objName}s(db, aggregationPipeline, root, args, context, ast, "${objName}s");        
+        let [endS, endNS] = process.hrtime(start);
+        result.Meta.queryElapsedTime = (endS + (endNS / 1e9));
       }
 
       if (queryPacket.metadataRequested.size) {
-        result.Meta = {};
-
         if (queryPacket.metadataRequested.get("count")) {
           let $match = aggregationPipeline.find(item => item.$match);
           let countResults = await dbHelpers.runQuery(db, "${table}", [$match, { $group: { _id: null, count: { $sum: 1 } } }]);  
