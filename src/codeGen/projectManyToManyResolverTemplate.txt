@@ -1,7 +1,7 @@
   async ${targetObjName}(obj, args, context, ast) {
     if (context.${dataLoaderId} == null) {
-      let db = await context.__mongodb;
       context.${dataLoaderId} = new DataLoader(async keyArrays => {
+        let db = await context.__mongodb;
         let $match = { ${keyField}: { $in: flatMap(keyArrays || [], ${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
         let { $project, $sort, $limit, $skip } = queryPacket;
