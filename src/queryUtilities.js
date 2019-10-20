@@ -257,7 +257,9 @@ export function dataLoaderId(ast) {
   let current = ast.path;
 
   while (current) {
-    result += "_" + current.key;
+    if (typeof current.key != "number") {
+      result += "_" + current.key;
+    }
     current = current.prev;
   }
   return result;
