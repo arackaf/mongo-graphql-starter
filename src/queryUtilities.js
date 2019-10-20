@@ -302,12 +302,12 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     let keyType = relationship.type.fields[relationship.keyField];
     let keyTypeIsArray = /Array/g.test(keyType);
     let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
-    //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
-
+    
     let destinationKeyType = relationship.type.fields[relationship.keyField];
     let receivingKeyIsArray = /Array$/.test(destinationKeyType);
-
+    
     // blocked on https://jira.mongodb.org/browse/SERVER-43943?filter=-2
+    //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
     if (foreignKeyIsArray) {
       return;
     }
@@ -318,6 +318,10 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
 
     let relationshipArgs = parseGraphqlArguments(ast.arguments);
     let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
+
+    let canUseSideQuery = !!pipelineValues.find(entry => entry.$skip == null || entry.$limit == null);
+    if (canUseSideQuery) return;
+
     let fkNameToUse = fkField.replace(/^_/, "x_");
 
     let asString = false;
@@ -363,24 +367,6 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     }
 
     $project[relationshipName] = "$" + relationshipName;
-
-    // let template = relationship.manyToMany
-    //   ? projectManyToManyResolverTemplate
-    //   : receivingKeyIsArray
-    //   ? projectOneToManyResolverTemplate_ArrayReceivingKey
-    //   : projectOneToManyResolverTemplate_SingleReceivingKey;
-
-    // let lookupSetContents = keyTypeIsArray ? `result.${relationship.keyField}.map(k => k + "")` : `[result.${relationship.keyField} + ""]`;
-
-    // if (mapping) {
-    //   if (destinationKeyType == MongoIdType || destinationKeyType == MongoIdArrayType) {
-    //     mapping = mapping.replace(/X/i, "ObjectId(id)");
-    //   } else if (destinationKeyType == StringType || destinationKeyType == StringArrayType) {
-    //     mapping = mapping.replace(/X/i, `"" + id`);
-    //   }
-    // } else {
-    //   mapping = "x => x";
-    // }
   });
 }
 
