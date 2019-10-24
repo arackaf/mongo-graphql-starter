@@ -8,13 +8,11 @@ export default `
 
   type MutationResultInfo {
     transaction: Boolean!,
-    elapsedTime: Float!
+    elapsedTime: Int!
   }
-  
+
   type QueryResultsMetadata {
     count: Int!
-    queryElapsedTime: Float!
-    countElapsedTime: Float!
   }
 
   input StringArrayUpdate {
