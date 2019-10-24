@@ -26,3 +26,6 @@ export { dbHelpers };
 
 import * as resolverHelpers from "./resolverHelpers";
 export { resolverHelpers };
+
+import settings from "./settings";
+export { settings }
