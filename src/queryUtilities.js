@@ -312,9 +312,12 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     if (!ast) return;
 
     let relationshipArgs = parseGraphqlArguments(ast.arguments);
+    Object.assign(relationshipArgs, relationshipArgs.FILTER || {});
+    delete relationshipArgs.FILTER;
+    
     let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
 
-    let canUseSideQuery = !!pipelineValues.find(entry => entry.$skip == null || entry.$limit == null);
+    let canUseSideQuery = !pipelineValues.find(entry => entry.$skip != null || entry.$limit != null);
     if (canUseSideQuery) {
       if (!settings.getPreferLookup()) {
         return;

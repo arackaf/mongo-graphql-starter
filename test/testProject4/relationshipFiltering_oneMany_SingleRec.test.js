@@ -17,7 +17,7 @@ beforeAll(async () => {
 
   for (let i = 0; i < 100; i++) {
     for (let person of [adam, katie, laura, mallory]) {
-      await db.collection("books").insertOne({ title: `${person.name} Book ${i + 1}`, pages: 100 + i, mainAuthorId: "" + person._id });
+      await db.collection("books").insertOne({ title: `${person.name} Book ${i + 1}`, pages: 100 + (i + 1), mainAuthorId: "" + person._id });
     }
   }
 });
@@ -29,13 +29,18 @@ afterAll(async () => {
   db = null;
 });
 
-test("Read author's books", async () => {
-  //
+test("Read author's main books 1", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, mainAuthorBooks(PAGE: 1, PAGE_SIZE: 3, FILTER: { pages_gt: 150 }, SORT: {pages: 1}){title}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", mainAuthorBooks: [{ title: "Adam Book 51" }, { title: "Adam Book 52" }, { title: "Adam Book 53" }] }]
+  });
 });
-// test("Read author's books", async () => {
-//   await queryAndMatchArray({
-//     query: `{allAuthors(name_startsWith: "Adam"){Authors{name, books(SORT: {title: 1}){title}}}}`,
-//     coll: "allAuthors",
-//     results: [{ name: "Adam", books: [{ title: "Book 1" }, { title: "Book 2" }] }]
-//   });
-// });
+
+test("Read author's main books 2", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, mainAuthorBooks(PAGE: 2, PAGE_SIZE: 3, FILTER: { pages_gt: 150 }, SORT: {pages: 1}){title}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", mainAuthorBooks: [{ title: "Adam Book 54" }, { title: "Adam Book 55" }, { title: "Adam Book 56" }] }]
+  });
+});
