@@ -302,15 +302,9 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     let keyType = relationship.type.fields[relationship.keyField];
     let keyTypeIsArray = /Array/g.test(keyType);
     let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
-    
+
     let destinationKeyType = relationship.type.fields[relationship.keyField];
     let receivingKeyIsArray = /Array$/.test(destinationKeyType);
-    
-    // blocked on https://jira.mongodb.org/browse/SERVER-43943?filter=-2
-    //   {$addFields: { "nums_strings": { "$map": { "input": "$nums", "as": "num", in: { "$toString": ["$$num"] }  } }}},
-    if (foreignKeyIsArray) {
-      return;
-    }
 
     let addedFields = new Set([]);
     let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
@@ -326,26 +320,50 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
 
     let asString = false;
     let asObjectId = false;
-    if (foreignKeyType == MongoIdType && (keyType == StringType || keyType == StringArrayType)) {
+    let asObjectIdArray = false;
+    let asStringIdArray = false;
+    if (!foreignKeyIsArray && foreignKeyType != StringType && (keyType == StringType || keyType == StringArrayType)) {
       fkNameToUse += "___as___string";
       asString = true;
-    } else if (foreignKeyType == StringType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+    } else if (!foreignKeyIsArray && foreignKeyType != MongoIdType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
       fkNameToUse += "___as___objectId";
       asObjectId = true;
+    } else if (foreignKeyIsArray && foreignKeyType != MongoIdArrayType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+      asObjectIdArray = true;
+      fkNameToUse += "__as__objectIdArray";
+    } else if (foreignKeyIsArray && foreignKeyType != StringArrayType && (keyType == StringType || keyType == StringArrayType)) {
+      asStringIdArray = true;
+      fkNameToUse += "__as__stringIdArray";
     }
+
     if (!addedFields.has(fkNameToUse)) {
       addedFields.add(fkNameToUse);
       if (asString) {
         aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
       } else if (asObjectId) {
         aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toObjectId: "$" + fkField } } });
+      } else if (asObjectIdArray) {
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toObjectId: ["$$val"] } } } } });
+      } else if (asStringIdArray) {
+        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toString: ["$$val"] } } } } });
       } else {
         aggregationPipeline.push({ $addFields: { [fkNameToUse]: "$" + fkField } });
       }
     }
 
-    if (keyTypeIsArray) {
-      Object.assign($match, { $expr: { $in: ["$$fkField", { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } }] } });
+    const keyAsArray = { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } };
+    const foreignKeyAsArray = { $cond: { if: { $isArray: "$$fkField" }, then: "$$fkField", else: [] } };
+
+    if (foreignKeyIsArray) {
+      if (keyTypeIsArray) {
+        Object.assign($match, {
+          $expr: { $ne: [[], { $setIntersection: [foreignKeyAsArray, keyAsArray] }] }
+        });
+      } else {
+        Object.assign($match, { $expr: { $in: ["$" + keyField, foreignKeyAsArray] } });
+      }
+    } else if (keyTypeIsArray) {
+      Object.assign($match, { $expr: { $in: ["$$fkField", keyAsArray] } });
     } else {
       Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
     }
