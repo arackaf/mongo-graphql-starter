@@ -15,6 +15,10 @@ export default `
     count: Int!
   }
 
+  type QueryRelationshipResultsMetadata {
+    count: Int!
+  }
+
   input StringArrayUpdate {
     index: Int!,
     value: String!
