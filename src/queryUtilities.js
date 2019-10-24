@@ -5,6 +5,7 @@ import { processInsertions } from "./dbHelpers";
 import escapeStringRegexp from "escape-string-regexp";
 import { newObjectFromArgs, insertObjects } from "./insertUtilities";
 import { parseRequestedFields, parseRequestedHierarchy, getNestedQueryInfo, getRelationshipAst } from "./projectUtilities";
+import settings from "./settings";
 
 import { typeFromAST, TypeInfo } from "graphql/utilities";
 
@@ -314,7 +315,11 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
 
     let canUseSideQuery = !!pipelineValues.find(entry => entry.$skip == null || entry.$limit == null);
-    if (canUseSideQuery) return;
+    if (canUseSideQuery) {
+      if (!settings.getPreferLookup()) {
+        return;
+      }
+    }
 
     let fkNameToUse = fkField.replace(/^_/, "x_");
 
