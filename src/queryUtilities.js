@@ -382,9 +382,10 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     if (relationship.__isObject) {
       pipelineValues.push({ $limit: 1 });
       aggregationPipeline.push({ $unwind: { path: "$" + relationshipName, preserveNullAndEmptyArrays: true } });
+      $project[relationshipName] = { $ifNull: ["$" + relationshipName, null] };
+    } else {
+      $project[relationshipName] = "$" + relationshipName;
     }
-
-    $project[relationshipName] = "$" + relationshipName;
   });
 }
 
