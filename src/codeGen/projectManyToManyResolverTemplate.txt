@@ -1,4 +1,8 @@
   async ${targetObjName}(obj, args, context, ast) {
+    if (obj.${targetObjName}) {
+      return cleanUpResults(obj.${targetObjName}, ${targetTypeName}Metadata);
+    }
+
     let dataLoaderName = dataLoaderId(ast);
     if (context[dataLoaderName] == null) {
       context[dataLoaderName] = new DataLoader(async keyArrays => {
