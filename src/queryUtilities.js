@@ -326,7 +326,7 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
 
       let canUseSideQuery = !meta && !pipelineValues.find(entry => entry.$skip != null || entry.$limit != null);
       if (canUseSideQuery) {
-        if (!settings.getPreferLookup()) {
+        if ((!settings.getPreferLookup() && !relationshipArgs.PREFER_LOOKUP) || relationshipArgs.DONT_PREFER_LOOKUP) {
           continue;
         }
       }
