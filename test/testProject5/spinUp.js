@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import { queryAndMatchArray, runQuery, runMutation, nextConnectionString } from "../testUtil";
 import { makeExecutableSchema } from "graphql-tools";
-import { createGraphqlSchema } from "../../src/module";
+import { createGraphqlSchema, settings } from "../../src/module";
 import path from "path";
 import glob from "glob";
 import fs from "fs";
@@ -23,6 +23,22 @@ export async function create() {
 
 export default async function() {
   await create();
+
+  if (process.env.PREFER_LOOKUP) {
+    settings.setPreferLookup(true);
+
+    console.log(
+      "******************************************************************\n",
+      "******************************************************************\n",
+      "******************************************************************\n",
+
+      "\nPreferring $lookup\n\n",
+
+      "******************************************************************\n",
+      "******************************************************************\n",
+      "******************************************************************\n"
+    );
+  }
 
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
 
