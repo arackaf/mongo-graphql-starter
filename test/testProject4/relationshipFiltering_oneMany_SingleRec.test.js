@@ -44,3 +44,18 @@ test("Read author's main books 2", async () => {
     results: [{ name: "Adam", mainAuthorBooks: [{ title: "Adam Book 54" }, { title: "Adam Book 55" }, { title: "Adam Book 56" }] }]
   });
 });
+
+test("Read author's books count", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, mainAuthorBooksMeta{count}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", mainAuthorBooksMeta: { count: 100 } }]
+  });
+});
+test("Read author's books count 2", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, mainAuthorBooksMeta(FILTER: { title_contains: "0" }){count}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", mainAuthorBooksMeta: { count: 10 } }]
+  });
+});

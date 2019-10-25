@@ -179,7 +179,7 @@ function relationshipResolver([name, entry]) {
     : "";
   let resolvers = [name + resolverArgs + `: ${relationshipType(entry)}`];
   if (entry.__isArray) {
-    resolvers.push("    " + name + "Meta" + resolverArgs + `: QueryRelationshipResultsMetadata`);
+    resolvers.push(`    ${name}Meta(FILTER: ${entry.type.__name}Filters): QueryRelationshipResultsMetadata`);
   }
 
   return resolvers.join("\n");

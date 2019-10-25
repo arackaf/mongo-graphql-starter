@@ -294,7 +294,8 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
   }
   let originalAst = ast;
 
-  Object.keys(TypeMetadata.relationships).forEach((relationshipName, index, all) => {
+  let addedFields = new Set([]);
+  Object.keys(TypeMetadata.relationships).forEach(relationshipName => {
     let relationship = TypeMetadata.relationships[relationshipName];
     let foreignKeyType = TypeMetadata.fields[relationship.fkField];
     let fkField = relationship.fkField;
@@ -307,92 +308,105 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     let destinationKeyType = relationship.type.fields[relationship.keyField];
     let receivingKeyIsArray = /Array$/.test(destinationKeyType);
 
-    let addedFields = new Set([]);
-    let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
-    if (!ast) return;
+    let relationshipsToLoop = [{ relationshipName, meta: false }];
+    debugger;
+    if (relationship.__isArray) {
+      relationshipsToLoop.push({ relationshipName: relationshipName + "Meta", meta: true });
+    }
 
-    let relationshipArgs = parseGraphqlArguments(ast.arguments);
-    Object.assign(relationshipArgs, relationshipArgs.FILTER || {});
-    delete relationshipArgs.FILTER;
-    
-    let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
+    for (let { relationshipName, meta } of relationshipsToLoop) {
+      let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
+      if (!ast) continue;
 
-    let canUseSideQuery = !pipelineValues.find(entry => entry.$skip != null || entry.$limit != null);
-    if (canUseSideQuery) {
-      if (!settings.getPreferLookup()) {
-        return;
+      let relationshipArgs = parseGraphqlArguments(ast.arguments);
+      Object.assign(relationshipArgs, relationshipArgs.FILTER || {});
+      delete relationshipArgs.FILTER;
+
+      let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
+
+      let canUseSideQuery = !meta && !pipelineValues.find(entry => entry.$skip != null || entry.$limit != null);
+      if (canUseSideQuery) {
+        if (!settings.getPreferLookup()) {
+          continue;
+        }
       }
-    }
 
-    let fkNameToUse = fkField.replace(/^_/, "x_");
+      let fkNameToUse = fkField.replace(/^_/, "x_");
 
-    let asString = false;
-    let asObjectId = false;
-    let asObjectIdArray = false;
-    let asStringIdArray = false;
-    if (!foreignKeyIsArray && foreignKeyType != StringType && (keyType == StringType || keyType == StringArrayType)) {
-      fkNameToUse += "___as___string";
-      asString = true;
-    } else if (!foreignKeyIsArray && foreignKeyType != MongoIdType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
-      fkNameToUse += "___as___objectId";
-      asObjectId = true;
-    } else if (foreignKeyIsArray && foreignKeyType != MongoIdArrayType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
-      asObjectIdArray = true;
-      fkNameToUse += "__as__objectIdArray";
-    } else if (foreignKeyIsArray && foreignKeyType != StringArrayType && (keyType == StringType || keyType == StringArrayType)) {
-      asStringIdArray = true;
-      fkNameToUse += "__as__stringIdArray";
-    }
+      let asString = false;
+      let asObjectId = false;
+      let asObjectIdArray = false;
+      let asStringIdArray = false;
+      if (!foreignKeyIsArray && foreignKeyType != StringType && (keyType == StringType || keyType == StringArrayType)) {
+        fkNameToUse += "___as___string";
+        asString = true;
+      } else if (!foreignKeyIsArray && foreignKeyType != MongoIdType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+        fkNameToUse += "___as___objectId";
+        asObjectId = true;
+      } else if (foreignKeyIsArray && foreignKeyType != MongoIdArrayType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+        asObjectIdArray = true;
+        fkNameToUse += "__as__objectIdArray";
+      } else if (foreignKeyIsArray && foreignKeyType != StringArrayType && (keyType == StringType || keyType == StringArrayType)) {
+        asStringIdArray = true;
+        fkNameToUse += "__as__stringIdArray";
+      }
 
-    if (!addedFields.has(fkNameToUse)) {
-      addedFields.add(fkNameToUse);
-      if (asString) {
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
-      } else if (asObjectId) {
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toObjectId: "$" + fkField } } });
-      } else if (asObjectIdArray) {
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toObjectId: ["$$val"] } } } } });
-      } else if (asStringIdArray) {
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toString: ["$$val"] } } } } });
+      if (!addedFields.has(fkNameToUse)) {
+        addedFields.add(fkNameToUse);
+        if (asString) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
+        } else if (asObjectId) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toObjectId: "$" + fkField } } });
+        } else if (asObjectIdArray) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toObjectId: ["$$val"] } } } } });
+        } else if (asStringIdArray) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toString: ["$$val"] } } } } });
+        } else {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: "$" + fkField } });
+        }
+      }
+
+      const keyAsArray = { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } };
+      const foreignKeyAsArray = { $cond: { if: { $isArray: "$$fkField" }, then: "$$fkField", else: [] } };
+
+      if (foreignKeyIsArray) {
+        if (keyTypeIsArray) {
+          Object.assign($match, {
+            $expr: { $ne: [[], { $setIntersection: [foreignKeyAsArray, keyAsArray] }] }
+          });
+        } else {
+          Object.assign($match, { $expr: { $in: ["$" + keyField, foreignKeyAsArray] } });
+        }
+      } else if (keyTypeIsArray) {
+        Object.assign($match, { $expr: { $in: ["$$fkField", keyAsArray] } });
       } else {
-        aggregationPipeline.push({ $addFields: { [fkNameToUse]: "$" + fkField } });
+        Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
       }
-    }
 
-    const keyAsArray = { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } };
-    const foreignKeyAsArray = { $cond: { if: { $isArray: "$$fkField" }, then: "$$fkField", else: [] } };
+      $project = $project || {};
 
-    if (foreignKeyIsArray) {
-      if (keyTypeIsArray) {
-        Object.assign($match, {
-          $expr: { $ne: [[], { $setIntersection: [foreignKeyAsArray, keyAsArray] }] }
-        });
+      aggregationPipeline.push({
+        $lookup: {
+          from: relationship.type.table,
+          let: { fkField: "$" + fkNameToUse },
+          pipeline: pipelineValues,
+          as: (meta ? "__" : "") + relationshipName
+        }
+      });
+
+      if (meta) {
+        let pipelineProject = pipelineValues.find(val => val.$project);
+        pipelineProject.$project = { _id: 1 };
+        $project[relationshipName] = { count: { $size: `$__${relationshipName}` } };
       } else {
-        Object.assign($match, { $expr: { $in: ["$" + keyField, foreignKeyAsArray] } });
+        if (relationship.__isObject) {
+          pipelineValues.push({ $limit: 1 });
+          aggregationPipeline.push({ $unwind: { path: "$" + relationshipName, preserveNullAndEmptyArrays: true } });
+          $project[relationshipName] = { $ifNull: ["$" + relationshipName, null] };
+        } else {
+          $project[relationshipName] = "$" + relationshipName;
+        }
       }
-    } else if (keyTypeIsArray) {
-      Object.assign($match, { $expr: { $in: ["$$fkField", keyAsArray] } });
-    } else {
-      Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
-    }
-
-    $project = $project || {};
-
-    aggregationPipeline.push({
-      $lookup: {
-        from: relationship.type.table,
-        let: { fkField: "$" + fkNameToUse },
-        pipeline: pipelineValues,
-        as: relationshipName
-      }
-    });
-
-    if (relationship.__isObject) {
-      pipelineValues.push({ $limit: 1 });
-      aggregationPipeline.push({ $unwind: { path: "$" + relationshipName, preserveNullAndEmptyArrays: true } });
-      $project[relationshipName] = { $ifNull: ["$" + relationshipName, null] };
-    } else {
-      $project[relationshipName] = "$" + relationshipName;
     }
   });
 }

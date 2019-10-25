@@ -51,6 +51,21 @@ test("Read author's books_idsM_Main 2", async () => {
   });
 });
 
+test("Read author's books_idsM_Main count", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, books_idsM_MainMeta{count}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", books_idsM_MainMeta: { count: 100 } }]
+  });
+});
+test("Read author's books_idsM_Main count 2", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, books_idsM_MainMeta(FILTER: { title_contains: "0" }){count}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", books_idsM_MainMeta: { count: 10 } }]
+  });
+});
+
 test("Read author's books_idsM_Main stand-alone", async () => {
   await queryAndMatchArray({
     query: `{allAuthors(name_startsWith: "Mallory"){Authors{name, books_idsM_Main{title}}}}`,
