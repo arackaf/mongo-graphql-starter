@@ -47,6 +47,7 @@ or advanced edge cases as needed.
   - [resolverSources example](#resolversources-example)
 - [Defining relationships between types](#defining-relationships-between-types)
   - [Using relationships](#using-relationships)
+  - [Implementation](#implementation)
   - [Creating related data](#creating-related-data)
     - [In creations](#in-creations)
     - [In updates (not one-to-many)](#in-updates-not-one-to-many)
@@ -903,9 +904,9 @@ For `one-to-many` relationships where the key is `_id`, upon deleting one of the
 
 ### Using relationships
 
-Request these relationships right in your GraphQL queries.  If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, then the ast will be parsed, and only the queried fields will fetched, and returned.  The `dataloader` utility is used to batch the requests for these relationships, so you don't need to worry about select n + 1.
+Request these relationships right in your GraphQL queries.  If you do not request anything, then nothing will be fetched from Mongo, as usual. If you do request them, the ast will be parsed, and only the queried fields will fetched, and returned.  Implementation details are below, but you'll never need to worry about the `Select N + 1` problem.
 
-For relationships that return a collection of items, like `authors` above, you can specify the `SORT` and `SORTS` arguments, like normal.  For example
+For relationships that return a collection of items, like `authors` above, you can specify the `SORT` and `SORTS`, `PAGE`, `PAGE_SIZE`, `LIMIT` and `SKIP` arguments, like normal. There's also a `FILTER` argument, which takes all the normal filters for that type. For example
 
 ```javascript
 {
@@ -918,8 +919,6 @@ For relationships that return a collection of items, like `authors` above, you c
 }
 ```
 
-or 
-
 ```javascript
 {
   allBooks(title_contains: "1"){
@@ -930,6 +929,92 @@ or
   }
 }
 ```
+
+```javascript
+{
+  allAuthors(name_startsWith: "Adam"){
+    Authors{
+      name, 
+      books(PAGE: 2, PAGE_SIZE: 3, FILTER: { pages_gt: 150 }, SORT: {pages: 1}){
+        title
+      }
+    }
+  }
+}
+```
+
+Array relationships also create a sibling `Meta` property (same name, but with `Meta` on the end) that contains the `count` of all results. For example
+
+```javascript
+{
+  allAuthors(name_startsWith: "Adam"){
+    Authors{
+      name, 
+      booksMeta{
+        count
+      }
+    }
+  }
+}
+```
+
+The `Meta` property also accepts the same `FILTER` argument as before, if you want to get a count of some subset of your items. For example
+
+```javascript
+{
+  allAuthors(name_startsWith: "Adam"){
+    Authors{
+      name, 
+      booksMeta(FILTER: { title_contains: "Math" }){
+        count
+      }
+    }
+  }
+}
+```
+
+### Implementation 
+
+Internally, relationships can be fetched by either adding a `$lookup` to Mongo's aggregation pipeline, or with the [DataLoader](https://www.npmjs.com/package/dataloader) package, inside the relevant resolver method. By default, the latter is preferred, since that's what I measured to produce better performance. To change this default globally, do the following:
+
+```javascript
+import { settings } from "mongo-graphql-starter";
+settings.setPreferLookup(true);
+```
+
+To change this default on an individual relationship query, you can pass a `PREFER_LOOKUP` argument, like so
+
+```javascript
+{
+  allAuthors(name_startsWith: "Adam"){
+    Authors{
+      name, 
+      books(PREFER_LOOKUP: true, FILTER: { pages_gt: 150 }, SORT: {pages: 1}){
+        title
+      }
+    }
+  }
+}
+```
+
+To undo the global `PREFER_LOOKUP` setting on an individual query, you can pass `DONT_PREFER_LOOKUP`
+
+```javascript
+{
+  allAuthors(name_startsWith: "Adam"){
+    Authors{
+      name, 
+      books(DONT_PREFER_LOOKUP: true, FILTER: { pages_gt: 150 }, SORT: {pages: 1}){
+        title
+      }
+    }
+  }
+}
+```
+
+This will cause the relationship query to be satisfied with the DataLoader, if possible. See below for when that's not possible.
+
+Any relationship that uses paging, either with the `PAGE` and `PAGE_SIZE` arguments, or with the manual `SKIP` and `LIMIT` arguments, will always use a Mongo `$lookup`. This is a result of how the DataLoader works. If your query uses any of these arguments, it will be satisfied by adding a `$lookup` to the pipeline, no matter what defaults or settings you've passed. 
 
 ### Creating related data
 
