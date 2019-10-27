@@ -1,5 +1,6 @@
   async ${targetObjName}(obj, args, context, ast) {
     if (obj.${targetObjName} !== void 0) {
+      await processHook(hooksObj, "${targetTypeName}", "adjustResults", [obj.${targetObjName}]);
       cleanUpResults([obj.${targetObjName}], ${targetTypeName}Metadata)
       return obj.${targetObjName};
     }
@@ -20,7 +21,9 @@
         for (let result of results) {
           destinationMap.set("" + result.${keyField}, result);
         }
-        return keys.map(id => destinationMap.get("" + id) || null);
+        let finalResult = keys.map(id => destinationMap.get("" + id) || null);
+        await processHook(hooksObj, "${targetTypeName}", "adjustResults", finalResult);
+        return finalResult;
       });
     }
     return obj.${fkField} == null ? null : context[dataLoaderName].load(obj.${fkField});

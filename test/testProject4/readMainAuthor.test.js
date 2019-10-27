@@ -23,7 +23,7 @@ afterAll(async () => {
   db = null;
 });
 
-test("Read authors", async () => {
+test("Read main author", async () => {
   await queryAndMatchArray({
     query: `{allBooks(title_startsWith: "B"){Books{title, mainAuthor{name}}}}`,
     coll: "allBooks",
@@ -31,6 +31,18 @@ test("Read authors", async () => {
       { title: "Book 1", mainAuthor: { name: "Adam" } },
       { title: "Book 2", mainAuthor: { name: "Adam" } },
       { title: "Book 3", mainAuthor: { name: "Katie" } }
+    ]
+  });
+});
+
+test("Read main author - hook", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_startsWith: "B"){Books{title, mainAuthor{name, hookValue}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", mainAuthor: { name: "Adam", hookValue: 1 } },
+      { title: "Book 2", mainAuthor: { name: "Adam", hookValue: 1 } },
+      { title: "Book 3", mainAuthor: { name: "Katie", hookValue: 1 } }
     ]
   });
 });

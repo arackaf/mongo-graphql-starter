@@ -1,5 +1,6 @@
   async ${targetObjName}(obj, args, context, ast) {
     if (obj.${targetObjName}) {
+      await processHook(hooksObj, "${targetTypeName}", "adjustResults", obj.${targetObjName});
       return cleanUpResults(obj.${targetObjName}, ${targetTypeName}Metadata);
     }
 
@@ -23,6 +24,9 @@
               finalResult[i].push(result);
             }
           }
+        }
+        for (let items of finalResult) {
+          await processHook(hooksObj, "${targetTypeName}", "adjustResults", items);
         }
         return finalResult;
       });

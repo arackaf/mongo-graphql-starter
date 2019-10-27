@@ -36,6 +36,14 @@ test("Read author's books", async () => {
   });
 });
 
+test("Read author's books - Hook", async () => {
+  await queryAndMatchArray({
+    query: `{allAuthors(name_startsWith: "Adam"){Authors{name, books(SORT: {title: 1}){title, hookValue}}}}`,
+    coll: "allAuthors",
+    results: [{ name: "Adam", books: [{ title: "Book 1", hookValue: 1 }, { title: "Book 2", hookValue: 1 }] }]
+  });
+});
+
 test("Read author's books and back", async () => {
   await queryAndMatchArray({
     query: `{
