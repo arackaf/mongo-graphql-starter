@@ -14,7 +14,7 @@ export default ({ objName, table }) => `    async update${objName}s(root, args, 
         await runHook("afterUpdate", $match, updates, { ...gqlPacket, db, session });
         ${mutationComplete()}
         
-        let result = $project ? await load${objName}s(db, { $match, $project }, root, args, context, ast) : null;
+        let result = $project ? await load${objName}s(db, [{ $match }, { $project }], root, args, context, ast) : null;
         return resolverHelpers.mutationSuccessResult({ ${objName}s: result, transaction, elapsedTime: 0 });
       });
     }`;

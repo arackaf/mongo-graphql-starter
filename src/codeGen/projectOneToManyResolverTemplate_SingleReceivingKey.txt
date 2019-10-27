@@ -1,8 +1,13 @@
   async ${targetObjName}(obj, args, context, ast) {
+    if (obj.${targetObjName}) {
+      await processHook(hooksObj, "${targetTypeName}", "adjustResults", obj.${targetObjName});
+      return cleanUpResults(obj.${targetObjName}, ${targetTypeName}Metadata);
+    }
+ 
     let dataLoaderName = dataLoaderId(ast);
     if (context[dataLoaderName] == null) {
+      let db = await context.__mongodb;
       context[dataLoaderName] = new DataLoader(async keys => {
-        let db = await context.__mongodb;
         let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
         let { $project, $sort, $limit, $skip } = queryPacket;
@@ -11,14 +16,19 @@
         let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
         cleanUpResults(results, ${targetTypeName}Metadata);
         let finalResult = keys.map(keyArr => []);
-
+        
+        let keyLookup = new Map([]);
+        for (let i = 0; i < keys.length; i++) {
+          keyLookup.set("" + keys[i], finalResult[i]);
+        }
         for (let result of results){
-          let keyLookup = new Set(${lookupSetContents});
-          for (let i = 0; i < keys.length; i++){
-            if (keyLookup.has("" + keys[i])) {
-              finalResult[i].push(result);
-            }
+          let resultEntry = keyLookup.get(result.${keyField});
+          if (resultEntry){
+            resultEntry.push(result);
           }
+        }
+        for (let items of finalResult) {
+          await processHook(hooksObj, "${targetTypeName}", "adjustResults", items);
         }
         return finalResult;
       });

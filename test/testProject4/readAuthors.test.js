@@ -42,6 +42,18 @@ test("Read authors", async () => {
   });
 });
 
+test("Read authors with hook value", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(title_startsWith: "B"){Books{title, authors{name, hookValue}}}}`,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam", hookValue: 1 }] },
+      { title: "Book 2", authors: [{ name: "Adam", hookValue: 1 }] },
+      { title: "Book 3", authors: [{ name: "Katie", hookValue: 1 }] }
+    ]
+  });
+});
+
 test("Read authors' first book", async () => {
   await queryAndMatchArray({
     query: `{allBooks(title_startsWith: "B"){Books{title, authors{name, firstBook{title}}}}}`,

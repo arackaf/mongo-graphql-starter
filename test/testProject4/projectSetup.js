@@ -31,13 +31,16 @@ export const Subject = {
 export const Author = {
   table: "authors",
   fields: {
+    _idsM: MongoIdArrayType,
+    _idsS: StringArrayType,
     name: StringType,
     birthday: DateType,
     mainSubjectId: StringType,
     subjectIds: StringArrayType,
     firstBookId: StringType,
     randomMongoId: MongoIdType,
-    randomMongoIds: MongoIdArrayType
+    randomMongoIds: MongoIdArrayType,
+    hookValue: IntType
   },
   relationships: {
     mainSubject: {
@@ -64,6 +67,34 @@ export const Author = {
       },
       fkField: "_id",
       keyField: "authorIds"
+    },
+    books_idsS: {
+      get type() {
+        return Book;
+      },
+      fkField: "_idsS",
+      keyField: "authorIds"
+    },
+    books_idsM: {
+      get type() {
+        return Book;
+      },
+      fkField: "_idsM",
+      keyField: "authorIds"
+    },
+    books_idsS_Main: {
+      get type() {
+        return Book;
+      },
+      fkField: "_idsS",
+      keyField: "mainAuthorId"
+    },
+    books_idsM_Main: {
+      get type() {
+        return Book;
+      },
+      fkField: "_idsM",
+      keyField: "mainAuthorId"
     },
     books_readonly: {
       get type() {
@@ -121,7 +152,8 @@ export const Book = {
     authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author),
     randomMongoId: MongoIdType,
-    randomMongoIds: MongoIdArrayType
+    randomMongoIds: MongoIdArrayType,
+    hookValue: IntType
   },
   relationships: {
     authors: {
