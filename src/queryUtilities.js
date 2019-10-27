@@ -4,7 +4,10 @@ import { processInsertions } from "./dbHelpers";
 
 import escapeStringRegexp from "escape-string-regexp";
 import { newObjectFromArgs, insertObjects } from "./insertUtilities";
-import { parseRequestedFields, parseRequestedHierarchy } from "./projectUtilities";
+import { parseRequestedFields, parseRequestedHierarchy, getNestedQueryInfo, getRelationshipAst } from "./projectUtilities";
+import settings from "./settings";
+
+import { typeFromAST, TypeInfo } from "graphql/utilities";
 
 export function getMongoFilters(args, objectMetaData) {
   return fillMongoFiltersObject(args, objectMetaData);
@@ -189,28 +192,41 @@ export function decontructGraphqlQuery(args, ast, objectMetaData, queryName, opt
 
   let sort = args.SORT;
   let sorts = args.SORTS;
-  let $sort;
-  let $limit;
-  let $skip;
+  let $sort = null;
+  let $skip = null;
+  let $limit = null;
+
+  let aggregationPipeline = [];
+  aggregationPipeline.push({ $match });
 
   if (sort) {
     $sort = sort;
+    aggregationPipeline.push({ $sort });
   } else if (sorts) {
     $sort = {};
     sorts.forEach(packet => {
       Object.assign($sort, packet);
     });
+    aggregationPipeline.push({ $sort });
   }
 
   if (args.LIMIT != null || args.SKIP != null) {
-    $limit = args.LIMIT;
     $skip = args.SKIP;
+    $limit = args.LIMIT;
   } else if (args.PAGE != null && args.PAGE_SIZE != null) {
-    $limit = args.PAGE_SIZE;
     $skip = (args.PAGE - 1) * args.PAGE_SIZE;
+    $limit = args.PAGE_SIZE;
+  }
+  $skip && aggregationPipeline.push({ $skip });
+  $limit && aggregationPipeline.push({ $limit });
+
+  addRelationshipLookups(aggregationPipeline, ast, queryName, objectMetaData, $project);
+
+  if ($project) {
+    aggregationPipeline.push({ $project });
   }
 
-  return { $match, $project, $sort, $limit, $skip, metadataRequested, extrasPackets };
+  return { $match, $sort, $skip, $limit, $project, aggregationPipeline, metadataRequested, extrasPackets };
 }
 
 export function cleanUpResults(results, metaData) {
@@ -249,6 +265,148 @@ export function cleanUpResults(results, metaData) {
         }
       }
     });
+  });
+
+  return results;
+}
+
+function parseGraphqlArguments(args) {
+  return args.reduce((hash, entry) => ((hash[entry.name.value] = parseGraphqlArg(entry.value)), hash), {});
+}
+
+function parseGraphqlArg(arg) {
+  switch (arg.kind) {
+    case "ListValue":
+      return arg.values.map(listVal => parseGraphqlArg(listVal));
+    case "ObjectValue":
+      return arg.fields.reduce((obj, field) => ((obj[field.name.value] = parseGraphqlArg(field.value)), obj), {});
+    case "IntValue":
+      return +arg.value;
+    default:
+      return arg.value;
+  }
+}
+
+function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadata, $project) {
+  let { ast: currentAst } = getNestedQueryInfo(ast, rootQuery);
+  if (!currentAst) {
+    return;
+  }
+  let originalAst = ast;
+
+  let addedFields = new Set([]);
+  Object.keys(TypeMetadata.relationships).forEach(relationshipName => {
+    let relationship = TypeMetadata.relationships[relationshipName];
+    let foreignKeyType = TypeMetadata.fields[relationship.fkField];
+    let fkField = relationship.fkField;
+    let keyField = relationship.keyField;
+
+    let keyType = relationship.type.fields[relationship.keyField];
+    let keyTypeIsArray = /Array/g.test(keyType);
+    let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
+
+    let destinationKeyType = relationship.type.fields[relationship.keyField];
+    let receivingKeyIsArray = /Array$/.test(destinationKeyType);
+
+    let relationshipsToLoop = [{ relationshipName, meta: false }];
+    if (relationship.__isArray) {
+      relationshipsToLoop.push({ relationshipName: relationshipName + "Meta", meta: true });
+    }
+
+    for (let { relationshipName, meta } of relationshipsToLoop) {
+      let ast = getRelationshipAst(currentAst, relationshipName, relationship.type);
+      if (!ast) continue;
+
+      let relationshipArgs = parseGraphqlArguments(ast.arguments);
+      Object.assign(relationshipArgs, relationshipArgs.FILTER || {});
+      delete relationshipArgs.FILTER;
+
+      let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
+
+      let canUseSideQuery = !meta && !pipelineValues.find(entry => entry.$skip != null || entry.$limit != null);
+      if (canUseSideQuery) {
+        if ((!settings.getPreferLookup() && !relationshipArgs.PREFER_LOOKUP) || relationshipArgs.DONT_PREFER_LOOKUP) {
+          continue;
+        }
+      }
+
+      let fkNameToUse = fkField.replace(/^_/, "x_");
+
+      let asString = false;
+      let asObjectId = false;
+      let asObjectIdArray = false;
+      let asStringIdArray = false;
+      if (!foreignKeyIsArray && foreignKeyType != StringType && (keyType == StringType || keyType == StringArrayType)) {
+        fkNameToUse += "___as___string";
+        asString = true;
+      } else if (!foreignKeyIsArray && foreignKeyType != MongoIdType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+        fkNameToUse += "___as___objectId";
+        asObjectId = true;
+      } else if (foreignKeyIsArray && foreignKeyType != MongoIdArrayType && (keyType == MongoIdType || keyType == MongoIdArrayType)) {
+        asObjectIdArray = true;
+        fkNameToUse += "__as__objectIdArray";
+      } else if (foreignKeyIsArray && foreignKeyType != StringArrayType && (keyType == StringType || keyType == StringArrayType)) {
+        asStringIdArray = true;
+        fkNameToUse += "__as__stringIdArray";
+      }
+
+      if (!addedFields.has(fkNameToUse)) {
+        addedFields.add(fkNameToUse);
+        if (asString) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toString: "$" + fkField } } });
+        } else if (asObjectId) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $toObjectId: "$" + fkField } } });
+        } else if (asObjectIdArray) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toObjectId: ["$$val"] } } } } });
+        } else if (asStringIdArray) {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: { $map: { input: "$" + fkField, as: "val", in: { $toString: ["$$val"] } } } } });
+        } else {
+          aggregationPipeline.push({ $addFields: { [fkNameToUse]: "$" + fkField } });
+        }
+      }
+
+      const keyAsArray = { $cond: { if: { $isArray: "$" + keyField }, then: "$" + keyField, else: [] } };
+      const foreignKeyAsArray = { $cond: { if: { $isArray: "$$fkField" }, then: "$$fkField", else: [] } };
+
+      if (foreignKeyIsArray) {
+        if (keyTypeIsArray) {
+          Object.assign($match, {
+            $expr: { $ne: [[], { $setIntersection: [foreignKeyAsArray, keyAsArray] }] }
+          });
+        } else {
+          Object.assign($match, { $expr: { $in: ["$" + keyField, foreignKeyAsArray] } });
+        }
+      } else if (keyTypeIsArray) {
+        Object.assign($match, { $expr: { $in: ["$$fkField", keyAsArray] } });
+      } else {
+        Object.assign($match, { $expr: { $eq: ["$$fkField", "$" + keyField] } });
+      }
+
+      $project = $project || {};
+
+      aggregationPipeline.push({
+        $lookup: {
+          from: relationship.type.table,
+          let: { fkField: "$" + fkNameToUse },
+          pipeline: pipelineValues,
+          as: (meta ? "__" : "") + relationshipName
+        }
+      });
+
+      if (meta) {
+        let pipelineProject = pipelineValues.find(val => val.$project);
+        pipelineProject.$project = { _id: 1 };
+        $project[relationshipName] = { count: { $size: `$__${relationshipName}` } };
+      } else {
+        if (relationship.__isObject) {
+          pipelineValues.push({ $limit: 1 });
+          aggregationPipeline.push({ $unwind: { path: "$" + relationshipName, preserveNullAndEmptyArrays: true } });
+          $project[relationshipName] = { $ifNull: ["$" + relationshipName, null] };
+        } else {
+          $project[relationshipName] = "$" + relationshipName;
+        }
+      }
+    }
   });
 }
 

@@ -174,8 +174,15 @@ function fieldType(value, useInputs) {
 }
 
 function relationshipResolver([name, entry]) {
-  let resolverArgs = entry.__isArray ? `(SORT: ${entry.type.__name}Sort, SORTS: [${entry.type.__name}Sort])` : "";
-  return name + resolverArgs + `: ${relationshipType(entry)}`;
+  let resolverArgs = entry.__isArray
+    ? `(FILTER: ${entry.type.__name}Filters, LIMIT: Int, SKIP: Int, PAGE: Int, PAGE_SIZE: Int, SORT: ${entry.type.__name}Sort, SORTS: [${entry.type.__name}Sort], PREFER_LOOKUP: Boolean, DONT_PREFER_LOOKUP: Boolean)`
+    : "";
+  let resolvers = [name + resolverArgs + `: ${relationshipType(entry)}`];
+  if (entry.__isArray) {
+    resolvers.push(`    ${name}Meta(FILTER: ${entry.type.__name}Filters): QueryRelationshipResultsMetadata`);
+  }
+
+  return resolvers.join("\n");
 }
 
 function relationshipType(value, useInputs) {

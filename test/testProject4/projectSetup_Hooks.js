@@ -25,6 +25,9 @@ export default {
         obj.name += "b";
         db.collection("authors").updateOne({ _id: obj._id }, { $set: { name: obj.name } });
       }
+    },
+    adjustResults(results) {
+      results.forEach(item => (item.hookValue = 1));
     }
   },
   Book: {
@@ -32,6 +35,9 @@ export default {
       if (/^ABORT/.test(obj.title)) {
         return false;
       }
+    },
+    adjustResults(results) {
+      results.forEach(item => (item.hookValue = 1));
     }
   }
 };

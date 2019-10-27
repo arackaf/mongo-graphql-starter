@@ -6,21 +6,21 @@
 
     let dataLoaderName = dataLoaderId(ast);
     if (context[dataLoaderName] == null) {
-      context[dataLoaderName] = new DataLoader(async keyArrays => {
-        let db = await context.__mongodb;
-        let $match = { ${keyField}: { $in: flatMap(keyArrays || [], ${idMapping}) } };
+      let db = await context.__mongodb;
+      context[dataLoaderName] = new DataLoader(async keys => {
+        let $match = { ${keyField}: { $in: keys.filter(id => id).map(${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
-        let { aggregationPipeline } = queryPacket;
+        let { $project, $sort, $limit, $skip } = queryPacket;
         
-        let results = await dbHelpers.runQuery(db, "${table}", aggregationPipeline);
+        let aggregateItems = [{ $match }, $sort ? { $sort } : null, { $project }].filter(item => item);
+        let results = await dbHelpers.runQuery(db, "${table}", aggregateItems);
         cleanUpResults(results, ${targetTypeName}Metadata);
-
-        let finalResult = keyArrays.map(keyArr => []);
-        let keySets = keyArrays.map(keyArr => new Set(keyArr.map(${keyField} => "" + ${keyField})));
+        let finalResult = keys.map(keyArr => []);
 
         for (let result of results){
-          for (let i = 0; i < keyArrays.length; i++){
-            if (keySets[i].has(result.${keyField} + "")){
+          let keyLookup = new Set(${lookupSetContents});
+          for (let i = 0; i < keys.length; i++){
+            if (keyLookup.has("" + keys[i])) {
               finalResult[i].push(result);
             }
           }

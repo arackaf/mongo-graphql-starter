@@ -20,7 +20,7 @@ beforeAll(async () => {
     [adam, katie, laura, mallory, eddie, mirelle, murphy, mark, andre, michael].map(person => db.collection("authors").insertOne(person))
   );
 
-  let book1 = { title: "Book 1", pages: 100, authorIds: [adam, katie, eddie, mirelle, andre, michael].map(p => "" + p._id) };
+  let book1 = { title: "Book 1", pages: 100, authorIds: [adam, katie, eddie, mirelle, andre, michael].map(p => p._id) };
   let book2 = { title: "Book 2", pages: 150, authorIds: [adam, andre, michael].map(p => "" + p._id) };
   let book3 = { title: "Book 3", pages: 200, authorIds: ["" + katie._id] };
 
