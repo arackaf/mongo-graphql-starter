@@ -32,7 +32,7 @@
     "express": "^4.17.0",
     "express-graphql": "^0.8.0",
     "glob": "^7.1.2",
-    "graphql": "^14.1.1",
+    "graphql": "^14.5.8",
     "graphql-tools": "^4.0.4",
     "jest": "^24.9.0",
     "mongodb": "^3.1.13"
