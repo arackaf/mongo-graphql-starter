@@ -309,7 +309,6 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
     let receivingKeyIsArray = /Array$/.test(destinationKeyType);
 
     let relationshipsToLoop = [{ relationshipName, meta: false }];
-    debugger;
     if (relationship.__isArray) {
       relationshipsToLoop.push({ relationshipName: relationshipName + "Meta", meta: true });
     }

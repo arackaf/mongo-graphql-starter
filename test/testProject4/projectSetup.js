@@ -39,7 +39,8 @@ export const Author = {
     subjectIds: StringArrayType,
     firstBookId: StringType,
     randomMongoId: MongoIdType,
-    randomMongoIds: MongoIdArrayType
+    randomMongoIds: MongoIdArrayType,
+    hookValue: IntType
   },
   relationships: {
     mainSubject: {
@@ -151,7 +152,8 @@ export const Book = {
     authorNames: StringArrayType,
     cachedAuthors: arrayOf(Author),
     randomMongoId: MongoIdType,
-    randomMongoIds: MongoIdArrayType
+    randomMongoIds: MongoIdArrayType,
+    hookValue: IntType
   },
   relationships: {
     authors: {

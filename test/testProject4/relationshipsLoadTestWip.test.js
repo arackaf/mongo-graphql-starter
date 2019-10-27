@@ -16,27 +16,12 @@ beforeAll(async () => {
   await Promise.all([adam, katie, laura, mallory].map(person => db.collection("authors").insertOne(person)));
 
   for (let i = 0; i < 10; i++) {
-    await db.collection("books").insertOne({ title: `Adam Book ${i + 1}`, pages: 100, mainAuthorId: adam._id });
-    await db.collection("books").insertOne({ title: `Katie Book ${i + 1}`, pages: 100, mainAuthorId: katie._id });
-    await db.collection("books").insertOne({ title: `Laura Book ${i + 1}`, pages: 100, mainAuthorId: laura._id });
+    await db.collection("books").insertOne({ title: `Adam Book ${i + 1}`, pages: 100, mainAuthorId: "" + adam._id });
+    await db.collection("books").insertOne({ title: `Katie Book ${i + 1}`, pages: 100, mainAuthorId: "" + katie._id });
+    await db.collection("books").insertOne({ title: `Laura Book ${i + 1}`, pages: 100, mainAuthorId: "" + laura._id });
   }
 });
 
-/*
-
-  aggregateItems.push(
-    { $addFields: { id_string: { $toString: "$_id" } } },
-    {
-      $lookup: {
-        from: "books",
-        let: { id: "$id_string" },
-        pipeline: [{ $match: { $expr: { $eq: ["$$id", "$mainAuthorId"] }, pages: 200 } }, { $sort: { title: -1 } }, { $skip: 2 }, { $limit: 2 }],
-        as: "mainAuthorBooks"
-      }
-    }
-  );
-
-*/
 
 afterAll(async () => {
   await db.collection("books").deleteMany({});
