@@ -1062,7 +1062,7 @@ These lifecycle hooks are discussed below.
 
 ## Lifecycle hooks
 
-Most applications will have some cross-cutting concerns, like authentication. The queries and mutations have various hooks that you can tap into, to add custom behavior.
+Most applications will have some cross-cutting concerns, like authentication. Queries and mutations have various hooks that you can tap into, to add custom behavior.
 
 Most of the hooks receive these arguments (and possibly others) which are defined here, once.
 
@@ -1089,7 +1089,7 @@ Most of the hooks receive these arguments (and possibly others) which are define
 | `afterUpdate(match, updates, { root, args, context, ast })`  | Called after an object is updated. `match` and `updates` are the same as in `beforeUpdate`.  This could be an opportunity to do any logging on the just-completed update.  |
 | `beforeDelete(match, { root, args, context, ast })`          | Called before an object is deleted. `match` is the object passed to Mongo to find the right object. Return `false` to cancel the deletion.  |
 | `afterDelete(match, { root, args, context, ast })`           | Called after an object is deleted. `match` is the same as in `beforeDelete`  |
-| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries, insertions or mutations—basically any generated operation which returns `Type` or `[Type]`—results will always be an array. The actual objects queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed, ie you can format dates, etc.  |
+| `adjustResults(results)`                                 | Called immediately before objects are returned, either from queries (including relationships), insertions or mutations—basically any generated operation which returns `Type` or `[Type]`—results will always be an array. The actual objects queried from Mongo are passed into this hook. Use this as an opportunity to manually adjust data as needed, ie you can format dates, etc.  |
 
 #### The `queryPacket` argument to the queryMiddleware hook
 
