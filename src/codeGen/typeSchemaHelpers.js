@@ -10,7 +10,10 @@ import {
   DateType,
   arrayOf,
   BoolType,
-  JSONType
+  JSONType,
+  ISODateType,
+  ISODateTimeType,
+  ISOTimeType,
 } from "../dataTypes";
 import { TAB } from "./utilities";
 import { createOperation as createOperationOriginal, createInput, createType } from "./gqlSchemaHelpers";
@@ -81,7 +84,10 @@ export default function createGraphqlTypeSchema(objectToCreate) {
       createInput(
         `${name}Sort`,
         Object.keys(fields)
-          .filter(k => objectToCreate.fields[k] !== JSONType)
+          .filter(k => {
+            const type = objectToCreate.fields[k];
+            return type !== JSONType || type !== ISODateType || type !== ISODateTimeType || type !== ISOTimeType
+          })
           .map(k => `${k}: Int`)
       ),
       createInput(`${name}Filters`, allQueryFields.concat([`OR: [${name}Filters]`]))
@@ -208,6 +214,12 @@ function fieldMutations(k, fields) {
       return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
     } else if (value === JSONType) {
       return [`${k}: JSON`];
+    } else if (value === ISODateTimeType) {
+      return [`${k}: ISODateTime`];
+    } else if (value === ISODateType) {
+      return [`${k}: ISODate`];
+    } else if (value === ISOTimeType) {
+      return [`${k}: ISOTime`];
     } else if (value === StringArrayType) {
       return [
         `${k}: [String]`,
@@ -282,6 +294,9 @@ function queriesForField(fieldName, realFieldType) {
     case IntType:
     case FloatType:
     case DateType:
+    case ISODateType:
+    case ISODateTimeType:
+    case ISOTimeType:
       result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
       break;
     case IntArrayType:
@@ -324,6 +339,9 @@ function queriesForField(fieldName, realFieldType) {
     case IntType:
     case FloatType:
     case DateType:
+    case ISODateType:
+    case ISODateTimeType:
+    case ISOTimeType:
     case BoolType:
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);

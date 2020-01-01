@@ -11,6 +11,9 @@ export const FloatArrayType = "FloatArray";
 export const DateType = "Date";
 export const BoolType = "Boolean";
 export const JSONType = "JSON";
+export const ISODateType = "ISODate";
+export const ISODateTimeType = "ISODateTime";
+export const ISOTimeType = "ISOTime";
 
 export const arrayOf = type => {
   type.__usedInArray = true;

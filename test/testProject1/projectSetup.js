@@ -13,7 +13,8 @@ import {
   objectOf,
   formattedDate,
   JSONType,
-  typeLiteral
+  typeLiteral,
+  ISODateType
 } from "../../src/dataTypes";
 
 export const Author = {
@@ -42,7 +43,8 @@ export const Book = {
     strArrs: typeLiteral("[[String]]"),
     createdOn: DateType,
     createdOnYearOnly: formattedDate({ format: "%Y" }),
-    jsonContent: JSONType
+    jsonContent: JSONType,
+    release: ISODateType
   }
 };
 

@@ -1,5 +1,8 @@
 export default `
   scalar JSON
+  scalar ISODate
+  scalar ISOTime
+  scalar ISODateTime
 
   type DeletionResultInfo {
     success: Boolean!,

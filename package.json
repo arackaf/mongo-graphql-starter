@@ -61,6 +61,7 @@
     "dataloader": "1.4.0",
     "escape-string-regexp": "1.0.5",
     "esm": "^3.2.25",
+    "graphql-iso-date": "3.6.1",
     "graphql-type-json": "0.2.1",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",

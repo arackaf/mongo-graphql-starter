@@ -4,9 +4,12 @@ export default function createMasterResolver(namesWithTables, writeableNames) {
   let resolverImports = namesWithTables.map(n => `import ${n}, { ${n} as ${n}Rest } from './${n}/resolver';`).join("\n");
   let resolverDestructurings = "const " + namesWithTables.map(n => `{ Query: ${n}Query, Mutation: ${n}Mutation } = ${n}`).join(";\nconst ") + ";";
 
-  return `import GraphQLJSON from 'graphql-type-json';\n\n${resolverImports}\n\n${resolverDestructurings}
+  return `import {GraphQLDate,GraphQLTime,GraphQLDateTime} from 'graphql-iso-date';import GraphQLJSON from 'graphql-type-json';\n\n${resolverImports}\n\n${resolverDestructurings}
 
 export default {
+${TAB}ISODate: GraphQLDate,
+${TAB}ISODateTime: GraphQLDateTime,
+${TAB}ISOTime: GraphQLTime,
 ${TAB}JSON: GraphQLJSON,
 ${TAB}Query: Object.assign(
 ${TAB2}{},
