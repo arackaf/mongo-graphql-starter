@@ -82,7 +82,7 @@ export function getNestedQueryInfo(ast, queryName) {
 
   if (fieldNode) {
     return {
-      requestMap: getSelections(fieldNode),
+      requestMap: getSelections(fieldNode, ast.fragments),
       ast: fieldNode
     };
   } else {
