@@ -24,27 +24,22 @@ export async function create() {
 }
 
 export default async function() {
-  try {
-    await create();
+  await create();
+  
+  const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
+  
+  let db, schema;
+  let client = await MongoClient.connect(process.env.Mongo4Addr, { useNewUrlParser: true, useUnifiedTopology: true });
+  db = client.db(process.env.databaseName || "mongo-graphql-starter");
+  schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
-    const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
-
-    let db, schema;
-    let client = await MongoClient.connect(process.env.Mongo4Addr, { useNewUrlParser: true, useUnifiedTopology: true });
-    db = client.db(process.env.databaseName || "mongo-graphql-starter");
-    schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
-
-    return {
-      db,
-      client,
-      schema,
-      close: () => client.close(),
-      queryAndMatchArray: options => queryAndMatchArray({ schema, db, ...options }),
-      runQuery: options => runQuery({ schema, db, ...options }),
-      runMutation: options => runMutation({ schema, db, client, ...options })
-    };
-  } catch (err) {
-    console.log("ERROR SPINNING UP PROJECT 9:", err);
-    throw err;
-  }
+  return {
+    db,
+    client,
+    schema,
+    close: () => client.close(),
+    queryAndMatchArray: options => queryAndMatchArray({ schema, db, ...options }),
+    runQuery: options => runQuery({ schema, db, ...options }),
+    runMutation: options => runMutation({ schema, db, client, ...options })
+  };
 }
