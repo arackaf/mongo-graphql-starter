@@ -20,6 +20,7 @@ or advanced edge cases as needed.
 - [TypeScript integration](#typescript-integration)
 - [Queries created](#queries-created)
   - [Projecting results from queries](#projecting-results-from-queries)
+  - [Fragment support](#fragment-support)
   - [Custom query arguments](#custom-query-arguments)
 - [Filters created](#filters-created)
   - [null values](#null-values)
@@ -398,6 +399,32 @@ Use standard GraphQL syntax to select only the fields you want from your query. 
 pull what was requested. This applies to nested fields as well. For example, given [this GraphQL setup](test/projectSetupB.js),
 [this unit test](test/testProject2/richQuerying.test.js#L234), and the others in the suite demonstrate the degree to which you can select nested field
 values.
+
+### Fragment support
+
+As of version 0.11.1, fragments are now supported
+
+```graphql
+fragment d1 on Book {
+  title
+}
+fragment d2 on Book {
+  ...d1
+  pages
+}
+fragment d3 on Book {
+  ...d2
+  isRead
+}
+query {
+  getBook(_id: "59e3dbdf94dc6983d41deece") {
+    Book {
+      ...d3
+      weight
+    }
+  }
+}
+```
 
 ### Custom query arguments
 
