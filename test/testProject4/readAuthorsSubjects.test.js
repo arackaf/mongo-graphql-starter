@@ -66,7 +66,7 @@ test("Read authors with subjects -- using fragments 1", async () => {
   });
 });
 
-test("Read authors with subjects -- using fragments 1", async () => {
+test("Read authors with subjects -- using fragments 2", async () => {
   await queryAndMatchArray({
     query: `
       fragment d1 on Book {
@@ -78,6 +78,78 @@ test("Read authors with subjects -- using fragments 1", async () => {
       }
 
       query {allBooks(title_startsWith: "B"){Books{...d1, authors{ ...d2 } }}}
+    `,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam", subjects: [{ name: "JavaScript" }] }] },
+      { title: "Book 2", authors: [{ name: "Adam", subjects: [{ name: "JavaScript" }] }] },
+      { title: "Book 3", authors: [{ name: "Mallory", subjects: [{ name: "Literature" }] }] }
+    ]
+  });
+});
+
+test("Read authors with subjects -- using fragments 2 A", async () => {
+  await queryAndMatchArray({
+    query: `
+      fragment d1 on Book {
+        title
+      }
+      fragment d2 on Author {
+        name
+        subjects(PREFER_LOOKUP: true) { name }
+      }
+
+      query {allBooks(title_startsWith: "B"){Books{...d1, authors(PREFER_LOOKUP: true) { ...d2 } }}}
+    `,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam", subjects: [{ name: "JavaScript" }] }] },
+      { title: "Book 2", authors: [{ name: "Adam", subjects: [{ name: "JavaScript" }] }] },
+      { title: "Book 3", authors: [{ name: "Mallory", subjects: [{ name: "Literature" }] }] }
+    ]
+  });
+});
+
+test("Read authors with subjects -- using fragments 3", async () => {
+  await queryAndMatchArray({
+    query: `
+      fragment d1 on Book {
+        title
+      }
+      fragment d2 on Author {
+        name
+        subjects { ...d3 }
+      }
+      fragment d3 on Subject {
+        name
+      }
+
+      query {allBooks(title_startsWith: "B"){Books{...d1, authors{ ...d2 } }}}
+    `,
+    coll: "allBooks",
+    results: [
+      { title: "Book 1", authors: [{ name: "Adam", subjects: [{ name: "JavaScript" }] }] },
+      { title: "Book 2", authors: [{ name: "Adam", subjects: [{ name: "JavaScript" }] }] },
+      { title: "Book 3", authors: [{ name: "Mallory", subjects: [{ name: "Literature" }] }] }
+    ]
+  });
+});
+
+test("Read authors with subjects -- using fragments 3 A", async () => {
+  await queryAndMatchArray({
+    query: `
+      fragment d1 on Book {
+        title
+      }
+      fragment d2 on Author {
+        name
+        subjects(PREFER_LOOKUP: true) { ...d3 }
+      }
+      fragment d3 on Subject {
+        name
+      }
+
+      query {allBooks(title_startsWith: "B"){Books{...d1, authors(PREFER_LOOKUP: true){ ...d2 } }}}
     `,
     coll: "allBooks",
     results: [
