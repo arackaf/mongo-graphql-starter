@@ -107,7 +107,7 @@ function getSelections(fieldNode, fragments) {
       }
       const y = [
         sel.name.value,
-        sel.selectionSet == null ? true : getSelections(sel)
+        sel.selectionSet == null ? true : getSelections(sel, fragments)
       ];
       return [...acc, y];
     }, [])
