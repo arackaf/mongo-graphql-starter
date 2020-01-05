@@ -183,6 +183,97 @@ test("Add mainAuthorBooks entry in new author, and nested objects C", async () =
   });
 });
 
+test("Add mainAuthorBooks entry in new author, and nested objects C - with fragments", async () => {
+  let result = await runMutation({
+    prefix: `
+      fragment d1 on Author {
+        name
+      }
+      fragment d2 on Book {
+        title
+      }
+      fragment d3 on Subject {
+        name
+      }
+      fragment d4 on Keyword {
+        keywordName
+      }
+    `,
+    mutation: `createAuthor(Author: {
+      name: "adam",
+      subjects: [{ name: "s1" }, { name: "s2", keywords: [{keywordName: "k1"}, {keywordName: "k2"}] }],
+      mainSubject: { name: "ms" },
+      mainAuthorBooks: [{
+        title: "New Book 1",
+      }]
+    }){Author{ ...d1, mainAuthorBooks{...d2, mainAuthor {name, mainSubject{...d3}, mainAuthorBooks{...d2}, subjects(SORT: {name: 1}){...d3, keywords(SORT: {keywordName: 1}){...d4}}} } }}`,
+    result: "createAuthor"
+  });
+
+  expect(result).toEqual({
+    name: "adam",
+    mainAuthorBooks: [
+      {
+        title: "New Book 1",
+        mainAuthor: {
+          name: "adam",
+          mainSubject: { name: "ms" },
+          mainAuthorBooks: [{ title: "New Book 1" }],
+          subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+        }
+      }
+    ]
+  });
+});
+
+test("Add mainAuthorBooks entry in new author, and nested objects C - with fragments on update", async () => {
+  let author = await runMutation({
+    mutation: `createAuthor(Author: {
+      name: "adam",
+      subjects: [{ name: "s1" }, { name: "s2", keywords: [{keywordName: "k1"}, {keywordName: "k2"}] }],
+      mainSubject: { name: "ms" },
+      mainAuthorBooks: [{
+        title: "New Book 1",
+      }]
+    }){Author{ _id }}`,
+    result: "createAuthor"
+  });
+
+  let result = await runMutation({
+    prefix: `
+      fragment d1 on Author {
+        name
+      }
+      fragment d2 on Book {
+        title
+      }
+      fragment d3 on Subject {
+        name
+      }
+      fragment d4 on Keyword {
+        keywordName
+      }
+    `,
+    mutation: `updateAuthor(_id: "${author._id}") {Author{ ...d1, mainAuthorBooks{...d2, mainAuthor {name, mainSubject{...d3}, mainAuthorBooks{...d2}, subjects(SORT: {name: 1}){...d3, keywords(SORT: {keywordName: 1}){...d4}}} } }}`,
+    result: "updateAuthor"
+  });
+
+  expect(result).toEqual({
+    name: "adam",
+    mainAuthorBooks: [
+      {
+        title: "New Book 1",
+        mainAuthor: {
+          name: "adam",
+          mainSubject: { name: "ms" },
+          mainAuthorBooks: [{ title: "New Book 1" }],
+          subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+        }
+      }
+    ]
+  });
+});
+
 test("Add mainAuthorBooks entry in new author, and nested objects D", async () => {
   await runMutation({
     mutation: `createAuthor(Author: {
