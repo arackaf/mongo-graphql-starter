@@ -100,17 +100,15 @@ export function getAllNestedQueryInfoAsts(ast, queryName) {
   return fieldNode.selectionSet.selections.find(fn => fn.kind == "Field" && fn.name && fn.name.value == queryName);
 }
 
-function getSelections(fieldNode, fragments) {
-  return new Map(
-    fieldNode.selectionSet.selections.reduce((acc, sel) => {
-      if (sel.kind === "FragmentSpread") {
-        acc.push(...getSelections(fragments[sel.name.value], fragments));
-      } else {
-        acc.push([sel.name.value, sel.selectionSet == null ? true : getSelections(sel, fragments)]);
-      }
-      return acc;
-    }, [])
-  );
+function getSelections(fieldNode, fragments, result = new Map([])) {
+  for (let sel of fieldNode.selectionSet.selections) {
+    if (sel.kind === "FragmentSpread") {
+      getSelections(fragments[sel.name.value], fragments, result);
+    } else {
+      result.set(sel.name.value, sel.selectionSet == null ? true : getSelections(sel, fragments));
+    }
+  }
+  return result;
 }
 
 //leave a simple forward call for now, in case sub-field GraphQL aliasing becomes a thing, per https://github.com/graphql/graphql-js/issues/297
