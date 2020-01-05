@@ -54,8 +54,9 @@ export function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor
     Object.keys(type.relationships).forEach(name => {
       let relationship = type.relationships[name];
       let { ast: astNew, requestMap } = getNestedQueryInfo(ast, anchor === "string" ? anchor + "." + name : name);
-
+      
       if (requestMap.size) {
+        astNew.fragments = ast.fragments;
         extrasPackets.set(name, parseRequestedHierarchy(astNew, requestMap, relationship.type));
       }
     });
