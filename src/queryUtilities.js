@@ -321,6 +321,7 @@ function addRelationshipLookups(aggregationPipeline, ast, rootQuery, TypeMetadat
       Object.assign(relationshipArgs, relationshipArgs.FILTER || {});
       delete relationshipArgs.FILTER;
 
+      currentAst.fragments = originalAst.fragments;
       let { aggregationPipeline: pipelineValues, $match } = decontructGraphqlQuery(relationshipArgs, currentAst, relationship.type, relationshipName);
 
       let canUseSideQuery = !meta && !pipelineValues.find(entry => entry.$skip != null || entry.$limit != null);
