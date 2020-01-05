@@ -54,7 +54,7 @@ export function parseRequestedHierarchy(ast, requestMap, type, args = {}, anchor
     Object.keys(type.relationships).forEach(name => {
       let relationship = type.relationships[name];
       let { ast: astNew, requestMap } = getNestedQueryInfo(ast, anchor === "string" ? anchor + "." + name : name);
-      
+
       if (requestMap.size) {
         astNew.fragments = ast.fragments;
         extrasPackets.set(name, parseRequestedHierarchy(astNew, requestMap, relationship.type));
@@ -104,13 +104,11 @@ function getSelections(fieldNode, fragments) {
   return new Map(
     fieldNode.selectionSet.selections.reduce((acc, sel) => {
       if (sel.kind === "FragmentSpread") {
-        return [...acc, ...getSelections(fragments[sel.name.value], fragments)];
+        acc.push(...getSelections(fragments[sel.name.value], fragments));
+      } else {
+        acc.push([sel.name.value, sel.selectionSet == null ? true : getSelections(sel, fragments)]);
       }
-      const y = [
-        sel.name.value,
-        sel.selectionSet == null ? true : getSelections(sel, fragments)
-      ];
-      return [...acc, y];
+      return acc;
     }, [])
   );
 }
