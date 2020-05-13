@@ -2,8 +2,8 @@ import globalSchemaTypes from "./globalSchemaTypes";
 
 export default function createTestSchema(names, namesWithTables, namesWithoutTables, writeableNames, types) {
   let schemaImports = namesWithTables
-    .map((n) => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`)
-    .concat(namesWithoutTables.map((n) => `import { type as ${n}Type } from './${n}/schema';`))
+    .map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`)
+    .concat(namesWithoutTables.map(n => `import { type as ${n}Type } from './${n}/schema';`))
     .join("\n");
   // console.log({types})
   return `
@@ -11,43 +11,52 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
   const endpoint = "http://localhost:8080/graphql"
 
   async function processQuery(query,name,fields) {
+    return new Promise((resolve,reject) => {
+    console.log(\`doing \${name}\`)
+
     const { data, errors, extensions, headers, status } = await rawRequest(
       endpoint,
       query
     )
     if(status===200){
       console.log(name+"passed")
+      resolve(name)
     } else {
 
     
     console.error(
       JSON.stringify({ fields,name, errors, extensions, headers, status })
     )
+    reject(errors)
     }
+    })
   }
 const runQueries = async () => {
     ${namesWithTables
-      .map((n) => {
-        const a = types.filter((t) => t.__name === n);
+      .map(n => {
+        const a = types.filter(t => t.__name === n);
         const fields = a[0].fields;
         const recursedFields = [];
-
-        Object.keys(fields).forEach((k) => {
+        const manualQueryArgs = [];
+        Object.keys(fields).forEach(k => {
           if (fields[k].__isArray) {
-            recursedFields.push(`${k}: {${Object.keys(fields[k].type.fields)}}`);
+            recursedFields.push(`${k} {${Object.keys(fields[k].type.fields)}}`);
           } else {
             recursedFields.push(k);
           }
           switch (fields[k]) {
             default:
           }
+          if (Array.isArray(fields[k].manualQueryArgs)) {
+            manualQueryArgs.push(...fields[k].manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
+          }
         });
-
+        // console.table(manualQueryArgs)
         console.table(recursedFields);
         const fieldNames = recursedFields.join(" ");
-        return `processQuery(\`{get${n}{${n}{${fieldNames}}}}\`,"${n}", "${fieldNames}")`;
+        return `await processQuery(\`{all${n}s(LIMIT:1){${n}s{${fieldNames}}}}\`,"${n}", "${fieldNames}")`;
       })
-      .join("\n")}
+      .join(".catch((error) => console.error(error))")}
 }
 runQueries().catch((error) => console.error(error))
 `;
