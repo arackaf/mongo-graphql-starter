@@ -1,3 +1,5 @@
 {
-  "printWidth": 150
+  "printWidth": 150,
+  "bracketSpacing": true,
+  "arrowParens": "avoid"
 }
