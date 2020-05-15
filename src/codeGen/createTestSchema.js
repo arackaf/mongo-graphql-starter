@@ -7,31 +7,38 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
     .join("\n");
   // console.log({types})
   return `
-  import { rawRequest } from "graphql-request"
-  const endpoint = "http://localhost:8080/graphql"
-
-  async function processQuery(query,name,fields) {
-    return new Promise((resolve,reject) => {
-    console.log(\`doing \${name}\`)
-
-    const { data, errors, extensions, headers, status } = await rawRequest(
-      endpoint,
-      query
-    )
-    if(status===200){
-      console.log(name+"passed")
-      resolve(name)
-    } else {
-
-    
-    console.error(
-      JSON.stringify({ fields,name, errors, extensions, headers, status })
-    )
-    reject(errors)
+  import { GraphQLClient } from "graphql-request"
+  const endpoint = process.env.GRAPHQL_URL
+  const token = process.env.AUTH_TOKEN
+  
+  const graphQLClient = new GraphQLClient(endpoint, {
+    headers: {
+      authorization: \`Bearer \${token}\`
     }
+  })
+  async function processQuery(query, name, fields, variables = {}) {
+    return new Promise(async (resolve, reject) => {
+      console.log(\`doing \${name}\`)
+      const {
+        data,
+        errors,
+        extensions,
+        headers,
+        status
+      } = await graphQLClient.rawRequest(query)
+      if (status === 200) {
+        console.log(name + "passed")
+        console.table(data)
+        resolve(name)
+      } else {
+        console.error(
+          JSON.stringify({ fields, name, errors, extensions, headers, status })
+        )
+        reject(errors)
+      }
     })
   }
-const runQueries = async () => {
+  const runQueries = async () => {
     ${namesWithTables
       .map(n => {
         const a = types.filter(t => t.__name === n);
@@ -62,7 +69,8 @@ const runQueries = async () => {
         const fieldNames = recursedFields.join(" ");
         return `await processQuery(\`{all${n}s(LIMIT:1){${n}s{${fieldNames}}}}\`,"${n}", "${fieldNames}")`;
       })
-      .join(".catch((error) => console.error(error))")}
+      .join(".catch((error) => console.error(error))\n")}
+
 }
 runQueries().catch((error) => console.error(error))
 `;
