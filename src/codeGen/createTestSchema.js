@@ -35,10 +35,14 @@ const runQueries = async () => {
     ${namesWithTables
       .map(n => {
         const a = types.filter(t => t.__name === n);
+        // console.log({n,f:a[0].fields})
         const fields = a[0].fields;
+        //      const fieldNames = Object.keys(fields)
         const recursedFields = [];
         const manualQueryArgs = [];
         Object.keys(fields).forEach(k => {
+          //  recursedFields.push(...queriesForField(k, fields[k]));
+          // console.log(k, fields[k])
           if (fields[k].__isArray) {
             recursedFields.push(`${k} {${Object.keys(fields[k].type.fields)}}`);
           } else {
@@ -50,6 +54,8 @@ const runQueries = async () => {
           if (Array.isArray(fields[k].manualQueryArgs)) {
             manualQueryArgs.push(...fields[k].manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
           }
+          // fieldType(fields[k])
+          //  let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
         });
         // console.table(manualQueryArgs)
         console.table(recursedFields);
