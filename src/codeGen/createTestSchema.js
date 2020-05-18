@@ -42,14 +42,11 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
     ${namesWithTables
       .map(n => {
         const a = types.filter(t => t.__name === n);
-        // console.log({n,f:a[0].fields})
+
         const fields = a[0].fields;
-        //      const fieldNames = Object.keys(fields)
         const recursedFields = [];
         const manualQueryArgs = [];
         Object.keys(fields).forEach(k => {
-          //  recursedFields.push(...queriesForField(k, fields[k]));
-          // console.log(k, fields[k])
           if (fields[k].__isArray) {
             recursedFields.push(`${k} {${Object.keys(fields[k].type.fields)}}`);
           } else {
@@ -61,16 +58,27 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
           if (Array.isArray(fields[k].manualQueryArgs)) {
             manualQueryArgs.push(...fields[k].manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
           }
-          // fieldType(fields[k])
-          //  let dateFields = Object.keys(fields).filter(k => fields[k] === DateType || (typeof fields[k] === "object" && fields[k].__isDate));
         });
-        // console.table(manualQueryArgs)
-        console.table(recursedFields);
+
         const fieldNames = recursedFields.join(" ");
         return `await processQuery(\`{all${n}s(LIMIT:1){${n}s{${fieldNames}}}}\`,"${n}", "${fieldNames}")`;
       })
       .join(".catch((error) => console.error(error))\n")}
+  ${
+    writeableNames.length
+      ? `
+    ${writeableNames
+      .map(n => {
+        const a = types.filter(t => t.__name === n);
 
+        const fields = a[0].fields;
+
+        return `await processQuery(\`mutation:{${n}(${JSON.stringify(fields)})}\`,"${n}", "")`;
+      })
+      .join(".catch((error) => console.error(error))\n")} 
+  `
+      : ""
+  }
 }
 runQueries().catch((error) => console.error(error))
 `;
