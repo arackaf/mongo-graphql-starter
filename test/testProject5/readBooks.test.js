@@ -4,7 +4,8 @@ import { ObjectId } from "mongodb";
 let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
-
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
   let adam = { name: "Adam", birthday: new Date("1982-03-22") };
   let katie = { name: "Katie", birthday: new Date("2009-08-05") };
   let laura = { name: "Laura", birthday: new Date("1974-12-19") };
@@ -55,7 +56,10 @@ test("Read author's books and back", async () => {
     results: [
       {
         name: "Adam",
-        books: [{ title: "Book 1", authors: [{ name: "Adam" }] }, { title: "Book 2", authors: [{ name: "Adam" }, { name: "Katie" }] }]
+        books: [
+          { title: "Book 1", authors: [{ name: "Adam" }] },
+          { title: "Book 2", authors: [{ name: "Adam" }, { name: "Katie" }] }
+        ]
       }
     ]
   });
