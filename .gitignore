@@ -13,3 +13,4 @@ test/testProject10/graphQL
 test/testProject-ts/graphQL
 coverage/
 graphql-types.ts
+data
