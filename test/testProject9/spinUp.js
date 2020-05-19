@@ -23,13 +23,13 @@ export async function create() {
   });
 }
 
-export default async function() {
+export default async function () {
   await create();
-  
+
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
-  
+
   let db, schema;
-  let client = await MongoClient.connect(process.env.Mongo4Addr, { useNewUrlParser: true, useUnifiedTopology: true });
+  let client = await MongoClient.connect(`${nextConnectionString()}?`);
   db = client.db(process.env.databaseName || "mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 
@@ -40,6 +40,6 @@ export default async function() {
     close: () => client.close(),
     queryAndMatchArray: options => queryAndMatchArray({ schema, db, ...options }),
     runQuery: options => runQuery({ schema, db, ...options }),
-    runMutation: options => runMutation({ schema, db, client, ...options })
+    runMutation: options => runMutation({ schema, db, client, ...options }),
   };
 }
