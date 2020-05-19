@@ -1237,3 +1237,17 @@ collection, then it will just generate a basic type, as well as an input type us
 isn't yet used for these types). If the type is backed by a Mongo collection, then the schema file will also contain queries, mutations, and filters;
 and a resolver file will also be created defining the queries and mutations.
 
+## Run tests 
+
+Tests connect to a local mongo instance
+test9 needs a replicaset 
+
+```shell
+npm install run-rs -D # or globally -g
+run-rs -v 4.0.12
+npm run test
+## docker run local tests works for all bar test9
+# docker run --network host mongo
+# npm run test-local
+## skip test9
+```
