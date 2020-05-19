@@ -6,6 +6,7 @@ import { makeExecutableSchema } from "graphql-tools";
 import express from "express";
 import conn from "./connection";
 
+import spinUp from "./spinUp";
 Promise.resolve(spinUp()).then(({ db, schema, queryAndMatchArray }) => {
   const app = express();
   const root = {
