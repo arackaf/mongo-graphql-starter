@@ -6,6 +6,10 @@ let adam, katie, laura, mallory, book1, book2, book3;
 
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runQuery, runMutation, close } = await spinUp());
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("subjects").deleteMany({});
+  await db.collection("keywords").deleteMany({});
 });
 
 afterEach(async () => {

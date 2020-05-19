@@ -6,6 +6,10 @@ let adam, katie, laura, mallory, book1, book2, book3;
 
 beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runQuery, runMutation, close } = await spinUp());
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("subjects").deleteMany({});
+  await db.collection("keywords").deleteMany({});
 });
 
 afterEach(async () => {
@@ -109,7 +113,10 @@ test("Add mainAuthorBooks entry in new author, and nested objects B", async () =
             mainAuthor: {
               name: "adam",
               mainSubject: { name: "ms" },
-              subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+              subjects: [
+                { name: "s1", keywords: [] },
+                { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }
+              ]
             }
           }
         ]
@@ -156,7 +163,10 @@ test("Add mainAuthorBooks entry in new author, and nested objects C", async () =
               name: "adam",
               mainSubject: { name: "ms" },
               mainAuthorBooks: [{ title: "New Book 1" }],
-              subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+              subjects: [
+                { name: "s1", keywords: [] },
+                { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }
+              ]
             }
           }
         ]
@@ -219,7 +229,10 @@ test("Add mainAuthorBooks entry in new author, and nested objects C - with fragm
           name: "adam",
           mainSubject: { name: "ms" },
           mainAuthorBooks: [{ title: "New Book 1" }],
-          subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+          subjects: [
+            { name: "s1", keywords: [] },
+            { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }
+          ]
         }
       }
     ]
@@ -267,7 +280,10 @@ test("Add mainAuthorBooks entry in new author, and nested objects C - with fragm
           name: "adam",
           mainSubject: { name: "ms" },
           mainAuthorBooks: [{ title: "New Book 1" }],
-          subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+          subjects: [
+            { name: "s1", keywords: [] },
+            { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }
+          ]
         }
       }
     ]
@@ -302,7 +318,10 @@ test("Add mainAuthorBooks entry in new author, and nested objects D", async () =
               name: "adam",
               mainSubject: { name: "ms" },
               mainAuthorBooks: [{ title: "New Book 1" }],
-              subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+              subjects: [
+                { name: "s1", keywords: [] },
+                { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }
+              ]
             }
           }
         ]
@@ -363,7 +382,10 @@ test("Add mainAuthorBooks entry in new author, and nested objects E", async () =
               name: "adam",
               mainSubject: { name: "ms" },
               mainAuthorBooks: [{ title: "New Book 1" }],
-              subjects: [{ name: "s1", keywords: [] }, { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }]
+              subjects: [
+                { name: "s1", keywords: [] },
+                { name: "s2", keywords: [{ keywordName: "k1" }, { keywordName: "k2" }] }
+              ]
             }
           }
         ]
