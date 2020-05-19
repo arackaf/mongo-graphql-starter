@@ -1247,8 +1247,5 @@ npm install run-rs -D # or globally -g
 run-rs -v 4.0.12
 npm run test
 rm -rf data # delete local data
-## docker run local tests works for all bar test9
-# docker run --network host mongo
-# npm run test-local
-## skip test9
+
 ```
