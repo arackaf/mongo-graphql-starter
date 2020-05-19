@@ -38,6 +38,10 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  await db.collection("books").deleteMany({});
+  await db.collection("authors").deleteMany({});
+  await db.collection("subjects").deleteMany({});
+  await db.collection("keywords").deleteMany({});
   close();
   db = null;
 });
