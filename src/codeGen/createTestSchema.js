@@ -72,8 +72,25 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
         const a = types.filter(t => t.__name === n);
 
         const fields = a[0].fields;
+        const recursedFields = [];
+        const manualQueryArgs = [];
+        Object.keys(fields).forEach(k => {
+          if (fields[k].__isArray) {
+            recursedFields.push(`${k} {${Object.keys(fields[k].type.fields)}}`);
+          } else {
+            recursedFields.push(k);
+          }
+          switch (fields[k]) {
+            default:
+          }
+          if (Array.isArray(fields[k].manualQueryArgs)) {
+            manualQueryArgs.push(...fields[k].manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
+          }
+        });
 
-        return `await processQuery(\`mutation:{${n}(${JSON.stringify(fields)})}\`,"${n}", "")`;
+        const fieldNames = recursedFields.join(" ");
+
+        return `await processQuery(\`mutation:{${n}(${JSON.stringify(fieldNames)})}\`,"${n}", "")`;
       })
       .join(".catch((error) => console.error(error))\n")} 
   `
