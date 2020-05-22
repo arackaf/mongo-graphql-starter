@@ -123,7 +123,7 @@ export default function (source, destPath, options = {}) {
     const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
     fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable)));
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
-    fs.writeFileSync(path.join(rootDir, "test.js"), formatJs(createTestSchema(names, namesWithTables, namesWithoutTables, namesWriteable, types)));
+    fs.writeFileSync(path.join(rootDir, "test-resolvers.js"), formatJs(createTestSchema(names, namesWithTables, namesWithoutTables, namesWriteable, types)));
 
     let result;
 
