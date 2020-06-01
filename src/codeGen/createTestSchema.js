@@ -76,7 +76,7 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
         const recursedFields = [];
         const manualQueryArgs = [];
         Object.keys(fields).forEach(k => {
-          if (fields[k].__isArray) {
+          if (fields[k].__isArray || fields[k].__isObject) {
             recursedFields.push(`${k} {${Object.keys(fields[k].type.fields)}}`);
           } else {
             recursedFields.push(k);
@@ -91,10 +91,10 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
 
         const fieldNames = recursedFields.join(" ");
 
-        return `await processQuery(\`mutation:{${n}(${JSON.stringify(fieldNames)})}\`," mutation ${n}", "")`;
+        return `// await processQuery(\`mutation:{${n}(${JSON.stringify(fieldNames)})}\`," mutation ${n}", "")`;
       })
       .join(".catch((error) => console.error(error))\n")}
-      .catch((error) => console.error(error))
+      // .catch((error) => console.error(error))
   `
       : ""
   }
