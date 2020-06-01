@@ -47,7 +47,7 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
         const recursedFields = [];
         const manualQueryArgs = [];
         Object.keys(fields).forEach(k => {
-          if (fields[k].__isArray) {
+          if (fields[k].__isArray || fields[k].__isObject) {
             recursedFields.push(`${k} {${Object.keys(fields[k].type.fields)}}`);
           } else {
             recursedFields.push(k);
