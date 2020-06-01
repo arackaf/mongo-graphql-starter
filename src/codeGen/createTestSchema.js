@@ -91,7 +91,7 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
 
         const fieldNames = recursedFields.join(" ");
 
-        return `await processQuery(\`mutation:{${n}(${JSON.stringify(fieldNames)})}\`,"${n}", "")`;
+        return `await processQuery(\`mutation:{${n}(${JSON.stringify(fieldNames)})}\`," mutation ${n}", "")`;
       })
       .join(".catch((error) => console.error(error))\n")}
       .catch((error) => console.error(error))
