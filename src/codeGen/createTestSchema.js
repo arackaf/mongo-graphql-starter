@@ -64,6 +64,7 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
         return `await processQuery(\`{all${n}s(LIMIT:1){${n}s{${fieldNames}}}}\`,"${n}", "${fieldNames}")`;
       })
       .join(".catch((error) => console.error(error))\n")}
+      ${namesWithTables.length > 0 ? `.catch((error) => console.error(error))` : ""}
   ${
     writeableNames.length
       ? `
@@ -92,7 +93,8 @@ export default function createTestSchema(names, namesWithTables, namesWithoutTab
 
         return `await processQuery(\`mutation:{${n}(${JSON.stringify(fieldNames)})}\`,"${n}", "")`;
       })
-      .join(".catch((error) => console.error(error))\n")} 
+      .join(".catch((error) => console.error(error))\n")}
+      .catch((error) => console.error(error))
   `
       : ""
   }
