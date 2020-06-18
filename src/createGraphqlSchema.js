@@ -10,6 +10,7 @@ import createMasterSchema from "./codeGen/createMasterSchema";
 import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
 import createMasterResolver from "./codeGen/createMasterResolver";
 import createTypeScriptTypes from "./codeGen/createTypeScriptTypes";
+import createTestSchema from "./codeGen/createTestSchema";
 
 import prettier from "prettier";
 
@@ -27,7 +28,7 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
 const formatGraphQL = code => prettier.format(code, { parser: "graphql" });
 const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 120 });
 
-export default function(source, destPath, options = {}) {
+export default function (source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
@@ -122,6 +123,14 @@ export default function(source, destPath, options = {}) {
     const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
     fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable)));
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
+    try {
+      fs.writeFileSync(
+        path.join(rootDir, "test-resolvers.js"),
+        formatJs(createTestSchema(names, namesWithTables, namesWithoutTables, namesWriteable, types))
+      );
+    } catch (er) {
+      console.log("ERROR GENERATING RESOLVER TESTS", er);
+    }
 
     let result;
 
