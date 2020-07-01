@@ -85,3 +85,27 @@ test("MongoId Array match - contains 2", async () => {
     results: [{ title: "Book 2" }, { title: "Book 3" }]
   });
 });
+
+test("MongoId Array match - contains any", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(mongoIds_containsAny: ["${id1}", "${id3}"], SORT: {title: 1}){Books{title}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }, { title: "Book 3" }]
+  });
+});
+
+test("MongoId Array match - contains all", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(mongoIds_containsAll: ["${id1}", "${id3}"], SORT: {title: 1}){Books{title}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 3" }]
+  });
+});
+
+test("MongoId Array match - contains all 2", async () => {
+  await queryAndMatchArray({
+    query: `{allBooks(mongoIds_containsAll: ["${id1}", "${id2}"], SORT: {title: 1}){Books{title}}}`,
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 3" }]
+  });
+});

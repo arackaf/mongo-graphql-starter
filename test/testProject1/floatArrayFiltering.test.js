@@ -89,6 +89,30 @@ test("Array match - contains", async () => {
   });
 });
 
+test("Array match - contains all", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(prices_containsAll: [1.1, 9.9], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: []
+  });
+});
+
+test("Array match - contains all 2", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(prices_containsAll: [1.1, 2.2, 3.3], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }]
+  });
+});
+
+test("Array match - contains all 3", async () => {
+  await queryAndMatchArray({
+    query: "{allBooks(prices_containsAll: [1.1, 3.3], SORT: {title: 1}){Books{title}}}",
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }]
+  });
+});
+
 test("Array match - contains any", async () => {
   await queryAndMatchArray({
     query: "{allBooks(prices_containsAny: [2.2, 9.9], SORT: {title: 1}){Books{title}}}",

@@ -76,6 +76,30 @@ test("String array match - contains 2", async () => {
   });
 });
 
+test("String array match - contains all", async () => {
+  await queryAndMatchArray({
+    query: '{allBooks(keywords_containsAll: ["c#", "coding"], SORT: {title: 1}){Books{title}}}',
+    coll: "allBooks",
+    results: []
+  });
+});
+
+test("String array match - contains all 2", async () => {
+  await queryAndMatchArray({
+    query: '{allBooks(keywords_containsAll: ["c#", "development"], SORT: {title: 1}){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Book 3" }]
+  });
+});
+
+test("String array match - contains all 3", async () => {
+  await queryAndMatchArray({
+    query: '{allBooks(keywords_containsAll: ["javascript", "coding"], SORT: {title: 1}){Books{title}}}',
+    coll: "allBooks",
+    results: [{ title: "Book 1" }, { title: "Book 2" }]
+  });
+});
+
 test("String array match - contains any", async () => {
   await queryAndMatchArray({
     query: '{allBooks(keywords_containsAny: ["c#", "coding"], SORT: {title: 1}){Books{title}}}',

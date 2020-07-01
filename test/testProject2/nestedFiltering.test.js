@@ -85,6 +85,18 @@ test("Nested querying 1c", async () =>
     { title: "Blog 2" }
   ]));
 
+  test("Nested querying 1c i", async () =>
+  await runIt(`{allBlogs(author: {knicknames_containsAll: ["a1", "one"]}, SORT: {title: 1}){Blogs{ title }}}`, [
+    { title: "Blog 1" },
+    { title: "Blog 2" }
+  ]));
+
+  test("Nested querying 1c i", async () =>
+  await runIt(`{allBlogs(author: {knicknames_containsAll: ["a1"]}, SORT: {title: 1}){Blogs{ title }}}`, [
+    { title: "Blog 1" },
+    { title: "Blog 2" }
+  ]));
+
 test("Nested querying 1d", async () =>
   await runIt(`{allBlogs(author: {luckyNumbers: [1, 11]}, SORT: {title: 1}){Blogs{ title }}}`, [{ title: "Blog 1" }, { title: "Blog 2" }]));
 

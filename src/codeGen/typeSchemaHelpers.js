@@ -296,6 +296,7 @@ function queriesForField(fieldName, realFieldType) {
         `${fieldName}_nin: [[${singleType}]]`,
         `${fieldName}_contains: ${singleType}`,
         `${fieldName}_containsAny: [${singleType}]`,
+        `${fieldName}_containsAll: [${singleType}]`,
         `${fieldName}_ne: [${singleType}]`
       );
       break;
@@ -312,6 +313,7 @@ function queriesForField(fieldName, realFieldType) {
           `${fieldName}_nin: [[String]]`,
           `${fieldName}_contains: String`,
           `${fieldName}_containsAny: [String]`,
+          `${fieldName}_containsAll: [String]`,
           `${fieldName}_ne: [String]`
         ]
       );

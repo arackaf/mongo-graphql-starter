@@ -123,6 +123,10 @@ export function fillMongoFiltersObject(args, objectMetaData, hash = {}, prefix =
             } else {
               hash[fieldName].$in.push(...args[k].map(item => (field === MongoIdArrayType ? ObjectId(item) : item)));
             }
+          } else if (queryOperation == "containsAll") {
+            ensure(hash, fieldName);
+            ensureArr(hash[fieldName], "$all");
+            hash[fieldName].$all.push(...args[k].map(item => (field === MongoIdArrayType ? ObjectId(item) : item)));
           } else if (queryOperation == "textContains") {
             ensure(hash, fieldName, () => (hash[fieldName].$regex = new RegExp(escapeStringRegexp(args[k]), "i")));
           } else if (queryOperation === "startsWith") {
