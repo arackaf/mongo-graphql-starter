@@ -1,6 +1,6 @@
 {
   "name": "mongo-graphql-starter",
-  "version": "0.11.2",
+  "version": "0.11.3",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -34,7 +34,6 @@
     "glob": "^7.1.2",
     "graphql": "^14.5.8",
     "graphql-request": "^1.8.2",
-    "graphql-tools": "^4.0.4",
     "jest": "^24.9.0",
     "mongodb": "^3.1.13"
   },
@@ -62,6 +61,7 @@
     "dataloader": "1.4.0",
     "escape-string-regexp": "1.0.5",
     "esm": "^3.2.25",
+    "graphql-tools": "^6.0.11",
     "graphql-type-json": "0.2.1",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",

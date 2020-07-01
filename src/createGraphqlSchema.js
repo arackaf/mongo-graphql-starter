@@ -26,7 +26,7 @@ function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
 }
 
 const formatGraphQL = code => prettier.format(code, { parser: "graphql" });
-const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 120 });
+const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 120, arrowParens: "avoid" });
 
 export default function (source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
