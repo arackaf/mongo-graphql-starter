@@ -1,0 +1,26 @@
+name: "Close stale issues"
+
+# Controls when the action will run.
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    name: Stale issue job
+    steps:
+      - uses: actions/stale@v3
+        with:
+          stale-issue-message: This issue has been inactive for 2 week. If you still think there is a problem, please leave a comment so the issue does not automatically close.
+          stale-pr-message: This PR has been inactive for 2 week. If you still think there is a problem, please leave a comment so the PR does not automatically close.
+          # These labels are required
+          stale-issue-label: closing-soon
+          exempt-issue-label: "work-in-progress"
+          stale-pr-label: closing-soon
+          exempt-pr-label: "needs-review,work-in-progress"
+          # Issue timing
+          days-before-stale: 14
+          days-before-close: 6
+
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
