@@ -30,6 +30,7 @@ const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 12
 
 export default function (source, destPath, options = {}) {
   return Promise.resolve(source).then(graphqlMetadata => {
+    console.log("SOURCE", source, graphqlMetadata, "END");
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
       mkdirp.sync(rootDir);
@@ -41,6 +42,7 @@ export default function (source, destPath, options = {}) {
     Object.keys(graphqlMetadata).forEach(k => {
       let type = graphqlMetadata[k];
       type.__name = k;
+      console.log("typename", k);
       if (!type.fields) graphqlMetadata[k].fields = {};
       if (!type.fields._id && type.table) {
         //add _id, and as a bonus, make it show up first in the list since the spec iterates object keys in order of insertion
