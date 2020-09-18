@@ -10,6 +10,7 @@ test/testProject7/graphQL/
 test/testProject8/graphQL/
 test/testProject9/graphQL
 test/testProject10/graphQL
+test/testProject11/graphQL
 test/testProject-ts/graphQL
 coverage/
 graphql-types.ts

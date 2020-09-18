@@ -13,6 +13,7 @@ import createTypeScriptTypes from "./codeGen/createTypeScriptTypes";
 import createTestSchema from "./codeGen/createTestSchema";
 
 import prettier from "prettier";
+import { convertMongooseModel } from "./mongooseHelpers";
 
 function createFile(path, contents, onlyIfAbsent, ...directoriesToCreate) {
   directoriesToCreate.forEach(dir => {
@@ -29,7 +30,17 @@ const formatGraphQL = code => prettier.format(code, { parser: "graphql" });
 const formatJs = code => prettier.format(code, { parser: "babel", printWidth: 120, arrowParens: "avoid", trailingComma: "none" });
 
 export default function (source, destPath, options = {}) {
-  return Promise.resolve(source).then(graphqlMetadata => {
+  return Promise.resolve(source).then(gqlMetadata => {
+    let graphqlMetadata = {};
+    if (options.mongoose) {
+      Object.keys(gqlMetadata).forEach(k => {
+        // console.log(convertMongooseModel({ schema: gqlMetadata[k] }));
+        graphqlMetadata[k] = { fields: convertMongooseModel({ schema: gqlMetadata[k] }) };
+      });
+    } else {
+      graphqlMetadata = gqlMetadata;
+    }
+    console.log("SOURCE", source, graphqlMetadata, "END");
     let rootDir = path.join(destPath, "graphQL");
     if (!fs.existsSync(rootDir)) {
       mkdirp.sync(rootDir);
@@ -41,6 +52,7 @@ export default function (source, destPath, options = {}) {
     Object.keys(graphqlMetadata).forEach(k => {
       let type = graphqlMetadata[k];
       type.__name = k;
+      console.log("typename", k);
       if (!type.fields) graphqlMetadata[k].fields = {};
       if (!type.fields._id && type.table) {
         //add _id, and as a bonus, make it show up first in the list since the spec iterates object keys in order of insertion
