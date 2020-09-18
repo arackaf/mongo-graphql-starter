@@ -12,46 +12,24 @@ import {
   StringArrayType,
   StringType
 } from "../../src/dataTypes";
-import { createMGSOutput } from "../../src/mongooseHelpers";
-import { BookModel } from "./models";
-
-export const AuthorExpected = {
-  fields: {
-    name: StringType,
-    birthday: DateType,
-    strings: StringArrayType
-  }
-};
-
-export const BookExpected = {
-  table: "books",
-  fields: {
-    title: StringType,
-    // pages: IntType,
-    pages: FloatType,
-    weight: FloatType,
-    keywords: StringArrayType,
-    // editions: IntArrayType,
-    editions: FloatArrayType,
-    prices: FloatArrayType,
-    isRead: BoolType,
-    mongoId: MongoIdType,
-    mongoIds: MongoIdArrayType,
-    authors: arrayOf(AuthorExpected),
-    // primaryAuthor: objectOf({ ...AuthorExpected }),
-    // strArrs: typeLiteral("[[String]]"),
-    createdOn: DateType,
-    // createdOnYearOnly: formattedDate({ format: "%Y" }),
-    jsonContent: JSONType,
-    _id: MongoIdType
-  }
-};
+import { convertSchemas, createMGSOutput } from "../../src/mongooseHelpers";
+import { BookModel, BookSchema, AuthorSchema } from "./models";
+import * as projectSetup from "./projectSetup";
 
 test("Convert Mongoose Model 1", () => {
   const result = createMGSOutput(BookModel);
-  console.log("EXPECTED", BookExpected.fields.authors.toString());
-  expect(result.table).toEqual(BookExpected.table);
-  expect(result).toMatchObject(BookExpected);
+  // const result = convertSchemas({
+  //   // Book: BookSchema,
+  //   Author: AuthorSchema
+  // });
+  // console.log("EXPECTED", BookExpected.fields.authors.toString());
+  // console.log(JSON.stringify(BookSchema, null, 3));
+  // console.log(JSON.stringify(AuthorSchema, null, 3));
+  console.log(JSON.stringify(result));
+  console.log(JSON.stringify(projectSetup, null, 3));
+  // expect(result.table).toEqual(BookExpected.table);
+  expect(JSON.stringify(result)).toEqual(JSON.stringify(projectSetup.Book));
+  // expect(result).toMatchObject(BookExpected);
   // expect(result.fields).toMatchInlineSnapshot(`
   //   Object {
   //     "_id": "MongoId",

@@ -16,6 +16,31 @@ const {
   typeLiteral
 } = dataTypes;
 
+export const convertSchemas = mongooseSchemas => {
+  console.log(mongooseSchemas);
+
+  Object.keys(mongooseSchemas).forEach(schema => {
+    console.log(schema);
+  });
+};
+
+/*  */
+
+export const createMGSOutput = model => {
+  if (!model || !model.modelName) {
+    throw new Error("You provide incorrect mongoose model to `createMGSOutput()`. " + "Correct model should contain `modelName` property.");
+  }
+
+  const fields = convertMongooseModel(model, "");
+
+  return {
+    table: model.modelName.toLowerCase() + "s",
+    fields: { _id: fields._id, ...fields }
+  };
+};
+
+/*  */
+
 function upperFirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
@@ -168,6 +193,7 @@ export const getFieldsFromModel = model => {
 export const convertMongooseModel = (model, prefix = "") => {
   const mongooseFields = getFieldsFromModel(model);
   const formattedFields = Object.keys(mongooseFields).reduce((acc, pathName, i) => {
+    // return convertFieldToMSGType(mongooseFields[pathName], "", acc);
     return {
       ...acc,
       [pathName]: convertFieldToMSGType(mongooseFields[pathName])
@@ -178,19 +204,6 @@ export const convertMongooseModel = (model, prefix = "") => {
   } else {
     return { [prefix.toLowerCase()]: formattedFields };
   }
-};
-
-export const createMGSOutput = model => {
-  if (!model || !model.modelName) {
-    throw new Error("You provide incorrect mongoose model to `createMGSOutput()`. " + "Correct model should contain `modelName` property.");
-  }
-
-  const fields = convertMongooseModel(model, "");
-
-  return {
-    table: model.modelName.toLowerCase() + "s",
-    fields
-  };
 };
 
 export function scalarToMGSType(field) {
@@ -295,7 +308,7 @@ export function docArrayToMGSType(field, prefix = "") {
       "You provide incorrect mongoose field to `docArrayToMGSType()`. " + "Correct field should be instance of `mongoose.Schema.Types.DocumentArray`"
     );
   }
-  const typeName = `${prefix}${upperFirst(_getFieldName(field))}`;
+  // const typeName = `${prefix}${upperFirst(_getFieldName(field))}`;
   const mgsType = convertMongooseModel(field, "fields");
 
   return arrayOf(mgsType);

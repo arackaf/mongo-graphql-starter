@@ -30,18 +30,21 @@ export const BookSchema = new Schema({
 });
 export const BookModel = mongoose.model("Book", BookSchema);
 
-export const SubjectSchema = new Schema({
-  name: String
-});
-export const SubjectModel = mongoose.model("Subject", SubjectSchema);
+/*  */
 
-export const TagSchema = new Schema({
-  name: String,
-  count: Number
-});
-export const TagModel = mongoose.model("Tag", TagSchema);
+/*  */
+// export const SubjectSchema = new Schema({
+//   name: String
+// });
+// export const SubjectModel = mongoose.model("Subject", SubjectSchema);
 
-export const ReadOnlyTagSchema = new Schema({
-  name: String
-});
+// export const TagSchema = new Schema({
+//   name: String,
+//   count: Number
+// });
+// export const TagModel = mongoose.model("Tag", TagSchema);
+
+// export const ReadOnlyTagSchema = new Schema({
+//   name: String
+// });
 // export const ReadOnlyTagModel = mongoose.model("ReadOnlyTag", SubjectSchema);
