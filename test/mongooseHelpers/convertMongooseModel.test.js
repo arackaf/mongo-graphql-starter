@@ -1,3 +1,4 @@
+import createGraphqlSchema from "../../src/createGraphqlSchema";
 import {
   arrayOf,
   BoolType,
@@ -15,20 +16,31 @@ import {
 import { convertSchemas, createMGSOutput } from "../../src/mongooseHelpers";
 import { BookModel, BookSchema, AuthorSchema } from "./models";
 import * as projectSetup from "./projectSetup";
+import path from "path";
+import fs from "fs";
 
-test("Convert Mongoose Model 1", () => {
-  const result = createMGSOutput(BookModel);
+beforeEach(() => {
+  fs.rmdirSync(path.resolve("./test/testProject11/graphQL"), { recursive: true });
+});
+
+test("Convert Mongoose Model 1", async () => {
+  // const result = createMGSOutput(BookModel);
   // const result = convertSchemas({
   //   // Book: BookSchema,
   //   Author: AuthorSchema
   // });
+  const mongooseProjectSetup = {
+    Author: AuthorSchema,
+    Book: BookSchema
+  };
   // console.log("EXPECTED", BookExpected.fields.authors.toString());
   // console.log(JSON.stringify(BookSchema, null, 3));
   // console.log(JSON.stringify(AuthorSchema, null, 3));
-  console.log(JSON.stringify(result));
-  console.log(JSON.stringify(projectSetup, null, 3));
+  // console.log(JSON.stringify(result));
+  await createGraphqlSchema(mongooseProjectSetup, path.resolve("./test/testProject11"), { mongoose: true });
+  // await createGraphqlSchema(projectSetup, path.resolve("./test/testProject11"));
   // expect(result.table).toEqual(BookExpected.table);
-  expect(JSON.stringify(result)).toEqual(JSON.stringify(projectSetup.Book));
+  // expect(JSON.stringify(result)).toEqual(JSON.stringify(projectSetup.Book));
   // expect(result).toMatchObject(BookExpected);
   // expect(result.fields).toMatchInlineSnapshot(`
   //   Object {

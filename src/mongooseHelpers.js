@@ -21,6 +21,8 @@ export const convertSchemas = mongooseSchemas => {
 
   Object.keys(mongooseSchemas).forEach(schema => {
     console.log(schema);
+    const result = convertMongooseModel({ schema: mongooseSchemas[schema] });
+    console.log(result);
   });
 };
 
@@ -30,6 +32,10 @@ export const createMGSOutput = model => {
   if (!model || !model.modelName) {
     throw new Error("You provide incorrect mongoose model to `createMGSOutput()`. " + "Correct model should contain `modelName` property.");
   }
+  // console.log("heel", model);
+  // console.log(JSON.stringify(model.schema.paths, null, 3));
+  const mongooseFields = getFieldsFromModel(model);
+  // console.log(JSON.stringify(mongooseFields, null, 3));
 
   const fields = convertMongooseModel(model, "");
 
@@ -172,6 +178,7 @@ export function convertFieldToMSGType(field, prefix = "") {
 }
 
 export const getFieldsFromModel = model => {
+  console.log(!model, !model.schema, !model.schema.paths);
   if (!model || !model.schema || !model.schema.paths) {
     throw new Error("You provide incorrect mongoose model to `convertMongooseModel()`. " + "Correct model should contain `schema.paths` properties.");
   }
