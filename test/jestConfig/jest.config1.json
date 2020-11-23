@@ -1,5 +1,10 @@
 {
   "rootDir": "../testProject1",
   "globalSetup": "<rootDir>/../masterSetup.js",
-  "testEnvironment": "node"
+  "testEnvironment": "node",
+  "coverageDirectory": "<rootDir>/../../coverage/",
+  "collectCoverage": true,
+  "collectCoverageFrom": [
+    "<rootDir>/../../src/**/*.js"
+  ]
 }
