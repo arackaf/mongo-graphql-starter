@@ -29,6 +29,7 @@
     "cross-env": "^6.0.3",
     "del": "3.0.0",
     "dotenv": "^6.2.0",
+    "dotenv-cli": "^4.0.0",
     "express": "^4.17.0",
     "express-graphql": "^0.8.0",
     "glob": "^7.1.2",
@@ -39,7 +40,7 @@
   },
   "scripts": {
     "test-local": "jest --runInBand --config=test/jestConfig/jest.configRoot.json",
-    "test": "jest --runInBand --bail --detectOpenHandles --config=test/jestConfig/jest.configRoot.json && codecov",
+    "test": "jest --runInBand --bail --detectOpenHandles --config=test/jestConfig/jest.configRoot.json && dotenv codecov",
     "test1": "jest --runInBand --config=test/jestConfig/jest.config1.json && codecov",
     "test2": "jest --runInBand --config=test/jestConfig/jest.config2.json",
     "test3": "jest --runInBand --config=test/jestConfig/jest.config3.json",
