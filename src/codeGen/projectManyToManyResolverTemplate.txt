@@ -11,6 +11,7 @@
         let $match = { ${keyField}: { $in: flatMap(keyArrays || [], ${idMapping}) } };
         let queryPacket = decontructGraphqlQuery(args, ast, ${targetTypeName}Metadata, null${receivingKeyForce});
         let { aggregationPipeline } = queryPacket;
+        aggregationPipeline.push({ $match });
         
         let results = await dbHelpers.runQuery(db, "${table}", aggregationPipeline);
         cleanUpResults(results, ${targetTypeName}Metadata);
