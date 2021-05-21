@@ -85,6 +85,8 @@ APIs generated are incidental.
 
 Let's work through a simple example.
 
+**NOTE:** All of the code below assumes you're using John Dalton's [ESM loader](https://github.com/standard-things/esm). **Do not** try to run this code with Node's native esm.
+
 First, create your db metadata like this. Each mongo collection you'd like added to your GraphQL endpoint needs to contain the table name, and all of
 the fields, keyed off of the data types provided. If you're creating a type which will only exist inside another type's Mongo fields, then you can
 omit the table property.
@@ -1226,8 +1228,7 @@ will work fine, assuming `HooksRoot` and `Type2Hooks` are JavaScript classes.
 
 ## A closer look at what's generated
 
-All code generated is modern JavaScript, meaning ES6, plus `async` / `await` and object spread, along with ES6 modules (`import` / `export`). If
-you're running Node 8.5 or better, and you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you
+All code generated is modern JavaScript, meaning ES6, plus `async` / `await` and object spread, along with ES6 modules (`import` / `export`). If you're using John Dalton's [outstanding ESM loader](https://github.com/standard-things/esm) (and I'd urge you
 to do so) then this code should just work. If any of those conditions are false, you'll need to pipe the results through Babel using your favorite
 build tool.
 
