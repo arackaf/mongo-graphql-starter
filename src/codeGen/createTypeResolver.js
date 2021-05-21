@@ -56,8 +56,9 @@ export default function createGraphqlResolver(objectToCreate, options) {
     `import ${objName}Metadata from "./${objName}";`,
     ...resolverSources.map(
       (src, i) =>
-        `import ResolverExtras${i + 1} from "${src}";\nconst { Query: QueryExtras${i + 1}, Mutation: MutationExtras${i + 1}, ...OtherExtras${i +
-          1} } = ResolverExtras${i + 1};`
+        `import ResolverExtras${i + 1} from "${src}";\nconst { Query: QueryExtras${i + 1}, Mutation: MutationExtras${i + 1}, ...OtherExtras${
+          i + 1
+        } } = ResolverExtras${i + 1};`
     )
   ];
 
@@ -125,7 +126,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
       let keyTypeIsArray = /Array/g.test(keyType);
       let foreignKeyIsArray = foreignKeyType == StringArrayType || foreignKeyType == MongoIdArrayType;
 
-      if (!typeImports.has(relationship.type.__name)) {
+      if (!typeImports.has(relationship.type.__name) && relationship.type.__name != objName) {
         typeImports.add(relationship.type.__name);
         imports.push(`import ${relationship.type.__name}Metadata from "../${relationship.type.__name}/${relationship.type.__name}";`);
       }

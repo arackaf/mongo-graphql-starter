@@ -24,6 +24,22 @@ export const Subject = {
         return Keyword;
       },
       fkField: "keywordIds"
+    },
+    subjectJunkA: {
+      get type() {
+        return Subject;
+      },
+      fkField: "junk",
+      keyField: "junk",
+      oneToOne: true
+    },
+    subjectJunkB: {
+      get type() {
+        return Subject;
+      },
+      fkField: "junk",
+      keyField: "junk",
+      oneToMany: true
     }
   }
 };
