@@ -11,8 +11,7 @@ async function load${objName}s(db, aggregationPipeline, root, args, context, ast
 }
 
 export const ${objName} = {
-${relationshipResolvers}
-${typeExtras}
+${typeExtrasAndRelationships}
 }
 
 export default {
