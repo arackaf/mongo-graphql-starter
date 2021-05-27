@@ -15,5 +15,8 @@ export function createType(name, fields) {
 }
 
 function createGenericType(typeName, name, fields) {
+  if (!fields.length) {
+    return "";
+  }
   return `${TAB}${typeName} ${name} {\n${TAB2}${fields.join(`\n${TAB2}`)}\n${TAB}}`;
 }
