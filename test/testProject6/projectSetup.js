@@ -43,11 +43,30 @@ export const DeleteInfo = {
   }
 };
 
+export const JunkItem = {
+  relationships: {
+    _junk: {
+      get type() {
+        return InsertInfo;
+      },
+      fkField: "_junk"
+    }
+  }
+};
+
 export const Coordinate = {
   table: "coordinates",
   fields: {
     x: IntType,
     y: IntType
+  },
+  relationships: {
+    _junk: {
+      get type() {
+        return DeleteInfo;
+      },
+      fkField: "_junk"
+    }
   },
   resolvedFields: {
     pointAbove: "Coordinate",

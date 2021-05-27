@@ -70,7 +70,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
     .filter(s => s)
     .join(",\n");
 
-  let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`).join(",\n");
+  let typeExtras = resolverSources.map((src, i) => `${TAB2}...(OtherExtras${i + 1} || {})`);
 
   let deleteCleanups = [];
   let fkAdjustments = Object.entries(objectToCreate.relationships).filter(([k, rel]) => rel.fkField == "_id").length;
@@ -116,7 +116,7 @@ export default function createGraphqlResolver(objectToCreate, options) {
     .join(",\n");
 
   let typeImports = new Set([]);
-  let relationshipResolvers = "";
+  let relationshipResolvers = [];
 
   if (objectToCreate.relationships) {
     Object.keys(objectToCreate.relationships).forEach((relationshipName, index, all) => {
@@ -171,51 +171,50 @@ export default function createGraphqlResolver(objectToCreate, options) {
           mapping = "x => x";
         }
 
-        relationshipResolvers += template
-          .replace(/\${table}/g, relationship.type.table)
-          .replace(/\${fkField}/g, relationship.fkField)
-          .replace(/\${keyField}/g, relationship.keyField || "_id")
-          .replace(/\${idMapping}/g, mapping)
-          .replace(/\${targetObjName}/g, relationshipName)
-          .replace(/\${targetTypeName}/g, relationship.type.__name)
-          .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
-          .replace(/\${sourceParam}/g, objName.toLowerCase())
-          .replace(/\${sourceObjName}/g, objName)
-          .replace(/\${dataLoaderId}/g, `__${objName}_${relationshipName}DataLoader`)
-          .replace(/\${lookupSetContents}/g, lookupSetContents)
-          .replace(
-            /\${receivingKeyForce}/g,
-            relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
-          );
+        relationshipResolvers.push(
+          template
+            .replace(/\${table}/g, relationship.type.table)
+            .replace(/\${fkField}/g, relationship.fkField)
+            .replace(/\${keyField}/g, relationship.keyField || "_id")
+            .replace(/\${idMapping}/g, mapping)
+            .replace(/\${targetObjName}/g, relationshipName)
+            .replace(/\${targetTypeName}/g, relationship.type.__name)
+            .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
+            .replace(/\${sourceParam}/g, objName.toLowerCase())
+            .replace(/\${sourceObjName}/g, objName)
+            .replace(/\${dataLoaderId}/g, `__${objName}_${relationshipName}DataLoader`)
+            .replace(/\${lookupSetContents}/g, lookupSetContents)
+            .replace(
+              /\${receivingKeyForce}/g,
+              relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
+            )
+        );
       } else if (relationship.__isObject) {
-        relationshipResolvers += projectOneToOneResolverTemplate
-          .replace(/\${table}/g, relationship.type.table)
-          .replace(/\${fkField}/g, relationship.fkField)
-          .replace(/\${keyField}/g, relationship.keyField || "_id")
-          .replace(/\${idMapping}/g, relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "id => ObjectId(id)" : "id => id")
-          .replace(/\${targetObjName}/g, relationshipName)
-          .replace(/\${targetTypeName}/g, relationship.type.__name)
-          .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
-          .replace(/\${sourceParam}/g, objName.toLowerCase())
-          .replace(/\${sourceObjName}/g, objName)
-          .replace(/\${dataLoaderId}/g, `__${objName}_${relationshipName}DataLoader`)
-          .replace(
-            /\${receivingKeyForce}/g,
-            relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
-          );
-      }
-
-      if (index < all.length - 1) {
-        relationshipResolvers += ",\n";
+        relationshipResolvers.push(
+          projectOneToOneResolverTemplate
+            .replace(/\${table}/g, relationship.type.table)
+            .replace(/\${fkField}/g, relationship.fkField)
+            .replace(/\${keyField}/g, relationship.keyField || "_id")
+            .replace(/\${idMapping}/g, relationship.type.fields[relationship.keyField || "_id"] === MongoIdType ? "id => ObjectId(id)" : "id => id")
+            .replace(/\${targetObjName}/g, relationshipName)
+            .replace(/\${targetTypeName}/g, relationship.type.__name)
+            .replace(/\${targetTypeNameLower}/g, relationship.type.__name.toLowerCase())
+            .replace(/\${sourceParam}/g, objName.toLowerCase())
+            .replace(/\${sourceObjName}/g, objName)
+            .replace(/\${dataLoaderId}/g, `__${objName}_${relationshipName}DataLoader`)
+            .replace(
+              /\${receivingKeyForce}/g,
+              relationship.keyField && relationship.keyField != "_id" ? `, { force: ["${relationship.keyField}"] }` : ""
+            )
+        );
       }
     });
   }
 
   result += template
+    .replace(/\${typeExtrasAndRelationships}/g, relationshipResolvers.concat(typeExtras).join(","))
     .replace(/\${queryItems}/g, queryItems)
-    .replace(/\${typeExtras}/g, typeExtras)
     .replace(/\${mutationItems}/g, mutationItems)
-    .replace(/\${relationshipResolvers}/g, relationshipResolvers)
     .replace(/\${table}/g, objectToCreate.table)
     .replace(/\${objName}/g, objName)
     .replace(/\${objNameLower}/g, objName.toLowerCase());
