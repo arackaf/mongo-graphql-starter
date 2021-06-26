@@ -7,7 +7,7 @@ import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
 import createMasterSchema from "./codeGen/createMasterSchema";
-import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
+
 import createMasterResolver from "./codeGen/createMasterResolver";
 import createTypeScriptTypes from "./codeGen/createTypeScriptTypes";
 import createTestSchema from "./codeGen/createTestSchema";
@@ -120,9 +120,12 @@ export default function (source, destPath, options = {}) {
       }
     });
 
-    const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
     fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable)));
+
+    const schemaModule = require(path.join(rootDir, "schema.js"));
+    const masterSchema = formatGraphQL(schemaModule.default);
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
+
     try {
       fs.writeFileSync(
         path.join(rootDir, "test-resolvers.js"),
