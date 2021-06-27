@@ -10,8 +10,13 @@ import mkdirp from "mkdirp";
 import * as projectSetupF from "./projectSetup";
 
 export async function create() {
+  //TODO: this shit
   await Promise.resolve(
-    createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
+    createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"), {
+      hooks: path.resolve(__dirname, "./projectSetup_Hooks.js"),
+      schemaAdditions: [path.resolve(__dirname, "./graphQL-extras/schemaAdditions.gql")],
+      resolverAdditions: [path.resolve(__dirname, "./graphQL-extras/resolverAdditions")]
+    })
   ).then(() => {
     if (!fs.existsSync("./test/testProject6/graphQL-extras")) {
       mkdirp.sync("./test/testProject6/graphQL-extras");

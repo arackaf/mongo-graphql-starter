@@ -120,7 +120,12 @@ export default function (source, destPath, options = {}) {
       }
     });
 
-    fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable)));
+    const schemaAdditions = (options.schemaAdditions || []).map(path => fs.readFileSync(path, { encoding: "utf8" }));
+    const resolverAdditions = options.resolverAdditions || [];
+    fs.writeFileSync(
+      path.join(rootDir, "schema.js"),
+      formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable, schemaAdditions))
+    );
 
     const schemaModule = require(path.join(rootDir, "schema.js"));
     const masterSchema = formatGraphQL(schemaModule.default);
@@ -143,7 +148,7 @@ export default function (source, destPath, options = {}) {
       });
     }
 
-    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables, namesWriteable)));
+    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables, namesWriteable, resolverAdditions)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
       fs.writeFileSync(
         path.join(rootDir, "hooks.js"),
