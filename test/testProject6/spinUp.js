@@ -14,8 +14,14 @@ export async function create() {
   await Promise.resolve(
     createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"), {
       hooks: path.resolve(__dirname, "./projectSetup_Hooks.js"),
-      schemaAdditions: [path.resolve(__dirname, "./graphQL-extras/schemaAdditions.gql")],
-      resolverAdditions: [path.resolve(__dirname, "./graphQL-extras/resolverAdditions")]
+      schemaAdditions: [
+        path.resolve(__dirname, "./graphQL-extras/schemaAdditions1.gql"),
+        path.resolve(__dirname, "./graphQL-extras/schemaAdditions2.gql")
+      ],
+      resolverAdditions: [
+        path.resolve(__dirname, "./graphQL-extras/resolverAdditions1"),
+        path.resolve(__dirname, "./graphQL-extras/resolverAdditions2")
+      ]
     })
   ).then(() => {
     if (!fs.existsSync("./test/testProject6/graphQL-extras")) {

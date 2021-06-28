@@ -25,3 +25,19 @@ test("Test addition 2", async () => {
     rawResult: "updateAddedType"
   });
 });
+
+test("Test addition 3", async () => {
+  const res = await runQuery({
+    query: `{getAddedType2(arg: ""){val}}`,
+    coll: "getAddedType2"
+  });
+
+  expect(res.val).toBe("Some Value");
+});
+
+test("Test addition 4", async () => {
+  const res = await runMutation({
+    mutation: `updateAddedType2(arg: "")`,
+    rawResult: "updateAddedType2"
+  });
+});
