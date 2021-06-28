@@ -12,11 +12,12 @@ afterAll(async () => {
 
 test("Test addition 1", async () => {
   const res = await runQuery({
-    query: `{getAddedType(arg: ""){val}}`,
+    query: `{getAddedType(arg: ""){val, val2}}`,
     coll: "getAddedType"
   });
 
   expect(res.val).toBe("Some Value");
+  expect(res.val2).toBe("val2");
 });
 
 test("Test addition 2", async () => {

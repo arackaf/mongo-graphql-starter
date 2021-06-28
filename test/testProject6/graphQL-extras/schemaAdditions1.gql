@@ -1,5 +1,6 @@
 type AddedType {
   val: String
+  val2: String
 }
 
 extend type Query {

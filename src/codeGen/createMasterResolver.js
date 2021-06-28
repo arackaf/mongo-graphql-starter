@@ -5,7 +5,10 @@ export default function createMasterResolver(namesWithTables, writeableNames, re
   let resolverDestructurings = "const " + namesWithTables.map(n => `{ Query: ${n}Query, Mutation: ${n}Mutation } = ${n}`).join(";\nconst ") + ";";
   let resolverAdditionImports = resolverAdditions.map((n, i) => `import resolverAddition${i + 1} from '${n}';`).join("\n");
   let resolverAdditionDestructurings = resolverAdditions
-    .map((n, i) => `const { Query: queryAddition${i + 1} = {}, Mutation: mutationAddition${i + 1} = {} } = resolverAddition${i + 1};`)
+    .map(
+      (n, i) =>
+        `const { Query: queryAddition${i + 1} = {}, Mutation: mutationAddition${i + 1} = {}, ...restAdditions${i + 1} } = resolverAddition${i + 1};`
+    )
     .join("\n");
 
   return `${[
@@ -29,7 +32,7 @@ ${[...writeableNames.map(n => `${n}Mutation`), ...resolverAdditions.map((n, i) =
 ),`
       : ""
   }
-${namesWithTables.length ? TAB : ""}${namesWithTables.map(n => `${n}: { ...${n}Rest }`).join(`,\n  `)}
+${[...namesWithTables.map(n => `${n}: { ...${n}Rest }`), ...resolverAdditions.map((n, i) => `...restAdditions${i + 1}`)].join(`,\n  `)}
 };
 
 `;
