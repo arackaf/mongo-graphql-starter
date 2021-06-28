@@ -48,6 +48,7 @@ or advanced edge cases as needed.
 - [Integrating custom content](#integrating-custom-content)
   - [schemaSources example](#schemasources-example)
   - [resolverSources example](#resolversources-example)
+  - [Adding Arbitrary Schema and Resolver Content](#adding-arbitrary-schema-and-resolver-content)
 - [Defining relationships between types](#defining-relationships-between-types)
   - [Using relationships](#using-relationships)
   - [Implementation](#implementation)
@@ -827,7 +828,7 @@ export default {
 };
 ```
 
-Here we see the `getCoordinate` and `updateCoordinate` query and mutation which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions however you may want. Also defined are a new query, and mutation.
+Here we see the definition for `getCoordinate` and `updateCoordinate` which we overrode above, defined. These definitions keep the same arguments, but change the return type. Here the results are the queried objects alone, **not** contained under a `Coordinate` object, and without any metadata that would normally be available; you're free to change built-in definitions however you may want. Also defined are a new query, and mutation.
 
 ### resolverSources example
 
@@ -860,9 +861,68 @@ export default {
 };
 ```
 
-Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (in real life you can of course make these async methods and actually query real data). The `Query` entry contains the `getCoordinate` query that was overridden, plus the `randomQuery` defined in the schema file above.  Lastly, of course, is the `Mutation` entry that has the `updateCoordinate` mutation that we overrode, and the new, `randomMutation` from before.
+Here we've defined our resolver for the `pointAbove` and `allNeighbors` fields (you can of course make these async methods and actually query real data). The `Query` entry contains the `getCoordinate` query that was overridden, plus the `randomQuery` defined in the schema file above.  Lastly, the `Mutation` entry has the `updateCoordinate` mutation that we overrode, and `randomMutation`.
 
-You can add as many of these files as you need.  Needless to say, if no queries or mutations are being added, those sections can be omitted.
+You can add as many of these files as you need.  If no queries or mutations are being added, those sections can be omitted.
+
+### Adding Arbitrary Schema and Resolver Content 
+
+`resolverSources` and `schemaSources` are meant for adding content specific for types you're already defining, and connecting to Mongo. If you have portions of your GraphQL endpoint that are defined separate from Mongo, for example in Dynamo, PostgresSQL, etc., and you'd like to add arbitrary content to your GraphQL schema, you can do that by specifying `schemaAdditions` and `resolverAdditions` when you call `createGraphqlSchema`.
+
+```js
+createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"), {
+  hooks: path.resolve(__dirname, "./projectSetup_Hooks.js"),
+  schemaAdditions: [
+    path.resolve(__dirname, "./graphQL-extras/schemaAdditions1.gql"),
+    path.resolve(__dirname, "./graphQL-extras/schemaAdditions2.gql")
+  ],
+  resolverAdditions: [
+    path.resolve(__dirname, "./graphQL-extras/resolverAdditions1"),
+    path.resolve(__dirname, "./graphQL-extras/resolverAdditions2")
+  ]
+})
+```
+
+The schema files will be read, and their text added directly to your overall schema. For example, `schemaAdditions1.gql` might contain this content
+
+```graphql
+type AddedType {
+  val: String
+  val2: String
+}
+
+extend type Query {
+  getAddedType(arg: String): AddedType
+}
+
+extend type Mutation {
+  updateAddedType(arg: String): Boolean
+}
+```
+
+while `resolverAdditions1` should default export an object, with optional Query, Mutation, and other properties that will be merged appropriately with the overall resolver code that is generated.
+
+```js
+export default {
+  AddedType: {
+    val2() {
+      return "val2";
+    }
+  },
+  Query: {
+    getAddedType(arg) {
+      return {
+        val: "Some Value"
+      };
+    }
+  },
+  Mutation: {
+    updateAddedType(arg) {
+      return true;
+    }
+  }
+};
+```
 
 ## Defining relationships between types
 
