@@ -1,4 +1,5 @@
 import { StringType, StringArrayType, IntType, MongoIdType } from "../../src/dataTypes";
+import path from "path";
 
 const fields = {
   field1: StringType,
@@ -73,8 +74,8 @@ export const Coordinate = {
     allNeighbors: "[Coordinate]"
   },
   extras: {
-    resolverSources: ["../../graphQL-extras/coordinateResolverExtras"],
-    schemaSources: ["../../graphQL-extras/coordinateSchemaExtras"],
+    resolverSources: [path.join(__dirname, "graphQL-extras/coordinateResolverExtras")],
+    schemaSources: [path.join(__dirname, "graphQL-extras/coordinateSchemaExtras")],
     overrides: ["getCoordinate", "updateCoordinate"]
   }
 };

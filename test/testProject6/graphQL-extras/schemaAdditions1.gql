@@ -1,0 +1,12 @@
+type AddedType {
+  val: String
+  val2: String
+}
+
+extend type Query {
+  getAddedType(arg: String): AddedType
+}
+
+extend type Mutation {
+  updateAddedType(arg: String): Boolean
+}

@@ -10,8 +10,19 @@ import mkdirp from "mkdirp";
 import * as projectSetupF from "./projectSetup";
 
 export async function create() {
+  //TODO: this shit
   await Promise.resolve(
-    createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })
+    createGraphqlSchema(projectSetupF, path.resolve("./test/testProject6"), {
+      hooks: path.resolve(__dirname, "./projectSetup_Hooks.js"),
+      schemaAdditions: [
+        path.resolve(__dirname, "./graphQL-extras/schemaAdditions1.gql"),
+        path.resolve(__dirname, "./graphQL-extras/schemaAdditions2.gql")
+      ],
+      resolverAdditions: [
+        path.resolve(__dirname, "./graphQL-extras/resolverAdditions1"),
+        path.resolve(__dirname, "./graphQL-extras/resolverAdditions2")
+      ]
+    })
   ).then(() => {
     if (!fs.existsSync("./test/testProject6/graphQL-extras")) {
       mkdirp.sync("./test/testProject6/graphQL-extras");
@@ -34,16 +45,13 @@ export async function create() {
   });
 }
 
-export default async function() {
+export default async function () {
   await create();
 
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);
 
   let db, schema;
-  let client = await MongoClient.connect(
-    nextConnectionString(),
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  );
+  let client = await MongoClient.connect(nextConnectionString(), { useNewUrlParser: true, useUnifiedTopology: true });
   db = client.db(process.env.databaseName || "mongo-graphql-starter");
   schema = makeExecutableSchema({ typeDefs, resolvers, initialValue: { db: {} } });
 

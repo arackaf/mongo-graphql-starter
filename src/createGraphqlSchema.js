@@ -7,7 +7,7 @@ import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
 import createMasterSchema from "./codeGen/createMasterSchema";
-import createMasterGqlSchema from "./codeGen/createMasterGqlSchema";
+
 import createMasterResolver from "./codeGen/createMasterResolver";
 import createTypeScriptTypes from "./codeGen/createTypeScriptTypes";
 import createTestSchema from "./codeGen/createTestSchema";
@@ -120,9 +120,17 @@ export default function (source, destPath, options = {}) {
       }
     });
 
-    const masterSchema = formatGraphQL(createMasterGqlSchema(types, rootDir));
-    fs.writeFileSync(path.join(rootDir, "schema.js"), formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable)));
+    const schemaAdditions = (options.schemaAdditions || []).map(path => fs.readFileSync(path, { encoding: "utf8" }));
+    const resolverAdditions = options.resolverAdditions || [];
+    fs.writeFileSync(
+      path.join(rootDir, "schema.js"),
+      formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable, schemaAdditions))
+    );
+
+    const schemaModule = require(path.join(rootDir, "schema.js"));
+    const masterSchema = formatGraphQL(schemaModule.default);
     fs.writeFileSync(path.join(rootDir, "entireSchema.gql"), masterSchema);
+
     try {
       fs.writeFileSync(
         path.join(rootDir, "test-resolvers.js"),
@@ -140,7 +148,7 @@ export default function (source, destPath, options = {}) {
       });
     }
 
-    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables, namesWriteable)));
+    fs.writeFileSync(path.join(rootDir, "resolver.js"), formatJs(createMasterResolver(namesWithTables, namesWriteable, resolverAdditions)));
     if (!options.hooks && !fs.existsSync(path.join(rootDir, "hooks.js"))) {
       fs.writeFileSync(
         path.join(rootDir, "hooks.js"),

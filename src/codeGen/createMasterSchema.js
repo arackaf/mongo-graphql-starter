@@ -1,6 +1,6 @@
 import globalSchemaTypes from "./globalSchemaTypes";
 
-export default function createMasterSchema(names, namesWithTables, namesWithoutTables, writeableNames) {
+export default function createMasterSchema(names, namesWithTables, namesWithoutTables, writeableNames, schemaAdditions) {
   let schemaImports = namesWithTables
     .map(n => `import { query as ${n}Query, mutation as ${n}Mutation, type as ${n}Type } from './${n}/schema';`)
     .concat(namesWithoutTables.map(n => `import { type as ${n}Type } from './${n}/schema';`))
@@ -24,6 +24,8 @@ ${globalSchemaTypes}
   }`
       : ""
   }
+
+  ${schemaAdditions.join("\n\n")}
 
 \``;
 }
