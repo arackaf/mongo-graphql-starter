@@ -121,7 +121,7 @@ export default function (source, destPath, options = {}) {
     });
 
     const schemaAdditions = (options.schemaAdditions || []).map(path => fs.readFileSync(path, { encoding: "utf8" }));
-    const resolverAdditions = options.resolverAdditions || [];
+    const resolverAdditions = (options.resolverAdditions || []).map(uri => path.relative(rootDir, uri).replace(/\\/g, "/"));
     fs.writeFileSync(
       path.join(rootDir, "schema.js"),
       formatJs(createMasterSchema(names, namesWithTables, namesWithoutTables, namesWriteable, schemaAdditions))
