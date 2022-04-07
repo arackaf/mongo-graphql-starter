@@ -72,7 +72,10 @@ export default function createGraphqlTypeSchema(objectToCreate) {
           .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
       ]),
       createInput(`${name}MutationInput`, [
-        ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
+        ...flatMap(
+          Object.keys(fields).filter(k => k != "_id"),
+          k => fieldMutations(k, fields)
+        ),
         ...Object.entries(relationships)
           .filter(([k, rel]) => !rel.oneToMany && !rel.readonly)
           .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
@@ -147,28 +150,17 @@ export default function createGraphqlTypeSchema(objectToCreate) {
 }
 
 function fieldType(value, useInputs) {
-  if (typeof value === "object" && value.__isDate) {
+  if (value.__isDate) {
     return "String";
-  } else if (typeof value === "string") {
-    switch (value) {
-      case StringArrayType:
-        return "[String]";
-      case IntArrayType:
-        return "[Int]";
-      case FloatArrayType:
-        return "[Float]";
-      case MongoIdArrayType:
-        return "[String]";
-      default:
-        return `${value == MongoIdType || value == DateType ? "String" : value}`;
-    }
-  } else if (typeof value === "object") {
+  } else {
     if (value.__isArray) {
       return `[${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}]`;
     } else if (value.__isLiteral) {
       return value.type;
     } else if (value.__isObject) {
       return `${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}`;
+    } else {
+      return value.type;
     }
   }
 }
@@ -197,61 +189,9 @@ function relationshipType(value, useInputs) {
 function fieldMutations(k, fields) {
   let value = fields[k];
 
-  if (typeof value === "object" && value.__isDate) {
+  if (value.__isDate) {
     return [`${k}: String`];
-  } else if (typeof value === "string") {
-    if (value === BoolType) {
-      return [`${k}: Boolean`];
-    } else if (value === "Int") {
-      return [`${k}: Int`, `${k}_INC: Int`, `${k}_DEC: Int`];
-    } else if (value === "Float") {
-      return [`${k}: Float`, `${k}_INC: Int`, `${k}_DEC: Int`];
-    } else if (value === JSONType) {
-      return [`${k}: JSON`];
-    } else if (value === StringArrayType) {
-      return [
-        `${k}: [String]`,
-        `${k}_PUSH: String`,
-        `${k}_CONCAT: [String]`,
-        `${k}_UPDATE: StringArrayUpdate`,
-        `${k}_UPDATES: [StringArrayUpdate]`,
-        `${k}_PULL: [String]`,
-        `${k}_ADDTOSET: [String]`
-      ];
-    } else if (value === IntArrayType) {
-      return [
-        `${k}: [Int]`,
-        `${k}_PUSH: Int`,
-        `${k}_CONCAT: [Int]`,
-        `${k}_UPDATE: IntArrayUpdate`,
-        `${k}_UPDATES: [IntArrayUpdate]`,
-        `${k}_PULL: [Int]`,
-        `${k}_ADDTOSET: [Int]`
-      ];
-    } else if (value === FloatArrayType) {
-      return [
-        `${k}: [Float]`,
-        `${k}_PUSH: Float`,
-        `${k}_CONCAT: [Float]`,
-        `${k}_UPDATE: FloatArrayUpdate`,
-        `${k}_UPDATES: [FloatArrayUpdate]`,
-        `${k}_PULL: [Float]`,
-        `${k}_ADDTOSET: [Float]`
-      ];
-    } else if (value === MongoIdArrayType) {
-      return [
-        `${k}: [String]`,
-        `${k}_PUSH: String`,
-        `${k}_CONCAT: [String]`,
-        `${k}_UPDATE: StringArrayUpdate`,
-        `${k}_UPDATES: [StringArrayUpdate]`,
-        `${k}_PULL: [String]`,
-        `${k}_ADDTOSET: [String]`
-      ];
-    }
-
-    return [`${k}: String`];
-  } else if (typeof value === "object") {
+  } else {
     if (value.__isArray) {
       return [
         `${k}: [${value.type.__name}Input]`,
@@ -265,6 +205,23 @@ function fieldMutations(k, fields) {
       return [`${k}: ${value.type}`];
     } else if (value.__isObject) {
       return [`${k}: ${value.type.__name}Input`, `${k}_UPDATE: ${value.type.__name}MutationInput`];
+    } else {
+      if (value.scalarArray) {
+        const underlyingType = value.underlyingType;
+        const type = value.type;
+
+        return [
+          `${k}: ${type}`,
+          `${k}_PUSH: ${underlyingType}`,
+          `${k}_CONCAT: ${type}`,
+          `${k}_UPDATE: ${underlyingType}ArrayUpdate`,
+          `${k}_UPDATES: [${underlyingType}ArrayUpdate]`,
+          `${k}_PULL: ${type}`,
+          `${k}_ADDTOSET: ${type}`
+        ];
+      } else {
+        return [`${k}: ${value.type}`];
+      }
     }
   }
 }

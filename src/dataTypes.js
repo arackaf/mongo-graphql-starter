@@ -1,16 +1,22 @@
 import { ObjectId } from "mongodb";
 
-export const MongoIdType = "MongoId";
-export const MongoIdArrayType = "MongoIdArray";
-export const StringType = "String";
-export const StringArrayType = "StringArray";
-export const IntType = "Int";
-export const IntArrayType = "IntArray";
-export const FloatType = "Float";
-export const FloatArrayType = "FloatArray";
-export const DateType = "Date";
-export const BoolType = "Boolean";
-export const JSONType = "JSON";
+const makeType = (props = {}) => {
+  return {
+    ...props
+  };
+};
+
+export const MongoIdType = { type: "String" };
+export const MongoIdArrayType = { type: "[String]", scalarArray: true, underlyingType: "String" };
+export const StringType = { type: "String" };
+export const StringArrayType = { type: "[String]", scalarArray: true, underlyingType: "String" };
+export const IntType = { type: "Int" };
+export const IntArrayType = { type: "[Int]", scalarArray: true, underlyingType: "Int" };
+export const FloatType = { type: "Float" };
+export const FloatArrayType = { type: "[Float]", scalarArray: true, underlyingType: "Float" };
+export const DateType = { type: "Date" };
+export const BoolType = { type: "Boolean" };
+export const JSONType = { type: "JSON" };
 
 export const arrayOf = type => {
   type.__usedInArray = true;

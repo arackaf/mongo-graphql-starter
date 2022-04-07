@@ -88,7 +88,7 @@ export default function createOutputTypeMetadata(objectToCreate) {
             } else {
               return {
                 name: k,
-                value: fields[k]
+                value: fields[k].type
               };
             }
           })
