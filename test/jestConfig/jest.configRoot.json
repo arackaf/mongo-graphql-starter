@@ -4,7 +4,5 @@
   "testEnvironment": "node",
   "coverageDirectory": "<rootDir>/coverage/",
   "collectCoverage": true,
-  "collectCoverageFrom": [
-    "<rootDir>/src/**/*.js"
-  ]
+  "collectCoverageFrom": ["<rootDir>/src/**/*.js"]
 }
