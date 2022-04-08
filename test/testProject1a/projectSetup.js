@@ -43,7 +43,18 @@ export const Book = {
     strArrs: fieldOf(typeLiteral("[[String]]")),
     createdOn: fieldOf(DateType),
     createdOnYearOnly: fieldOf(formattedDate({ format: "%Y" })),
-    jsonContent: fieldOf(JSONType)
+    jsonContent: fieldOf(JSONType),
+
+    nq__id: fieldOf(MongoIdType).nonQueryable(),
+    nq_str: fieldOf(StringType).nonQueryable(),
+    nq_strArr: fieldOf(StringArrayType).nonQueryable(),
+    nq_bool: fieldOf(BoolType).nonQueryable(),
+    nq_int: fieldOf(IntType).nonQueryable(),
+    nq_intArr: fieldOf(IntArrayType).nonQueryable(),
+    nq_float: fieldOf(FloatType).nonQueryable(),
+    nq_floatArr: fieldOf(FloatArrayType).nonQueryable(),
+    nq_date: fieldOf(DateType).nonQueryable(),
+    nq_json: fieldOf(JSONType).nonQueryable()
   }
 };
 

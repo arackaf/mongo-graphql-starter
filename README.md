@@ -16,7 +16,7 @@ The idea is to auto-generate the mundane, repetitive boilerplate needed for a gr
   - [Prior art](#prior-art)
   - [How do you use it?](#how-do-you-use-it)
     - [Valid types for your fields](#valid-types-for-your-fields)
-    - [Adding adding traits to your properties](#adding-adding-traits-to-your-properties)
+    - [Adding property traits](#adding-property-traits)
     - [Readonly types](#readonly-types)
     - [Circular dependencies are fine](#circular-dependencies-are-fine)
   - [VS Code integration](#vs-code-integration)
