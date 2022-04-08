@@ -7,14 +7,14 @@ const makeType = (props = {}) => {
 };
 
 export const MongoIdType = { type: "String" };
-export const MongoIdArrayType = { type: "[String]", scalarArray: true, underlyingType: "String" };
+export const MongoIdArrayType = { __mongoIdArray: true, type: "[String]", scalarArray: true, underlyingType: "String" };
 export const StringType = { type: "String" };
 export const StringArrayType = { type: "[String]", scalarArray: true, underlyingType: "String" };
 export const IntType = { type: "Int" };
 export const IntArrayType = { type: "[Int]", scalarArray: true, underlyingType: "Int" };
 export const FloatType = { type: "Float" };
 export const FloatArrayType = { type: "[Float]", scalarArray: true, underlyingType: "Float" };
-export const DateType = { type: "Date" };
+export const DateType = { __isDate: true, type: "String" };
 export const BoolType = { type: "Boolean" };
 export const JSONType = { type: "JSON" };
 
@@ -50,6 +50,7 @@ export const typeLiteral = type => {
 export const formattedDate = options => {
   return {
     ...options,
+    type: "String",
     __isDate: true
   };
 };

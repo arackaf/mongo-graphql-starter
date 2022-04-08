@@ -227,69 +227,63 @@ function fieldMutations(k, fields) {
 }
 
 function queriesForField(fieldName, realFieldType) {
-  if (typeof realFieldType === "object" && realFieldType.__isDate) {
-    realFieldType = DateType;
-  }
   let result = [];
-  let fieldType = realFieldType === DateType || realFieldType === MongoIdType ? "String" : realFieldType;
-  switch (realFieldType) {
-    case StringType:
-      result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`, `${fieldName}_regex`].map(p => `${p}: String`));
-      break;
-    case IntType:
-    case FloatType:
-    case DateType:
-      result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
-      break;
-    case IntArrayType:
-    case FloatArrayType:
-      let singleType = realFieldType == IntArrayType ? "Int" : "Float";
-      result.push(`${fieldName}_count: Int`);
-      result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${singleType}`));
-      result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
-      result.push(
-        `${fieldName}: [${singleType}]`,
-        `${fieldName}_in: [[${singleType}]]`,
-        `${fieldName}_nin: [[${singleType}]]`,
-        `${fieldName}_contains: ${singleType}`,
-        `${fieldName}_containsAny: [${singleType}]`,
-        `${fieldName}_containsAll: [${singleType}]`,
-        `${fieldName}_ne: [${singleType}]`
-      );
-      break;
-    case StringArrayType:
-      result.push(`${fieldName}_count: Int`);
-      result.push(
-        ...[`${fieldName}_textContains: String`, `${fieldName}_startsWith: String`, `${fieldName}_endsWith: String`, `${fieldName}_regex: String`]
-      );
-    case MongoIdArrayType:
-      result.push(
-        ...[
-          `${fieldName}: [String]`,
-          `${fieldName}_in: [[String]]`,
-          `${fieldName}_nin: [[String]]`,
-          `${fieldName}_contains: String`,
-          `${fieldName}_containsAny: [String]`,
-          `${fieldName}_containsAll: [String]`,
-          `${fieldName}_ne: [String]`
-        ]
-      );
-      break;
+  let fieldType = realFieldType.type;
+  if (realFieldType.type === "String") {
+    result.push(...[`${fieldName}_contains`, `${fieldName}_startsWith`, `${fieldName}_endsWith`, `${fieldName}_regex`].map(p => `${p}: String`));
   }
 
-  switch (realFieldType) {
-    case MongoIdType:
-    case StringType:
-    case IntType:
-    case FloatType:
-    case DateType:
-    case BoolType:
+  if (realFieldType.type === "Int" || realFieldType.type === "Float" || realFieldType.__isDate) {
+    result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${fieldType}`));
+  }
+
+  if (realFieldType.type === "[Int]" || realFieldType.type === "[Float]") {
+    let singleType = realFieldType.underlyingType;
+    result.push(`${fieldName}_count: Int`);
+    result.push(...[`${fieldName}_lt`, `${fieldName}_lte`, `${fieldName}_gt`, `${fieldName}_gte`].map(p => `${p}: ${singleType}`));
+    result.push(...[`${fieldName}_emlt`, `${fieldName}_emlte`, `${fieldName}_emgt`, `${fieldName}_emgte`].map(p => `${p}: ${singleType}`));
+    result.push(
+      `${fieldName}: [${singleType}]`,
+      `${fieldName}_in: [[${singleType}]]`,
+      `${fieldName}_nin: [[${singleType}]]`,
+      `${fieldName}_contains: ${singleType}`,
+      `${fieldName}_containsAny: [${singleType}]`,
+      `${fieldName}_containsAll: [${singleType}]`,
+      `${fieldName}_ne: [${singleType}]`
+    );
+  }
+  if (realFieldType.type === "[String]") {
+    result.push(`${fieldName}_count: Int`);
+    result.push(
+      ...[`${fieldName}_textContains: String`, `${fieldName}_startsWith: String`, `${fieldName}_endsWith: String`, `${fieldName}_regex: String`]
+    );
+  }
+
+  if (realFieldType.__mongoIdArray) {
+    result.push(
+      ...[
+        `${fieldName}: [String]`,
+        `${fieldName}_in: [[String]]`,
+        `${fieldName}_nin: [[String]]`,
+        `${fieldName}_contains: String`,
+        `${fieldName}_containsAny: [String]`,
+        `${fieldName}_containsAll: [String]`,
+        `${fieldName}_ne: [String]`
+      ]
+    );
+  }
+
+  switch (realFieldType.type) {
+    case "String":
+    case "Int":
+    case "Float":
+    case "Boolean":
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
       result.push(`${fieldName}_nin: [${fieldType}]`);
       break;
-    case JSONType:
+    case "JSON":
       result.push(`${fieldName}: ${fieldType}`);
       result.push(`${fieldName}_ne: ${fieldType}`);
       result.push(`${fieldName}_in: [${fieldType}]`);
