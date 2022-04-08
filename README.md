@@ -12,59 +12,61 @@ The idea is to auto-generate the mundane, repetitive boilerplate needed for a gr
 
 <!-- TOC -->
 
-- [Prior art](#prior-art)
-- [How do you use it?](#how-do-you-use-it)
-  - [Valid types for your fields](#valid-types-for-your-fields)
-  - [Readonly types](#readonly-types)
-  - [Circular dependencies are fine](#circular-dependencies-are-fine)
-- [VS Code integration](#vs-code-integration)
-- [TypeScript integration](#typescript-integration)
-- [Queries created](#queries-created)
-  - [Projecting results from queries](#projecting-results-from-queries)
-  - [Fragment support](#fragment-support)
-  - [Custom query arguments](#custom-query-arguments)
-- [Filters created](#filters-created)
-  - [null values](#null-values)
-  - [String filters](#string-filters)
-  - [String array filters](#string-array-filters)
-  - [Int filters](#int-filters)
-  - [Int array filters](#int-array-filters)
-  - [Float filters](#float-filters)
-  - [Float array filters](#float-array-filters)
-  - [Date filters](#date-filters)
-  - [Formatting dates](#formatting-dates)
-  - [OR Queries](#or-queries)
-  - [Nested object and array filters](#nested-object-and-array-filters)
-  - [Sorting](#sorting)
-  - [Paging](#paging)
-- [Mutations](#mutations)
-  - [Creations](#creations)
-  - [Updates](#updates)
-    - [The Updates argument](#the-updates-argument)
-  - [Deleting](#deleting)
-  - [Mutation examples](#mutation-examples)
-- [Transactions](#transactions)
-- [Integrating custom content](#integrating-custom-content)
-  - [schemaSources example](#schemasources-example)
-  - [resolverSources example](#resolversources-example)
-  - [Adding Arbitrary Schema and Resolver Content](#adding-arbitrary-schema-and-resolver-content)
-- [Defining relationships between types](#defining-relationships-between-types)
-  - [Using relationships](#using-relationships)
-  - [Implementation](#implementation)
-  - [Creating related data](#creating-related-data)
-    - [In creations](#in-creations)
-    - [In updates (not one-to-many)](#in-updates-not-one-to-many)
-    - [In updates (one-to-many)](#in-updates-one-to-many)
-    - [In lifecycle hooks](#in-lifecycle-hooks)
-- [Lifecycle hooks](#lifecycle-hooks)
-  - [All available hooks](#all-available-hooks)
-    - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
-  - [How to define hooks](#how-to-define-hooks)
-    - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)
-    - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
-    - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
-- [A closer look at what's generated](#a-closer-look-at-whats-generated)
-- [Run tests](#run-tests)
+- [mongo-graphql-starter](#mongo-graphql-starter)
+  - [Prior art](#prior-art)
+  - [How do you use it?](#how-do-you-use-it)
+    - [Valid types for your fields](#valid-types-for-your-fields)
+    - [Adding adding traits to your properties](#adding-adding-traits-to-your-properties)
+    - [Readonly types](#readonly-types)
+    - [Circular dependencies are fine](#circular-dependencies-are-fine)
+  - [VS Code integration](#vs-code-integration)
+  - [TypeScript integration](#typescript-integration)
+  - [Queries created](#queries-created)
+    - [Projecting results from queries](#projecting-results-from-queries)
+    - [Fragment support](#fragment-support)
+    - [Custom query arguments](#custom-query-arguments)
+  - [Filters created](#filters-created)
+    - [null values](#null-values)
+    - [String filters](#string-filters)
+    - [String array filters](#string-array-filters)
+    - [Int filters](#int-filters)
+    - [Int array filters](#int-array-filters)
+    - [Float filters](#float-filters)
+    - [Float array filters](#float-array-filters)
+    - [Date filters](#date-filters)
+    - [Formatting dates](#formatting-dates)
+    - [OR Queries](#or-queries)
+    - [Nested object and array filters](#nested-object-and-array-filters)
+    - [Sorting](#sorting)
+    - [Paging](#paging)
+  - [Mutations](#mutations)
+    - [Creations](#creations)
+    - [Updates](#updates)
+      - [The Updates argument](#the-updates-argument)
+    - [Deleting](#deleting)
+    - [Mutation examples](#mutation-examples)
+  - [Transactions](#transactions)
+  - [Integrating custom content](#integrating-custom-content)
+    - [schemaSources example](#schemasources-example)
+    - [resolverSources example](#resolversources-example)
+    - [Adding Arbitrary Schema and Resolver Content](#adding-arbitrary-schema-and-resolver-content)
+  - [Defining relationships between types](#defining-relationships-between-types)
+    - [Using relationships](#using-relationships)
+    - [Implementation](#implementation)
+    - [Creating related data](#creating-related-data)
+      - [In creations](#in-creations)
+      - [In updates (not one-to-many)](#in-updates-not-one-to-many)
+      - [In updates (one-to-many)](#in-updates-one-to-many)
+      - [In lifecycle hooks](#in-lifecycle-hooks)
+  - [Lifecycle hooks](#lifecycle-hooks)
+    - [All available hooks](#all-available-hooks)
+      - [The `queryPacket` argument to the queryMiddleware hook](#the-querypacket-argument-to-the-querymiddleware-hook)
+    - [How to define hooks](#how-to-define-hooks)
+      - [Customizing the location of your hooks file.](#customizing-the-location-of-your-hooks-file)
+      - [Doing asynchronous processing in hooks.](#doing-asynchronous-processing-in-hooks)
+      - [Reusing code across types' hooks](#reusing-code-across-types-hooks)
+  - [A closer look at what's generated](#a-closer-look-at-whats-generated)
+  - [Run tests](#run-tests)
 
 <!-- /TOC -->
 
@@ -243,6 +245,24 @@ const {
 | `objectOf`         | Function: Pass it a type you've created to specify a single object of that type |
 | `arrayOf`          | Function: Pass it a type you've created to specify an array of that type |
 | `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though you can add your own to the generated code.         |
+
+### Adding adding traits to your properties 
+
+If you'd like to modify the default behavior of properties on a type, you can create them with the `fieldOf` builder. Pass it the type you want, from the prior section, and then call the appropriate method to modify it, and add the desired trait. 
+
+Right now, the only trait is nonQueryable, which prevents queries for being generated for that type, removing some bloat from your GraphQL api. These properties will still be editable and readable, there just won't be any queries generated for them.
+
+```js
+import { MongoIdType, StringType, fieldOf      } from "../../src/dataTypes";
+
+export const Book = {
+  table: "books",
+  fields: {
+    _id: fieldOf(MongoIdType).nonQueryable(),
+    title: fieldOf(StringType).nonQueryable(),
+  }
+};
+```
 
 ### Readonly types
 
