@@ -15,3 +15,4 @@ coverage/
 graphql-types.ts
 data
 .env
+test/testProject1a/graphQL

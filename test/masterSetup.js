@@ -3,6 +3,7 @@ const del = require("del");
 module.exports = () => {
   try {
     del.sync("test/testProject1/graphQL");
+    del.sync("test/testProject1a/graphQL");
     del.sync("test/testProject1_NewDriver/graphQL");
     del.sync("test/testProject2/graphQL");
     del.sync("test/testProject3/graphQL");
