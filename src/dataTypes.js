@@ -1,5 +1,17 @@
 import { ObjectId } from "mongodb";
 
+export const fieldOf = type => {
+  return {
+    customField: true,
+    type,
+    traits: new Set([]),
+    nonQueryable() {
+      this.traits.add("non-queryable");
+      return this;
+    }
+  };
+};
+
 export const MongoIdType = "MongoId";
 export const MongoIdArrayType = "MongoIdArray";
 export const StringType = "String";
