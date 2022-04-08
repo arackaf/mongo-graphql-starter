@@ -246,20 +246,21 @@ const {
 | `arrayOf`          | Function: Pass it a type you've created to specify an array of that type |
 | `typeLiteral`      | Function: pass it an arbitrary string to specify a field of that GraphQL type. The field will be available in queries, but no filters will be created, though you can add your own to the generated code.         |
 
-### Adding adding traits to your properties 
+### Adding property traits 
 
-If you'd like to modify the default behavior of properties on a type, you can create them with the `fieldOf` builder. Pass it the type you want, from the prior section, and then call the appropriate method to modify it, and add the desired trait. 
+If you'd like to modify the default behavior of a type's properties, you can use the `fieldOf` builder. Pass it a type from the prior section, and call the appropriate method to add the desired trait. 
 
-Right now, the only trait is nonQueryable, which prevents queries for being generated for that type, removing some bloat from your GraphQL api. These properties will still be editable and readable, there just won't be any queries generated for them.
+For now, the only available trait is `nonQueryable`, which prevents queries from being generated for a property. This will remove some bloat from your GraphQL api. These properties will still be editable and readable, but no queries will be generated for them. Properties can be made nonQueryable with the `nonQueryable()` method.
 
 ```js
-import { MongoIdType, StringType, fieldOf      } from "../../src/dataTypes";
+import { MongoIdType, StringType, fieldOf } from "../../src/dataTypes";
 
 export const Book = {
   table: "books",
   fields: {
     _id: fieldOf(MongoIdType).nonQueryable(),
     title: fieldOf(StringType).nonQueryable(),
+    isRead: BoolType
   }
 };
 ```
