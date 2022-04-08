@@ -15,5 +15,6 @@ module.exports = () => {
     del.sync("test/testProject8/graphQL");
     del.sync("test/testProject9/graphQL");
     del.sync("test/testProject10/graphQL");
+    del.sync("test/testProject11/graphQL");
   } catch (e) {}
 };
