@@ -46,6 +46,18 @@ export default function (source, destPath, options = {}) {
         //add _id, and as a bonus, make it show up first in the list since the spec iterates object keys in order of insertion
         type.fields = { _id: MongoIdType, ...type.fields };
       }
+
+      type.nonQueryable = {};
+      for (const [k, val] of Object.entries(type.fields)) {
+        if (val.customField) {
+          if (val.traits.has("non-queryable")) {
+            type.nonQueryable[k] = true;
+          }
+
+          type.fields[k] = val.type;
+        }
+      }
+
       if (type.relationships) {
         Object.keys(type.relationships).forEach(k => {
           let relationship = type.relationships[k];

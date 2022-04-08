@@ -33,7 +33,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   const createOperation = createOperationOriginal.bind(null, { overrides });
 
   Object.keys(fields).forEach(k => {
-    allQueryFields.push(...queriesForField(k, fields[k]));
+    allQueryFields.push(...queriesForField(objectToCreate, k, fields[k]));
   });
   if (Array.isArray(objectToCreate.manualQueryArgs)) {
     manualQueryArgs.push(...objectToCreate.manualQueryArgs.map(arg => `${arg.name}: ${arg.type}`));
@@ -72,7 +72,10 @@ export default function createGraphqlTypeSchema(objectToCreate) {
           .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
       ]),
       createInput(`${name}MutationInput`, [
-        ...flatMap(Object.keys(fields).filter(k => k != "_id"), k => fieldMutations(k, fields)),
+        ...flatMap(
+          Object.keys(fields).filter(k => k != "_id"),
+          k => fieldMutations(k, fields)
+        ),
         ...Object.entries(relationships)
           .filter(([k, rel]) => !rel.oneToMany && !rel.readonly)
           .map(([k, rel]) => (rel.__isArray ? `${k}_ADD: ${relationshipType(rel, true)}` : `${k}_SET: ${relationshipType(rel, true)}`))
@@ -269,7 +272,10 @@ function fieldMutations(k, fields) {
   }
 }
 
-function queriesForField(fieldName, realFieldType) {
+function queriesForField(objectToCreate, fieldName, realFieldType) {
+  if (objectToCreate.nonQueryable[fieldName]) {
+    return [];
+  }
   if (typeof realFieldType === "object" && realFieldType.__isDate) {
     realFieldType = DateType;
   }

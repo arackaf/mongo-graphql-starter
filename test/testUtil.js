@@ -6,7 +6,7 @@ const localConn = "mongodb://127.0.0.1:27017/mongo-graphql-starter";
 
 export const nextConnectionString = () => process.env.MongoAddr || localConn;
 
-export async function runQuery({ schema, db, query, variables, coll, results, meta }) {
+export async function runQuery({ schema, db, query, coll }) {
   let allResults = await graphql(schema, query, { db }, {});
 
   if (!allResults.data || allResults.data[coll] === void 0) {
