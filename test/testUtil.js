@@ -7,7 +7,7 @@ const localConn = "mongodb://127.0.0.1:27017/mongo-graphql-starter";
 export const nextConnectionString = () => process.env.MongoAddr || localConn;
 
 export async function runQuery({ schema, db, query, coll }) {
-  let allResults = await graphql(schema, query, { db }, {});
+  let allResults = await graphql({ schema, source: query, rootValue: { db }, contextValue: {} });
 
   if (!allResults.data || allResults.data[coll] === void 0) {
     let msg = "Expected result not found: probable error.";
@@ -25,7 +25,7 @@ export async function runQuery({ schema, db, query, coll }) {
 }
 
 export async function queryAndMatchArray({ schema, db, query, variables, coll, results, rawResult, meta, error }) {
-  let allResults = await graphql(schema, query, { db }, {});
+  let allResults = await graphql({ schema, source: query, rootValue: { db }, contextValue: {} });
 
   if (error) {
     if (!allResults.errors || !allResults.errors.length) {
@@ -72,7 +72,7 @@ export async function runMutation({ schema, db, client, mutation, variables, noV
     throw "NO MUTATION PASSED IN";
   }
 
-  let mutationResult = await graphql(schema, `${prefix} mutation{${mutation}}`, { db, client }, {});
+  let mutationResult = await graphql({ schema, source: `${prefix} mutation{${mutation}}`, rootValue: { db, client }, contextValue: {} });
 
   if (noValidation) {
     return;

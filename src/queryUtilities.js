@@ -2,7 +2,7 @@ import { MongoIdType, MongoIdArrayType, StringType, StringArrayType, IntArrayTyp
 import { ObjectId } from "mongodb";
 import { processInsertions } from "./dbHelpers";
 
-import escapeStringRegexp from "escape-string-regexp";
+import escapeStringRegexp from "./escape-string-regexp";
 import { newObjectFromArgs, insertObjects } from "./insertUtilities";
 import { parseRequestedFields, parseRequestedHierarchy, getNestedQueryInfo, getRelationshipAst } from "./projectUtilities";
 import settings from "./settings";

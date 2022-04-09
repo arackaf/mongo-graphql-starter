@@ -174,7 +174,7 @@ Here's what a minimal, complete example might look like.
 
 ```javascript
 import { MongoClient } from "mongodb";
-import expressGraphql from "express-graphql";
+import { graphqlHTTP } from "express-graphql";
 import resolvers from "./graphQL/resolver";
 import schema from "./graphQL/schema";
 import { makeExecutableSchema } from "@graphql-tools/schema";
@@ -190,7 +190,7 @@ const executableSchema = makeExecutableSchema({ typeDefs: schema, resolvers });
 
 app.use(
   "/graphql",
-  expressGraphql({
+  graphqlHTTP({
     schema: executableSchema,
     graphiql: true,
     rootValue: root
