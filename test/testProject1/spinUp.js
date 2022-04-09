@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { queryAndMatchArray, runMutation, runQuery, nextConnectionString } from "../testUtil";
-import { makeExecutableSchema } from "graphql-tools";
+import { makeExecutableSchema } from "@graphql-tools/schema";
 import { createGraphqlSchema } from "../../src/module";
 import path from "path";
 import glob from "glob";
@@ -19,7 +19,7 @@ export async function create() {
   }
 }
 
-export default async function() {
+export default async function () {
   await create();
 
   const [{ default: resolvers }, { default: typeDefs }] = await Promise.all([import("./graphQL/resolver"), import("./graphQL/schema")]);

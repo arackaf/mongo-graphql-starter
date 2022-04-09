@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { queryAndMatchArray, runQuery, runMutation, nextConnectionString } from "../testUtil";
-import { makeExecutableSchema } from "graphql-tools";
+import { makeExecutableSchema } from "@graphql-tools/schema";
 import { createGraphqlSchema, settings } from "../../src/module";
 import path from "path";
 import glob from "glob";
@@ -21,7 +21,7 @@ export async function create() {
   });
 }
 
-export default async function() {
+export default async function () {
   await create();
 
   if (process.env.PREFER_LOOKUP) {

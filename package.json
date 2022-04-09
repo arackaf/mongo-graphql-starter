@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/arackaf/mongo-graphql-starter",
   "devDependencies": {
+    "@graphql-tools/schema": "^8.3.7",
     "babel-jest": "^24.9.0",
     "babel-plugin-dynamic-import-node": "^2.3.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
@@ -58,20 +59,19 @@
     "testts": "jest --runInBand --config=test/jestConfig/jest.config-ts.json"
   },
   "dependencies": {
-    "@graphql-codegen/core": "1.17.10",
-    "@graphql-codegen/typescript": "1.22.4",
-    "@graphql-codegen/typescript-operations": "1.18.3",
+    "@graphql-codegen/core": "^2.5.1",
+    "@graphql-codegen/typescript": "^2.4.8",
+    "@graphql-codegen/typescript-operations": "^2.3.5",
     "dataloader": "1.4.0",
     "escape-string-regexp": "1.0.5",
     "esm": "^3.2.25",
-    "graphql-tools": "^6.0.11",
-    "graphql-type-json": "0.2.1",
+    "graphql-type-json": "^0.3.2",
     "lodash.flatmap": "4.5.0",
     "mkdirp": "0.5.1",
     "prettier": "latest"
   },
   "peerDependencies": {
-    "mongodb": ">= 2.2.31",
-    "graphql": ">= 0.13.2"
+    "graphql": ">= 0.13.2",
+    "mongodb": ">= 2.2.31"
   }
 }
