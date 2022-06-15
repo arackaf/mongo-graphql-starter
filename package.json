@@ -43,6 +43,7 @@
     "test": "jest --runInBand --bail --detectOpenHandles --config=test/jestConfig/jest.configRoot.json && dotenv codecov",
     "test1": "jest --runInBand --config=test/jestConfig/jest.config1.json",
     "test1a": "jest --runInBand --config=test/jestConfig/jest.config1a.json",
+    "test1b": "jest --runInBand --config=test/jestConfig/jest.config1b.json",
     "test2": "jest --runInBand --config=test/jestConfig/jest.config2.json",
     "test3": "jest --runInBand --config=test/jestConfig/jest.config3.json",
     "test4": "jest --runInBand --config=test/jestConfig/jest.config4.json",
