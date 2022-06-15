@@ -42,8 +42,6 @@
     "test-local": "jest --runInBand --config=test/jestConfig/jest.configRoot.json",
     "test": "jest --runInBand --bail --detectOpenHandles --config=test/jestConfig/jest.configRoot.json && dotenv codecov",
     "test1": "jest --runInBand --config=test/jestConfig/jest.config1.json",
-    "test1a": "jest --runInBand --config=test/jestConfig/jest.config1a.json",
-    "test1b": "jest --runInBand --config=test/jestConfig/jest.config1b.json",
     "test2": "jest --runInBand --config=test/jestConfig/jest.config2.json",
     "test3": "jest --runInBand --config=test/jestConfig/jest.config3.json",
     "test4": "jest --runInBand --config=test/jestConfig/jest.config4.json",
@@ -56,6 +54,7 @@
     "test9": "jest --runInBand --config=test/jestConfig/jest.config9.json",
     "test10": "jest --runInBand --config=test/jestConfig/jest.config10.json",
     "test11": "jest --runInBand --config=test/jestConfig/jest.config11.json",
+    "test12": "jest --runInBand --config=test/jestConfig/jest.config12.json",
     "testts": "jest --runInBand --config=test/jestConfig/jest.config-ts.json"
   },
   "dependencies": {
