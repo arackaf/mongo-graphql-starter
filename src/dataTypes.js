@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb";
 
+import * as dataTypeConstants from "./dataTypeConstants";
+
 export const fieldOf = type => {
   return {
     customField: true,
@@ -11,18 +13,6 @@ export const fieldOf = type => {
     }
   };
 };
-
-export const MongoIdType = "MongoId";
-export const MongoIdArrayType = "MongoIdArray";
-export const StringType = "String";
-export const StringArrayType = "StringArray";
-export const IntType = "Int";
-export const IntArrayType = "IntArray";
-export const FloatType = "Float";
-export const FloatArrayType = "FloatArray";
-export const DateType = "Date";
-export const BoolType = "Boolean";
-export const JSONType = "JSON";
 
 export const arrayOf = type => {
   type.__usedInArray = true;
@@ -59,3 +49,15 @@ export const formattedDate = options => {
     __isDate: true
   };
 };
+
+export const MongoIdType = fieldOf(dataTypeConstants.MongoIdType);
+export const MongoIdArrayType = fieldOf(dataTypeConstants.MongoIdArrayType);
+export const StringType = fieldOf(dataTypeConstants.StringType);
+export const StringArrayType = fieldOf(dataTypeConstants.StringArrayType);
+export const IntType = fieldOf(dataTypeConstants.IntType);
+export const IntArrayType = fieldOf(dataTypeConstants.IntArrayType);
+export const FloatType = fieldOf(dataTypeConstants.FloatType);
+export const FloatArrayType = fieldOf(dataTypeConstants.FloatArrayType);
+export const DateType = fieldOf(dataTypeConstants.DateType);
+export const BoolType = fieldOf(dataTypeConstants.BoolType);
+export const JSONType = fieldOf(dataTypeConstants.JSONType);

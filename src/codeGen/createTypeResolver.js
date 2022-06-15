@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { TAB, TAB2 } from "./utilities";
-import { MongoIdType, StringType, StringArrayType, MongoIdArrayType } from "../dataTypes";
+import { MongoIdType, StringType, StringArrayType, MongoIdArrayType } from "../dataTypeConstants";
 
 import createItemTemplate from "./resolverTemplateMethods/createItem";
 import updateItemTemplate from "./resolverTemplateMethods/updateItem";

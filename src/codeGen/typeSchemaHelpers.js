@@ -11,7 +11,7 @@ import {
   arrayOf,
   BoolType,
   JSONType
-} from "../dataTypes";
+} from "../dataTypeConstants";
 import { TAB } from "./utilities";
 import { createOperation as createOperationOriginal, createInput, createType } from "./gqlSchemaHelpers";
 import flatMap from "lodash.flatmap";

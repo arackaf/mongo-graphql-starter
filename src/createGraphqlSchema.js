@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import { MongoIdType, StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType } from "./dataTypes";
+import { MongoIdType, StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType } from "./dataTypeConstants";
 import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
