@@ -15,19 +15,15 @@ afterAll(async () => {
 
 processField(
   {
-    field: "q__id_arr",
+    field: "q__id",
     queries: [
       {
-        args: ["_contains"],
+        args: ["", "_ne"],
         value: '"6164d3d577f54f44209b7941"'
       },
       {
-        args: ["", "_containsAny", "_containsAll", "_ne"],
-        value: '["6164d3d577f54f44209b7941"]'
-      },
-      {
         args: ["_in", "_nin"],
-        value: '[["6164d3d577f54f44209b7941"]]'
+        value: '["6164d3d577f54f44209b7941"]'
       }
     ]
   },
