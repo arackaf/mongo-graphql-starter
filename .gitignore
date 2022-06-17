@@ -17,3 +17,4 @@ data
 .env
 test/testProject1a/graphQL
 test/testProject11/graphQL
+test/testProject12/graphQL
