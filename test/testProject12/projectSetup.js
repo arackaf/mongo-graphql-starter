@@ -21,6 +21,7 @@ export const Thing1 = {
   table: "thing1",
   fields: {
     q__id: MongoIdType,
+    q__id_arr: MongoIdArrayType,
     q_str: StringType,
     q_strArr: StringArrayType,
     q_bool: BoolType,
@@ -32,6 +33,7 @@ export const Thing1 = {
     q_json: JSONType,
 
     nq__id: MongoIdType.nonQueryable(),
+    nq__id_arr: MongoIdArrayType.nonQueryable(),
     nq_str: StringType.nonQueryable(),
     nq_strArr: StringArrayType.nonQueryable(),
     nq_bool: BoolType.nonQueryable(),

@@ -3,6 +3,7 @@ export const type = `
   type Thing1 {
     _id: String
     q__id: String
+    q__id_arr: [String]
     q_str: String
     q_strArr: [String]
     q_bool: Boolean
@@ -13,6 +14,7 @@ export const type = `
     q_date: String
     q_json: JSON
     nq__id: String
+    nq__id_arr: [String]
     nq_str: String
     nq_strArr: [String]
     nq_bool: Boolean
@@ -53,6 +55,7 @@ export const type = `
   input Thing1Input {
     _id: String
     q__id: String
+    q__id_arr: [String]
     q_str: String
     q_strArr: [String]
     q_bool: Boolean
@@ -63,6 +66,7 @@ export const type = `
     q_date: String
     q_json: JSON
     nq__id: String
+    nq__id_arr: [String]
     nq_str: String
     nq_strArr: [String]
     nq_bool: Boolean
@@ -76,6 +80,13 @@ export const type = `
 
   input Thing1MutationInput {
     q__id: String
+    q__id_arr: [String]
+    q__id_arr_PUSH: String
+    q__id_arr_CONCAT: [String]
+    q__id_arr_UPDATE: StringArrayUpdate
+    q__id_arr_UPDATES: [StringArrayUpdate]
+    q__id_arr_PULL: [String]
+    q__id_arr_ADDTOSET: [String]
     q_str: String
     q_strArr: [String]
     q_strArr_PUSH: String
@@ -108,6 +119,13 @@ export const type = `
     q_date: String
     q_json: JSON
     nq__id: String
+    nq__id_arr: [String]
+    nq__id_arr_PUSH: String
+    nq__id_arr_CONCAT: [String]
+    nq__id_arr_UPDATE: StringArrayUpdate
+    nq__id_arr_UPDATES: [StringArrayUpdate]
+    nq__id_arr_PULL: [String]
+    nq__id_arr_ADDTOSET: [String]
     nq_str: String
     nq_strArr: [String]
     nq_strArr_PUSH: String
@@ -144,6 +162,7 @@ export const type = `
   input Thing1Sort {
     _id: Int
     q__id: Int
+    q__id_arr: Int
     q_str: Int
     q_strArr: Int
     q_bool: Int
@@ -153,6 +172,7 @@ export const type = `
     q_floatArr: Int
     q_date: Int
     nq__id: Int
+    nq__id_arr: Int
     nq_str: Int
     nq_strArr: Int
     nq_bool: Int
@@ -172,6 +192,13 @@ export const type = `
     q__id_ne: String
     q__id_in: [String]
     q__id_nin: [String]
+    q__id_arr: [String]
+    q__id_arr_in: [[String]]
+    q__id_arr_nin: [[String]]
+    q__id_arr_contains: String
+    q__id_arr_containsAny: [String]
+    q__id_arr_containsAll: [String]
+    q__id_arr_ne: [String]
     q_str_contains: String
     q_str_startsWith: String
     q_str_endsWith: String
@@ -299,6 +326,13 @@ export const query = `
     q__id_ne: String,
     q__id_in: [String],
     q__id_nin: [String],
+    q__id_arr: [String],
+    q__id_arr_in: [[String]],
+    q__id_arr_nin: [[String]],
+    q__id_arr_contains: String,
+    q__id_arr_containsAny: [String],
+    q__id_arr_containsAll: [String],
+    q__id_arr_ne: [String],
     q_str_contains: String,
     q_str_startsWith: String,
     q_str_endsWith: String,

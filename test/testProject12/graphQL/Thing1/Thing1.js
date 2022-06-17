@@ -4,6 +4,7 @@ export default {
   fields: {
     _id: "MongoId",
     q__id: "MongoId",
+    q__id_arr: "MongoIdArray",
     q_str: "String",
     q_strArr: "StringArray",
     q_bool: "Boolean",
@@ -17,6 +18,7 @@ export default {
     },
     q_json: "JSON",
     nq__id: "MongoId",
+    nq__id_arr: "MongoIdArray",
     nq_str: "String",
     nq_strArr: "StringArray",
     nq_bool: "Boolean",
