@@ -20,6 +20,17 @@ import {
 export const Thing1 = {
   table: "thing1",
   fields: {
+    q__id: MongoIdType,
+    q_str: StringType,
+    q_strArr: StringArrayType,
+    q_bool: BoolType,
+    q_int: IntType,
+    q_intArr: IntArrayType,
+    q_float: FloatType,
+    q_floatArr: FloatArrayType,
+    q_date: DateType,
+    q_json: JSONType,
+
     nq__id: MongoIdType.nonQueryable(),
     nq_str: StringType.nonQueryable(),
     nq_strArr: StringArrayType.nonQueryable(),

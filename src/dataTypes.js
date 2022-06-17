@@ -8,8 +8,13 @@ export const fieldOf = type => {
     type,
     traits: new Set([]),
     nonQueryable() {
-      this.traits.add("non-queryable");
-      return this;
+      return this.addTrait("non-queryable");
+    },
+    addTrait(trait) {
+      const clone = { ...this };
+      clone.traits = new Set(this.traits);
+      clone.traits.add(trait);
+      return clone;
     }
   };
 };

@@ -33,90 +33,18 @@ input FloatArrayUpdate {
   value: Float!
 }
 
-type Author {
-  name: String
-  birthday: String
-  strings: [String]
-}
-
-input AuthorInput {
-  name: String
-  birthday: String
-  strings: [String]
-}
-
-input AuthorMutationInput {
-  name: String
-  birthday: String
-  strings: [String]
-  strings_PUSH: String
-  strings_CONCAT: [String]
-  strings_UPDATE: StringArrayUpdate
-  strings_UPDATES: [StringArrayUpdate]
-  strings_PULL: [String]
-  strings_ADDTOSET: [String]
-}
-
-input AuthorArrayMutationInput {
-  index: Int
-  Updates: AuthorMutationInput
-}
-
-input AuthorSort {
-  name: Int
-  birthday: Int
-  strings: Int
-}
-
-input AuthorFilters {
-  name_contains: String
-  name_startsWith: String
-  name_endsWith: String
-  name_regex: String
-  name: String
-  name_ne: String
-  name_in: [String]
-  name_nin: [String]
-  birthday_lt: String
-  birthday_lte: String
-  birthday_gt: String
-  birthday_gte: String
-  birthday: String
-  birthday_ne: String
-  birthday_in: [String]
-  birthday_nin: [String]
-  strings_count: Int
-  strings_textContains: String
-  strings_startsWith: String
-  strings_endsWith: String
-  strings_regex: String
-  strings: [String]
-  strings_in: [[String]]
-  strings_nin: [[String]]
-  strings_contains: String
-  strings_containsAny: [String]
-  strings_containsAll: [String]
-  strings_ne: [String]
-  OR: [AuthorFilters]
-}
-
-type Book {
+type Thing1 {
   _id: String
-  title: String
-  pages: Int
-  weight: Float
-  keywords: [String]
-  editions: [Int]
-  prices: [Float]
-  isRead: Boolean
-  mongoId: String
-  mongoIds: [String]
-  authors: [Author]
-  primaryAuthor: Author
-  strArrs: [[String]]
-  createdOn: String
-  createdOnYearOnly: String
-  jsonContent: JSON
+  q__id: String
+  q_str: String
+  q_strArr: [String]
+  q_bool: Boolean
+  q_int: Int
+  q_intArr: [Int]
+  q_float: Float
+  q_floatArr: [Float]
+  q_date: String
+  q_json: JSON
   nq__id: String
   nq_str: String
   nq_strArr: [String]
@@ -129,49 +57,44 @@ type Book {
   nq_json: JSON
 }
 
-type BookQueryResults {
-  Books: [Book!]!
+type Thing1QueryResults {
+  Thing1s: [Thing1!]!
   Meta: QueryResultsMetadata!
 }
 
-type BookSingleQueryResult {
-  Book: Book
+type Thing1SingleQueryResult {
+  Thing1: Thing1
 }
 
-type BookMutationResult {
-  Book: Book
+type Thing1MutationResult {
+  Thing1: Thing1
   success: Boolean!
   Meta: MutationResultInfo!
 }
 
-type BookMutationResultMulti {
-  Books: [Book]
+type Thing1MutationResultMulti {
+  Thing1s: [Thing1]
   success: Boolean!
   Meta: MutationResultInfo!
 }
 
-type BookBulkMutationResult {
+type Thing1BulkMutationResult {
   success: Boolean!
   Meta: MutationResultInfo!
 }
 
-input BookInput {
+input Thing1Input {
   _id: String
-  title: String
-  pages: Int
-  weight: Float
-  keywords: [String]
-  editions: [Int]
-  prices: [Float]
-  isRead: Boolean
-  mongoId: String
-  mongoIds: [String]
-  authors: [AuthorInput]
-  primaryAuthor: AuthorInput
-  strArrs: [[String]]
-  createdOn: String
-  createdOnYearOnly: String
-  jsonContent: JSON
+  q__id: String
+  q_str: String
+  q_strArr: [String]
+  q_bool: Boolean
+  q_int: Int
+  q_intArr: [Int]
+  q_float: Float
+  q_floatArr: [Float]
+  q_date: String
+  q_json: JSON
   nq__id: String
   nq_str: String
   nq_strArr: [String]
@@ -184,56 +107,39 @@ input BookInput {
   nq_json: JSON
 }
 
-input BookMutationInput {
-  title: String
-  pages: Int
-  pages_INC: Int
-  pages_DEC: Int
-  weight: Float
-  weight_INC: Int
-  weight_DEC: Int
-  keywords: [String]
-  keywords_PUSH: String
-  keywords_CONCAT: [String]
-  keywords_UPDATE: StringArrayUpdate
-  keywords_UPDATES: [StringArrayUpdate]
-  keywords_PULL: [String]
-  keywords_ADDTOSET: [String]
-  editions: [Int]
-  editions_PUSH: Int
-  editions_CONCAT: [Int]
-  editions_UPDATE: IntArrayUpdate
-  editions_UPDATES: [IntArrayUpdate]
-  editions_PULL: [Int]
-  editions_ADDTOSET: [Int]
-  prices: [Float]
-  prices_PUSH: Float
-  prices_CONCAT: [Float]
-  prices_UPDATE: FloatArrayUpdate
-  prices_UPDATES: [FloatArrayUpdate]
-  prices_PULL: [Float]
-  prices_ADDTOSET: [Float]
-  isRead: Boolean
-  mongoId: String
-  mongoIds: [String]
-  mongoIds_PUSH: String
-  mongoIds_CONCAT: [String]
-  mongoIds_UPDATE: StringArrayUpdate
-  mongoIds_UPDATES: [StringArrayUpdate]
-  mongoIds_PULL: [String]
-  mongoIds_ADDTOSET: [String]
-  authors: [AuthorInput]
-  authors_PUSH: AuthorInput
-  authors_CONCAT: [AuthorInput]
-  authors_UPDATE: AuthorArrayMutationInput
-  authors_UPDATES: [AuthorArrayMutationInput]
-  authors_PULL: AuthorFilters
-  primaryAuthor: AuthorInput
-  primaryAuthor_UPDATE: AuthorMutationInput
-  strArrs: [[String]]
-  createdOn: String
-  createdOnYearOnly: String
-  jsonContent: JSON
+input Thing1MutationInput {
+  q__id: String
+  q_str: String
+  q_strArr: [String]
+  q_strArr_PUSH: String
+  q_strArr_CONCAT: [String]
+  q_strArr_UPDATE: StringArrayUpdate
+  q_strArr_UPDATES: [StringArrayUpdate]
+  q_strArr_PULL: [String]
+  q_strArr_ADDTOSET: [String]
+  q_bool: Boolean
+  q_int: Int
+  q_int_INC: Int
+  q_int_DEC: Int
+  q_intArr: [Int]
+  q_intArr_PUSH: Int
+  q_intArr_CONCAT: [Int]
+  q_intArr_UPDATE: IntArrayUpdate
+  q_intArr_UPDATES: [IntArrayUpdate]
+  q_intArr_PULL: [Int]
+  q_intArr_ADDTOSET: [Int]
+  q_float: Float
+  q_float_INC: Int
+  q_float_DEC: Int
+  q_floatArr: [Float]
+  q_floatArr_PUSH: Float
+  q_floatArr_CONCAT: [Float]
+  q_floatArr_UPDATE: FloatArrayUpdate
+  q_floatArr_UPDATES: [FloatArrayUpdate]
+  q_floatArr_PULL: [Float]
+  q_floatArr_ADDTOSET: [Float]
+  q_date: String
+  q_json: JSON
   nq__id: String
   nq_str: String
   nq_strArr: [String]
@@ -268,22 +174,17 @@ input BookMutationInput {
   nq_json: JSON
 }
 
-input BookSort {
+input Thing1Sort {
   _id: Int
-  title: Int
-  pages: Int
-  weight: Int
-  keywords: Int
-  editions: Int
-  prices: Int
-  isRead: Int
-  mongoId: Int
-  mongoIds: Int
-  authors: Int
-  primaryAuthor: Int
-  strArrs: Int
-  createdOn: Int
-  createdOnYearOnly: Int
+  q__id: Int
+  q_str: Int
+  q_strArr: Int
+  q_bool: Int
+  q_int: Int
+  q_intArr: Int
+  q_float: Int
+  q_floatArr: Int
+  q_date: Int
   nq__id: Int
   nq_str: Int
   nq_strArr: Int
@@ -295,605 +196,228 @@ input BookSort {
   nq_date: Int
 }
 
-input BookFilters {
+input Thing1Filters {
   _id: String
   _id_ne: String
   _id_in: [String]
   _id_nin: [String]
-  title_contains: String
-  title_startsWith: String
-  title_endsWith: String
-  title_regex: String
-  title: String
-  title_ne: String
-  title_in: [String]
-  title_nin: [String]
-  pages_lt: Int
-  pages_lte: Int
-  pages_gt: Int
-  pages_gte: Int
-  pages: Int
-  pages_ne: Int
-  pages_in: [Int]
-  pages_nin: [Int]
-  weight_lt: Float
-  weight_lte: Float
-  weight_gt: Float
-  weight_gte: Float
-  weight: Float
-  weight_ne: Float
-  weight_in: [Float]
-  weight_nin: [Float]
-  keywords_count: Int
-  keywords_textContains: String
-  keywords_startsWith: String
-  keywords_endsWith: String
-  keywords_regex: String
-  keywords: [String]
-  keywords_in: [[String]]
-  keywords_nin: [[String]]
-  keywords_contains: String
-  keywords_containsAny: [String]
-  keywords_containsAll: [String]
-  keywords_ne: [String]
-  editions_count: Int
-  editions_lt: Int
-  editions_lte: Int
-  editions_gt: Int
-  editions_gte: Int
-  editions_emlt: Int
-  editions_emlte: Int
-  editions_emgt: Int
-  editions_emgte: Int
-  editions: [Int]
-  editions_in: [[Int]]
-  editions_nin: [[Int]]
-  editions_contains: Int
-  editions_containsAny: [Int]
-  editions_containsAll: [Int]
-  editions_ne: [Int]
-  prices_count: Int
-  prices_lt: Float
-  prices_lte: Float
-  prices_gt: Float
-  prices_gte: Float
-  prices_emlt: Float
-  prices_emlte: Float
-  prices_emgt: Float
-  prices_emgte: Float
-  prices: [Float]
-  prices_in: [[Float]]
-  prices_nin: [[Float]]
-  prices_contains: Float
-  prices_containsAny: [Float]
-  prices_containsAll: [Float]
-  prices_ne: [Float]
-  isRead: Boolean
-  isRead_ne: Boolean
-  isRead_in: [Boolean]
-  isRead_nin: [Boolean]
-  mongoId: String
-  mongoId_ne: String
-  mongoId_in: [String]
-  mongoId_nin: [String]
-  mongoIds: [String]
-  mongoIds_in: [[String]]
-  mongoIds_nin: [[String]]
-  mongoIds_contains: String
-  mongoIds_containsAny: [String]
-  mongoIds_containsAll: [String]
-  mongoIds_ne: [String]
-  authors_count: Int
-  authors: AuthorFilters
-  primaryAuthor: AuthorFilters
-  createdOn_lt: String
-  createdOn_lte: String
-  createdOn_gt: String
-  createdOn_gte: String
-  createdOn: String
-  createdOn_ne: String
-  createdOn_in: [String]
-  createdOn_nin: [String]
-  createdOnYearOnly_lt: String
-  createdOnYearOnly_lte: String
-  createdOnYearOnly_gt: String
-  createdOnYearOnly_gte: String
-  createdOnYearOnly: String
-  createdOnYearOnly_ne: String
-  createdOnYearOnly_in: [String]
-  createdOnYearOnly_nin: [String]
-  jsonContent: JSON
-  jsonContent_ne: JSON
-  jsonContent_in: [JSON]
-  jsonContent_nin: [JSON]
-  OR: [BookFilters]
-}
-
-type Subject {
-  _id: String
-  name: String
-}
-
-type SubjectQueryResults {
-  Subjects: [Subject!]!
-  Meta: QueryResultsMetadata!
-}
-
-type SubjectSingleQueryResult {
-  Subject: Subject
-}
-
-type SubjectMutationResult {
-  Subject: Subject
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-type SubjectMutationResultMulti {
-  Subjects: [Subject]
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-type SubjectBulkMutationResult {
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-input SubjectInput {
-  _id: String
-  name: String
-}
-
-input SubjectMutationInput {
-  name: String
-}
-
-input SubjectSort {
-  _id: Int
-  name: Int
-}
-
-input SubjectFilters {
-  _id: String
-  _id_ne: String
-  _id_in: [String]
-  _id_nin: [String]
-  name_contains: String
-  name_startsWith: String
-  name_endsWith: String
-  name_regex: String
-  name: String
-  name_ne: String
-  name_in: [String]
-  name_nin: [String]
-  OR: [SubjectFilters]
-}
-
-type Tag {
-  _id: String
-  name: String
-  count: Int
-}
-
-type TagQueryResults {
-  Tags: [Tag!]!
-  Meta: QueryResultsMetadata!
-}
-
-type TagSingleQueryResult {
-  Tag: Tag
-}
-
-type TagMutationResult {
-  Tag: Tag
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-type TagMutationResultMulti {
-  Tags: [Tag]
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-type TagBulkMutationResult {
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-input TagInput {
-  _id: String
-  name: String
-  count: Int
-}
-
-input TagMutationInput {
-  name: String
-  count: Int
-  count_INC: Int
-  count_DEC: Int
-}
-
-input TagSort {
-  _id: Int
-  name: Int
-  count: Int
-}
-
-input TagFilters {
-  _id_contains: String
-  _id_startsWith: String
-  _id_endsWith: String
-  _id_regex: String
-  _id: String
-  _id_ne: String
-  _id_in: [String]
-  _id_nin: [String]
-  name_contains: String
-  name_startsWith: String
-  name_endsWith: String
-  name_regex: String
-  name: String
-  name_ne: String
-  name_in: [String]
-  name_nin: [String]
-  count_lt: Int
-  count_lte: Int
-  count_gt: Int
-  count_gte: Int
-  count: Int
-  count_ne: Int
-  count_in: [Int]
-  count_nin: [Int]
-  OR: [TagFilters]
-}
-
-type ReadonlyTag {
-  _id: String
-  name: String
-  count: Int
-}
-
-type ReadonlyTagQueryResults {
-  ReadonlyTags: [ReadonlyTag!]!
-  Meta: QueryResultsMetadata!
-}
-
-type ReadonlyTagSingleQueryResult {
-  ReadonlyTag: ReadonlyTag
-}
-
-type ReadonlyTagMutationResult {
-  ReadonlyTag: ReadonlyTag
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-type ReadonlyTagMutationResultMulti {
-  ReadonlyTags: [ReadonlyTag]
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-type ReadonlyTagBulkMutationResult {
-  success: Boolean!
-  Meta: MutationResultInfo!
-}
-
-input ReadonlyTagInput {
-  _id: String
-  name: String
-  count: Int
-}
-
-input ReadonlyTagMutationInput {
-  name: String
-  count: Int
-  count_INC: Int
-  count_DEC: Int
-}
-
-input ReadonlyTagSort {
-  _id: Int
-  name: Int
-  count: Int
-}
-
-input ReadonlyTagFilters {
-  _id: String
-  _id_ne: String
-  _id_in: [String]
-  _id_nin: [String]
-  name_contains: String
-  name_startsWith: String
-  name_endsWith: String
-  name_regex: String
-  name: String
-  name_ne: String
-  name_in: [String]
-  name_nin: [String]
-  count_lt: Int
-  count_lte: Int
-  count_gt: Int
-  count_gte: Int
-  count: Int
-  count_ne: Int
-  count_in: [Int]
-  count_nin: [Int]
-  OR: [ReadonlyTagFilters]
+  q__id: String
+  q__id_ne: String
+  q__id_in: [String]
+  q__id_nin: [String]
+  q_str_contains: String
+  q_str_startsWith: String
+  q_str_endsWith: String
+  q_str_regex: String
+  q_str: String
+  q_str_ne: String
+  q_str_in: [String]
+  q_str_nin: [String]
+  q_strArr_count: Int
+  q_strArr_textContains: String
+  q_strArr_startsWith: String
+  q_strArr_endsWith: String
+  q_strArr_regex: String
+  q_strArr: [String]
+  q_strArr_in: [[String]]
+  q_strArr_nin: [[String]]
+  q_strArr_contains: String
+  q_strArr_containsAny: [String]
+  q_strArr_containsAll: [String]
+  q_strArr_ne: [String]
+  q_bool: Boolean
+  q_bool_ne: Boolean
+  q_bool_in: [Boolean]
+  q_bool_nin: [Boolean]
+  q_int_lt: Int
+  q_int_lte: Int
+  q_int_gt: Int
+  q_int_gte: Int
+  q_int: Int
+  q_int_ne: Int
+  q_int_in: [Int]
+  q_int_nin: [Int]
+  q_intArr_count: Int
+  q_intArr_lt: Int
+  q_intArr_lte: Int
+  q_intArr_gt: Int
+  q_intArr_gte: Int
+  q_intArr_emlt: Int
+  q_intArr_emlte: Int
+  q_intArr_emgt: Int
+  q_intArr_emgte: Int
+  q_intArr: [Int]
+  q_intArr_in: [[Int]]
+  q_intArr_nin: [[Int]]
+  q_intArr_contains: Int
+  q_intArr_containsAny: [Int]
+  q_intArr_containsAll: [Int]
+  q_intArr_ne: [Int]
+  q_float_lt: Float
+  q_float_lte: Float
+  q_float_gt: Float
+  q_float_gte: Float
+  q_float: Float
+  q_float_ne: Float
+  q_float_in: [Float]
+  q_float_nin: [Float]
+  q_floatArr_count: Int
+  q_floatArr_lt: Float
+  q_floatArr_lte: Float
+  q_floatArr_gt: Float
+  q_floatArr_gte: Float
+  q_floatArr_emlt: Float
+  q_floatArr_emlte: Float
+  q_floatArr_emgt: Float
+  q_floatArr_emgte: Float
+  q_floatArr: [Float]
+  q_floatArr_in: [[Float]]
+  q_floatArr_nin: [[Float]]
+  q_floatArr_contains: Float
+  q_floatArr_containsAny: [Float]
+  q_floatArr_containsAll: [Float]
+  q_floatArr_ne: [Float]
+  q_date_lt: String
+  q_date_lte: String
+  q_date_gt: String
+  q_date_gte: String
+  q_date: String
+  q_date_ne: String
+  q_date_in: [String]
+  q_date_nin: [String]
+  q_json: JSON
+  q_json_ne: JSON
+  q_json_in: [JSON]
+  q_json_nin: [JSON]
+  OR: [Thing1Filters]
 }
 
 type Query {
-  allBooks(
+  allThing1s(
     _id: String
     _id_ne: String
     _id_in: [String]
     _id_nin: [String]
-    title_contains: String
-    title_startsWith: String
-    title_endsWith: String
-    title_regex: String
-    title: String
-    title_ne: String
-    title_in: [String]
-    title_nin: [String]
-    pages_lt: Int
-    pages_lte: Int
-    pages_gt: Int
-    pages_gte: Int
-    pages: Int
-    pages_ne: Int
-    pages_in: [Int]
-    pages_nin: [Int]
-    weight_lt: Float
-    weight_lte: Float
-    weight_gt: Float
-    weight_gte: Float
-    weight: Float
-    weight_ne: Float
-    weight_in: [Float]
-    weight_nin: [Float]
-    keywords_count: Int
-    keywords_textContains: String
-    keywords_startsWith: String
-    keywords_endsWith: String
-    keywords_regex: String
-    keywords: [String]
-    keywords_in: [[String]]
-    keywords_nin: [[String]]
-    keywords_contains: String
-    keywords_containsAny: [String]
-    keywords_containsAll: [String]
-    keywords_ne: [String]
-    editions_count: Int
-    editions_lt: Int
-    editions_lte: Int
-    editions_gt: Int
-    editions_gte: Int
-    editions_emlt: Int
-    editions_emlte: Int
-    editions_emgt: Int
-    editions_emgte: Int
-    editions: [Int]
-    editions_in: [[Int]]
-    editions_nin: [[Int]]
-    editions_contains: Int
-    editions_containsAny: [Int]
-    editions_containsAll: [Int]
-    editions_ne: [Int]
-    prices_count: Int
-    prices_lt: Float
-    prices_lte: Float
-    prices_gt: Float
-    prices_gte: Float
-    prices_emlt: Float
-    prices_emlte: Float
-    prices_emgt: Float
-    prices_emgte: Float
-    prices: [Float]
-    prices_in: [[Float]]
-    prices_nin: [[Float]]
-    prices_contains: Float
-    prices_containsAny: [Float]
-    prices_containsAll: [Float]
-    prices_ne: [Float]
-    isRead: Boolean
-    isRead_ne: Boolean
-    isRead_in: [Boolean]
-    isRead_nin: [Boolean]
-    mongoId: String
-    mongoId_ne: String
-    mongoId_in: [String]
-    mongoId_nin: [String]
-    mongoIds: [String]
-    mongoIds_in: [[String]]
-    mongoIds_nin: [[String]]
-    mongoIds_contains: String
-    mongoIds_containsAny: [String]
-    mongoIds_containsAll: [String]
-    mongoIds_ne: [String]
-    authors_count: Int
-    authors: AuthorFilters
-    primaryAuthor: AuthorFilters
-    createdOn_lt: String
-    createdOn_lte: String
-    createdOn_gt: String
-    createdOn_gte: String
-    createdOn: String
-    createdOn_ne: String
-    createdOn_in: [String]
-    createdOn_nin: [String]
-    createdOnYearOnly_lt: String
-    createdOnYearOnly_lte: String
-    createdOnYearOnly_gt: String
-    createdOnYearOnly_gte: String
-    createdOnYearOnly: String
-    createdOnYearOnly_ne: String
-    createdOnYearOnly_in: [String]
-    createdOnYearOnly_nin: [String]
-    jsonContent: JSON
-    jsonContent_ne: JSON
-    jsonContent_in: [JSON]
-    jsonContent_nin: [JSON]
-    OR: [BookFilters]
-    SORT: BookSort
-    SORTS: [BookSort]
+    q__id: String
+    q__id_ne: String
+    q__id_in: [String]
+    q__id_nin: [String]
+    q_str_contains: String
+    q_str_startsWith: String
+    q_str_endsWith: String
+    q_str_regex: String
+    q_str: String
+    q_str_ne: String
+    q_str_in: [String]
+    q_str_nin: [String]
+    q_strArr_count: Int
+    q_strArr_textContains: String
+    q_strArr_startsWith: String
+    q_strArr_endsWith: String
+    q_strArr_regex: String
+    q_strArr: [String]
+    q_strArr_in: [[String]]
+    q_strArr_nin: [[String]]
+    q_strArr_contains: String
+    q_strArr_containsAny: [String]
+    q_strArr_containsAll: [String]
+    q_strArr_ne: [String]
+    q_bool: Boolean
+    q_bool_ne: Boolean
+    q_bool_in: [Boolean]
+    q_bool_nin: [Boolean]
+    q_int_lt: Int
+    q_int_lte: Int
+    q_int_gt: Int
+    q_int_gte: Int
+    q_int: Int
+    q_int_ne: Int
+    q_int_in: [Int]
+    q_int_nin: [Int]
+    q_intArr_count: Int
+    q_intArr_lt: Int
+    q_intArr_lte: Int
+    q_intArr_gt: Int
+    q_intArr_gte: Int
+    q_intArr_emlt: Int
+    q_intArr_emlte: Int
+    q_intArr_emgt: Int
+    q_intArr_emgte: Int
+    q_intArr: [Int]
+    q_intArr_in: [[Int]]
+    q_intArr_nin: [[Int]]
+    q_intArr_contains: Int
+    q_intArr_containsAny: [Int]
+    q_intArr_containsAll: [Int]
+    q_intArr_ne: [Int]
+    q_float_lt: Float
+    q_float_lte: Float
+    q_float_gt: Float
+    q_float_gte: Float
+    q_float: Float
+    q_float_ne: Float
+    q_float_in: [Float]
+    q_float_nin: [Float]
+    q_floatArr_count: Int
+    q_floatArr_lt: Float
+    q_floatArr_lte: Float
+    q_floatArr_gt: Float
+    q_floatArr_gte: Float
+    q_floatArr_emlt: Float
+    q_floatArr_emlte: Float
+    q_floatArr_emgt: Float
+    q_floatArr_emgte: Float
+    q_floatArr: [Float]
+    q_floatArr_in: [[Float]]
+    q_floatArr_nin: [[Float]]
+    q_floatArr_contains: Float
+    q_floatArr_containsAny: [Float]
+    q_floatArr_containsAll: [Float]
+    q_floatArr_ne: [Float]
+    q_date_lt: String
+    q_date_lte: String
+    q_date_gt: String
+    q_date_gte: String
+    q_date: String
+    q_date_ne: String
+    q_date_in: [String]
+    q_date_nin: [String]
+    q_json: JSON
+    q_json_ne: JSON
+    q_json_in: [JSON]
+    q_json_nin: [JSON]
+    OR: [Thing1Filters]
+    SORT: Thing1Sort
+    SORTS: [Thing1Sort]
     LIMIT: Int
     SKIP: Int
     PAGE: Int
     PAGE_SIZE: Int
-    createdOn_format: String
-    createdOnYearOnly_format: String
+    q_date_format: String
     nq_date_format: String
-  ): BookQueryResults!
+  ): Thing1QueryResults!
 
-  getBook(
+  getThing1(
     _id: String
-    createdOn_format: String
-    createdOnYearOnly_format: String
+    q_date_format: String
     nq_date_format: String
-  ): BookSingleQueryResult!
-
-  allSubjects(
-    _id: String
-    _id_ne: String
-    _id_in: [String]
-    _id_nin: [String]
-    name_contains: String
-    name_startsWith: String
-    name_endsWith: String
-    name_regex: String
-    name: String
-    name_ne: String
-    name_in: [String]
-    name_nin: [String]
-    OR: [SubjectFilters]
-    SORT: SubjectSort
-    SORTS: [SubjectSort]
-    LIMIT: Int
-    SKIP: Int
-    PAGE: Int
-    PAGE_SIZE: Int
-  ): SubjectQueryResults!
-
-  getSubject(_id: String): SubjectSingleQueryResult!
-
-  allTags(
-    _id_contains: String
-    _id_startsWith: String
-    _id_endsWith: String
-    _id_regex: String
-    _id: String
-    _id_ne: String
-    _id_in: [String]
-    _id_nin: [String]
-    name_contains: String
-    name_startsWith: String
-    name_endsWith: String
-    name_regex: String
-    name: String
-    name_ne: String
-    name_in: [String]
-    name_nin: [String]
-    count_lt: Int
-    count_lte: Int
-    count_gt: Int
-    count_gte: Int
-    count: Int
-    count_ne: Int
-    count_in: [Int]
-    count_nin: [Int]
-    OR: [TagFilters]
-    SORT: TagSort
-    SORTS: [TagSort]
-    LIMIT: Int
-    SKIP: Int
-    PAGE: Int
-    PAGE_SIZE: Int
-  ): TagQueryResults!
-
-  getTag(_id: String): TagSingleQueryResult!
-
-  allReadonlyTags(
-    _id: String
-    _id_ne: String
-    _id_in: [String]
-    _id_nin: [String]
-    name_contains: String
-    name_startsWith: String
-    name_endsWith: String
-    name_regex: String
-    name: String
-    name_ne: String
-    name_in: [String]
-    name_nin: [String]
-    count_lt: Int
-    count_lte: Int
-    count_gt: Int
-    count_gte: Int
-    count: Int
-    count_ne: Int
-    count_in: [Int]
-    count_nin: [Int]
-    OR: [ReadonlyTagFilters]
-    SORT: ReadonlyTagSort
-    SORTS: [ReadonlyTagSort]
-    LIMIT: Int
-    SKIP: Int
-    PAGE: Int
-    PAGE_SIZE: Int
-  ): ReadonlyTagQueryResults!
-
-  getReadonlyTag(_id: String): ReadonlyTagSingleQueryResult!
+  ): Thing1SingleQueryResult!
 }
 
 type Mutation {
-  createBook(Book: BookInput): BookMutationResult
+  createThing1(Thing1: Thing1Input): Thing1MutationResult
 
-  updateBook(_id: String, Updates: BookMutationInput): BookMutationResult
+  updateThing1(_id: String, Updates: Thing1MutationInput): Thing1MutationResult
 
-  updateBooks(
+  updateThing1s(
     _ids: [String]
-    Updates: BookMutationInput
-  ): BookMutationResultMulti
+    Updates: Thing1MutationInput
+  ): Thing1MutationResultMulti
 
-  updateBooksBulk(
-    Match: BookFilters
-    Updates: BookMutationInput
-  ): BookBulkMutationResult
+  updateThing1sBulk(
+    Match: Thing1Filters
+    Updates: Thing1MutationInput
+  ): Thing1BulkMutationResult
 
-  deleteBook(_id: String): DeletionResultInfo
-
-  createSubject(Subject: SubjectInput): SubjectMutationResult
-
-  updateSubject(
-    _id: String
-    Updates: SubjectMutationInput
-  ): SubjectMutationResult
-
-  updateSubjects(
-    _ids: [String]
-    Updates: SubjectMutationInput
-  ): SubjectMutationResultMulti
-
-  updateSubjectsBulk(
-    Match: SubjectFilters
-    Updates: SubjectMutationInput
-  ): SubjectBulkMutationResult
-
-  deleteSubject(_id: String): DeletionResultInfo
-
-  createTag(Tag: TagInput): TagMutationResult
-
-  updateTag(_id: String, Updates: TagMutationInput): TagMutationResult
-
-  updateTags(_ids: [String], Updates: TagMutationInput): TagMutationResultMulti
-
-  updateTagsBulk(
-    Match: TagFilters
-    Updates: TagMutationInput
-  ): TagBulkMutationResult
-
-  deleteTag(_id: String): DeletionResultInfo
+  deleteThing1(_id: String): DeletionResultInfo
 }

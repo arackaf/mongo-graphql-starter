@@ -9,7 +9,7 @@ import fs from "fs";
 import * as projectSetupA from "./projectSetup";
 
 export async function create() {
-  await createGraphqlSchema(projectSetupA, path.resolve("./test/testProject1a"));
+  await createGraphqlSchema(projectSetupA, path.resolve("./test/testProject12"));
 
   if (true || process.env.InCI) {
     glob.sync("./test/testProject1a/graphQL/**/resolver.js").forEach(f => {

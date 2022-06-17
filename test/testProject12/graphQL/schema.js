@@ -1,12 +1,4 @@
-import { query as BookQuery, mutation as BookMutation, type as BookType } from "./Book/schema";
-import { query as SubjectQuery, mutation as SubjectMutation, type as SubjectType } from "./Subject/schema";
-import { query as TagQuery, mutation as TagMutation, type as TagType } from "./Tag/schema";
-import {
-  query as ReadonlyTagQuery,
-  mutation as ReadonlyTagMutation,
-  type as ReadonlyTagType
-} from "./ReadonlyTag/schema";
-import { type as AuthorType } from "./Author/schema";
+import { query as Thing1Query, mutation as Thing1Mutation, type as Thing1Type } from "./Thing1/schema";
 
 export default `
 
@@ -46,32 +38,14 @@ export default `
   }
 
 
-  ${AuthorType}
-
-  ${BookType}
-
-  ${SubjectType}
-
-  ${TagType}
-
-  ${ReadonlyTagType}
+  ${Thing1Type}
 
   type Query {
-    ${BookQuery}
-
-    ${SubjectQuery}
-
-    ${TagQuery}
-
-    ${ReadonlyTagQuery}
+    ${Thing1Query}
   }
 
   type Mutation {
-    ${BookMutation}
-
-    ${SubjectMutation}
-
-    ${TagMutation}
+    ${Thing1Mutation}
   }
 
   

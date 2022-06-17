@@ -1,21 +1,12 @@
 import GraphQLJSON from "graphql-type-json";
 
-import Book, { Book as BookRest } from "./Book/resolver";
-import Subject, { Subject as SubjectRest } from "./Subject/resolver";
-import Tag, { Tag as TagRest } from "./Tag/resolver";
-import ReadonlyTag, { ReadonlyTag as ReadonlyTagRest } from "./ReadonlyTag/resolver";
+import Thing1, { Thing1 as Thing1Rest } from "./Thing1/resolver";
 
-const { Query: BookQuery, Mutation: BookMutation } = Book;
-const { Query: SubjectQuery, Mutation: SubjectMutation } = Subject;
-const { Query: TagQuery, Mutation: TagMutation } = Tag;
-const { Query: ReadonlyTagQuery, Mutation: ReadonlyTagMutation } = ReadonlyTag;
+const { Query: Thing1Query, Mutation: Thing1Mutation } = Thing1;
 
 export default {
   JSON: GraphQLJSON,
-  Query: Object.assign({}, BookQuery, SubjectQuery, TagQuery, ReadonlyTagQuery),
-  Mutation: Object.assign({}, BookMutation, SubjectMutation, TagMutation),
-  Book: { ...BookRest },
-  Subject: { ...SubjectRest },
-  Tag: { ...TagRest },
-  ReadonlyTag: { ...ReadonlyTagRest }
+  Query: Object.assign({}, Thing1Query),
+  Mutation: Object.assign({}, Thing1Mutation),
+  Thing1: { ...Thing1Rest }
 };
