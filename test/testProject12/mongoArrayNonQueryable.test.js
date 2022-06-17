@@ -15,51 +15,43 @@ afterAll(async () => {
   db = null;
 });
 
-const mongoArgs = ["_contains"];
-const mongoArrArgs = ["", "_containsAny", "_containsAll", "_ne"];
-const mongoArrArrArgs = ["_in", "_nin"];
+const q__id_arr = {
+  field: "q__id_arr",
+  queries: [
+    {
+      args: ["_contains"],
+      value: '"6164d3d577f54f44209b7941"'
+    },
+    {
+      args: ["", "_containsAny", "_containsAll", "_ne"],
+      value: '["6164d3d577f54f44209b7941"]'
+    },
+    {
+      args: ["_in", "_nin"],
+      value: '[["6164d3d577f54f44209b7941"]]'
+    }
+  ]
+};
 
-const queryable = "q__id_arr";
-const nonqueryable = "nq__id_arr";
+function processField({ field, queries }) {
+  const queryable = field;
+  const nonqueryable = `n${field}`;
 
-mongoArgs.forEach(arg => {
-  test("Testing queryable " + (arg || "match"), async () => {
-    queriesWithoutError({
-      query: `{allThing1s(${queryable}${arg}: "6164d3d577f54f44209b7941") { Thing1s { _id } }}`
+  queries.forEach(({ args, value }) => {
+    args.forEach(arg => {
+      test("Testing queryable " + (arg || "match"), async () => {
+        queriesWithoutError({
+          query: `{allThing1s(${queryable}${arg}: ${value}) { Thing1s { _id } }}`
+        });
+      });
+
+      test("Testing non-queryable " + (arg || "match"), async () => {
+        queryFails({
+          query: `{allThing1s(${nonqueryable}${arg}: ${value}) { Thing1s { _id } }}`
+        });
+      });
     });
   });
+}
 
-  test("Testing non-queryable " + (arg || "match"), async () => {
-    queryFails({
-      query: `{allThing1s(${nonqueryable}${arg}: ["6164d3d577f54f44209b7941"]) { Thing1s { _id } }}`
-    });
-  });
-});
-
-mongoArrArgs.forEach(arg => {
-  test("Testing queryable " + (arg || "match"), async () => {
-    queriesWithoutError({
-      query: `{allThing1s(${queryable}${arg}: ["6164d3d577f54f44209b7941"]) { Thing1s { _id } }}`
-    });
-  });
-
-  test("Testing non-queryable " + (arg || "match"), async () => {
-    queryFails({
-      query: `{allThing1s(${nonqueryable}${arg}: ["6164d3d577f54f44209b7941"]) { Thing1s { _id } }}`
-    });
-  });
-});
-
-mongoArrArrArgs.forEach(arg => {
-  test("Testing queryable " + (arg || "match"), async () => {
-    queriesWithoutError({
-      query: `{allThing1s(${queryable}${arg}: [["6164d3d577f54f44209b7941"]]) { Thing1s { _id } }}`
-    });
-  });
-
-  test("Testing non-queryable " + (arg || "match"), async () => {
-    queryFails({
-      query: `{allThing1s(${nonqueryable}${arg}: [["6164d3d577f54f44209b7941"]]) { Thing1s { _id } }}`
-    });
-  });
-});
+processField(q__id_arr);
