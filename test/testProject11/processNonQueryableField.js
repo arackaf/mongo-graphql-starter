@@ -1,4 +1,18 @@
-export async function processField({ field, queries }, getGraphqlHelpers) {
+import spinUp from "./spinUp";
+
+let db, close, queriesWithoutError, queryFails;
+const getGraphqlHelpers = () => ({ close, queriesWithoutError, queryFails });
+
+beforeAll(async () => {
+  ({ db, close, queriesWithoutError, queryFails } = await spinUp());
+});
+
+afterAll(async () => {
+  close();
+  db = null;
+});
+
+export async function processField({ field, queries }) {
   const queryable = field;
   const nonqueryable = `n${field}`;
 
