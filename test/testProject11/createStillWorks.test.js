@@ -5,6 +5,11 @@ beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 });
 
+afterAll(() => {
+  close();
+  db = null;
+});
+
 test("Create minimal object", async () => {
   let obj = await runMutation({
     mutation: `createBook(Book: {

@@ -5,6 +5,11 @@ beforeAll(async () => {
   ({ db, schema, runQuery, runMutation, close } = await spinUp());
 });
 
+afterAll(() => {
+  close();
+  db = null;
+});
+
 const nonQueryableFields = ["_id", "str", "strArr"];
 
 nonQueryableFields.forEach(field => {
