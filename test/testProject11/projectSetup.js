@@ -13,8 +13,7 @@ import {
   objectOf,
   formattedDate,
   JSONType,
-  typeLiteral,
-  fieldOf
+  typeLiteral
 } from "../../src/dataTypes";
 
 export const Book = {
