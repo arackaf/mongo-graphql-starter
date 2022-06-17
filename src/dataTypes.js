@@ -10,6 +10,12 @@ export const fieldOf = type => {
     nonQueryable() {
       return this.addTrait("non-queryable");
     },
+    nonNull() {
+      return this.addTrait("non-null");
+    },
+    containsNonNull() {
+      return this.addTrait("contains-non-null");
+    },
     addTrait(trait) {
       const clone = { ...this };
       clone.traits = new Set(this.traits);

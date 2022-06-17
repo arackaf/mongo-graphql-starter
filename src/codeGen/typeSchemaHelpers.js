@@ -44,7 +44,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   const createSchemaTypes = () =>
     `${[
       createType(name, [
-        ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k])}`),
+        ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k])}`),
         ...Object.keys(resolvedFields).map(k => `${k}: ${resolvedFields[k]}`),
         ...relationshipEntries.map(relationshipResolver)
       ]),
@@ -59,14 +59,14 @@ export default function createGraphqlTypeSchema(objectToCreate) {
         : []),
       objectToCreate.hasMutableOneToManyRelationship
         ? createInput(`${name}InputLocal`, [
-            ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+            ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k], true)}`),
             ...Object.entries(relationships)
               .filter(([k, rel]) => !rel.readonly && !rel.oneToMany)
               .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
           ])
         : null,
       createInput(`${name}Input`, [
-        ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+        ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k], true)}`),
         ...Object.entries(relationships)
           .filter(([k, rel]) => !rel.readonly)
           .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
@@ -113,7 +113,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
             createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
             createOperation(
               `update${name}`,
-              [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
+              [`_id: ${fieldType(null, null, fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
               `${name}MutationResult`
             ),
             createOperation(
@@ -149,21 +149,24 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 }
 
-function fieldType(value, useInputs) {
+function fieldType(type, name, value, useInputs) {
+  const nonNull = type && name ? type.nonNull[name] : false;
+  const containsNonNull = type && name ? type.containsNonNull[name] : null;
+
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
     switch (value) {
       case StringArrayType:
-        return "[String]";
+        return `[String${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
       case IntArrayType:
-        return "[Int]";
+        return `[Int${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
       case FloatArrayType:
-        return "[Float]";
+        return `[Float${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
       case MongoIdArrayType:
-        return "[String]";
+        return `[String${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
       default:
-        return `${value == MongoIdType || value == DateType ? "String" : value}`;
+        return `${value == MongoIdType || value == DateType ? "String" : value}${nonNull ? "!" : ""}`;
     }
   } else if (typeof value === "object") {
     if (value.__isArray) {

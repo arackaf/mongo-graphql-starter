@@ -69,6 +69,10 @@ export const Thing1 = {
     nq_float: FloatType.nonQueryable(),
     nq_floatArr: FloatArrayType.nonQueryable(),
     nq_date: DateType.nonQueryable(),
-    nq_json: JSONType.nonQueryable()
+    nq_json: JSONType.nonQueryable(),
+
+    nonNullString: StringType.nonNull(),
+    nonNullStringArray: StringArrayType.nonNull(),
+    nonNullStringArrayOfNonNull: StringArrayType.nonNull().containsNonNull()
   }
 };

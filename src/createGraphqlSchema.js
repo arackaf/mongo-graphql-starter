@@ -48,10 +48,18 @@ export default function (source, destPath, options = {}) {
       }
 
       type.nonQueryable = {};
+      type.nonNull = {};
+      type.containsNonNull = {};
       for (const [k, val] of Object.entries(type.fields)) {
         if (val.customField) {
           if (val.traits.has("non-queryable")) {
             type.nonQueryable[k] = true;
+          }
+          if (val.traits.has("non-null")) {
+            type.nonNull[k] = true;
+          }
+          if (val.traits.has("contains-non-null")) {
+            type.containsNonNull[k] = true;
           }
 
           type.fields[k] = val.type;
