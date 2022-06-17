@@ -8,7 +8,6 @@ import {
   FloatType,
   FloatArrayType,
   DateType,
-  arrayOf,
   BoolType,
   JSONType
 } from "../dataTypeConstants";

@@ -4,7 +4,6 @@ import {
   IntType,
   FloatType,
   DateType,
-  arrayOf,
   StringArrayType,
   MongoIdArrayType,
   IntArrayType,
