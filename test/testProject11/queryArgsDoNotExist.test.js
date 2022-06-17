@@ -10,7 +10,7 @@ afterAll(() => {
   db = null;
 });
 
-const nonQueryableFields = ["_id", "str", "strArr"];
+const nonQueryableFields = ["_id", "str", "strArr", "bool", "int", "intArr", "float", "floatArr", "date", "json"];
 
 nonQueryableFields.forEach(field => {
   test("Non queryable field " + field + " has no search args in all query", async () => {
@@ -34,7 +34,7 @@ nonQueryableFields.forEach(field => {
 
     const allBooksArgs = schema.queryType.fields.find(field => field.name === "allBooks").args.map(arg => arg.name);
 
-    const foundArgs = allBooksArgs.filter(p => p.startsWith(field));
+    const foundArgs = allBooksArgs.filter(p => p.startsWith(field) && p !== "date_format");
 
     expect(foundArgs.length).toBe(0);
   });

@@ -54,7 +54,6 @@
     "test9": "jest --runInBand --config=test/jestConfig/jest.config9.json",
     "test10": "jest --runInBand --config=test/jestConfig/jest.config10.json",
     "test11": "jest --runInBand --config=test/jestConfig/jest.config11.json",
-    "test12": "jest --runInBand --config=test/jestConfig/jest.config12.json",
     "testts": "jest --runInBand --config=test/jestConfig/jest.config-ts.json"
   },
   "dependencies": {
