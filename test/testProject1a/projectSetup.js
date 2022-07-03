@@ -42,7 +42,8 @@ export const Book = {
     strArrs: typeLiteral("[[String]]"),
     createdOn: DateType.nonNull(),
     createdOnYearOnly: formattedDate({ format: "%Y" }).nonNull(),
-    jsonContent: JSONType.nonNull()
+    jsonContent: JSONType.nonNull(),
+    literalNonNullString: typeLiteral("String!")
   }
 };
 
