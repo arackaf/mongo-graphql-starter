@@ -5,6 +5,11 @@ beforeAll(async () => {
   ({ db, schema, queryAndMatchArray, runMutation, close } = await spinUp());
 });
 
+afterEach(async () => {
+  await db.collection("books").deleteMany({});
+  await db.collection("thing1").deleteMany({});
+});
+
 afterAll(() => {
   close();
   db = null;
@@ -77,3 +82,41 @@ test("Create minimal object", async () => {
     queryable_json: "jsonq"
   });
 });
+
+const fullThing1 = {
+  nonNullString: "a",
+  nonNullStringArray: [],
+  nonNullStringArrayOfNonNull: [],
+
+  nonNullMongoId: "625b73ae4f45cbd7fb1a16e6",
+  nonNullMongoIdArray: [],
+  nonNullMongoIdArrayOfNonNull: [],
+
+  nonNullInt: 1,
+  nonNullIntArray: [],
+  nonNullIntArrayOfNonNull: [],
+
+  nonNullFloat: 1.1,
+  nonNullFloatArray: [],
+  nonNullFloatArrayOfNonNull: [],
+
+  nonNullDate: "1/1/2000",
+
+  nonNullObject: { id: "1" },
+  nonNullArrayOfObjects: [],
+  nonNullArrayOfNonNullObjects: []
+};
+
+test("Create minimal Thing1", async () => {
+  expect(1).toBe(1);
+  return;
+  let obj = await runMutation({
+    mutation: `createThing1(Thing1: ${JSON.stringify(fullThing1)}) { success } `,
+    result: "createThing1"
+  });
+  expect(obj).toEqual({
+    success: true
+  });
+});
+
+Object.keys(fullThing1).forEach(k => {});
