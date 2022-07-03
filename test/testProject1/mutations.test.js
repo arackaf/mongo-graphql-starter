@@ -13,25 +13,37 @@ afterAll(async () => {
 });
 
 test("Creation mutation runs", async () => {
-  await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){Book{title, pages}}`, result: "createBook" });
+  await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", pages: 100, literalNonNullString: ""}){Book{title, pages}}`,
+    result: "createBook"
+  });
 });
 
 test("Creation mutation runs and returns success", async () => {
-  let res = await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){success}`, rawResult: "createBook" });
+  let res = await runMutation({
+    mutation: `createBook(Book: {title: "Book 1", pages: 100, literalNonNullString: ""}){success}`,
+    rawResult: "createBook"
+  });
   expect(res).toEqual({ success: true });
 });
 
 test("Creation mutation runs without selection", async () => {
-  await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100}){success}`, result: "createBook" });
+  await runMutation({ mutation: `createBook(Book: {title: "Book 1", pages: 100, literalNonNullString: ""}){success}`, result: "createBook" });
 });
 
 test("Creation mutation runs and returns object", async () => {
-  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 2", pages: 100}){Book{title, pages}}`, result: "createBook" });
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 2", pages: 100, literalNonNullString: ""}){Book{title, pages}}`,
+    result: "createBook"
+  });
   expect(obj).toEqual({ title: "Book 2", pages: 100 });
 });
 
 test("Creation mutation runs and returns object, then searched with graphQL", async () => {
-  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 3", pages: 150}){Book{_id}}`, result: "createBook" });
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 3", pages: 150, literalNonNullString: ""}){Book{_id}}`,
+    result: "createBook"
+  });
   await queryAndMatchArray({
     query: `{getBook(_id: "${obj._id}"){Book{title, pages}}}`,
     coll: "getBook",
@@ -40,7 +52,10 @@ test("Creation mutation runs and returns object, then searched with graphQL", as
 });
 
 test("Creation mutation runs and returns object, then searched with graphQL. Check non-created fields", async () => {
-  let obj = await runMutation({ mutation: `createBook(Book: {title: "Book 3", pages: 150}){Book{_id}}`, result: "createBook" });
+  let obj = await runMutation({
+    mutation: `createBook(Book: {title: "Book 3", pages: 150, literalNonNullString: ""}){Book{_id}}`,
+    result: "createBook"
+  });
   await queryAndMatchArray({
     query: `{getBook(_id: "${obj._id}"){Book{title, pages, weight}}}`,
     coll: "getBook",
@@ -50,14 +65,17 @@ test("Creation mutation runs and returns object, then searched with graphQL. Che
 
 test("Creation mutation runs and returns object with formatting", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
+    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, literalNonNullString: "", authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "createBook"
   });
   expect(obj).toEqual({
     title: "Book 2",
     pages: 100,
     weight: 1.2,
-    authors: [{ birthday: "03/22/1982", name: "Adam" }, { birthday: "06/02/2004", name: "Bob" }],
+    authors: [
+      { birthday: "03/22/1982", name: "Adam" },
+      { birthday: "06/02/2004", name: "Bob" }
+    ],
     primaryAuthor: { birthday: "06/02/2004", name: "Bob" },
     strArrs: [["a"], ["b", "c"]],
     createdOn: "06/03/2004",
@@ -71,6 +89,7 @@ test("Modification mutation works", async () => {
       title: "Book 2", 
       pages: 100, 
       weight: 1.2, 
+      literalNonNullString: "",
       authors: [
         {
           birthday: "1982-03-22", 
@@ -143,7 +162,10 @@ test("Modification mutation works", async () => {
     title: "Book 2a",
     pages: 101,
     weight: 1.3,
-    authors: [{ birthday: "03/23/1982", name: "Adam R" }, { birthday: "06/03/2004", name: "Bob B" }],
+    authors: [
+      { birthday: "03/23/1982", name: "Adam R" },
+      { birthday: "06/03/2004", name: "Bob B" }
+    ],
     primaryAuthor: { birthday: "01/02/2000", name: "Mike" },
     strArrs: [["d"], ["e", "f"]],
     createdOn: "06/04/2004",
@@ -153,21 +175,22 @@ test("Modification mutation works", async () => {
 
 test("Modification mutation works", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {authors: [{birthday: "1982-03-22", name: "Adam"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}}){Book{_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
+    mutation: `createBook(Book: {authors: [{birthday: "1982-03-22", name: "Adam"}], literalNonNullString: "", primaryAuthor: {birthday: "2004-06-02", name: "Bob"}}){Book{_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "createBook"
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${
-      obj._id
-    }", Updates: {authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: {authors: [{birthday: "1982-03-23", name: "Adam R"}, {birthday: "2004-06-03", name: "Bob B"}], primaryAuthor: {birthday: "2000-01-02", name: "Mike"}}){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
     title: null,
     pages: null,
     weight: null,
-    authors: [{ birthday: "03/23/1982", name: "Adam R" }, { birthday: "06/03/2004", name: "Bob B" }],
+    authors: [
+      { birthday: "03/23/1982", name: "Adam R" },
+      { birthday: "06/03/2004", name: "Bob B" }
+    ],
     primaryAuthor: { birthday: "01/02/2000", name: "Mike" },
     strArrs: null,
     createdOn: null,
@@ -188,7 +211,8 @@ test("Partial modification mutation works", async () => {
       primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, 
       strArrs: [["a"], ["b", "c"]], 
       createdOn: "2004-06-03", 
-      createdOnYearOnly: "2004-06-03"
+      createdOnYearOnly: "2004-06-03",
+      literalNonNullString: ""
     }){Book{
       _id, 
       title, 
@@ -235,7 +259,10 @@ test("Partial modification mutation works", async () => {
     title: "Book 2a",
     pages: 101,
     weight: 1.2,
-    authors: [{ birthday: "03/22/1982", name: "Adam" }, { birthday: "06/02/2004", name: "Bob" }],
+    authors: [
+      { birthday: "03/22/1982", name: "Adam" },
+      { birthday: "06/02/2004", name: "Bob" }
+    ],
     primaryAuthor: { birthday: "06/02/2004", name: "Bob" },
     strArrs: [["a"], ["b", "c"]],
     createdOn: "06/03/2004",
@@ -245,21 +272,22 @@ test("Partial modification mutation works", async () => {
 
 test("No modification mutation works", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){Book{_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
+    mutation: `createBook(Book: {title: "Book 2", pages: 100, weight: 1.2, literalNonNullString: "", authors: [{birthday: "1982-03-22", name: "Adam"}, {birthday: "2004-06-02", name: "Bob"}], primaryAuthor: {birthday: "2004-06-02", name: "Bob"}, strArrs: [["a"], ["b", "c"]], createdOn: "2004-06-03", createdOnYearOnly: "2004-06-03"}){Book{_id, title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "createBook"
   });
 
   let updated = await runMutation({
-    mutation: `updateBook(_id: "${
-      obj._id
-    }"){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
+    mutation: `updateBook(_id: "${obj._id}"){Book{title, pages, weight, authors { birthday, name }, primaryAuthor{ birthday, name }, strArrs, createdOn, createdOnYearOnly}}`,
     result: "updateBook"
   });
   expect(updated).toEqual({
     title: "Book 2",
     pages: 100,
     weight: 1.2,
-    authors: [{ birthday: "03/22/1982", name: "Adam" }, { birthday: "06/02/2004", name: "Bob" }],
+    authors: [
+      { birthday: "03/22/1982", name: "Adam" },
+      { birthday: "06/02/2004", name: "Bob" }
+    ],
     primaryAuthor: { birthday: "06/02/2004", name: "Bob" },
     strArrs: [["a"], ["b", "c"]],
     createdOn: "06/03/2004",
@@ -271,7 +299,7 @@ test("No modification mutation works", async () => {
 
 test("float array update", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.9]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", prices: [1.1, 2.9]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -285,7 +313,7 @@ test("float array update", async () => {
 
 test("float array updates", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.9]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", prices: [1.1, 2.9]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -299,7 +327,7 @@ test("float array updates", async () => {
 
 test("float array pull", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.2, 3.3]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", prices: [1.1, 2.2, 3.3]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -313,7 +341,7 @@ test("float array pull", async () => {
 
 test("float array add to set", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", prices: [1.1, 2.2, 3.3]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", prices: [1.1, 2.2, 3.3]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -329,7 +357,7 @@ test("float array add to set", async () => {
 
 test("bool update", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", isRead: true}){Book{_id, isRead}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", isRead: true}){Book{_id, isRead}}`,
     result: "createBook"
   });
   expect(obj.isRead).toEqual(true);
@@ -346,7 +374,7 @@ test("bool update", async () => {
 
 test("int array update", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", editions: [6, 10]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", editions: [6, 10]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -360,7 +388,7 @@ test("int array update", async () => {
 
 test("int array updates", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", editions: [6, 10]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", editions: [6, 10]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -374,7 +402,7 @@ test("int array updates", async () => {
 
 test("int array pull", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", editions: [4, 6, 10]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", editions: [4, 6, 10]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -388,7 +416,7 @@ test("int array pull", async () => {
 
 test("int array add to set", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", editions: [4, 6, 10]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", editions: [4, 6, 10]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -404,7 +432,7 @@ test("int array add to set", async () => {
 
 test("string array update", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", keywords: ["c", "d"]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -418,7 +446,7 @@ test("string array update", async () => {
 
 test("string array updates", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", keywords: ["c", "d"]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -432,7 +460,7 @@ test("string array updates", async () => {
 
 test("string array pull", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d", "e"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", keywords: ["c", "d", "e"]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -446,7 +474,7 @@ test("string array pull", async () => {
 
 test("string array add to set", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", keywords: ["c", "d", "e"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", keywords: ["c", "d", "e"]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -467,7 +495,7 @@ const idCrap = ObjectId("59ff9b246d61043f186dcfe9");
 
 test("Manual mongoId", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {_id: "${idCrap}" title: "Book temp"}){Book{_id}}`,
+    mutation: `createBook(Book: {_id: "${idCrap}" title: "Book temp", literalNonNullString: ""}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -487,7 +515,7 @@ test("Manual mongoId", async () => {
 
 test("MongoId array update", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id2}", "${idCrap}"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", mongoIds: ["${id2}", "${idCrap}"]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -501,14 +529,12 @@ test("MongoId array update", async () => {
 
 test("MongoId array updates", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id3}", "${idCrap}"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", mongoIds: ["${id3}", "${idCrap}"]}){Book{_id}}`,
     result: "createBook"
   });
 
   obj = await runMutation({
-    mutation: `updateBook(_id: "${
-      obj._id
-    }", Updates: {mongoIds_UPDATES: [{index: 0, value: "${id1}"}, {index: 1, value: "${id2}"}] }) {Book{title, mongoIds}}`,
+    mutation: `updateBook(_id: "${obj._id}", Updates: {mongoIds_UPDATES: [{index: 0, value: "${id1}"}, {index: 1, value: "${id2}"}] }) {Book{title, mongoIds}}`,
     result: "updateBook"
   });
 
@@ -517,7 +543,7 @@ test("MongoId array updates", async () => {
 
 test("MongoId array pull", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id1}", "${id2}", "${id3}"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", mongoIds: ["${id1}", "${id2}", "${id3}"]}){Book{_id}}`,
     result: "createBook"
   });
 
@@ -531,7 +557,7 @@ test("MongoId array pull", async () => {
 
 test("MongoId array add to set", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", mongoIds: ["${id1}", "${id2}", "${id3}"]}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", mongoIds: ["${id1}", "${id2}", "${id3}"]}){Book{_id}}`,
     result: "createBook"
   });
 

@@ -13,7 +13,7 @@ afterAll(async () => {
 
 test("Deletion works", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 2"}){Book{_id}}`,
+    mutation: `createBook(Book: {title: "Book 2", literalNonNullString: ""}){Book{_id}}`,
     result: "createBook"
   });
 
