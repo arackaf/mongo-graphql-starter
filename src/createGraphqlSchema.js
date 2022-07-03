@@ -62,6 +62,8 @@ export default function (source, destPath, options = {}) {
             type.containsNonNull[k] = true;
           }
 
+          //in case the field is get-only
+          delete type.fields[k];
           type.fields[k] = val.type;
         }
       }

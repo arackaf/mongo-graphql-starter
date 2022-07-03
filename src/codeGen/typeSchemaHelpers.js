@@ -267,7 +267,7 @@ function fieldMutations(k, fields) {
         `${k}_PULL: ${value.type.__name}Filters`
       ];
     } else if (value.__isLiteral) {
-      return [`${k}: ${value.type}`];
+      return [`${k}: ${value.type.replace(/\!$/, "")}`];
     } else if (value.__isObject) {
       return [`${k}: ${value.type.__name}Input`, `${k}_UPDATE: ${value.type.__name}MutationInput`];
     }
