@@ -121,23 +121,31 @@ for (let k of Object.keys(fullThing1)) {
   test(`Create minimal Thing1 - replace ${k}`, async () => {
     if (/Array$/.test(k)) {
       const thingObj = { ...fullThing1, [k]: null };
-      await verifyNullError(thingObj);
+      await verifyNullError(thingObj, /null/);
     } else if (/ArrayOfNonNull$/.test(k)) {
       const thingObj1 = { ...fullThing1, [k]: null };
-      await verifyNullError(thingObj1);
+      await verifyNullError(thingObj1, /null/);
 
       const thingObj2 = { ...fullThing1, [k]: [null] };
-      await verifyNullError(thingObj2);
+      await verifyNullError(thingObj2, /null/);
     } else {
       const thingObj = { ...fullThing1, [k]: null };
-      await verifyNullError(thingObj);
+      await verifyNullError(thingObj, /null/);
     }
   });
 }
 
-const verifyNullError = async thingObj => {
+const verifyNullError = async (thingObj, errorRegex) => {
   await runMutation({
     mutation: `createThing1(Thing1: ${JSON5.stringify(thingObj, { quote: '"' })}) { success } `,
-    expectedError: /null/
+    expectedError: errorRegex
   });
 };
+
+["nonNullObject", "nonNullArrayOfObjects", "nonNullArrayOfNonNullObjects"].forEach(k => {
+  test(`Create minimal Thing1 - replace non-null object ${k}`, async () => {
+    const thingObj = { ...fullThing1 };
+    delete thingObj[k];
+    await verifyNullError(thingObj, /was not provided/);
+  });
+});
