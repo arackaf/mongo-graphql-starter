@@ -1,4 +1,5 @@
 import spinUp from "./spinUp";
+import JSON5 from "json5";
 
 let db, schema, queryAndMatchArray, runMutation, close;
 beforeAll(async () => {
@@ -108,15 +109,27 @@ const fullThing1 = {
 };
 
 test("Create minimal Thing1", async () => {
-  expect(1).toBe(1);
-  return;
   let obj = await runMutation({
-    mutation: `createThing1(Thing1: ${JSON.stringify(fullThing1)}) { success } `,
-    result: "createThing1"
+    mutation: `createThing1(Thing1: ${JSON5.stringify(fullThing1, { quote: '"' })}) { success } `,
+    rawResult: "createThing1"
   });
-  expect(obj).toEqual({
-    success: true
-  });
+
+  expect(obj).toEqual({ success: true });
 });
 
-Object.keys(fullThing1).forEach(k => {});
+for (let k of Object.keys(fullThing1)) {
+  if (/Array$/.test(k)) {
+  } else if (/ArrayOfNonNull$/.test(k)) {
+  } else {
+    test(`Create minimal Thing1 - replace ${k}`, async () => {
+      const thingObj = Object.assign({}, fullThing1);
+      thingObj[k] = null;
+
+      await runMutation({
+        mutation: `createThing1(Thing1: ${JSON5.stringify(thingObj, { quote: '"' })}) { success } `,
+        expectedError: /null/
+      });
+    });
+    break;
+  }
+}
