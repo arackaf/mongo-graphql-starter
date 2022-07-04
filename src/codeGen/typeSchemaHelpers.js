@@ -152,20 +152,23 @@ function fieldType(type, name, value, useInputs) {
   const nonNull = type && name ? type.nonNull[name] : false;
   const containsNonNull = type && name ? type.containsNonNull[name] : null;
 
+  const nonNullBang = nonNull ? "!" : "";
+  const ofNonNullBang = nonNull ? "!" : "";
+
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
     switch (value) {
       case StringArrayType:
-        return `[String${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
+        return `[String${ofNonNullBang}]${nonNullBang}`;
       case IntArrayType:
-        return `[Int${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
+        return `[Int${ofNonNullBang}]${nonNullBang}`;
       case FloatArrayType:
-        return `[Float${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
+        return `[Float${ofNonNullBang}]${nonNullBang}`;
       case MongoIdArrayType:
-        return `[String${containsNonNull ? "!" : ""}]${nonNull ? "!" : ""}`;
+        return `[String${ofNonNullBang}]${nonNullBang}`;
       default:
-        return `${value == MongoIdType || value == DateType ? "String" : value}${nonNull ? "!" : ""}`;
+        return `${value == MongoIdType || value == DateType ? "String" : value}${nonNullBang}`;
     }
   } else if (typeof value === "object") {
     if (value.__isArray) {

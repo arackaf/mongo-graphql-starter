@@ -118,18 +118,26 @@ test("Create minimal Thing1", async () => {
 });
 
 for (let k of Object.keys(fullThing1)) {
-  if (/Array$/.test(k)) {
-  } else if (/ArrayOfNonNull$/.test(k)) {
-  } else {
-    test(`Create minimal Thing1 - replace ${k}`, async () => {
-      const thingObj = Object.assign({}, fullThing1);
-      thingObj[k] = null;
+  test(`Create minimal Thing1 - replace ${k}`, async () => {
+    if (/Array$/.test(k)) {
+      const thingObj = { ...fullThing1, [k]: null };
+      await verifyNullError(thingObj);
+    } else if (/ArrayOfNonNull$/.test(k)) {
+      const thingObj1 = { ...fullThing1, [k]: null };
+      await verifyNullError(thingObj1);
 
-      await runMutation({
-        mutation: `createThing1(Thing1: ${JSON5.stringify(thingObj, { quote: '"' })}) { success } `,
-        expectedError: /null/
-      });
-    });
-    break;
-  }
+      const thingObj2 = { ...fullThing1, [k]: [null] };
+      await verifyNullError(thingObj2);
+    } else {
+      const thingObj = { ...fullThing1, [k]: null };
+      await verifyNullError(thingObj);
+    }
+  });
 }
+
+const verifyNullError = async thingObj => {
+  await runMutation({
+    mutation: `createThing1(Thing1: ${JSON5.stringify(thingObj, { quote: '"' })}) { success } `,
+    expectedError: /null/
+  });
+};
