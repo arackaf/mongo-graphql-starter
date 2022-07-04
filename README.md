@@ -17,6 +17,7 @@ The idea is to auto-generate the mundane, repetitive boilerplate needed for a gr
   - [How do you use it?](#how-do-you-use-it)
     - [Valid types for your fields](#valid-types-for-your-fields)
     - [Adding property traits](#adding-property-traits)
+      - [Type safety in updates](#type-safety-in-updates)
     - [Readonly types](#readonly-types)
     - [Circular dependencies are fine](#circular-dependencies-are-fine)
   - [VS Code integration](#vs-code-integration)
@@ -248,9 +249,14 @@ const {
 
 ### Adding property traits 
 
-If you'd like to modify the default behavior of a type's properties, you can use the `fieldOf` builder. Pass it a type from the prior section, and call the appropriate method to add the desired trait. 
+There are a number of chainable helper functions you can use to modify the default behavior of a type's properties. 
 
-For now, the only available trait is `nonQueryable`, which prevents queries from being generated for a property. This will remove some bloat from your GraphQL api. These properties will still be editable and readable, but no queries will be generated for them. Properties can be made nonQueryable with the `nonQueryable()` method.
+| Type               | Description  |
+| ------------------ | ------------------------------------ |
+| `nonQueryable` | Prevents any filters from being for this field. This is useful for preventing your GraphQL schema from becoming unnecessarily bloated |
+| `nonNull`      | Marks the field as non-null. The type itself, that's returned from queries, as well as the input type for object creation will be marked as non-null |
+| `containsNonNull` | For arrays only, indicates that the array's items will never be null |
+
 
 ```js
 import { MongoIdType, StringType, fieldOf } from "../../src/dataTypes";
@@ -258,12 +264,21 @@ import { MongoIdType, StringType, fieldOf } from "../../src/dataTypes";
 export const Book = {
   table: "books",
   fields: {
-    _id: fieldOf(MongoIdType).nonQueryable(),
-    title: fieldOf(StringType).nonQueryable(),
-    isRead: BoolType
+    _id: MongoIdType,
+    nonQueryable: StringType.nonQueryable(),
+    nonNullString: StringType.nonNull(),
+    nonNullStringArray: StringArrayType.nonNull(),
+    nonNullStringArrayOfNonNull: StringArrayType.nonNull().containsNonNull(),
+    allTraits: StringArrayType.nonQueryable().nonNull().containsNonNull()
   }
 };
 ```
+
+#### Type safety in updates
+
+Unfortunately, GraphQL doesn't support optional, non-null fields. As a result, there's no straightforward way to encode that a value in an update cannot be null, without also requiring you to provide a value. For example, for the `nonNullString` field above, if the update mutation input type were coded like this, `nonNullString: String!`, then you'd have to always provide a value for that field when updating an instance of this type, even if you wanted to leave it alone.
+
+As a result, the field traits related to nullability do not affect mutations in any way. So be careful to not update invalid data into your endpoint. 
 
 ### Readonly types
 

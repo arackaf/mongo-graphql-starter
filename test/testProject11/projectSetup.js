@@ -54,7 +54,7 @@ export const Thing1 = {
   fields: {
     nonNullString: StringType.nonNull(),
     nonNullStringArray: StringArrayType.nonNull(),
-    nonNullStringArrayOfNonNull: StringArrayType.nonNull().containsNonNull(),
+    nonNullStringArrayOfNonNull: StringArrayType.nonQueryable().nonNull().containsNonNull(),
 
     nonNullMongoId: MongoIdType.nonNull(),
     nonNullMongoIdArray: MongoIdArrayType.nonNull(),
