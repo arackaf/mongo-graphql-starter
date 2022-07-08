@@ -259,7 +259,7 @@ There are a number of chainable helper functions you can use to modify the defau
 
 
 ```js
-import { MongoIdType, StringType, fieldOf } from "../../src/dataTypes";
+import { MongoIdType, StringType } from "../../src/dataTypes";
 
 export const Book = {
   table: "books",
