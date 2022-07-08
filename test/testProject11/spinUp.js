@@ -1,5 +1,5 @@
 import { MongoClient } from "mongodb";
-import { queryAndMatchArray, runMutation, runQuery, nextConnectionString } from "../testUtil";
+import { queryAndMatchArray, runMutation, runQuery, nextConnectionString, queriesWithoutError, queryFails } from "../testUtil";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { createGraphqlSchema } from "../../src/module";
 import path from "path";
@@ -40,6 +40,8 @@ export default async function () {
     close: () => client.close(),
     queryAndMatchArray: options => queryAndMatchArray({ schema, db: () => db, ...options }),
     runQuery: options => runQuery({ schema, db: () => db, ...options }),
-    runMutation: options => runMutation({ schema, db: () => db, ...options })
+    runMutation: options => runMutation({ schema, db: () => db, ...options }),
+    queriesWithoutError: options => queriesWithoutError({ schema, db: () => db, ...options }),
+    queryFails: options => queryFails({ schema, db: () => db, ...options })
   };
 }

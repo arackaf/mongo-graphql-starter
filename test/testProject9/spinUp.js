@@ -10,6 +10,8 @@ import * as projectSetup9 from "./projectSetup";
 import dotenv from "dotenv";
 dotenv.config();
 
+jest.setTimeout(25000);
+
 export async function create() {
   await Promise.resolve(
     createGraphqlSchema(projectSetup9, path.resolve("./test/testProject9"), { hooks: path.resolve(__dirname, "./projectSetup_Hooks.js") })

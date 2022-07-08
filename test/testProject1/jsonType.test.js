@@ -17,7 +17,7 @@ afterAll(async () => {
 
 test("Creation mutation works with JSON", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{title, jsonContent}}`,
     result: "createBook"
   });
 
@@ -26,12 +26,12 @@ test("Creation mutation works with JSON", async () => {
 
 test("Query null", async () => {
   const withJson = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
   expect(withJson.jsonContent).toBeDefined();
   const withoutJson = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1"}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: ""}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
   expect(withoutJson.jsonContent).toBe(null);
@@ -45,12 +45,12 @@ test("Query null", async () => {
 
 test("Query value", async () => {
   const withJson = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
   expect(withJson.jsonContent).toBeDefined();
   const withoutJson = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1"}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: ""}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
   expect(withoutJson.jsonContent).toBe(null);
@@ -64,12 +64,12 @@ test("Query value", async () => {
 
 test("Query not null", async () => {
   const withJson = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
   expect(withJson.jsonContent).toBeDefined();
   const withoutJson = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1"}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: ""}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
   expect(withoutJson.jsonContent).toBe(null);
@@ -83,17 +83,17 @@ test("Query not null", async () => {
 
 test("Query not value", async () => {
   const bookA = await runMutation({
-    mutation: `createBook(Book: {title: "Book A", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book A", literalNonNullString: "", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookB = await runMutation({
-    mutation: `createBook(Book: {title: "Book B", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book B", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookC = await runMutation({
-    mutation: `createBook(Book: {title: "Book C"}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book C", literalNonNullString: ""}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
@@ -106,22 +106,22 @@ test("Query not value", async () => {
 
 test("Query in value", async () => {
   const bookA = await runMutation({
-    mutation: `createBook(Book: {title: "Book A", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book A", literalNonNullString: "", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookB = await runMutation({
-    mutation: `createBook(Book: {title: "Book B", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book B", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookC = await runMutation({
-    mutation: `createBook(Book: {title: "Book C"}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book C", literalNonNullString: ""}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookD = await runMutation({
-    mutation: `createBook(Book: {title: "Book C", jsonContent: {a: 99, b: "c"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book C", literalNonNullString: "", jsonContent: {a: 99, b: "c"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
@@ -134,22 +134,22 @@ test("Query in value", async () => {
 
 test("Query not in value", async () => {
   const bookA = await runMutation({
-    mutation: `createBook(Book: {title: "Book A", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book A", literalNonNullString: "", jsonContent: {a: 2, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookB = await runMutation({
-    mutation: `createBook(Book: {title: "Book B", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book B", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookC = await runMutation({
-    mutation: `createBook(Book: {title: "Book C"}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book C", literalNonNullString: ""}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
   const bookD = await runMutation({
-    mutation: `createBook(Book: {title: "Book C", jsonContent: {a: 99, b: "c"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book C", literalNonNullString: "", jsonContent: {a: 99, b: "c"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
@@ -162,7 +162,7 @@ test("Query not in value", async () => {
 
 test("Update JSON", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
@@ -182,7 +182,7 @@ test("Update JSON", async () => {
 
 test("Update JSON multi", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 
@@ -202,7 +202,7 @@ test("Update JSON multi", async () => {
 
 test("Update JSON bulk", async () => {
   let obj = await runMutation({
-    mutation: `createBook(Book: {title: "Book 1", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
+    mutation: `createBook(Book: {title: "Book 1", literalNonNullString: "", jsonContent: {a: 1, b: "b"}}){Book{_id, title, jsonContent}}`,
     result: "createBook"
   });
 

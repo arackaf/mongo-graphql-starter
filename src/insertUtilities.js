@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 
 import { processInsertions } from "./dbHelpers";
-import { MongoIdType, MongoIdArrayType, StringType, StringArrayType, DateType } from "./dataTypes";
+import { MongoIdType, MongoIdArrayType, StringType, StringArrayType, DateType } from "./dataTypeConstants";
 
 export async function insertObjects(argsArray, typeMetadata, options) {
   if (!Array.isArray(argsArray)) {
@@ -78,26 +78,28 @@ export async function newObjectFromArgs(args, typeMetadata, options) {
     }
   }
 
-  let keyValuePairs = (await Promise.all(
-    Object.keys(args).map(async k => {
-      let field = typeMetadata.fields[k];
-      if (!field) return null;
+  let keyValuePairs = (
+    await Promise.all(
+      Object.keys(args).map(async k => {
+        let field = typeMetadata.fields[k];
+        if (!field) return null;
 
-      if (field == DateType || field.__isDate) {
-        return [k, new Date(args[k])];
-      } else if (field.__isArray) {
-        return [k, await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, options)))];
-      } else if (field.__isObject) {
-        return [k, await newObjectFromArgs(args[k], field.type, options)];
-      } else if (field === MongoIdArrayType) {
-        return [k, args[k].map(val => ObjectId(val))];
-      } else if (field === MongoIdType) {
-        return [k, ObjectId(args[k])];
-      } else {
-        return [k, args[k]];
-      }
-    })
-  )).filter(x => x);
+        if (field == DateType || field.__isDate) {
+          return [k, new Date(args[k])];
+        } else if (field.__isArray) {
+          return [k, await Promise.all(args[k].map(argItem => newObjectFromArgs(argItem, field.type, options)))];
+        } else if (field.__isObject) {
+          return [k, await newObjectFromArgs(args[k], field.type, options)];
+        } else if (field === MongoIdArrayType) {
+          return [k, args[k].map(val => ObjectId(val))];
+        } else if (field === MongoIdType) {
+          return [k, ObjectId(args[k])];
+        } else {
+          return [k, args[k]];
+        }
+      })
+    )
+  ).filter(x => x);
 
   return keyValuePairs.reduce((obj, [k, val]) => ((obj[k] = val), obj), {});
 }

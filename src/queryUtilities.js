@@ -1,4 +1,4 @@
-import { MongoIdType, MongoIdArrayType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypes";
+import { MongoIdType, MongoIdArrayType, StringType, StringArrayType, IntArrayType, IntType, FloatType, FloatArrayType } from "./dataTypeConstants";
 import { ObjectId } from "mongodb";
 import { processInsertions } from "./dbHelpers";
 

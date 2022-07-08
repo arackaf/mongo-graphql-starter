@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, FloatArrayType } from "./dataTypes";
+import { MongoIdType, MongoIdArrayType, DateType, StringType, StringArrayType, IntArrayType, FloatArrayType } from "./dataTypeConstants";
 import { insertObjects, newObjectFromArgs } from "./insertUtilities";
 import { fillMongoFiltersObject } from "./queryUtilities";
 

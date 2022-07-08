@@ -67,6 +67,26 @@ export async function queryAndMatchArray({ schema, db, query, variables, coll, r
   }
 }
 
+export async function queriesWithoutError({ schema, db, query }) {
+  let allResults = await graphql({ schema, source: query, rootValue: { db }, contextValue: {} });
+
+  if (allResults.errors) {
+    expect("Error was not expected").toBe("But Error'd out\n\n" + allResults.errors);
+  } else {
+    expect(1).toBe(1);
+  }
+}
+
+export async function queryFails({ schema, db, query }) {
+  let allResults = await graphql({ schema, source: query, rootValue: { db }, contextValue: {} });
+
+  if (allResults.errors) {
+    expect(1).toBe(1);
+  } else {
+    expect("Error was expected").toBe("But did not fail");
+  }
+}
+
 export async function runMutation({ schema, db, client, mutation, variables, noValidation, result, rawResult, expectedError, prefix = "" }) {
   if (mutation == null) {
     throw "NO MUTATION PASSED IN";

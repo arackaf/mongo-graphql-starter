@@ -21,9 +21,9 @@ test("String filters null", async () => {
     query: `{allBooks(
       SORT: {title: 1}, 
       title: null
-    ){Books{title, pages}}}`,
+    ){Books{ pages}}}`,
     coll: "allBooks",
-    results: [{ title: null, pages: 90 }]
+    results: [{ pages: 90 }]
   });
 });
 
@@ -32,9 +32,9 @@ test("Int filters null", async () => {
     query: `{allBooks(
       SORT: {title: 1}, 
       pages: null
-    ){Books{title, pages}}}`,
+    ){Books{title}}}`,
     coll: "allBooks",
-    results: [{ title: "null", pages: null }]
+    results: [{ title: "null" }]
   });
 });
 

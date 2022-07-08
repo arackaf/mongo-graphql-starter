@@ -15,6 +15,7 @@ test("Modification mutation works", async () => {
   let obj = await runMutation({
     mutation: `createBook(Book: {
       title: "Book 1", 
+      literalNonNullString: "",
       authors: [
         { birthday: "1982-03-22",  name: "Adam" }, 
         { birthday: "1982-03-22", name: "Alan" }, 
@@ -46,6 +47,7 @@ test("Modification addToSet works", async () => {
   let obj = await runMutation({
     mutation: `createBook(Book: {
       title: "Book 1", 
+      literalNonNullString: "",
       authors: [
         { birthday: "1982-03-22",  name: "Adam", strings: ["a", "b"] }, 
         { birthday: "1982-03-22", name: "Alan", strings: [] }, 

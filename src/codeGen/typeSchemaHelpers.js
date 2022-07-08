@@ -8,10 +8,9 @@ import {
   FloatType,
   FloatArrayType,
   DateType,
-  arrayOf,
   BoolType,
   JSONType
-} from "../dataTypes";
+} from "../dataTypeConstants";
 import { TAB } from "./utilities";
 import { createOperation as createOperationOriginal, createInput, createType } from "./gqlSchemaHelpers";
 import flatMap from "lodash.flatmap";
@@ -44,7 +43,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   const createSchemaTypes = () =>
     `${[
       createType(name, [
-        ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k])}`),
+        ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k])}`),
         ...Object.keys(resolvedFields).map(k => `${k}: ${resolvedFields[k]}`),
         ...relationshipEntries.map(relationshipResolver)
       ]),
@@ -59,14 +58,14 @@ export default function createGraphqlTypeSchema(objectToCreate) {
         : []),
       objectToCreate.hasMutableOneToManyRelationship
         ? createInput(`${name}InputLocal`, [
-            ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+            ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k], true)}`),
             ...Object.entries(relationships)
               .filter(([k, rel]) => !rel.readonly && !rel.oneToMany)
               .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
           ])
         : null,
       createInput(`${name}Input`, [
-        ...Object.keys(fields).map(k => `${k}: ${fieldType(fields[k], true)}`),
+        ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k], true)}`),
         ...Object.entries(relationships)
           .filter(([k, rel]) => !rel.readonly)
           .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
@@ -113,7 +112,7 @@ export default function createGraphqlTypeSchema(objectToCreate) {
             createOperation(`create${name}`, [`${name}: ${name}Input`], `${name}MutationResult`),
             createOperation(
               `update${name}`,
-              [`_id: ${fieldType(fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
+              [`_id: ${fieldType(null, null, fields._id)}`, `Updates: ${name}MutationInput`, ...oneToManyForSingle],
               `${name}MutationResult`
             ),
             createOperation(
@@ -149,29 +148,35 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 }
 
-function fieldType(value, useInputs) {
+function fieldType(type, name, value, useInputs) {
+  const nonNull = type && name ? type.nonNull[name] : false;
+  const containsNonNull = type && name ? type.containsNonNull[name] : null;
+
+  const nonNullBang = nonNull ? "!" : "";
+  const ofNonNullBang = nonNull ? "!" : "";
+
   if (typeof value === "object" && value.__isDate) {
     return "String";
   } else if (typeof value === "string") {
     switch (value) {
       case StringArrayType:
-        return "[String]";
+        return `[String${ofNonNullBang}]${nonNullBang}`;
       case IntArrayType:
-        return "[Int]";
+        return `[Int${ofNonNullBang}]${nonNullBang}`;
       case FloatArrayType:
-        return "[Float]";
+        return `[Float${ofNonNullBang}]${nonNullBang}`;
       case MongoIdArrayType:
-        return "[String]";
+        return `[String${ofNonNullBang}]${nonNullBang}`;
       default:
-        return `${value == MongoIdType || value == DateType ? "String" : value}`;
+        return `${value == MongoIdType || value == DateType ? "String" : value}${nonNullBang}`;
     }
   } else if (typeof value === "object") {
     if (value.__isArray) {
-      return `[${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}]`;
+      return `[${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}${ofNonNullBang}]${nonNullBang}`;
     } else if (value.__isLiteral) {
       return value.type;
     } else if (value.__isObject) {
-      return `${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}`;
+      return `${value.type.__name}${useInputs ? (value.type.hasOneToManyRelationship ? "InputLocal" : "Input") : ""}${nonNullBang}`;
     }
   }
 }
@@ -265,7 +270,7 @@ function fieldMutations(k, fields) {
         `${k}_PULL: ${value.type.__name}Filters`
       ];
     } else if (value.__isLiteral) {
-      return [`${k}: ${value.type}`];
+      return [`${k}: ${value.type.replace(/\!$/, "")}`];
     } else if (value.__isObject) {
       return [`${k}: ${value.type.__name}Input`, `${k}_UPDATE: ${value.type.__name}MutationInput`];
     }

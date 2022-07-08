@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import mkdirp from "mkdirp";
 
-import { MongoIdType, StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType } from "./dataTypes";
+import { MongoIdType, StringArrayType, MongoIdArrayType, IntArrayType, FloatArrayType } from "./dataTypeConstants";
 import createTypeResolver from "./codeGen/createTypeResolver";
 import createGraphqlTypeSchema from "./codeGen/createTypeSchema";
 import createOutputTypeMetadata from "./codeGen/createTypeMetadata";
@@ -48,12 +48,22 @@ export default function (source, destPath, options = {}) {
       }
 
       type.nonQueryable = {};
+      type.nonNull = {};
+      type.containsNonNull = {};
       for (const [k, val] of Object.entries(type.fields)) {
         if (val.customField) {
           if (val.traits.has("non-queryable")) {
             type.nonQueryable[k] = true;
           }
+          if (val.traits.has("non-null")) {
+            type.nonNull[k] = true;
+          }
+          if (val.traits.has("contains-non-null")) {
+            type.containsNonNull[k] = true;
+          }
 
+          //in case the field is get-only
+          delete type.fields[k];
           type.fields[k] = val.type;
         }
       }

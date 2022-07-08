@@ -13,23 +13,22 @@ import {
   objectOf,
   formattedDate,
   JSONType,
-  typeLiteral,
-  fieldOf
+  typeLiteral
 } from "../../src/dataTypes";
 
 export const Book = {
   table: "books",
   fields: {
-    _id: fieldOf(MongoIdType).nonQueryable(),
-    str: fieldOf(StringType).nonQueryable(),
-    strArr: fieldOf(StringArrayType).nonQueryable(),
-    bool: fieldOf(BoolType).nonQueryable(),
-    int: fieldOf(IntType).nonQueryable(),
-    intArr: fieldOf(IntArrayType).nonQueryable(),
-    float: fieldOf(FloatType).nonQueryable(),
-    floatArr: fieldOf(FloatArrayType).nonQueryable(),
-    date: fieldOf(DateType).nonQueryable(),
-    json: fieldOf(JSONType).nonQueryable(),
+    _id: MongoIdType.nonQueryable(),
+    str: StringType.nonQueryable(),
+    strArr: StringArrayType.nonQueryable(),
+    bool: BoolType.nonQueryable(),
+    int: IntType.nonQueryable(),
+    intArr: IntArrayType.nonQueryable(),
+    float: FloatType.nonQueryable(),
+    floatArr: FloatArrayType.nonQueryable(),
+    date: DateType.nonQueryable(),
+    json: JSONType.nonQueryable(),
 
     queryable__id: MongoIdType,
     queryable_str: StringType,
@@ -41,5 +40,38 @@ export const Book = {
     queryable_floatArr: FloatArrayType,
     queryable_date: DateType,
     queryable_json: JSONType
+  }
+};
+
+export const SubType = {
+  fields: {
+    id: StringType
+  }
+};
+
+export const Thing1 = {
+  table: "thing1",
+  fields: {
+    nonNullString: StringType.nonNull(),
+    nonNullStringArray: StringArrayType.nonNull(),
+    nonNullStringArrayOfNonNull: StringArrayType.nonQueryable().nonNull().containsNonNull(),
+
+    nonNullMongoId: MongoIdType.nonNull(),
+    nonNullMongoIdArray: MongoIdArrayType.nonNull(),
+    nonNullMongoIdArrayOfNonNull: MongoIdArrayType.nonNull().containsNonNull(),
+
+    nonNullInt: IntType.nonNull(),
+    nonNullIntArray: IntArrayType.nonNull(),
+    nonNullIntArrayOfNonNull: IntArrayType.nonNull().containsNonNull(),
+
+    nonNullFloat: FloatType.nonNull(),
+    nonNullFloatArray: FloatArrayType.nonNull(),
+    nonNullFloatArrayOfNonNull: FloatArrayType.nonNull().containsNonNull(),
+
+    nonNullDate: DateType.nonNull(),
+
+    nonNullObject: objectOf(SubType).nonNull(),
+    nonNullArrayOfObjects: arrayOf(SubType).nonNull(),
+    nonNullArrayOfNonNullObjects: arrayOf(SubType).nonNull().containsNonNull()
   }
 };

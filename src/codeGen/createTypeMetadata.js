@@ -4,12 +4,11 @@ import {
   IntType,
   FloatType,
   DateType,
-  arrayOf,
   StringArrayType,
   MongoIdArrayType,
   IntArrayType,
   FloatArrayType
-} from "../dataTypes";
+} from "../dataTypeConstants";
 import { TAB } from "./utilities";
 
 const defaultDateFormat = "%m/%d/%Y";
