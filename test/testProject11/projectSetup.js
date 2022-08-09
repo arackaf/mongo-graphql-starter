@@ -19,7 +19,7 @@ import {
 export const Book = {
   table: "books",
   fields: {
-    _id: MongoIdType.nonQueryable(),
+    _id: MongoIdType.nonQueryable().nonNull(),
     str: StringType.nonQueryable(),
     strArr: StringArrayType.nonQueryable(),
     bool: BoolType.nonQueryable(),

@@ -65,7 +65,9 @@ export default function createGraphqlTypeSchema(objectToCreate) {
           ])
         : null,
       createInput(`${name}Input`, [
-        ...Object.keys(fields).map(k => `${k}: ${fieldType(objectToCreate, k, fields[k], true)}`),
+        ...Object.keys(fields).map(
+          k => `${k}: ${fieldType(objectToCreate, k, fields[k], true, k === "_id" /* force  _id to be nullable for input */)}`
+        ),
         ...Object.entries(relationships)
           .filter(([k, rel]) => !rel.readonly)
           .map(([k, rel]) => `${k}: ${relationshipType(rel, true)}`)
@@ -148,8 +150,8 @@ export default function createGraphqlTypeSchema(objectToCreate) {
   }
 }
 
-function fieldType(type, name, value, useInputs) {
-  const nonNull = type && name ? type.nonNull[name] : false;
+function fieldType(type, name, value, useInputs, forceNullable) {
+  const nonNull = !forceNullable && type && name ? type.nonNull[name] : false;
   const containsNonNull = type && name ? type.containsNonNull[name] : null;
 
   const nonNullBang = nonNull ? "!" : "";
