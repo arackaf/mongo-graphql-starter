@@ -283,6 +283,7 @@ function queriesForField(objectToCreate, fieldName, realFieldType) {
   if (objectToCreate.nonQueryable[fieldName]) {
     return [];
   }
+
   if (typeof realFieldType === "object" && realFieldType.__isDate) {
     realFieldType = DateType;
   }
@@ -357,6 +358,18 @@ function queriesForField(objectToCreate, fieldName, realFieldType) {
   }
   if (realFieldType.__isObject || realFieldType.__isArray) {
     result.push(`${fieldName}: ${realFieldType.type.__name}Filters`);
+  }
+
+  if (objectToCreate.queryWhitelist[fieldName]) {
+    const validFilters = objectToCreate.queryWhitelist[fieldName];
+    const validFiltersLookup = new Set(validFilters);
+
+    return result.filter(arg => {
+      const name = arg.split(":")[0];
+      const querySuffix = name.split("_")[1] || "";
+
+      return validFiltersLookup.has(querySuffix);
+    });
   }
 
   return result;

@@ -75,3 +75,17 @@ export const Thing1 = {
     nonNullArrayOfNonNullObjects: arrayOf(SubType).nonNull().containsNonNull()
   }
 };
+
+export const Thing2 = {
+  table: "thing2",
+  fields: {
+    string1: StringType.limitQueriesTo(["", "startsWith"]),
+    string2: StringType.limitQueriesTo([]),
+    string3: StringType.limitQueriesTo(["endsWith"]),
+    bool1: BoolType.limitQueriesTo(["", "in", "nin"]),
+    intArr1: IntArrayType.limitQueriesTo(["count", "contains", ""]),
+    intArr2: IntArrayType.limitQueriesTo(["count", "contains", "", "invalid"]),
+    int1: IntType,
+    float1: FloatType
+  }
+};

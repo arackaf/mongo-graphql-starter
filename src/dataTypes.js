@@ -5,11 +5,16 @@ import * as dataTypeConstants from "./dataTypeConstants";
 const objectFieldPrototype = {
   customField: true,
   traits: new Set([]),
+
   nonQueryable() {
     return this.addTrait("non-queryable");
   },
   nonNull() {
     return this.addTrait("non-null");
+  },
+  limitQueriesTo(queries) {
+    this.queryWhitelist = queries;
+    return this.addTrait("query-whitelist");
   },
   addTrait(trait) {
     const proto = Object.getPrototypeOf(this);
