@@ -50,6 +50,8 @@ export default function (source, destPath, options = {}) {
       type.nonQueryable = {};
       type.nonNull = {};
       type.containsNonNull = {};
+      type.queryWhitelist = {};
+
       for (const [k, val] of Object.entries(type.fields)) {
         if (val.customField) {
           if (val.traits.has("non-queryable")) {
@@ -60,6 +62,9 @@ export default function (source, destPath, options = {}) {
           }
           if (val.traits.has("contains-non-null")) {
             type.containsNonNull[k] = true;
+          }
+          if (val.traits.has("query-whitelist")) {
+            type.queryWhitelist[k] = val.queryWhitelist;
           }
 
           //in case the field is get-only
