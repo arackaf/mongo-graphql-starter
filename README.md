@@ -256,6 +256,7 @@ There are a number of chainable helper functions you can use to modify the defau
 | `nonQueryable` | Prevents any filters from being for this field. This is useful for preventing your GraphQL schema from becoming unnecessarily bloated |
 | `nonNull`      | Marks the field as non-null. The type itself, that's returned from queries, as well as the input type for object creation will be marked as non-null |
 | `containsNonNull` | For arrays only, indicates that the array's items will never be null |
+| `limitQueriesTo` | Limits the queries generated for this field. Pass it an array of strings to whitelist the queries you want generated. Pass exactly what comes after the `_` for each query. So to generate an exact match, and an `in` query, pass `["", "in"]` |
 
 
 ```js
@@ -269,7 +270,8 @@ export const Book = {
     nonNullString: StringType.nonNull(),
     nonNullStringArray: StringArrayType.nonNull(),
     nonNullStringArrayOfNonNull: StringArrayType.nonNull().containsNonNull(),
-    allTraits: StringArrayType.nonQueryable().nonNull().containsNonNull()
+    allTraits: StringArrayType.nonQueryable().nonNull().containsNonNull(),
+    someField: BoolType.limitQueriesTo(["", "in", "nin"]),
   }
 };
 ```
